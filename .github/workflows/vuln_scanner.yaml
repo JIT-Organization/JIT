@@ -36,6 +36,7 @@ jobs:
         run: |
           if grep -rniE "(innerHTML|dangerouslySetInnerHTML)" ./ui/src; then
             echo "Match found."
+            exit 1
           else
             echo "No match found. Ignoring."
           fi
@@ -76,4 +77,11 @@ jobs:
 
       - name: Basic SQL Injection Pattern Scan (Example)
         working-directory: ./jit
-        run: grep -rniE "url|username|password" ./jit/src/main/resources/application.properties
+        # run: grep -rniE "url|username|password" ./jit/src/main/resources/application.properties
+        run: |
+          if grep -rniE "url|username|password" ./jit/src/main/resources/application.properties; then
+            echo "Match found."
+            exit 1
+          else
+            echo "No match found. Ignoring."
+          fi
