@@ -14,7 +14,7 @@ RUN npm install
 COPY . .
 
 # Build the Next.js app
-RUN npm run build
+RUN npm run dev
 
 # Use a lightweight web server for serving the build
 FROM nginx:stable-alpine
