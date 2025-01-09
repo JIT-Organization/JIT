@@ -1,7 +1,7 @@
 # Use a Node.js base image
 FROM node:18-alpine AS builder
 
-# Set working directory
+# Set the working directory
 WORKDIR /app
 
 # Copy package files
@@ -14,16 +14,23 @@ RUN npm install
 COPY . .
 
 # Build the Next.js app
-RUN npm run dev
+RUN npm run build
 
-# Use a lightweight web server for serving the build
-FROM nginx:stable-alpine
+# Use Node.js for serving the Next.js app
+FROM node:18-alpine
 
-# Copy the built app to the web server
-COPY --from=builder /app/.next /usr/share/nginx/html
+# Set the working directory
+WORKDIR /app
 
-# Expose port
-EXPOSE 80
+# Copy only the necessary files
+COPY --from=builder /app/.next /app/.next
+COPY --from=builder /app/package*.json /app/
 
-# Start the web server
-CMD ["nginx", "-g", "daemon off;"]
+# Install production dependencies only
+RUN npm install --production
+
+# Expose the port
+EXPOSE 3000
+
+# Start the Next.js app
+CMD ["npm", "start"]
