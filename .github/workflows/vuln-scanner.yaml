@@ -5,13 +5,13 @@ on:
     branches:
       - 'main'
       - 'dev'
-      - 'feature/*'
+      - 'version/*'
       - 'sprint/*'
   pull_request:
     branches:
       - 'main'
       - 'dev'
-      - 'feature/*'
+      - 'version/*'
       - 'sprint/*'
 
 jobs:
