@@ -6,11 +6,13 @@ on:
       - 'main'
       - 'dev'
       - 'feature/*'
+      - 'sprint/*'
   pull_request:
     branches:
       - 'main'
       - 'dev'
       - 'feature/*'
+      - 'sprint/*'
 
 jobs:
   frontend_scan:
