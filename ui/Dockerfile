@@ -24,7 +24,6 @@ WORKDIR /app
 
 # Copy the build artifacts and package files
 COPY --from=builder /app/.next /app/.next
-COPY --from=builder /app/public /app/public
 COPY --from=builder /app/package*.json /app/
 
 # Install production dependencies
