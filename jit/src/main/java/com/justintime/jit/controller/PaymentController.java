@@ -12,12 +12,8 @@ import java.util.List;
 @RequestMapping("/api/payments")
 public class PaymentController {
 
-    private PaymentService paymentService;
-
     @Autowired
-    public PaymentController(PaymentService paymentService) {
-        this.paymentService = paymentService;
-    }
+    private PaymentService paymentService;
 
     @GetMapping
     public List<Payment> getAllPayments() {

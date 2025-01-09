@@ -4,17 +4,23 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.justintime.jit.entity.Enums.Role;
 import com.justintime.jit.entity.OrderEntities.Order;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Audited
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
 @Table(name = "users")
 public class User {
 
@@ -58,7 +64,7 @@ public class User {
         @Column(name = "updated_dttm", nullable = false)
         private LocalDateTime updatedDttm;
 
-        @OneToMany(mappedBy = "customer",cascade = CascadeType.ALL)
+        @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
         @JsonIgnoreProperties("customer")
         private List<Order> orders;
 
@@ -70,4 +76,46 @@ public class User {
         @JsonIgnoreProperties("user")
         private List<Admin> admins;
 
+        // Copy Constructor
+        public User(User other) {
+                this.id = other.id;
+                this.firstName = other.firstName;
+                this.lastName = other.lastName;
+                this.profilePictureUrl = other.profilePictureUrl;
+                this.isActive = other.isActive;
+                this.userName = other.userName;
+                this.email = other.email;
+                this.phoneNumber = other.phoneNumber;
+                this.passwordHash = other.passwordHash;
+                this.role = other.role;
+                this.createdDttm = other.createdDttm;
+                this.updatedDttm = other.updatedDttm;
+                this.orders = other.orders != null ? other.orders.stream().map(Order::new).collect(Collectors.toList()) : null; // Deep copy of orders
+                this.reservations = other.reservations != null ? other.reservations.stream().map(Reservation::new).collect(Collectors.toList()) : null; // Deep copy of reservations
+                this.admins = other.admins != null ? other.admins.stream().map(Admin::new).collect(Collectors.toList()) : null; // Deep copy of admins
+        }
+
+        public List<Order> getOrders() {
+                return orders != null ? orders.stream().map(Order::new).collect(Collectors.toList()) : null; // Defensive copy
+        }
+
+        public void setOrders(List<Order> orders) {
+                this.orders = orders != null ? orders.stream().map(Order::new).collect(Collectors.toList()) : null; // Defensive copy
+        }
+
+        public List<Reservation> getReservations() {
+                return reservations != null ? reservations.stream().map(Reservation::new).collect(Collectors.toList()) : null; // Defensive copy
+        }
+
+        public void setReservations(List<Reservation> reservations) {
+                this.reservations = reservations != null ? reservations.stream().map(Reservation::new).collect(Collectors.toList()) : null; // Defensive copy
+        }
+
+        public List<Admin> getAdmins() {
+                return admins != null ? admins.stream().map(Admin::new).collect(Collectors.toList()) : null; // Defensive copy
+        }
+
+        public void setAdmins(List<Admin> admins) {
+                this.admins = admins != null ? admins.stream().map(Admin::new).collect(Collectors.toList()) : null; // Defensive copy
+        }
 }

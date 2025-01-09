@@ -1,25 +1,24 @@
 package com.justintime.jit.entity;
 
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Audited
-@Data
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 @Table(name="category")
 public class Category {
 
@@ -27,7 +26,7 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(name="category_name",nullable = false)
+    @Column(name="category_name", nullable = false)
     private String categoryName;
 
     @CreationTimestamp
@@ -42,4 +41,20 @@ public class Category {
     @JsonIgnoreProperties("category")
     private List<Food> foods;
 
+    // Copy Constructor
+    public Category(Category other) {
+        this.id = other.id;
+        this.categoryName = other.categoryName;
+        this.createdDttm = other.createdDttm;
+        this.updatedDttm = other.updatedDttm;
+        this.foods = other.foods != null ? other.foods.stream().map(Food::new).collect(Collectors.toList()) : null; // Deep copy of foods
+    }
+
+    public List<Food> getFoods() {
+        return foods != null ? foods.stream().map(Food::new).collect(Collectors.toList()) : null; // Defensive copy
+    }
+
+    public void setFoods(List<Food> foods) {
+        this.foods = foods != null ? foods.stream().map(Food::new).collect(Collectors.toList()) : null; // Defensive copy
+    }
 }

@@ -1,19 +1,24 @@
 package com.justintime.jit.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Audited
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
 @Table(name = "food")
 public class Food {
 
@@ -21,10 +26,10 @@ public class Food {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name="food_name",nullable = false, length = 100)
+    @Column(name="food_name", nullable = false, length = 100)
     private String foodName;
 
-    @Column(name="description",nullable = false)
+    @Column(name="description", nullable = false)
     private String description;
 
     @ManyToOne
@@ -44,4 +49,30 @@ public class Food {
     @JsonIgnoreProperties("food")
     private List<MenuItem> menuItems;
 
+    // Copy Constructor
+    public Food(Food other) {
+        this.id = other.id;
+        this.foodName = other.foodName;
+        this.description = other.description;
+        this.category = other.category != null ? new Category(other.category) : null;
+        this.createdDttm = other.createdDttm;
+        this.updatedDttm = other.updatedDttm;
+        this.menuItems = other.menuItems != null ? other.menuItems.stream().map(MenuItem::new).collect(Collectors.toList()) : null; // Deep copy of menuItems
+    }
+
+    public Category getCategory() {
+        return category != null ? new Category(category) : null; // Defensive copy
+    }
+
+    public void setCategory(Category category) {
+        this.category = category != null ? new Category(category) : null; // Defensive copy
+    }
+
+    public List<MenuItem> getMenuItems() {
+        return menuItems != null ? menuItems.stream().map(MenuItem::new).collect(Collectors.toList()) : null; // Defensive copy
+    }
+
+    public void setMenuItems(List<MenuItem> menuItems) {
+        this.menuItems = menuItems != null ? menuItems.stream().map(MenuItem::new).collect(Collectors.toList()) : null; // Defensive copy
+    }
 }

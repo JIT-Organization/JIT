@@ -11,6 +11,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/restaurantactivities")
 public class ReservationActivityController {
+    
     @Autowired
     private ReservationActivityService reservationActivityService;
 

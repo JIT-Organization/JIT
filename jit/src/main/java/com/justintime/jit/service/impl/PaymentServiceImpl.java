@@ -15,7 +15,7 @@ public class PaymentServiceImpl implements PaymentService {
     private PaymentRepository paymentRepository;
 
     @Autowired
-    public void PaymentService(PaymentRepository paymentRepository) {
+    public void paymentService(PaymentRepository paymentRepository) {
         this.paymentRepository = paymentRepository;
     }
 

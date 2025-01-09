@@ -2,6 +2,8 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.3.5'
 	id 'io.spring.dependency-management' version '1.1.6'
+	id("org.owasp.dependencycheck") version "11.1.1"
+	id("com.github.spotbugs") version "6.0.27"
 }
 
 group = 'com.justintime'
@@ -56,6 +58,10 @@ dependencyManagement {
 	imports {
 		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
 	}
+}
+
+dependencyCheck {
+	nvd.apiKey = "f4bd36ec-fed1-473d-a2fa-291f8c625fe2"
 }
 
 tasks.named('test') {
