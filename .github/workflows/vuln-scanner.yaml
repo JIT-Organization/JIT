@@ -2,9 +2,15 @@ name: Vulnerability Scan
 
 on:
   push:
-    branches: [ '*' ]
+    branches:
+      - 'main'
+      - 'dev'
+      - 'feature/*'
   pull_request:
-    branches: [ '*' ]
+    branches:
+      - 'main'
+      - 'dev'
+      - 'feature/*'
 
 jobs:
   frontend_scan:
@@ -35,10 +41,11 @@ jobs:
         run: |
           if grep -rniE "(innerHTML|dangerouslySetInnerHTML)" ./ui/src; then
             echo "Match found."
-            # exit 1
+            exit 1  # Fail the job if XSS patterns are found
           else
             echo "No match found. Ignoring."
           fi
+
   backend_scan:
     runs-on: ubuntu-latest
     steps:
@@ -68,23 +75,17 @@ jobs:
         run: |
           ./gradlew dependencyCheckAnalyze -Ddependency-check.cache-dir=./cache --info
           ls -R ./jit/build || echo "Build directory not found."
-    
-      - name: Debug file structure (Check for application.properties)
-        run: |
-          ls -R ./jit/src/main/resources/ || echo "application.properties file not found."
-    
+
       - name: Run Basic SQL Injection Pattern Scan
         working-directory: ./jit
         run: |
           echo "Checking if application.properties exists..."
           if [ -f ./src/main/resources/application.properties ]; then
             echo "application.properties found. Checking for patterns."
-            # Display contents of the file for debugging
-            cat ./src/main/resources/application.properties
             # Perform the pattern scan
             if grep -rniE "url|username|password" ./src/main/resources/application.properties; then
               echo "Potentially sensitive information found in application.properties."
-              # exit 1
+              exit 1  # Fail the job if sensitive patterns are found
             else
               echo "No sensitive patterns found."
             fi
