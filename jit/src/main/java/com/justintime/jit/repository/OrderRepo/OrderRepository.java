@@ -20,4 +20,6 @@ public interface OrderRepository extends BaseRepository<Order, Long> {
 
     // Get orders within a time range
     List<Order> findByOrderDateBetween(LocalDateTime startTime, LocalDateTime endTime);
+
+    List<Order> findByRestaurantIdAndCustomerId(Long restaurantId, Long customerId);
 }

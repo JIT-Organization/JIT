@@ -47,4 +47,9 @@ public class PaymentController {
         paymentService.deletePayment(id);
         return ResponseEntity.noContent().build();
     }
+    @GetMapping("/orders/{orderId}/payments")
+    public ResponseEntity<List<Payment>> getPaymentsByOrderId(@PathVariable Long orderId) {
+        List<Payment> payments = paymentService.getPaymentsByOrderId(orderId);
+        return ResponseEntity.ok(payments);
+    }
 }
