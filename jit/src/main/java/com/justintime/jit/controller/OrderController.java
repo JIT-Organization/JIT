@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -56,8 +57,15 @@ public class OrderController {
 
     // Get orders by restaurant ID and customer ID
     @GetMapping("/{restaurantId}/customers/{customerId}/orders")
-    public ResponseEntity<List<Order>> getOrdersByRestaurantAndCustomerId( @PathVariable Long restaurantId, @PathVariable Long customerId) {
-        List<Order> orders = orderService.getOrdersByRestaurantAndCustomerId(restaurantId, customerId);
+    public ResponseEntity<List<Order>> getOrdersByRestaurantAndCustomerId(
+            @PathVariable(required = false) Long restaurantId,
+            @PathVariable(required = false) Long customerId) {
+
+        // Convert to Optional before passing to service
+        Optional<Long> optRestaurantId = Optional.ofNullable(restaurantId);
+        Optional<Long> optCustomerId = Optional.ofNullable(customerId);
+
+        List<Order> orders = orderService.getOrdersByRestaurantAndCustomerId(optRestaurantId, optCustomerId);
         return ResponseEntity.ok(orders);
     }
 

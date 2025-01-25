@@ -78,6 +78,17 @@ public class OrderServiceImpl implements OrderService {
                                 .reduce(BigDecimal.ZERO, BigDecimal::add); }
 
     @Override
-    public List<Order> getOrdersByRestaurantAndCustomerId(Long restaurantId, Long customerId)
-    { return orderRepository.findByRestaurantIdAndCustomerId(restaurantId, customerId); }
+    public List<Order> getOrdersByRestaurantAndCustomerId(Optional<Long> restaurantId, Optional<Long> customerId)
+    {
+        if (customerId.isPresent() && restaurantId.isPresent()) {
+            return orderRepository.findByRestaurantIdAndCustomerId(restaurantId.get(), customerId.get());
+        }
+        if (customerId.isPresent()) {
+            return orderRepository.findByCustomerId(customerId.get());
+        }
+        if (restaurantId.isPresent()) {
+            return orderRepository.findByRestaurantId(restaurantId.get());
+        }
+        return orderRepository.findAll();
+    }
 }
