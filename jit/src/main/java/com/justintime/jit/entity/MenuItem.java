@@ -60,6 +60,9 @@ public class MenuItem {
     @JsonIgnoreProperties("menuItem")
     private List<OrderItem> orderItems = new ArrayList<>();
 
+    @Column(name = "image", columnDefinition = "TEXT")
+    private String base64Image;
+
     // Copy Constructor
     public MenuItem(MenuItem other) {
         this.id = null; // New instance should not copy the ID (leave it null for persistence)
@@ -69,6 +72,7 @@ public class MenuItem {
         this.stock = other.stock;
         this.createdDttm = other.createdDttm;
         this.updatedDttm = other.updatedDttm;
+        this.base64Image = other.base64Image;
 
         // Deep copy the comboItems
         this.comboItems = other.comboItems.stream()

@@ -1,8 +1,11 @@
 package com.justintime.jit.controller;
 
 import com.justintime.jit.entity.MenuItem;
+import com.justintime.jit.exception.ImageSizeLimitExceededException;
 import com.justintime.jit.service.MenuItemService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,13 +28,23 @@ public class MenuItemController {
     }
 
     @PostMapping
-    public MenuItem addMenuItem(@RequestBody MenuItem menuItem) {
-        return menuItemService.addMenuItem(menuItem);
+    public ResponseEntity<?> addMenuItem(@RequestBody MenuItem menuItem) {
+        try {
+            MenuItem savedItem = menuItemService.addMenuItem(menuItem);
+            return ResponseEntity.ok(savedItem);
+        } catch (ImageSizeLimitExceededException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     @PutMapping("/{id}")
-    public MenuItem updateMenuItem(@PathVariable Long id, @RequestBody MenuItem updatedItem) {
-        return menuItemService.updateMenuItem(id, updatedItem);
+    public ResponseEntity<?> updateMenuItem(@PathVariable Long id, @RequestBody MenuItem updatedItem) {
+        try {
+            MenuItem upadatedMenuItem = menuItemService.updateMenuItem(id, updatedItem);
+            return ResponseEntity.ok(upadatedMenuItem);
+        } catch (ImageSizeLimitExceededException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")
