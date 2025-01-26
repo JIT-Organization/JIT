@@ -15,9 +15,14 @@ public interface OrderRepository extends BaseRepository<Order, Long> {
     // Find all orders for a specific restaurant
     List<Order> findByRestaurantId(Long restaurantId);
 
+    List<Order> findAll();
+
+
     // Find orders by status
     List<Order> findByStatus(String status);
 
     // Get orders within a time range
     List<Order> findByOrderDateBetween(LocalDateTime startTime, LocalDateTime endTime);
+
+    List<Order> findByRestaurantIdAndCustomerId(Long restaurantId, Long customerId);
 }
