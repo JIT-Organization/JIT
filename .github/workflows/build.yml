@@ -1,11 +1,18 @@
 name: Build and Test Workflow
 
 on:
+  push:
+    branches:
+      - 'main'
+      - 'dev'
+      - 'version/*'
+      - 'sprint/*'
   pull_request:
     branches:
-      - main
-      -sprint/2025.1
-      -version/0.1.0
+      - 'main'
+      - 'dev'
+      - 'version/*'
+      - 'sprint/*'
 
 jobs:
   backend:
