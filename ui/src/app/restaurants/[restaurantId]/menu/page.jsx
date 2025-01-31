@@ -1,4 +1,4 @@
-import FoodCard from "../../../../../../components/food/FoodCard";
+import FoodCard from "../../../../components/food/FoodCard";
 import { menuItems } from "@/data/menuitems";
 
 const MenuList = () => {
