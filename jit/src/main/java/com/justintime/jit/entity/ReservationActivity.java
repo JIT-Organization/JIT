@@ -37,20 +37,20 @@ public class ReservationActivity {
     @Column(name = "updated_dttm", nullable = false)
     private LocalDateTime updatedDttm;
 
-    // Copy Constructor
-    public ReservationActivity(ReservationActivity other) {
-        this.id = other.id;
-        this.reservation = other.reservation != null ? new Reservation(other.reservation) : null;
-        this.changeLog = other.changeLog;
-        this.updatedBy = other.updatedBy;
-        this.updatedDttm = other.updatedDttm;
-    }
-
-    public Reservation getReservation() {
-        return reservation != null ? new Reservation(reservation) : null; // Defensive copy
-    }
-
-    public void setReservation(Reservation reservation) {
-        this.reservation = reservation != null ? new Reservation(reservation) : null; // Defensive copy
-    }
+//    // Copy Constructor
+//    public ReservationActivity(ReservationActivity other) {
+//        this.id = other.id;
+//        this.reservation = other.reservation != null ? new Reservation(other.reservation) : null;
+//        this.changeLog = other.changeLog;
+//        this.updatedBy = other.updatedBy;
+//        this.updatedDttm = other.updatedDttm;
+//    }
+//
+//    public Reservation getReservation() {
+//        return reservation != null ? new Reservation(reservation) : null; // Defensive copy
+//    }
+//
+//    public void setReservation(Reservation reservation) {
+//        this.reservation = reservation != null ? new Reservation(reservation) : null; // Defensive copy
+//    }
 }

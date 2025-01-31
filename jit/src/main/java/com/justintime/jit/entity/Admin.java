@@ -28,6 +28,11 @@ public class Admin {
     private Restaurant restaurant;
 
     @ManyToOne
+    @JoinColumn(name = "address_id", nullable = false)
+    @JsonIgnoreProperties("admins")
+    private Address address;
+
+    @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     @JsonIgnoreProperties("admins")
     private User user;
@@ -40,28 +45,28 @@ public class Admin {
     @Column(name = "updated_dttm", nullable = false)
     private LocalDateTime updatedDttm;
 
-    // Copy Constructor
-    public Admin(Admin other) {
-        this.id = other.id;
-        this.restaurant = other.restaurant != null ? new Restaurant(other.restaurant) : null;
-        this.user = other.user != null ? new User(other.user) : null;
-        this.createdDttm = other.createdDttm;
-        this.updatedDttm = other.updatedDttm;
-    }
-
-    public Restaurant getRestaurant() {
-        return restaurant != null ? new Restaurant(restaurant) : null; // Defensive copy
-    }
-
-    public void setRestaurant(Restaurant restaurant) {
-        this.restaurant = restaurant != null ? new Restaurant(restaurant) : null; // Defensive copy
-    }
-
-    public User getUser() {
-        return user != null ? new User(user) : null; // Defensive copy
-    }
-
-    public void setUser(User user) {
-        this.user = user != null ? new User(user) : null; // Defensive copy
-    }
+//    // Copy Constructor
+//    public Admin(Admin other) {
+//        this.id = other.id;
+//        this.restaurant = other.restaurant != null ? new Restaurant(other.restaurant) : null;
+//        this.user = other.user != null ? new User(other.user) : null;
+//        this.createdDttm = other.createdDttm;
+//        this.updatedDttm = other.updatedDttm;
+//    }
+//
+//    public Restaurant getRestaurant() {
+//        return restaurant != null ? new Restaurant(restaurant) : null; // Defensive copy
+//    }
+//
+//    public void setRestaurant(Restaurant restaurant) {
+//        this.restaurant = restaurant != null ? new Restaurant(restaurant) : null; // Defensive copy
+//    }
+//
+//    public User getUser() {
+//        return user != null ? new User(user) : null; // Defensive copy
+//    }
+//
+//    public void setUser(User user) {
+//        this.user = user != null ? new User(user) : null; // Defensive copy
+//    }
 }
