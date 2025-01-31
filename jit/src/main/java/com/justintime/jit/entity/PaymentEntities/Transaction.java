@@ -45,22 +45,22 @@ public class Transaction {
     @Column(name = "updated_dttm", nullable = false)
     private LocalDateTime updatedDttm;
 
-    public Transaction(Transaction other) {
-        this.id = null; // New instance should not have the same ID
-        this.payment = other.payment != null ? new Payment(other.payment) : null; // Deep copy of Payment
-        this.transactionType = other.transactionType;
-        this.transactionAmount = other.transactionAmount;
-        this.transactionStatus = other.transactionStatus;
-        this.transactionDate = other.transactionDate;
-        this.updatedBy = other.updatedBy;
-        this.updatedDttm = other.updatedDttm;
-    }
-
-    public Payment getPayment() {
-        return payment != null ? new Payment(payment) : null; // Defensive copy
-    }
-
-    public void setPayment(Payment payment) {
-        this.payment = payment != null ? new Payment(payment) : null; // Defensive copy
-    }
+//    public Transaction(Transaction other) {
+//        this.id = null; // New instance should not have the same ID
+//        this.payment = other.payment != null ? new Payment(other.payment) : null; // Deep copy of Payment
+//        this.transactionType = other.transactionType;
+//        this.transactionAmount = other.transactionAmount;
+//        this.transactionStatus = other.transactionStatus;
+//        this.transactionDate = other.transactionDate;
+//        this.updatedBy = other.updatedBy;
+//        this.updatedDttm = other.updatedDttm;
+//    }
+//
+//    public Payment getPayment() {
+//        return payment != null ? new Payment(payment) : null; // Defensive copy
+//    }
+//
+//    public void setPayment(Payment payment) {
+//        this.payment = payment != null ? new Payment(payment) : null; // Defensive copy
+//    }
 }
