@@ -1,5 +1,6 @@
 package com.justintime.jit.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -10,6 +11,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Audited
@@ -25,7 +27,7 @@ public class Address {
 
     @ManyToOne
     @JoinColumn(name = "restaurant_id", nullable = false)
-    @JsonIgnoreProperties("addresses")
+    @JsonBackReference
     private Restaurant restaurant;
 
     @Column(name = "address_line1", nullable = false, length = 150)
@@ -57,26 +59,35 @@ public class Address {
     @Column(name = "updated_dttm", nullable = false)
     private LocalDateTime updatedDttm;
 
-    // Copy Constructor
-    public Address(Address other) {
-        this.id = other.id;
-        this.restaurant = other.restaurant != null ? new Restaurant(other.restaurant) : null;
-        this.addressLine1 = other.addressLine1;
-        this.addressLine2 = other.addressLine2;
-        this.city = other.city;
-        this.state = other.state;
-        this.country = other.country;
-        this.latitude = other.latitude;
-        this.longitude = other.longitude;
-        this.createdDttm = other.createdDttm;
-        this.updatedDttm = other.updatedDttm;
-    }
+//    @OneToMany(mappedBy = "address")
+//    @JsonIgnoreProperties("address")
+//    private List<MenuItem> menuItems;
+//
+//    @OneToMany(mappedBy = "address")
+//    @JsonIgnoreProperties("address")
+//    private List<Cook> cooks;
 
-    public Restaurant getRestaurant() {
-        return restaurant != null ? new Restaurant(restaurant) : null; // Defensive copy
-    }
 
-    public void setRestaurant(Restaurant restaurant) {
-        this.restaurant = restaurant != null ? new Restaurant(restaurant) : null; // Defensive copy
-    }
+//    // Copy Constructor
+//    public Address(Address other) {
+//        this.id = other.id;
+//        this.restaurant = other.restaurant != null ? new Restaurant(other.restaurant) : null;
+//        this.addressLine1 = other.addressLine1;
+//        this.addressLine2 = other.addressLine2;
+//        this.city = other.city;
+//        this.state = other.state;
+//        this.country = other.country;
+//        this.latitude = other.latitude;
+//        this.longitude = other.longitude;
+//        this.createdDttm = other.createdDttm;
+//        this.updatedDttm = other.updatedDttm;
+//    }
+//
+//    public Restaurant getRestaurant() {
+//        return restaurant != null ? new Restaurant(restaurant) : null; // Defensive copy
+//    }
+//
+//    public void setRestaurant(Restaurant restaurant) {
+//        this.restaurant = restaurant != null ? new Restaurant(restaurant) : null; // Defensive copy
+//    }
 }

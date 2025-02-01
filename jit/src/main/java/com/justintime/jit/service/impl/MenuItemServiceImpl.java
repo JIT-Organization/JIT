@@ -1,5 +1,7 @@
 package com.justintime.jit.service.impl;
 
+import com.justintime.jit.entity.Food;
+import com.justintime.jit.repository.OrderRepo.OrderItemRepository;
 import com.justintime.jit.service.MenuItemService;
 import com.justintime.jit.repository.MenuItemRepository;
 import com.justintime.jit.entity.MenuItem;
@@ -8,12 +10,16 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
-    @Service
+@Service
     public class MenuItemServiceImpl extends BaseServiceImpl<MenuItem,Long> implements MenuItemService {
 
-        @Autowired
-        private MenuItemRepository menuItemRepository;
+    private final MenuItemRepository menuItemRepository;
+
+    public MenuItemServiceImpl(MenuItemRepository menuItemRepository) {
+        this.menuItemRepository = menuItemRepository;
+    }
 
         public List<MenuItem> getAllMenuItems() {
             return menuItemRepository.findAll();
@@ -32,9 +38,20 @@ import java.util.List;
             MenuItem existingItem = menuItemRepository.findById(id).orElseThrow(() -> new RuntimeException("MenuItem not found"));
             existingItem.setRestaurant(updatedItem.getRestaurant());
             existingItem.setFood(updatedItem.getFood());
+            existingItem.setDescription(updatedItem.getDescription());
             existingItem.setPrice(updatedItem.getPrice());
+            existingItem.setOfferPrice(updatedItem.getOfferPrice());
             existingItem.setStock(updatedItem.getStock());
-            existingItem.setUpdatedDttm(LocalDateTime.now());
+            existingItem.setCount(updatedItem.getCount());
+            existingItem.setAddress(updatedItem.getAddress());
+            existingItem.setTimeIntervalSet(updatedItem.getTimeIntervalSet());
+            existingItem.setCookSet(updatedItem.getCookSet());
+            existingItem.setPreparationTime(updatedItem.getPreparationTime());
+            existingItem.setOnlyVeg(updatedItem.getOnlyVeg());
+            existingItem.setOnlyForCombos(updatedItem.getOnlyForCombos());
+            existingItem.setBase64Image(updatedItem.getBase64Image());
+            existingItem.setHotelSpecial(updatedItem.getHotelSpecial());
+            existingItem.setRating(updatedItem.getRating());
             return menuItemRepository.save(existingItem);
         }
 

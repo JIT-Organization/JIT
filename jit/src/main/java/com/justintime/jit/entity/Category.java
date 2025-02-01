@@ -1,5 +1,6 @@
 package com.justintime.jit.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -11,7 +12,9 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Entity
@@ -24,10 +27,19 @@ public class Category {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Column(name="category_name", nullable = false)
     private String categoryName;
+
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "category_food",
+            joinColumns = @JoinColumn(name = "category_id"),
+            inverseJoinColumns = @JoinColumn(name = "food_id")
+    )
+    @JsonIgnoreProperties("categories")
+    private Set<Food> foods = new HashSet<>();
 
     @CreationTimestamp
     @Column(name = "created_dttm", nullable = false, updatable = false)
@@ -37,24 +49,23 @@ public class Category {
     @Column(name = "updated_dttm", nullable = false)
     private LocalDateTime updatedDttm;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnoreProperties("category")
-    private List<Food> foods;
 
-    // Copy Constructor
-    public Category(Category other) {
-        this.id = other.id;
-        this.categoryName = other.categoryName;
-        this.createdDttm = other.createdDttm;
-        this.updatedDttm = other.updatedDttm;
-        this.foods = other.foods != null ? other.foods.stream().map(Food::new).collect(Collectors.toList()) : null; // Deep copy of foods
-    }
-
-    public List<Food> getFoods() {
-        return foods != null ? foods.stream().map(Food::new).collect(Collectors.toList()) : null; // Defensive copy
-    }
-
-    public void setFoods(List<Food> foods) {
-        this.foods = foods != null ? foods.stream().map(Food::new).collect(Collectors.toList()) : null; // Defensive copy
-    }
+//    // Copy Constructor
+//    public Category(Category other) {
+//        this.id = other.id;
+//        this.categoryName = other.categoryName;
+//        this.createdDttm = other.createdDttm;
+//        this.updatedDttm = other.updatedDttm;
+//        this.foods = other.foods != null ? other.foods.stream().map(Food::new).collect(Collectors.toList()) : null;
+//    }
+//
+//    // Defensive Copying: Get a copy of the list of foods to prevent external modifications
+//    public List<Food> getFoods() {
+//        return foods != null ? foods.stream().map(Food::new).collect(Collectors.toList()) : null;
+//    }
+//
+//    // Defensive Copying: Set a copy of the list of foods
+//    public void setFoods(List<Food> foods) {
+//        this.foods = foods != null ? foods.stream().map(Food::new).collect(Collectors.toList()) : null;
+//    }
 }
