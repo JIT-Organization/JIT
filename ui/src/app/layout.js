@@ -1,4 +1,5 @@
 import "./globals.css";
+import TSQueryClientProvider from "../components/providers/TSQueryClientProvider";
 
 export const metadata = {
   title: "Just In Time",
@@ -8,8 +9,8 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className='antialiased'>
-        {children}
+      <body className="antialiased">
+        <TSQueryClientProvider>{children}</TSQueryClientProvider>
       </body>
     </html>
   );

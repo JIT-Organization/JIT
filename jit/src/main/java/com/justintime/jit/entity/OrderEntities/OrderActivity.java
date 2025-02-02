@@ -36,20 +36,20 @@ public class OrderActivity {
     @Column(name = "updated_dttm", nullable = false)
     private LocalDateTime updatedDttm;
 
-    // Copy constructor
-    public OrderActivity(OrderActivity other) {
-        this.id = other.id;
-        this.order = other.order != null ? new Order(other.order) : null;
-        this.changeLog = other.changeLog;
-        this.updatedBy = other.updatedBy;
-        this.updatedDttm = other.updatedDttm;
-    }
-
-    public Order getOrder() {
-        return order != null ? new Order(order) : null; // Defensive copy
-    }
-
-    public void setOrder(Order order) {
-        this.order = order != null ? new Order(order) : null; // Defensive copy
-    }
+//    // Copy constructor
+//    public OrderActivity(OrderActivity other) {
+//        this.id = other.id;
+//        this.order = other.order != null ? new Order(other.order) : null;
+//        this.changeLog = other.changeLog;
+//        this.updatedBy = other.updatedBy;
+//        this.updatedDttm = other.updatedDttm;
+//    }
+//
+//    public Order getOrder() {
+//        return order != null ? new Order(order) : null; // Defensive copy
+//    }
+//
+//    public void setOrder(Order order) {
+//        this.order = order != null ? new Order(order) : null; // Defensive copy
+//    }
 }
