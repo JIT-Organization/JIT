@@ -12,6 +12,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -19,17 +21,16 @@ import java.util.stream.Collectors;
 
     private final MenuItemRepository menuItemRepository;
 
-    public MenuItemServiceImpl(MenuItemRepository menuItemRepository) {
+    private final OrderItemRepository orderItemRepository;
+
+    public MenuItemServiceImpl(MenuItemRepository menuItemRepository, OrderItemRepository orderItemRepository) {
         this.menuItemRepository = menuItemRepository;
+        this.orderItemRepository = orderItemRepository;
     }
 
         public List<MenuItem> getAllMenuItems() {
             return menuItemRepository.findAll();
         }
-//
-//        public List<MenuItem> getMenuItemsByAddressId(Long addressId) {
-//            return menuItemRepository.findByAddressId(addressId);
-//        }
 
         public MenuItem addMenuItem(MenuItem menuItem) {
             menuItem.setUpdatedDttm(LocalDateTime.now());
@@ -61,24 +62,40 @@ import java.util.stream.Collectors;
             menuItemRepository.deleteById(id);
         }
 
-        public List<MenuItem> getMenuItemsByAddressId(Long addressId, String sortBy, String priceRange, boolean onlyForCombos){
+        public List<MenuItem> getMenuItemsByAddressId(Long addressId, String sortBy, String priceRange, boolean onlyForCombos) {
             List<MenuItem> menuItems = menuItemRepository.findByAddressId(addressId);
 
-            if (onlyForCombos){
-                return menuItems.stream()
-                        .filter(MenuItem::getOnlyForCombos) // Show onlyForCombos if true, otherwise exclude
-                        .filter(item -> isWithinPriceRange(item, priceRange)) // Apply price range filter
-                        .sorted(getComparator(sortBy != null ? sortBy : "default")) // Apply sorting
+            if ("popularity".equalsIgnoreCase(sortBy)) {
+                List<Object[]> result = orderItemRepository.findMenuItemsWithOrderCount(addressId);
+
+                // Convert List<Object[]> to Map<MenuItem, Integer>
+                Map<MenuItem, Integer> orderCounts = result.stream()
+                        .collect(Collectors.toMap(
+                                obj -> (MenuItem) obj[0],   // MenuItem
+                                obj -> ((Long) obj[1]).intValue() // Order count
+                        ));
+
+                // Filter onlyForCombos if needed
+                return orderCounts.keySet().stream()
+                        .filter(item -> !onlyForCombos || item.getOnlyForCombos()) // Apply onlyForCombos filter
+                        .sorted(Comparator.comparingInt(item -> orderCounts.getOrDefault(item, 0)).reversed()) // Sort by order count
                         .collect(Collectors.toList());
             }
+            // Apply combo filtering
+            Predicate<MenuItem> comboFilter = onlyForCombos ? MenuItem::getOnlyForCombos : item -> !item.getOnlyForCombos();
+
+
+            Comparator<MenuItem> comparator = getComparator(sortBy != null ? sortBy : "default");
+
+            // Filter, sort, and return
             return menuItems.stream()
-                    .filter(item -> !item.getOnlyForCombos()) // Show onlyForCombos if true, otherwise exclude
-                    .filter(item -> isWithinPriceRange(item, priceRange)) // Apply price range filter
-                    .sorted(getComparator(sortBy != null ? sortBy : "default")) // Apply sorting
+                    .filter(comboFilter)
+                    .filter(item -> isWithinPriceRange(item, priceRange))
+                    .sorted(comparator)
                     .collect(Collectors.toList());
         }
-        // Unified Sorting Logic
-        private Comparator<MenuItem> getComparator(String sortBy) {
+
+    private Comparator<MenuItem> getComparator(String sortBy) {
             return switch (sortBy.toLowerCase()) {
                 case "oldest" -> Comparator.comparing(MenuItem::getUpdatedDttm, Comparator.nullsLast(Comparator.naturalOrder()));
                 case "newest" -> Comparator.comparing(MenuItem::getUpdatedDttm, Comparator.nullsLast(Comparator.naturalOrder())).reversed();
