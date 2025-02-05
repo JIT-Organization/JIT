@@ -1,7 +1,9 @@
 package com.justintime.jit.entity.ComboEntities;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.justintime.jit.entity.Address;
 import com.justintime.jit.entity.OrderEntities.OrderItem;
+import com.justintime.jit.entity.Restaurant;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -28,14 +30,28 @@ public class Combo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToMany(mappedBy = "comboSet")
+    @ManyToMany(cascade = {CascadeType.MERGE})
+    @JoinTable(
+            name = "combo_item_combo",
+            joinColumns = @JoinColumn(name = "combo_id"),
+            inverseJoinColumns = @JoinColumn(name = "combo_item_id")
+    )
     private Set<ComboItem> comboItemSet = new HashSet<>();
+
+    @ManyToOne
+    @JoinColumn(name = "address_id", nullable = false)
+    private Address address;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "restaurant_id", nullable = false)
+    @JsonIgnoreProperties("combos")
+    private Restaurant restaurant;
 
     @Column(name = "price", nullable = false, columnDefinition = "DECIMAL(10,2)")
     private BigDecimal price;
 
     @Column(name = "stock", nullable = false, columnDefinition = "INT DEFAULT 0")
-    private Integer stock;
+    private Integer stock = 0;
 
     @CreationTimestamp
     @Column(name = "created_dttm", nullable = false, updatable = false)

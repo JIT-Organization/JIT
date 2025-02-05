@@ -26,12 +26,7 @@ public class ComboItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(
-            name = "combo_item_combo",
-            joinColumns = @JoinColumn(name = "combo_item_id"),
-            inverseJoinColumns = @JoinColumn(name = "combo_id")
-    )
+    @ManyToMany(mappedBy = "comboItemSet")
     private Set<Combo> comboSet = new HashSet<>();
 
     @ManyToOne
