@@ -6,6 +6,7 @@ import com.justintime.jit.repository.OrderRepo.OrderItemRepository;
 import com.justintime.jit.service.MenuItemService;
 import com.justintime.jit.repository.MenuItemRepository;
 import com.justintime.jit.entity.MenuItem;
+import com.justintime.jit.util.FilterMenuItems;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -65,69 +66,9 @@ import java.util.stream.Collectors;
 
     public List<MenuItem> getMenuItemsByAddressId(Long addressId, Filter sortBy, String priceRange, boolean onlyForCombos) {
         List<MenuItem> menuItems = menuItemRepository.findByAddressId(addressId);
-
-        if (Filter.POPULARITY.equals(sortBy)) { // Prevent NullPointerException
-            List<Object[]> result = orderItemRepository.findMenuItemsWithOrderCount(addressId);
-
-            // Convert List<Object[]> to Map<MenuItem, Integer>
-            Map<MenuItem, Integer> orderCounts = result.stream()
-                    .collect(Collectors.toMap(
-                            obj -> (MenuItem) obj[0],   // MenuItem
-                            obj -> ((Number) obj[1]).intValue() // Safely convert COUNT result
-                    ));
-
-            // Apply filters and sort by popularity
-            return orderCounts.keySet().stream()
-                    .filter(item -> (!onlyForCombos || item.getOnlyForCombos()) && isWithinPriceRange(item, priceRange)) // Apply both filters
-                    .sorted(Comparator.comparingInt(orderCounts::get).reversed()) // Sort by order count descending
-                    .collect(Collectors.toList());
-        }
-
-        // Apply combo filtering
-        Predicate<MenuItem> comboFilter = onlyForCombos ? MenuItem::getOnlyForCombos : item -> !item.getOnlyForCombos();
-
-        // Get appropriate comparator
-        Comparator<MenuItem> comparator = getComparator(sortBy != null ? sortBy : Filter.DEFAULT);
-
-        // Filter, sort, and return
-        return menuItems.stream()
-                .filter(comboFilter)
-                .filter(item -> isWithinPriceRange(item, priceRange))
-                .sorted(comparator)
-                .collect(Collectors.toList());
+        FilterMenuItems filterMenuItems = new FilterMenuItems();
+        return filterMenuItems.filterAndSortMenuItems(menuItems, addressId, sortBy, priceRange, onlyForCombos, orderItemRepository);
     }
-
-    private Comparator<MenuItem> getComparator(Filter sortBy) {
-        return switch (sortBy) {
-            case OLDEST -> Comparator.comparing(MenuItem::getUpdatedDttm, Comparator.nullsLast(Comparator.naturalOrder()));
-            case NEWEST -> Comparator.comparing(MenuItem::getUpdatedDttm, Comparator.nullsLast(Comparator.naturalOrder())).reversed();
-            case RATING -> Comparator.comparing(MenuItem::getRating, Comparator.nullsLast(Comparator.naturalOrder())).reversed();
-            default -> Comparator.comparing(item -> item.getFood().getFoodName(), Comparator.nullsLast(Comparator.naturalOrder()));
-        };
-    }
-
-
-        // Unified Price Filtering Logic
-        private boolean isWithinPriceRange(MenuItem item, String priceRange) {
-            if (priceRange == null || priceRange.isEmpty()) {
-                return true; // No filtering applied
-            }
-
-            BigDecimal price = item.getPrice();
-
-            if (priceRange.matches("\\d+-\\d+")) { // Matches "100-500" format
-                String[] parts = priceRange.split("-");
-                BigDecimal minPrice = new BigDecimal(parts[0]);
-                BigDecimal maxPrice = new BigDecimal(parts[1]);
-                return price.compareTo(minPrice) >= 0 && price.compareTo(maxPrice) <= 0;
-            }
-            else if (priceRange.matches("above-\\d+")) { // Matches "above-500"
-                BigDecimal minPrice = new BigDecimal(priceRange.split("-")[1]);
-                return price.compareTo(minPrice) > 0;
-            }
-
-            return true; // Default to including all if format is invalid
-        }
-    }
+}
 
 

@@ -1,4 +1,4 @@
-package com.justintime.jit.helpers;
+package com.justintime.jit.util;
 
 import com.justintime.jit.exception.ImageSizeLimitExceededException;
 

@@ -1,20 +1,16 @@
 package com.justintime.jit.controller;
 
-import com.justintime.jit.entity.ComboEntities.ComboItem;
 import com.justintime.jit.entity.Enums.Filter;
 import com.justintime.jit.entity.MenuItem;
 import com.justintime.jit.exception.ImageSizeLimitExceededException;
-import com.justintime.jit.helpers.ImageValidation;
+import com.justintime.jit.util.ImageValidation;
 import com.justintime.jit.service.ComboItemService;
 import com.justintime.jit.service.MenuItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/menu-items")

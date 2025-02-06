@@ -1,6 +1,7 @@
 package com.justintime.jit.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.justintime.jit.entity.ComboEntities.Combo;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,6 +29,10 @@ public class TimeInterval {
     @ManyToMany(mappedBy = "timeIntervalSet")
     @JsonIgnoreProperties("timeIntervalSet")
     private Set<MenuItem> menuItemSet = new HashSet<>();
+
+    @ManyToMany(mappedBy = "timeIntervalSet", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JsonIgnoreProperties("timeIntervalSet")
+    private Set<Combo> comboSet = new HashSet<>();
 
     @Column(name = "start_time", nullable = false)
     private LocalDateTime startTime;

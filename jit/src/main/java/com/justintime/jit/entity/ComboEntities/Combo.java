@@ -2,8 +2,10 @@ package com.justintime.jit.entity.ComboEntities;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.justintime.jit.entity.Address;
+import com.justintime.jit.entity.Cook;
 import com.justintime.jit.entity.OrderEntities.OrderItem;
 import com.justintime.jit.entity.Restaurant;
+import com.justintime.jit.entity.TimeInterval;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -52,6 +54,39 @@ public class Combo {
 
     @Column(name = "stock", nullable = false, columnDefinition = "INT DEFAULT 0")
     private Integer stock = 0;
+
+    @Column(name="description", nullable = false, columnDefinition = "TEXT")
+    private String description;
+
+    @Column(name = "offer_price", nullable = false, columnDefinition = "DECIMAL(10,2)")
+    private BigDecimal offerPrice;
+
+    @Column(name = "count", nullable = false, columnDefinition = "INT DEFAULT 0")
+    private Integer count = 0;
+
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+            name = "combo_time_interval",
+            joinColumns = @JoinColumn(name = "combo_id"),
+            inverseJoinColumns = @JoinColumn(name = "time_interval_id")
+    )
+    @JsonIgnoreProperties("comboSet")
+    private Set<TimeInterval> timeIntervalSet = new HashSet<>();
+
+    @Column(name = "preparation_time", nullable = false)
+    private Integer preparationTime;
+
+    @Column(name = "food_type", nullable = false, length = 1)
+    private Boolean onlyVeg;
+
+    @Column(name = "hotel_special", nullable = false, length = 1)
+    private Boolean hotelSpecial;
+
+    @Column(name = "image", columnDefinition = "TEXT")
+    private String base64Image;
+
+    @Column(name = "rating", nullable = false, columnDefinition = "DECIMAL(10,1)")
+    private BigDecimal rating;
 
     @CreationTimestamp
     @Column(name = "created_dttm", nullable = false, updatable = false)
