@@ -1,6 +1,7 @@
 package com.justintime.jit.controller;
 
 import com.justintime.jit.entity.ComboEntities.ComboItem;
+import com.justintime.jit.entity.Enums.Filter;
 import com.justintime.jit.entity.MenuItem;
 import com.justintime.jit.exception.ImageSizeLimitExceededException;
 import com.justintime.jit.helpers.ImageValidation;
@@ -30,10 +31,10 @@ public class MenuItemController {
         return menuItemService.getAllMenuItems();
     }
 
-    @GetMapping("/restaurant/{restaurantId}/{addressId}")
+    @GetMapping("/restaurant/{addressId}")
     public List<MenuItem> getMenuItemsByRestaurant(
             @PathVariable Long addressId,
-            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) Filter sortBy,
             @RequestParam(required = false) String priceRange,
             @RequestParam(required = false, defaultValue = "false") boolean onlyForCombos) {
         return menuItemService.getMenuItemsByAddressId(addressId, sortBy, priceRange, onlyForCombos);

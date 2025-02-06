@@ -1,5 +1,6 @@
 package com.justintime.jit.service.impl;
 
+import com.justintime.jit.entity.Enums.Filter;
 import com.justintime.jit.entity.Food;
 import com.justintime.jit.repository.OrderRepo.OrderItemRepository;
 import com.justintime.jit.service.MenuItemService;
@@ -62,47 +63,49 @@ import java.util.stream.Collectors;
             menuItemRepository.deleteById(id);
         }
 
-        public List<MenuItem> getMenuItemsByAddressId(Long addressId, String sortBy, String priceRange, boolean onlyForCombos) {
-            List<MenuItem> menuItems = menuItemRepository.findByAddressId(addressId);
+    public List<MenuItem> getMenuItemsByAddressId(Long addressId, Filter sortBy, String priceRange, boolean onlyForCombos) {
+        List<MenuItem> menuItems = menuItemRepository.findByAddressId(addressId);
 
-            if ("popularity".equalsIgnoreCase(sortBy)) {
-                List<Object[]> result = orderItemRepository.findMenuItemsWithOrderCount(addressId);
+        if (Filter.POPULARITY.equals(sortBy)) { // Prevent NullPointerException
+            List<Object[]> result = orderItemRepository.findMenuItemsWithOrderCount(addressId);
 
-                // Convert List<Object[]> to Map<MenuItem, Integer>
-                Map<MenuItem, Integer> orderCounts = result.stream()
-                        .collect(Collectors.toMap(
-                                obj -> (MenuItem) obj[0],   // MenuItem
-                                obj -> ((Long) obj[1]).intValue() // Order count
-                        ));
+            // Convert List<Object[]> to Map<MenuItem, Integer>
+            Map<MenuItem, Integer> orderCounts = result.stream()
+                    .collect(Collectors.toMap(
+                            obj -> (MenuItem) obj[0],   // MenuItem
+                            obj -> ((Number) obj[1]).intValue() // Safely convert COUNT result
+                    ));
 
-                // Filter onlyForCombos if needed
-                return orderCounts.keySet().stream()
-                        .filter(item -> !onlyForCombos || item.getOnlyForCombos()) // Apply onlyForCombos filter
-                        .sorted(Comparator.comparingInt(item -> orderCounts.getOrDefault(item, 0)).reversed()) // Sort by order count
-                        .collect(Collectors.toList());
-            }
-            // Apply combo filtering
-            Predicate<MenuItem> comboFilter = onlyForCombos ? MenuItem::getOnlyForCombos : item -> !item.getOnlyForCombos();
-
-
-            Comparator<MenuItem> comparator = getComparator(sortBy != null ? sortBy : "default");
-
-            // Filter, sort, and return
-            return menuItems.stream()
-                    .filter(comboFilter)
-                    .filter(item -> isWithinPriceRange(item, priceRange))
-                    .sorted(comparator)
+            // Apply filters and sort by popularity
+            return orderCounts.keySet().stream()
+                    .filter(item -> (!onlyForCombos || item.getOnlyForCombos()) && isWithinPriceRange(item, priceRange)) // Apply both filters
+                    .sorted(Comparator.comparingInt(orderCounts::get).reversed()) // Sort by order count descending
                     .collect(Collectors.toList());
         }
 
-    private Comparator<MenuItem> getComparator(String sortBy) {
-            return switch (sortBy.toLowerCase()) {
-                case "oldest" -> Comparator.comparing(MenuItem::getUpdatedDttm, Comparator.nullsLast(Comparator.naturalOrder()));
-                case "newest" -> Comparator.comparing(MenuItem::getUpdatedDttm, Comparator.nullsLast(Comparator.naturalOrder())).reversed();
-                case "rating" -> Comparator.comparing(MenuItem::getRating, Comparator.nullsLast(Comparator.naturalOrder())).reversed();
-                default -> Comparator.comparing(item -> item.getFood().getFoodName(), Comparator.nullsLast(Comparator.naturalOrder()));
-            };
-        }
+        // Apply combo filtering
+        Predicate<MenuItem> comboFilter = onlyForCombos ? MenuItem::getOnlyForCombos : item -> !item.getOnlyForCombos();
+
+        // Get appropriate comparator
+        Comparator<MenuItem> comparator = getComparator(sortBy != null ? sortBy : Filter.DEFAULT);
+
+        // Filter, sort, and return
+        return menuItems.stream()
+                .filter(comboFilter)
+                .filter(item -> isWithinPriceRange(item, priceRange))
+                .sorted(comparator)
+                .collect(Collectors.toList());
+    }
+
+    private Comparator<MenuItem> getComparator(Filter sortBy) {
+        return switch (sortBy) {
+            case OLDEST -> Comparator.comparing(MenuItem::getUpdatedDttm, Comparator.nullsLast(Comparator.naturalOrder()));
+            case NEWEST -> Comparator.comparing(MenuItem::getUpdatedDttm, Comparator.nullsLast(Comparator.naturalOrder())).reversed();
+            case RATING -> Comparator.comparing(MenuItem::getRating, Comparator.nullsLast(Comparator.naturalOrder())).reversed();
+            default -> Comparator.comparing(item -> item.getFood().getFoodName(), Comparator.nullsLast(Comparator.naturalOrder()));
+        };
+    }
+
 
         // Unified Price Filtering Logic
         private boolean isWithinPriceRange(MenuItem item, String priceRange) {
