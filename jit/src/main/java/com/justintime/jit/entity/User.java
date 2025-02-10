@@ -1,6 +1,8 @@
 package com.justintime.jit.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.justintime.jit.entity.Enums.Role;
 import com.justintime.jit.entity.OrderEntities.Order;
 import jakarta.persistence.*;
@@ -65,19 +67,15 @@ public class User {
         private LocalDateTime updatedDttm;
 
         @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
-        @JsonIgnoreProperties("customer")
         private List<Order> orders;
 
         @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
-        @JsonIgnoreProperties("customer")
         private List<Reservation> reservations;
 
         @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-        @JsonIgnoreProperties("user")
         private List<Admin> admins;
 
         @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-        @JsonIgnoreProperties("user")
         private Cook cook;  // A single cook record per user
 
 //        // Copy Constructor

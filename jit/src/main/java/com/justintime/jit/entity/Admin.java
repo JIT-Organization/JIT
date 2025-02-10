@@ -1,6 +1,8 @@
 package com.justintime.jit.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,17 +26,10 @@ public class Admin {
 
     @ManyToOne
     @JoinColumn(name = "restaurant_id", nullable = false)
-    @JsonIgnoreProperties("admins")
     private Restaurant restaurant;
 
     @ManyToOne
-    @JoinColumn(name = "address_id", nullable = false)
-    @JsonIgnoreProperties("admins")
-    private Address address;
-
-    @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    @JsonIgnoreProperties("admins")
     private User user;
 
     @CreationTimestamp

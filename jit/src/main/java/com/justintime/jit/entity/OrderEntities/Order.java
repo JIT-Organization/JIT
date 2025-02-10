@@ -1,6 +1,8 @@
 package com.justintime.jit.entity.OrderEntities;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.justintime.jit.entity.Enums.OrderStatus;
 import com.justintime.jit.entity.PaymentEntities.Payment;
 import com.justintime.jit.entity.Restaurant;
@@ -32,12 +34,10 @@ public class Order {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    @JsonIgnoreProperties("orders")
     private User customer;
 
     @ManyToOne
     @JoinColumn(name = "restaurant_id", nullable = false)
-    @JsonIgnoreProperties("orders")
     private Restaurant restaurant;
 
     @Enumerated(EnumType.STRING)
@@ -59,15 +59,12 @@ public class Order {
     private LocalDateTime updatedDttm;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    @JsonIgnoreProperties("order")
     private List<Payment> payments;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    @JsonIgnoreProperties("order")
     private List<OrderItem> orderItems;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    @JsonIgnoreProperties("order")
     private List<OrderActivity> orderActivities;
 
 //    // Copy constructor

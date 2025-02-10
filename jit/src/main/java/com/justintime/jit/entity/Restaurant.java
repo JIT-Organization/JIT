@@ -1,7 +1,9 @@
 package com.justintime.jit.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.justintime.jit.entity.ComboEntities.Combo;
 import com.justintime.jit.entity.OrderEntities.Order;
 import jakarta.persistence.*;
@@ -20,7 +22,7 @@ import java.util.stream.Collectors;
 @Audited
 @Getter
 @Setter
-@Table(name = "restaurants")
+@Table(name = "restaurant")
 @NoArgsConstructor
 public class Restaurant {
 
@@ -37,6 +39,27 @@ public class Restaurant {
         @Column(name = "email")
         private String email;
 
+        @Column(name = "address_line1", nullable = false, length = 150)
+        private String addressLine1;
+
+        @Column(name = "address_line2", length = 150)
+        private String addressLine2;
+
+        @Column(name = "city", nullable = false, length = 100)
+        private String city;
+
+        @Column(name = "state", nullable = false, length = 100)
+        private String state;
+
+        @Column(name = "country", nullable = false, length = 100)
+        private String country;
+
+        @Column(name = "latitude", nullable = false)
+        private Double latitude;
+
+        @Column(name = "longitude", nullable = false)
+        private Double longitude;
+
         @CreationTimestamp
         @Column(name = "created_dttm", nullable = false, updatable = false)
         private LocalDateTime createdDttm;
@@ -46,35 +69,24 @@ public class Restaurant {
         private LocalDateTime updatedDttm;
 
         @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
-        @JsonManagedReference
-        private List<Address> addresses;
-
-        @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
-        @JsonIgnoreProperties("restaurant")
         private List<MenuItem> menu;
 
         @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
-        @JsonIgnoreProperties("restaurant")
         private List<Combo> combos;
 
         @OneToMany(mappedBy = "restaurant")
-        @JsonIgnoreProperties("restaurant")
         private List<Cook> cooks;
 
         @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
-        @JsonIgnoreProperties("restaurant")
         private List<Order> orders;
 
         @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
-        @JsonIgnoreProperties("restaurant")
         private List<ShiftCapacity> shiftCapacities;
 
         @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
-        @JsonIgnoreProperties("restaurant")
         private List<Reservation> reservations;
 
         @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
-        @JsonIgnoreProperties("restaurant")
         private List<Admin> admins;
 
 //        // Copy Constructor

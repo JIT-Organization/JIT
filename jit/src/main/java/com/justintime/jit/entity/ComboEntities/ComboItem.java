@@ -1,5 +1,7 @@
 package com.justintime.jit.entity.ComboEntities;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.justintime.jit.entity.MenuItem;
 import jakarta.persistence.*;
 import lombok.Getter;

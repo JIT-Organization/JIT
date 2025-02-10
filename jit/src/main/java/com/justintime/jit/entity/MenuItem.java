@@ -1,7 +1,9 @@
 package com.justintime.jit.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.justintime.jit.entity.ComboEntities.ComboItem;
 import com.justintime.jit.entity.OrderEntities.OrderItem;
 import jakarta.persistence.*;
@@ -19,10 +21,7 @@ import java.util.*;
 
 @Entity
 @Audited
-@Table(
-        name = "menu_item",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"restaurant_id", "address_id", "food_id"})
-)
+@Table(name = "menu_item")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -32,20 +31,20 @@ public class MenuItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "address_id", nullable = false)
-    @JsonIgnoreProperties("menuItems")
-    private Address address;
+    @Column(name="menu_item_name", nullable = false, length = 100)
+    private String menuItemName;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "restaurant_id", nullable = false)
-    @JsonIgnoreProperties("menu")
     private Restaurant restaurant;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "food_id", nullable = false)
-    @JsonIgnoreProperties("menuItems")
-    private Food food;
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "category_menu_item",
+            joinColumns = @JoinColumn(name = "menu_item_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
+    private Set<Category> categories = new HashSet<>();
 
     @Column(name="description", nullable = false, columnDefinition = "TEXT")
     private String description;
@@ -55,6 +54,14 @@ public class MenuItem {
 
     @Column(name = "offer_price", nullable = false, columnDefinition = "DECIMAL(10,2)")
     private BigDecimal offerPrice;
+
+    @UpdateTimestamp
+    @Column(name = "offer_from")
+    private LocalDateTime offerFrom;
+
+    @UpdateTimestamp
+    @Column(name = "offer_to")
+    private LocalDateTime offerTo;
 
     @Column(name = "stock", nullable = false, columnDefinition = "INT DEFAULT 0")
     private Integer stock = 0;
@@ -68,7 +75,6 @@ public class MenuItem {
             joinColumns = @JoinColumn(name = "menu_item_id"), // Foreign key for MenuItem
             inverseJoinColumns = @JoinColumn(name = "cook_id")
     )
-    @JsonIgnoreProperties("menuItemSet")
     private Set<Cook> cookSet = new HashSet<>();
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
@@ -78,17 +84,22 @@ public class MenuItem {
             inverseJoinColumns = @JoinColumn(name = "time_interval_id"),
             uniqueConstraints = @UniqueConstraint(columnNames = {"menu_item_id", "time_interval_id"})
     )
-    @JsonIgnoreProperties("menuItemSet")
     private Set<TimeInterval> timeIntervalSet = new HashSet<>();
 
     @Column(name = "preparation_time", nullable = false)
     private Integer preparationTime;
 
-    @Column(name = "food_type", nullable = false, length = 1)
+    @Column(name = "accept_bulk_orders", nullable = false, length = 1)
+    private Boolean acceptBulkOrders;
+
+    @Column(name = "only_veg", nullable = false, length = 1)
     private Boolean onlyVeg;
 
     @Column(name = "only_for_combos", nullable = false, length = 1)
     private Boolean onlyForCombos;
+
+    @Column(name = "active", nullable = false, length = 1)
+    private Boolean active;
 
     @Column(name = "hotel_special", nullable = false, length = 1)
     private Boolean hotelSpecial;
@@ -108,11 +119,9 @@ public class MenuItem {
     private LocalDateTime updatedDttm;
 
     @OneToMany(mappedBy = "menuItem", cascade = CascadeType.ALL)
-    @JsonIgnoreProperties("menuItem")
     private List<ComboItem> comboItems = new ArrayList<>();
 
     @OneToMany(mappedBy = "menuItem", cascade = CascadeType.ALL)
-    @JsonIgnoreProperties("menuItem")
     private List<OrderItem> orderItems = new ArrayList<>();
 
 //    // Copy Constructor

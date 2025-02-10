@@ -1,22 +1,16 @@
 package com.justintime.jit.service.impl;
 
+import com.justintime.jit.dto.MenuItemDTO;
 import com.justintime.jit.entity.Enums.Filter;
-import com.justintime.jit.entity.Food;
 import com.justintime.jit.repository.OrderRepo.OrderItemRepository;
 import com.justintime.jit.service.MenuItemService;
 import com.justintime.jit.repository.MenuItemRepository;
 import com.justintime.jit.entity.MenuItem;
 import com.justintime.jit.util.FilterMenuItems;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 @Service
     public class MenuItemServiceImpl extends BaseServiceImpl<MenuItem,Long> implements MenuItemService {
@@ -42,13 +36,12 @@ import java.util.stream.Collectors;
         public MenuItem updateMenuItem(Long id, MenuItem updatedItem) {
             MenuItem existingItem = menuItemRepository.findById(id).orElseThrow(() -> new RuntimeException("MenuItem not found"));
             existingItem.setRestaurant(updatedItem.getRestaurant());
-            existingItem.setFood(updatedItem.getFood());
+            existingItem.setMenuItemName(updatedItem.getMenuItemName());
             existingItem.setDescription(updatedItem.getDescription());
             existingItem.setPrice(updatedItem.getPrice());
             existingItem.setOfferPrice(updatedItem.getOfferPrice());
             existingItem.setStock(updatedItem.getStock());
             existingItem.setCount(updatedItem.getCount());
-            existingItem.setAddress(updatedItem.getAddress());
             existingItem.setTimeIntervalSet(updatedItem.getTimeIntervalSet());
             existingItem.setCookSet(updatedItem.getCookSet());
             existingItem.setPreparationTime(updatedItem.getPreparationTime());
@@ -64,10 +57,10 @@ import java.util.stream.Collectors;
             menuItemRepository.deleteById(id);
         }
 
-    public List<MenuItem> getMenuItemsByAddressId(Long addressId, Filter sortBy, String priceRange, boolean onlyForCombos) {
-        List<MenuItem> menuItems = menuItemRepository.findByAddressId(addressId);
+    public List<MenuItemDTO> getMenuItemsByRestaurantId(Long restaurantId, Filter sortBy, String priceRange, boolean onlyForCombos) {
+        List<MenuItem> menuItems = menuItemRepository.findByRestaurantId(restaurantId);
         FilterMenuItems filterMenuItems = new FilterMenuItems();
-        return filterMenuItems.filterAndSortMenuItems(menuItems, addressId, sortBy, priceRange, onlyForCombos, orderItemRepository);
+        return filterMenuItems.filterAndSortMenuItems(menuItems, restaurantId, sortBy, priceRange, onlyForCombos, orderItemRepository);
     }
 }
 

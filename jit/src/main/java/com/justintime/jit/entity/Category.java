@@ -1,7 +1,9 @@
 package com.justintime.jit.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -32,14 +34,13 @@ public class Category {
     @Column(name="category_name", nullable = false)
     private String categoryName;
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
-            name = "category_food",
+            name = "category_menu_item",
             joinColumns = @JoinColumn(name = "category_id"),
-            inverseJoinColumns = @JoinColumn(name = "food_id")
+            inverseJoinColumns = @JoinColumn(name = "menu_item_id")
     )
-    @JsonIgnoreProperties("categories")
-    private Set<Food> foods = new HashSet<>();
+    private Set<MenuItem> menuItems = new HashSet<>();
 
     @CreationTimestamp
     @Column(name = "created_dttm", nullable = false, updatable = false)

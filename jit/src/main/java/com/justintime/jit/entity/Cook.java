@@ -1,6 +1,8 @@
 package com.justintime.jit.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -35,24 +37,16 @@ public class Cook {
     @Column(name = "specialty")
     private String specialty; // e.g., Italian, Indian, etc.
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "address_id", nullable = false)
-    @JsonIgnoreProperties("cooks")
-    private Address address;
-
     // Many cooks can work for a single restaurant
     @ManyToOne
     @JoinColumn(name = "restaurant_id", nullable = false)
-    @JsonIgnoreProperties("cooks")
     private Restaurant restaurant;
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
-    @JsonIgnoreProperties("cook")
     private User user;
 
     @ManyToMany(mappedBy = "cookSet")
-    @JsonIgnoreProperties("cookSet")
     private Set<MenuItem> menuItemSet;
 }
 

@@ -1,6 +1,8 @@
 package com.justintime.jit.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,7 +26,6 @@ public class ReservationActivity {
 
     @ManyToOne
     @JoinColumn(name = "reservation_id", nullable = false)
-    @JsonIgnoreProperties("reservationActivities")
     private Reservation reservation;
 
     @Column(name = "change_log", nullable = false, length = 50)

@@ -7,5 +7,6 @@ import java.util.List;
 
 @Repository
 public interface MenuItemRepository extends BaseRepository<MenuItem, Long> {
-    List<MenuItem> findByAddressId(Long addressId);
+    List<MenuItem> findByRestaurantId(Long retaurantId);
+    List<MenuItem> findByMenuItemNameContaining(String restaurantName);
 }

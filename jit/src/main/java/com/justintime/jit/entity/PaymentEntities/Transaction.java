@@ -23,7 +23,6 @@ public class Transaction {
 
     @ManyToOne
     @JoinColumn(name = "payment_id", nullable = false)
-    @JsonIgnoreProperties("transactions")
     private Payment payment;
 
     @Column(name = "transaction_type", nullable = false, length = 50)
