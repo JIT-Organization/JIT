@@ -66,8 +66,7 @@ public class MenuItem {
     @JoinTable(
             name = "menu_item_cook", // Join table name
             joinColumns = @JoinColumn(name = "menu_item_id"), // Foreign key for MenuItem
-            inverseJoinColumns = @JoinColumn(name = "cook_id"), // Foreign key for Cook
-            uniqueConstraints = @UniqueConstraint(columnNames = {"menu_item_id", "cook_id"})
+            inverseJoinColumns = @JoinColumn(name = "cook_id")
     )
     @JsonIgnoreProperties("menuItemSet")
     private Set<Cook> cookSet = new HashSet<>();

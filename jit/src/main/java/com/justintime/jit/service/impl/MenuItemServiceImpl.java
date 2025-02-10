@@ -1,15 +1,21 @@
 package com.justintime.jit.service.impl;
 
+import com.justintime.jit.entity.Enums.Filter;
 import com.justintime.jit.entity.Food;
 import com.justintime.jit.repository.OrderRepo.OrderItemRepository;
 import com.justintime.jit.service.MenuItemService;
 import com.justintime.jit.repository.MenuItemRepository;
 import com.justintime.jit.entity.MenuItem;
+import com.justintime.jit.util.FilterMenuItems;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -17,16 +23,15 @@ import java.util.stream.Collectors;
 
     private final MenuItemRepository menuItemRepository;
 
-    public MenuItemServiceImpl(MenuItemRepository menuItemRepository) {
+    private final OrderItemRepository orderItemRepository;
+
+    public MenuItemServiceImpl(MenuItemRepository menuItemRepository, OrderItemRepository orderItemRepository) {
         this.menuItemRepository = menuItemRepository;
+        this.orderItemRepository = orderItemRepository;
     }
 
         public List<MenuItem> getAllMenuItems() {
             return menuItemRepository.findAll();
-        }
-
-        public List<MenuItem> getMenuItemsByRestaurantId(Long restaurantId) {
-            return menuItemRepository.findByRestaurantId(restaurantId);
         }
 
         public MenuItem addMenuItem(MenuItem menuItem) {
@@ -58,6 +63,12 @@ import java.util.stream.Collectors;
         public void deleteMenuItem(Long id) {
             menuItemRepository.deleteById(id);
         }
+
+    public List<MenuItem> getMenuItemsByAddressId(Long addressId, Filter sortBy, String priceRange, boolean onlyForCombos) {
+        List<MenuItem> menuItems = menuItemRepository.findByAddressId(addressId);
+        FilterMenuItems filterMenuItems = new FilterMenuItems();
+        return filterMenuItems.filterAndSortMenuItems(menuItems, addressId, sortBy, priceRange, onlyForCombos, orderItemRepository);
     }
+}
 
 

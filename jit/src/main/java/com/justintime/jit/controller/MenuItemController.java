@@ -1,16 +1,16 @@
 package com.justintime.jit.controller;
 
+import com.justintime.jit.entity.Enums.Filter;
 import com.justintime.jit.entity.MenuItem;
 import com.justintime.jit.exception.ImageSizeLimitExceededException;
-import com.justintime.jit.helpers.ImageValidation;
+import com.justintime.jit.util.ImageValidation;
+import com.justintime.jit.service.ComboItemService;
 import com.justintime.jit.service.MenuItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/menu-items")
@@ -19,19 +19,21 @@ public class MenuItemController {
     @Autowired
     private MenuItemService menuItemService;
 
+    @Autowired
+    private ComboItemService comboItemService;
+
     @GetMapping
     public List<MenuItem> getAllMenuItems() {
-        List<MenuItem> menuItems = menuItemService.getAllMenuItems();
-
-        // Sort the menu items by foodName of the associated food object
-        return menuItems.stream()
-                .sorted(Comparator.comparing(item -> item.getFood().getFoodName()))  // Sorting by foodName
-                .collect(Collectors.toList());
+        return menuItemService.getAllMenuItems();
     }
 
-    @GetMapping("/restaurant/{restaurantId}")
-    public List<MenuItem> getMenuItemsByRestaurant(@PathVariable Long restaurantId) {
-        return menuItemService.getMenuItemsByRestaurantId(restaurantId);
+    @GetMapping("/restaurant/{addressId}")
+    public List<MenuItem> getMenuItemsByRestaurant(
+            @PathVariable Long addressId,
+            @RequestParam(required = false) Filter sortBy,
+            @RequestParam(required = false) String priceRange,
+            @RequestParam(required = false, defaultValue = "false") boolean onlyForCombos) {
+        return menuItemService.getMenuItemsByAddressId(addressId, sortBy, priceRange, onlyForCombos);
     }
 
     @PostMapping("/validateImage")

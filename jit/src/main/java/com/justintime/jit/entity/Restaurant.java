@@ -2,6 +2,7 @@ package com.justintime.jit.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.justintime.jit.entity.ComboEntities.Combo;
 import com.justintime.jit.entity.OrderEntities.Order;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -51,6 +52,10 @@ public class Restaurant {
         @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
         @JsonIgnoreProperties("restaurant")
         private List<MenuItem> menu;
+
+        @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
+        @JsonIgnoreProperties("restaurant")
+        private List<Combo> combos;
 
         @OneToMany(mappedBy = "restaurant")
         @JsonIgnoreProperties("restaurant")
