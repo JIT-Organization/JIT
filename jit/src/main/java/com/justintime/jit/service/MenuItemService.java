@@ -10,7 +10,7 @@ public interface MenuItemService extends BaseService<MenuItem,Long>{
 
     List<MenuItemDTO> getAllMenuItems();
     List<MenuItemDTO> getMenuItemsByRestaurantId(Long addressId, Filter sortBy, String priceRange, String category, boolean onlyForCombos);
-    MenuItem addMenuItem(MenuItem menuItem);
+    MenuItem addMenuItem(MenuItemDTO menuItemDTO);
     MenuItem updateMenuItem(Long id, MenuItem updatedItem);
     void deleteMenuItem(Long id);
 }

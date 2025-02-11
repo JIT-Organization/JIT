@@ -33,8 +33,8 @@ public class MenuItemDTO {
     private BigDecimal rating;
     private LocalDateTime createdDttm;
     private LocalDateTime updatedDttm;
-    private Set<Category> categorySet;
-    private Set<Cook> cookSet;
+    private Set<String> categorySet;
+    private Set<String> cookSet;
     private Set<TimeInterval> timeIntervalSet;
 }
 

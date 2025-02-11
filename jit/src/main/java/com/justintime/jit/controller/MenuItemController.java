@@ -48,8 +48,8 @@ public class MenuItemController {
     }
 
     @PostMapping
-    public MenuItem addMenuItem(@RequestBody MenuItem menuItem) {
-        return menuItemService.addMenuItem(menuItem);
+    public MenuItem addMenuItem(@RequestBody MenuItemDTO menuItemDTO) {
+        return menuItemService.addMenuItem(menuItemDTO);
     }
 
     @PutMapping("/{id}")

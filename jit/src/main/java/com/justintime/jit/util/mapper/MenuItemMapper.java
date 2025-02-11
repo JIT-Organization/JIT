@@ -16,7 +16,7 @@ public class MenuItemMapper {
         MenuItemDTO dto = new MenuItemDTO();
         dto.setId(menuItem.getId());
         dto.setMenuItemName(menuItem.getMenuItemName());
-        dto.setRestaurantId(menuItem.getRestaurant().getId());
+//        dto.setRestaurant(menuItem.getRestaurant());
         dto.setDescription(menuItem.getDescription());
         dto.setPrice(menuItem.getPrice());
         dto.setOfferPrice(menuItem.getOfferPrice());
