@@ -6,11 +6,15 @@ import com.justintime.jit.repository.OrderRepo.OrderItemRepository;
 import com.justintime.jit.service.MenuItemService;
 import com.justintime.jit.repository.MenuItemRepository;
 import com.justintime.jit.entity.MenuItem;
-import com.justintime.jit.util.FilterMenuItems;
+import com.justintime.jit.util.filter.FilterItemsUtil;
+import com.justintime.jit.util.mapper.GenericMapperImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.modelmapper.ModelMapper;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
     public class MenuItemServiceImpl extends BaseServiceImpl<MenuItem,Long> implements MenuItemService {
@@ -19,13 +23,19 @@ import java.util.List;
 
     private final OrderItemRepository orderItemRepository;
 
-    public MenuItemServiceImpl(MenuItemRepository menuItemRepository, OrderItemRepository orderItemRepository) {
+    @Autowired
+    private GenericMapperImpl<MenuItem, MenuItemDTO> menuItemMapper;
+
+    public MenuItemServiceImpl(MenuItemRepository menuItemRepository, OrderItemRepository orderItemRepository){
         this.menuItemRepository = menuItemRepository;
         this.orderItemRepository = orderItemRepository;
     }
 
-        public List<MenuItem> getAllMenuItems() {
-            return menuItemRepository.findAll();
+        public List<MenuItemDTO> getAllMenuItems() {
+            return menuItemRepository.findAll()
+                    .stream()
+                    .map(menuItem -> menuItemMapper.toDTO(menuItem, MenuItemDTO.class))
+                    .collect(Collectors.toList());
         }
 
         public MenuItem addMenuItem(MenuItem menuItem) {
@@ -57,10 +67,11 @@ import java.util.List;
             menuItemRepository.deleteById(id);
         }
 
-    public List<MenuItemDTO> getMenuItemsByRestaurantId(Long restaurantId, Filter sortBy, String priceRange, boolean onlyForCombos) {
+    public List<MenuItemDTO> getMenuItemsByRestaurantId(Long restaurantId, Filter sortBy, String priceRange, String category, boolean onlyForCombos) {
         List<MenuItem> menuItems = menuItemRepository.findByRestaurantId(restaurantId);
-        FilterMenuItems filterMenuItems = new FilterMenuItems();
-        return filterMenuItems.filterAndSortMenuItems(menuItems, restaurantId, sortBy, priceRange, onlyForCombos, orderItemRepository);
+        GenericMapperImpl<MenuItem, MenuItemDTO> genericMapper = new GenericMapperImpl<>(new ModelMapper());
+        FilterItemsUtil filterItemsUtil = new FilterItemsUtil(genericMapper);
+        return filterItemsUtil.filterAndSortItems(menuItems, restaurantId, sortBy, priceRange, category, onlyForCombos,orderItemRepository);
     }
 }
 

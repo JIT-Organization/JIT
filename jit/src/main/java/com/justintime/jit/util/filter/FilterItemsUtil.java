@@ -1,25 +1,43 @@
-package com.justintime.jit.util;
+package com.justintime.jit.util.filter;
 
 import com.justintime.jit.dto.MenuItemDTO;
 import com.justintime.jit.entity.MenuItem;
 import com.justintime.jit.entity.Enums.Filter;
 import com.justintime.jit.repository.OrderRepo.OrderItemRepository;
-import com.justintime.jit.util.Mapper.MenuItemMapper;
+import com.justintime.jit.util.mapper.GenericMapperImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class FilterMenuItems {
+@Component
+public class FilterItemsUtil {
 
-    public List<MenuItemDTO> filterAndSortMenuItems(
+    private final GenericMapperImpl<MenuItem, MenuItemDTO> genericMapper;
+
+    @Autowired
+    public FilterItemsUtil(GenericMapperImpl<MenuItem, MenuItemDTO> genericMapper) {
+        this.genericMapper = genericMapper;
+    }
+
+    public List<MenuItemDTO> filterAndSortItems(
             List<MenuItem> menuItems,
             Long addressId,
             Filter sortBy,
             String priceRange,
+            String category,
             boolean onlyForCombos,
             OrderItemRepository orderItemRepository) {
+
+        if (category != null && !category.trim().isEmpty()) {
+            menuItems = menuItems.stream()
+                    .filter(item -> item.getCategorySet().stream()
+                            .anyMatch(c -> category.equalsIgnoreCase(c.getCategoryName()))) // Corrected for Set<Category>
+                    .collect(Collectors.toList());
+        }
 
         if (Filter.POPULARITY.equals(sortBy)) {
             List<Long> menuItemIds = menuItems.stream()
@@ -39,7 +57,7 @@ public class FilterMenuItems {
                     .sorted(Comparator.comparingInt(
                             (MenuItem item) -> idToCountMap.getOrDefault(item.getId(), 0)
                     ).reversed())
-                    .map(MenuItemMapper::toDTO) // Use mapper
+                    .map(item -> genericMapper.toDTO(item, MenuItemDTO.class)) // Using GenericMapper
                     .collect(Collectors.toList());
         }
 
@@ -50,7 +68,7 @@ public class FilterMenuItems {
                 .filter(comboFilter)
                 .filter(item -> isWithinPriceRange(item, priceRange))
                 .sorted(comparator)
-                .map(MenuItemMapper::toDTO) // Use mapper
+                .map(item -> genericMapper.toDTO(item, MenuItemDTO.class)) // Using GenericMapper
                 .collect(Collectors.toList());
     }
 

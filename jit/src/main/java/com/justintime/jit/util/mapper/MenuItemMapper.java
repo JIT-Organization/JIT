@@ -1,4 +1,4 @@
-package com.justintime.jit.util.Mapper;
+package com.justintime.jit.util.mapper;
 
 import com.justintime.jit.dto.MenuItemDTO;
 import com.justintime.jit.entity.MenuItem;
@@ -36,23 +36,23 @@ public class MenuItemMapper {
         dto.setUpdatedDttm(menuItem.getUpdatedDttm());
 
         // Extract category IDs (assuming a relationship with Category)
-        Set<Long> categoryIds = Optional.ofNullable(menuItem.getCategories())
-                .orElse(Collections.emptySet())  // Prevent NullPointerException
-                .stream()
-                .map(Category::getId)
-                .collect(Collectors.toSet());
-        dto.setCategoryIds(categoryIds);
-
-
-        // Extract cook IDs
-        dto.setCookIds(menuItem.getCookSet().stream()
-                .map(Cook::getId)
-                .collect(Collectors.toSet()));
-
-        // Extract time interval IDs
-        dto.setTimeIntervalIds(menuItem.getTimeIntervalSet().stream()
-                .map(TimeInterval::getId)
-                .collect(Collectors.toSet()));
+//        Set<Long> categoryIds = Optional.ofNullable(menuItem.getCategorySet())
+//                .orElse(Collections.emptySet())  // Prevent NullPointerException
+//                .stream()
+//                .map(Category::getId)
+//                .collect(Collectors.toSet());
+//        dto.setCategorySetIds(categoryIds);
+//
+//
+//        // Extract cook IDs
+//        dto.setCookSetIds(menuItem.getCookSet().stream()
+//                .map(Cook::getId)
+//                .collect(Collectors.toSet()));
+//
+//        // Extract time interval IDs
+//        dto.setTimeIntervalSetIds(menuItem.getTimeIntervalSet().stream()
+//                .map(TimeInterval::getId)
+//                .collect(Collectors.toSet()));
 
         return dto;
     }

@@ -20,11 +20,8 @@ public class MenuItemController {
     @Autowired
     private MenuItemService menuItemService;
 
-    @Autowired
-    private ComboItemService comboItemService;
-
     @GetMapping
-    public List<MenuItem> getAllMenuItems() {
+    public List<MenuItemDTO> getAllMenuItems() {
         return menuItemService.getAllMenuItems();
     }
 
@@ -33,8 +30,9 @@ public class MenuItemController {
             @PathVariable Long restaurantId,
             @RequestParam(required = false) Filter sortBy,
             @RequestParam(required = false) String priceRange,
+            @RequestParam(required = false) String category,
             @RequestParam(required = false, defaultValue = "false") boolean onlyForCombos) {
-        return menuItemService.getMenuItemsByRestaurantId(restaurantId, sortBy, priceRange, onlyForCombos);
+        return menuItemService.getMenuItemsByRestaurantId(restaurantId, sortBy, priceRange, category, onlyForCombos);
     }
 
     @PostMapping("/validateImage")

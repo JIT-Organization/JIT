@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.justintime.jit.entity.ComboEntities.ComboItem;
 import com.justintime.jit.entity.OrderEntities.OrderItem;
+import com.justintime.jit.util.filter.FilterableItem;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,7 +26,7 @@ import java.util.*;
 @Getter
 @Setter
 @NoArgsConstructor
-public class MenuItem {
+public class MenuItem implements FilterableItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,7 +45,7 @@ public class MenuItem {
             joinColumns = @JoinColumn(name = "menu_item_id"),
             inverseJoinColumns = @JoinColumn(name = "category_id")
     )
-    private Set<Category> categories = new HashSet<>();
+    private Set<Category> categorySet = new HashSet<>();
 
     @Column(name="description", nullable = false, columnDefinition = "TEXT")
     private String description;
@@ -123,6 +124,16 @@ public class MenuItem {
 
     @OneToMany(mappedBy = "menuItem", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems = new ArrayList<>();
+
+    @Override
+    public String getName() {
+        return this.menuItemName;
+    }
+
+    @Override
+    public Boolean isCombo() {
+        return false;
+    }
 
 //    // Copy Constructor
 //    public MenuItem(MenuItem other) {

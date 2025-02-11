@@ -1,8 +1,10 @@
 package com.justintime.jit.entity.ComboEntities;
 
+import com.justintime.jit.entity.Category;
 import com.justintime.jit.entity.OrderEntities.OrderItem;
 import com.justintime.jit.entity.Restaurant;
 import com.justintime.jit.entity.TimeInterval;
+import com.justintime.jit.util.filter.FilterableItem;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -21,11 +23,14 @@ import java.util.Set;
 @Setter
 @Table(name = "combo")
 @NoArgsConstructor
-public class Combo {
+public class Combo implements FilterableItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "combo_name", unique = true, nullable = false)
+    private String comboName;
 
     @ManyToMany(cascade = {CascadeType.MERGE})
     @JoinTable(
@@ -34,6 +39,14 @@ public class Combo {
             inverseJoinColumns = @JoinColumn(name = "combo_item_id")
     )
     private Set<ComboItem> comboItemSet = new HashSet<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "combo_category",
+            joinColumns = @JoinColumn(name = "combo_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
+    private Set<Category> categories = new HashSet<>();
 
     @ManyToOne
     @JoinColumn(name = "restaurant_id", nullable = false)
@@ -101,6 +114,21 @@ public class Combo {
 
     @OneToMany(mappedBy = "combo", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems;
+
+    @Override
+    public String getName() {
+        return this.comboName;
+    }
+
+    @Override
+    public Boolean getOnlyForCombos() {
+        return false;
+    }
+
+    @Override
+    public Boolean isCombo() {
+        return true;
+    }
 
 //    public Set<ComboItem> getComboItemSet() {
 //        return Collections.unmodifiableSet(comboItemSet);

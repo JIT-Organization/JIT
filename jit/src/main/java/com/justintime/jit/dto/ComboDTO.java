@@ -1,8 +1,5 @@
 package com.justintime.jit.dto;
 
-import com.justintime.jit.entity.Category;
-import com.justintime.jit.entity.Cook;
-import com.justintime.jit.entity.TimeInterval;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,10 +9,9 @@ import java.util.Set;
 
 @Getter
 @Setter
-public class MenuItemDTO {
+public class ComboDTO {
     private Long id;
-    private String menuItemName;
-    private Long restaurantId;
+    private String comboName;
     private String description;
     private BigDecimal price;
     private BigDecimal offerPrice;
@@ -26,15 +22,17 @@ public class MenuItemDTO {
     private Integer preparationTime;
     private Boolean acceptBulkOrders;
     private Boolean onlyVeg;
-    private Boolean onlyForCombos;
     private Boolean active;
     private Boolean hotelSpecial;
     private String base64Image;
     private BigDecimal rating;
     private LocalDateTime createdDttm;
     private LocalDateTime updatedDttm;
-    private Set<Category> categorySet;
-    private Set<Cook> cookSet;
-    private Set<TimeInterval> timeIntervalSet;
+
+    // Related IDs to avoid entity dependencies
+    private Long restaurantId;
+    private Set<Long> comboItemIds;
+    private Set<Long> categoryIds;
+    private Set<Long> timeIntervalIds;
 }
 

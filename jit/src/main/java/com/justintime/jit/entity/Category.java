@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.justintime.jit.entity.ComboEntities.Combo;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -31,7 +32,7 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name="category_name", nullable = false)
+    @Column(name="category_name", unique = true, nullable = false)
     private String categoryName;
 
     @ManyToMany(cascade = CascadeType.ALL)
@@ -41,6 +42,14 @@ public class Category {
             inverseJoinColumns = @JoinColumn(name = "menu_item_id")
     )
     private Set<MenuItem> menuItems = new HashSet<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "combo_category",
+            joinColumns = @JoinColumn(name = "category_id"),
+            inverseJoinColumns = @JoinColumn(name = "combo_id")
+    )
+    private Set<Combo> combos = new HashSet<>();
 
     @CreationTimestamp
     @Column(name = "created_dttm", nullable = false, updatable = false)

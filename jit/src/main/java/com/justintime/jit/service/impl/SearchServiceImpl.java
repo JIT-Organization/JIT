@@ -1,6 +1,6 @@
 package com.justintime.jit.service.impl;
 
-import com.justintime.jit.dto.SearchResultDto;
+import com.justintime.jit.dto.SearchResultDTO;
 import com.justintime.jit.entity.MenuItem;
 import com.justintime.jit.entity.Restaurant;
 import com.justintime.jit.repository.MenuItemRepository;
@@ -22,13 +22,13 @@ public class SearchServiceImpl implements SearchService {
     private RestaurantRepository restaurantRepository;
 
     @Override
-    public List<SearchResultDto> searchByName(String query) {
-        List<SearchResultDto> results = new ArrayList<>();
+    public List<SearchResultDTO> searchByName(String query) {
+        List<SearchResultDTO> results = new ArrayList<>();
 
         // Search Restaurants
         List<Restaurant> matchingRestaurants = restaurantRepository.findByRestaurantNameContaining(query);
         for (Restaurant restaurant : matchingRestaurants) {
-            SearchResultDto dto = new SearchResultDto();
+            SearchResultDTO dto = new SearchResultDTO();
             dto.setType("Restaurant");
             dto.setName(restaurant.getRestaurantName());
 
@@ -43,7 +43,7 @@ public class SearchServiceImpl implements SearchService {
         // Search Foods
         List<MenuItem> matchingMenuItems = menuItemRepository.findByMenuItemNameContaining(query);
         for (MenuItem menuItem : matchingMenuItems) {
-            SearchResultDto dto = new SearchResultDto();
+            SearchResultDTO dto = new SearchResultDTO();
             dto.setType("MenuItem");
             dto.setName(menuItem.getMenuItemName());
 
