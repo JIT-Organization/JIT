@@ -8,4 +8,5 @@ import java.util.Optional;
 @Repository
 public interface CategoryRepository extends BaseRepository<Category,Long>{
     boolean existsByCategoryName(String categoryName);
+    Category findByCategoryName(String categoryName);
 }

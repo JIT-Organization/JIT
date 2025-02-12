@@ -1,6 +1,7 @@
 package com.justintime.jit.controller;
 
 
+import com.justintime.jit.dto.ComboDTO;
 import com.justintime.jit.entity.ComboEntities.Combo;
 import com.justintime.jit.service.ComboService;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,7 +20,7 @@ public class ComboController {
     private ComboService comboService;
 
     @GetMapping
-    public List<Combo> getAllCombos() {
+    public List<ComboDTO> getAllCombos() {
         return comboService.getAllCombos();
     }
 

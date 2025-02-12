@@ -1,6 +1,8 @@
 package com.justintime.jit.entity.OrderEntities;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.justintime.jit.entity.ComboEntities.Combo;
 import com.justintime.jit.entity.MenuItem;
 import jakarta.persistence.*;
@@ -29,17 +31,14 @@ public class OrderItem {
 
         @ManyToOne
         @JoinColumn(name = "order_id", nullable = false)
-        @JsonIgnoreProperties("orderItems")
         private Order order;
 
         @ManyToOne
         @JoinColumn(name = "menu_item_id", nullable = false)
-        @JsonIgnoreProperties("orderItems")
         private MenuItem menuItem;
 
         @ManyToOne
         @JoinColumn(name = "combo_id", nullable = false)
-        @JsonIgnoreProperties("orderItems")
         private Combo combo;
 
         @Column(name = "quantity", nullable = false, columnDefinition = "int default 1")

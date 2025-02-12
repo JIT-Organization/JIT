@@ -30,7 +30,6 @@ public class Payment {
 
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)
-    @JsonIgnoreProperties("orders")
     private Order order;
 
     @Column(name = "payment_method", nullable = false)

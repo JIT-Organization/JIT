@@ -1,21 +1,27 @@
 package com.justintime.jit.service.impl;
 
+import com.justintime.jit.dto.ComboDTO;
 import com.justintime.jit.entity.ComboEntities.Combo;
 import com.justintime.jit.repository.ComboRepo.ComboRepository;
 import com.justintime.jit.service.ComboService;
+import com.justintime.jit.util.mapper.ComboMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ComboServiceImpl extends BaseServiceImpl<Combo,Long> implements ComboService {
     @Autowired
     private ComboRepository comboRepository;
 
-    public List<Combo> getAllCombos() {
-        return comboRepository.findAll();
+    public List<ComboDTO> getAllCombos() {
+        return comboRepository.findAll()
+                .stream()
+                .map(ComboMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
     public Optional<Combo> getComboById(Long id) {

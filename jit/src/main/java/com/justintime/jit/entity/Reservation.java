@@ -1,6 +1,8 @@
 package com.justintime.jit.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,17 +30,14 @@ public class Reservation {
 
         @ManyToOne
         @JoinColumn(name = "customer_id", nullable = false)
-        @JsonIgnoreProperties("reservations")
         private User customer;
 
         @ManyToOne
         @JoinColumn(name = "restaurant_id", nullable = false)
-        @JsonIgnoreProperties("reservations")
         private Restaurant restaurant;
 
         @ManyToOne
         @JoinColumn(name = "shift_capacity_id", nullable = false)
-        @JsonIgnoreProperties("reservations")
         private ShiftCapacity shiftCapacity;
 
         @Column(name = "reservation_start", nullable = false)
@@ -62,7 +61,6 @@ public class Reservation {
         private LocalDateTime updatedDttm;
 
         @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL)
-        @JsonIgnoreProperties("reservation")
         private List<ReservationActivity> reservationActivities;
 
 //        // Copy Constructor

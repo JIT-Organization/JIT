@@ -14,11 +14,11 @@ import java.util.List;
 public interface OrderItemRepository extends BaseRepository<OrderItem,Long> {
     @Query("SELECT oi.menuItem, COUNT(oi) AS orderCount " +
             "FROM OrderItem oi " +
-            "WHERE oi.menuItem.address.id = :addressId " +
+            "WHERE oi.menuItem.restaurant.id = :restaurantId " +
             "AND oi.menuItem.id IN :menuItemIds " +
             "GROUP BY oi.menuItem " +
             "ORDER BY orderCount DESC")
-    List<Object[]> findMenuItemsWithOrderCount(@Param("addressId") Long addressId, @Param("menuItemIds") List<Long> menuItemIds);
+    List<Object[]> findMenuItemsWithOrderCount(@Param("restaurantId") Long restaurantId, @Param("menuItemIds") List<Long> menuItemIds);
 //    List<Object[]> findMenuItemsWithOrderCount(@Param("startDate") LocalDateTime startDate,
 //                                               @Param("addressId") Long addressId);
 }

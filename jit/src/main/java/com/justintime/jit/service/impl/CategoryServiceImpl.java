@@ -35,7 +35,7 @@ public class CategoryServiceImpl extends BaseServiceImpl<Category,Long> implemen
     public Category updateCategory(Long id, Category updatedCategory) {
         return categoryRepository.findById(id).map(existingCategory -> {
             existingCategory.setCategoryName(updatedCategory.getCategoryName());
-            existingCategory.setFoods(updatedCategory.getFoods());
+            existingCategory.setMenuItems(updatedCategory.getMenuItems());
             existingCategory.setUpdatedDttm(updatedCategory.getUpdatedDttm());
             return categoryRepository.save(existingCategory);
         }).orElseThrow(() -> new RuntimeException("Category not found with id " + id));

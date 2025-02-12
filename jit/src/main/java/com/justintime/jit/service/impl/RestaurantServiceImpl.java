@@ -1,24 +1,18 @@
 package com.justintime.jit.service.impl;
 
 import com.justintime.jit.entity.Restaurant;
-import com.justintime.jit.repository.AddressRepository;
 import com.justintime.jit.repository.RestaurantRepository;
 import com.justintime.jit.service.RestaurantService;
-import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class RestaurantServiceImpl extends BaseServiceImpl<Restaurant,Long> implements RestaurantService {
 
     @Autowired
     private RestaurantRepository restaurantRepository;
-
-    @Autowired
-    private AddressRepository addressRepository;
 
     private static final int SUGGESTION_THRESHOLD = 3;
 
@@ -49,7 +43,6 @@ public class RestaurantServiceImpl extends BaseServiceImpl<Restaurant,Long> impl
         existingRestaurant.setAdmins(restaurant.getAdmins());
         existingRestaurant.setMenu(restaurant.getMenu());
         existingRestaurant.setOrders(restaurant.getOrders());
-        existingRestaurant.setAddresses(restaurant.getAddresses());
         existingRestaurant.setContactNumber(restaurant.getContactNumber());
 
         return restaurantRepository.save(existingRestaurant);

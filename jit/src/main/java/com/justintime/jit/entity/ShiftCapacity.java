@@ -1,6 +1,8 @@
 package com.justintime.jit.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,7 +31,6 @@ public class ShiftCapacity {
 
         @ManyToOne
         @JoinColumn(name = "restaurant_id", nullable = false)
-        @JsonIgnoreProperties("shiftCapacities")
         private Restaurant restaurant;
 
         @Column(name = "start_time", nullable = false)
@@ -50,7 +51,6 @@ public class ShiftCapacity {
         private LocalDateTime updatedDttm;
 
         @OneToMany(mappedBy = "shiftCapacity", cascade = CascadeType.ALL)
-        @JsonIgnoreProperties("shiftCapacity")
         private List<Reservation> reservations;
 
 //        // Copy Constructor
