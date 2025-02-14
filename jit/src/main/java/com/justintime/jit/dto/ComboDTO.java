@@ -35,6 +35,6 @@ public class ComboDTO {
     private Set<ComboItem> comboItemSet;
     private Set<String> categorySet;
     private Set<String> cookSet;
-    private Set<String> timeIntervalSet;
+    private Set<TimeIntervalDTO> timeIntervalSet;
 }
 

@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -35,6 +36,6 @@ public class MenuItemDTO {
     private LocalDateTime updatedDttm;
     private Set<String> categorySet;
     private Set<String> cookSet;
-    private Set<TimeInterval> timeIntervalSet;
+    private Set<TimeIntervalDTO> timeIntervalSet;
 }
 

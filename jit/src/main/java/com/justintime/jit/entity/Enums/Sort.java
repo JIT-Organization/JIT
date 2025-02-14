@@ -1,9 +1,9 @@
 package com.justintime.jit.entity.Enums;
 
-public enum Filter {
+public enum Sort {
     OLDEST,
     NEWEST,
-    POPULARITY,
     RATING,
+    POPULARITY,
     DEFAULT
 }

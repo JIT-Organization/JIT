@@ -2,17 +2,23 @@ package com.justintime.jit.util.filter;
 
 import com.justintime.jit.dto.ComboDTO;
 import com.justintime.jit.dto.MenuItemDTO;
+import com.justintime.jit.dto.TimeIntervalDTO;
 import com.justintime.jit.entity.ComboEntities.Combo;
 import com.justintime.jit.entity.Cook;
+import com.justintime.jit.entity.Enums.Sort;
 import com.justintime.jit.entity.MenuItem;
 import com.justintime.jit.entity.Category;
-import com.justintime.jit.entity.Enums.Filter;
+import com.justintime.jit.entity.TimeInterval;
 import com.justintime.jit.repository.OrderRepo.OrderItemRepository;
 import com.justintime.jit.util.mapper.GenericMapperImpl;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.sql.Time;
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.Comparator;
@@ -23,13 +29,20 @@ public class FilterItemsUtil {
     public static <T extends FilterableItem, DTO> List<DTO> filterAndSortItems(
             List<T> items,
             Long restaurantId,
-            Filter sortBy,
+            Sort sortBy,
             String priceRange,
             String category,
-            boolean onlyForCombos,
+            Boolean onlyVeg,
+            Boolean onlyForCombos,
             OrderItemRepository orderItemRepository,
             GenericMapperImpl<T, DTO> genericMapper,
             Class<DTO> dtoClass) {
+
+        if (onlyVeg != null) {
+            items = items.stream()
+                    .filter(item -> onlyVeg.equals(item.getOnlyVeg()))
+                    .collect(Collectors.toList());
+        }
 
         if (category != null && !category.trim().isEmpty()) {
             items = items.stream()
@@ -46,7 +59,7 @@ public class FilterItemsUtil {
                     .collect(Collectors.toList());
         }
 
-        if (Filter.POPULARITY.equals(sortBy)) {
+        if (Sort.POPULARITY.equals(sortBy)) {
             List<Long> itemIds = items.stream()
                     .map(FilterableItem::getId)
                     .collect(Collectors.toList());
@@ -61,15 +74,12 @@ public class FilterItemsUtil {
 
             return items.stream()
                     .filter(item -> (!onlyForCombos || item.getOnlyForCombos()) && isWithinPriceRange(item, priceRange))
-                    .sorted(Comparator.comparingInt(
-                            (T item) -> idToCountMap.getOrDefault(item.getId(), 0)
-                    ).reversed())
+                    .sorted(Comparator.comparing(item -> idToCountMap.getOrDefault(item.getId(), 0), Comparator.reverseOrder()))
                     .map(item -> convertToDTO(item, genericMapper, dtoClass))
                     .collect(Collectors.toList());
         }
-
         Predicate<T> comboFilter = onlyForCombos ? FilterableItem::getOnlyForCombos : item -> !item.getOnlyForCombos();
-        Comparator<T> comparator = getComparator(sortBy != null ? sortBy : Filter.DEFAULT);
+        Comparator<T> comparator = getComparator(sortBy != null ? sortBy : Sort.DEFAULT);
 
         return items.stream()
                 .filter(comboFilter)
@@ -77,6 +87,7 @@ public class FilterItemsUtil {
                 .sorted(comparator)
                 .map(item -> convertToDTO(item, genericMapper, dtoClass))
                 .collect(Collectors.toList());
+
     }
 
     private static <T extends FilterableItem, DTO> DTO convertToDTO(T item, GenericMapperImpl<T, DTO> genericMapper, Class<DTO> dtoClass) {
@@ -88,6 +99,7 @@ public class FilterItemsUtil {
                             .map(Category::getCategoryName)
                             .collect(Collectors.toSet())
             );
+            comboDTO.setTimeIntervalSet(convertTimeIntervals(combo.getTimeIntervalSet())); // Add conversion
         } else if (dto instanceof MenuItemDTO menuItemDTO && item instanceof MenuItem menuItem) {
             menuItemDTO.setCategorySet(
                     menuItem.getCategorySet().stream()
@@ -99,11 +111,22 @@ public class FilterItemsUtil {
                             .map(Cook::getName)
                             .collect(Collectors.toSet())
             );
+            menuItemDTO.setTimeIntervalSet(convertTimeIntervals(menuItem.getTimeIntervalSet())); // Add conversion
         }
         return dto;
     }
 
-    private static <T extends FilterableItem> Comparator<T> getComparator(Filter sortBy) {
+    private static Set<TimeIntervalDTO> convertTimeIntervals(Set<TimeInterval> timeIntervalSet) {
+        if (timeIntervalSet == null) return Collections.emptySet(); // Return empty set
+
+        return timeIntervalSet.stream()
+                .map(interval -> new TimeIntervalDTO(interval.getStartTime(), interval.getEndTime())) // Get start and end
+                .collect(Collectors.toSet());
+    }
+
+
+
+    private static <T extends FilterableItem> Comparator<T> getComparator(Sort sortBy) {
         return switch (sortBy) {
             case OLDEST -> Comparator.comparing((T item) -> item.getUpdatedDttm(), Comparator.nullsLast(Comparator.naturalOrder()));
             case NEWEST -> Comparator.comparing((T item) -> item.getUpdatedDttm(), Comparator.nullsLast(Comparator.naturalOrder())).reversed();
