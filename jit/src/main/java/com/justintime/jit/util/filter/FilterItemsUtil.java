@@ -23,6 +23,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.Comparator;
 
+import static com.justintime.jit.service.impl.MenuItemServiceImpl.convertTimeIntervals;
+
 @Component
 public class FilterItemsUtil {
 
@@ -115,15 +117,6 @@ public class FilterItemsUtil {
         }
         return dto;
     }
-
-    private static Set<TimeIntervalDTO> convertTimeIntervals(Set<TimeInterval> timeIntervalSet) {
-        if (timeIntervalSet == null) return Collections.emptySet(); // Return empty set
-
-        return timeIntervalSet.stream()
-                .map(interval -> new TimeIntervalDTO(interval.getStartTime(), interval.getEndTime())) // Get start and end
-                .collect(Collectors.toSet());
-    }
-
 
 
     private static <T extends FilterableItem> Comparator<T> getComparator(Sort sortBy) {

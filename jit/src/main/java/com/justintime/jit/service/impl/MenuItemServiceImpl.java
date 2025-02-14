@@ -144,7 +144,7 @@ import java.util.stream.Collectors;
         return FilterItemsUtil.filterAndSortItems(menuItems, restaurantId, sortBy, priceRange, category, onlyVeg, onlyForCombos, orderItemRepository, menuItemMapper ,MenuItemDTO.class);
     }
 
-    private static Set<TimeIntervalDTO> convertTimeIntervals(Set<TimeInterval> timeIntervalSet) {
+    public static Set<TimeIntervalDTO> convertTimeIntervals(Set<TimeInterval> timeIntervalSet) {
         if (timeIntervalSet == null) return Collections.emptySet(); // Return empty set
 
         return timeIntervalSet.stream()

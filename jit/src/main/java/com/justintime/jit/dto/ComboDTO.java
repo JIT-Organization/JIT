@@ -32,9 +32,8 @@ public class ComboDTO {
 
     // Related IDs to avoid entity dependencies
     private Long restaurantId;
-    private Set<ComboItem> comboItemSet;
+    private Set<ComboItemDTO> comboItemSet;
     private Set<String> categorySet;
-    private Set<String> cookSet;
     private Set<TimeIntervalDTO> timeIntervalSet;
 }
 
