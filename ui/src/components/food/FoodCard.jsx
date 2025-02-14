@@ -1,63 +1,45 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 
-const FoodCard = ({
-  id,
-  image,
-  name,
-  rating,
-  cost,
-  timeTaken,
-  tags = [], // Optional array for additional details
-  onClick,
-}) => {
+const FoodCard = ({ id, image, name, rating, cost, timeTaken, tags = [] }) => {
   return (
-    <div
-      className="border rounded-lg shadow-md p-3 bg-white hover:shadow-lg transition-shadow cursor-pointer"
-      onClick={onClick}
-    >
-      {/* Image Section */}
-      <div className="relative w-full h-36">
-        <Image
-          src={image}
-          alt={name}
-          layout="fill"
-          objectFit="cover"
-          className="rounded-t-md"
-          priority
-        />
-      </div>
+    <Card className="w-72 overflow-hidden"> {/* Consistent Card Structure */}
+      
+      {/* Header Section with Image */}
+      <CardHeader className="relative w-full h-36">
+        <Image src={image} alt={name} layout="fill" objectFit="cover" className="rounded-t-xl" />
+      </CardHeader>
 
-      {/* Content Section */}
-      <div className="p-3">
-        <h3 className="text-lg font-semibold truncate">{name}</h3>
-        <div className="flex justify-between items-center mt-2">
-          <span className="text-sm text-gray-600">⭐ {rating}/5</span>
-          <span className="text-sm font-bold">${cost}</span>
+      {/* Food Details Section */}
+      <CardContent>
+        <CardTitle className="text-lg">{name}</CardTitle>
+        <CardDescription className="text-gray-500">⭐ {rating}/5 • ⏱️ {timeTaken}</CardDescription>
+        
+        <div className="mt-2 flex justify-between items-center">
+          <span className="text-lg font-bold">${cost}</span>
         </div>
-        <div className="text-xs text-gray-500 mt-1">⏱️ {timeTaken}</div>
+
+        {/* Tags (e.g., Chef Recommended, Spicy) */}
         {tags.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-1">
+          <div className="mt-2 flex flex-wrap gap-2">
             {tags.map((tag, index) => (
-              <span
-                key={index}
-                className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded"
-              >
+              <span key={index} className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-lg">
                 {tag}
               </span>
             ))}
           </div>
         )}
-      </div>
+      </CardContent>
 
-      {/* Details Button */}
-      <div className="mt-4 text-center">
-        <Link href={`/menu-details/${id}`}>
-          <span className="text-blue-500 hover:underline text-sm">View Details</span>
+      {/* Footer Section */}
+      <CardFooter className="justify-center">
+        <Link href={`/menu-details/${id}`} className="text-blue-500 hover:underline text-sm">
+          View Details
         </Link>
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 };
 
