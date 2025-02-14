@@ -16,12 +16,9 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.sql.Time;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.Comparator;
 
 import static com.justintime.jit.service.impl.MenuItemServiceImpl.convertTimeIntervals;
 
@@ -66,7 +63,12 @@ public class FilterItemsUtil {
                     .map(FilterableItem::getId)
                     .collect(Collectors.toList());
 
-            List<Object[]> result = orderItemRepository.findMenuItemsWithOrderCount(restaurantId, itemIds);
+            List<Object[]> result = new ArrayList<>();
+            if (dtoClass.equals(MenuItemDTO.class)) {
+                result = orderItemRepository.findMenuItemsWithOrderCount(restaurantId, itemIds);
+            } else if (dtoClass.equals(ComboDTO.class)) {
+                result = orderItemRepository.findCombosWithOrderCount(restaurantId, itemIds);
+            }
 
             final var idToCountMap = result.stream()
                     .collect(Collectors.toMap(

@@ -19,6 +19,14 @@ public interface OrderItemRepository extends BaseRepository<OrderItem,Long> {
             "GROUP BY oi.menuItem " +
             "ORDER BY orderCount DESC")
     List<Object[]> findMenuItemsWithOrderCount(@Param("restaurantId") Long restaurantId, @Param("menuItemIds") List<Long> menuItemIds);
+
+    @Query("SELECT oi.combo, COUNT(oi) AS orderCount " +
+            "FROM OrderItem oi " +
+            "WHERE oi.combo.restaurant.id = :restaurantId " +
+            "AND oi.combo.id IN :comboIds " +
+            "GROUP BY oi.combo " +
+            "ORDER BY orderCount DESC")
+    List<Object[]> findCombosWithOrderCount(@Param("restaurantId") Long restaurantId, @Param("comboIds") List<Long> itemIds);
 //    List<Object[]> findMenuItemsWithOrderCount(@Param("startDate") LocalDateTime startDate,
 //                                               @Param("addressId") Long addressId);
 }
