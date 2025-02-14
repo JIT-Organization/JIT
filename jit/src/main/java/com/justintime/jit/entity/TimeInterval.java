@@ -22,11 +22,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @Audited
-public class TimeInterval {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class TimeInterval extends BaseEntity{
 
     @ManyToMany(mappedBy = "timeIntervalSet")
     private Set<MenuItem> menuItemSet = new HashSet<>();

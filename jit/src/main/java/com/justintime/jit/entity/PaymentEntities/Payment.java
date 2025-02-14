@@ -1,6 +1,7 @@
 package com.justintime.jit.entity.PaymentEntities;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.justintime.jit.entity.BaseEntity;
 import com.justintime.jit.entity.OrderEntities.Order;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -22,11 +23,7 @@ import java.util.stream.Collectors;
 @Setter
 @Table(name = "payment")
 @NoArgsConstructor
-public class Payment {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Payment extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)
@@ -49,10 +46,6 @@ public class Payment {
 
     @Column(name = "updated_by")
     private String updatedBy;
-
-    @UpdateTimestamp
-    @Column(name = "updated_dttm", nullable = false)
-    private LocalDateTime updatedDttm;
 
     @OneToMany(mappedBy = "payment", cascade = CascadeType.ALL)
     private List<Transaction> transactions;

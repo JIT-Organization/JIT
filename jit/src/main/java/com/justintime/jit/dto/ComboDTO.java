@@ -1,5 +1,6 @@
 package com.justintime.jit.dto;
 
+import com.justintime.jit.entity.ComboEntities.ComboItem;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -31,8 +32,9 @@ public class ComboDTO {
 
     // Related IDs to avoid entity dependencies
     private Long restaurantId;
-    private Set<Long> comboItemIds;
-    private Set<Long> categoryIds;
-    private Set<Long> timeIntervalIds;
+    private Set<ComboItem> comboItemSet;
+    private Set<String> categorySet;
+    private Set<String> cookSet;
+    private Set<String> timeIntervalSet;
 }
 

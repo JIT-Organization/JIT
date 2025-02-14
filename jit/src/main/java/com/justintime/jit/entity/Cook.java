@@ -20,10 +20,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @Audited
-public class Cook {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Cook extends BaseEntity{
 
     @Column(name = "name", nullable = false)
     private String name;

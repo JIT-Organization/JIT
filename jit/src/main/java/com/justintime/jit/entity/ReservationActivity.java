@@ -19,10 +19,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @Table(name = "reservation_activity")
-public class ReservationActivity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+public class ReservationActivity extends BaseEntity{
 
     @ManyToOne
     @JoinColumn(name = "reservation_id", nullable = false)
@@ -33,10 +30,6 @@ public class ReservationActivity {
 
     @Column(name = "updated_by", nullable = false, length = 100)
     private String updatedBy;
-
-    @UpdateTimestamp
-    @Column(name = "updated_dttm", nullable = false)
-    private LocalDateTime updatedDttm;
 
 //    // Copy Constructor
 //    public ReservationActivity(ReservationActivity other) {

@@ -24,11 +24,7 @@ import java.util.stream.Collectors;
 @Setter
 @Table(name = "restaurant")
 @NoArgsConstructor
-public class Restaurant {
-
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        private Long id;
+public class Restaurant extends BaseEntity{
 
         @Column(name = "restaurant_name", nullable = false)
         private String restaurantName;
@@ -59,14 +55,6 @@ public class Restaurant {
 
         @Column(name = "longitude", nullable = false)
         private Double longitude;
-
-        @CreationTimestamp
-        @Column(name = "created_dttm", nullable = false, updatable = false)
-        private LocalDateTime createdDttm;
-
-        @UpdateTimestamp
-        @Column(name = "updated_dttm", nullable = false)
-        private LocalDateTime updatedDttm;
 
         @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
         private List<MenuItem> menu;

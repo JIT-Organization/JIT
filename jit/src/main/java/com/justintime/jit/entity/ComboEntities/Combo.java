@@ -1,5 +1,6 @@
 package com.justintime.jit.entity.ComboEntities;
 
+import com.justintime.jit.entity.BaseEntity;
 import com.justintime.jit.entity.Category;
 import com.justintime.jit.entity.OrderEntities.OrderItem;
 import com.justintime.jit.entity.Restaurant;
@@ -23,11 +24,7 @@ import java.util.Set;
 @Setter
 @Table(name = "combo")
 @NoArgsConstructor
-public class Combo implements FilterableItem {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Combo extends BaseEntity implements FilterableItem {
 
     @Column(name = "combo_name", unique = true, nullable = false)
     private String comboName;
@@ -89,7 +86,7 @@ public class Combo implements FilterableItem {
     @Column(name = "accept_bulk_orders", nullable = false, length = 1)
     private Boolean acceptBulkOrders;
 
-    @Column(name = "food_type", nullable = false, length = 1)
+    @Column(name = "only_veg", nullable = false, length = 1)
     private Boolean onlyVeg;
 
     @Column(name = "active", nullable = false, length = 1)
@@ -103,14 +100,6 @@ public class Combo implements FilterableItem {
 
     @Column(name = "rating", nullable = false, columnDefinition = "DECIMAL(10,1)")
     private BigDecimal rating;
-
-    @CreationTimestamp
-    @Column(name = "created_dttm", nullable = false, updatable = false)
-    private LocalDateTime createdDttm;
-
-    @UpdateTimestamp
-    @Column(name = "updated_dttm", nullable = false)
-    private LocalDateTime updatedDttm;
 
     @OneToMany(mappedBy = "combo", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems;

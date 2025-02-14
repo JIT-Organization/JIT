@@ -19,10 +19,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @Table(name = "admin")
-public class Admin {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+public class Admin extends BaseEntity{
 
     @ManyToOne
     @JoinColumn(name = "restaurant_id", nullable = false)
@@ -31,14 +28,6 @@ public class Admin {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
-    @CreationTimestamp
-    @Column(name = "created_dttm", nullable = false, updatable = false)
-    private LocalDateTime createdDttm;
-
-    @UpdateTimestamp
-    @Column(name = "updated_dttm", nullable = false)
-    private LocalDateTime updatedDttm;
 
 //    // Copy Constructor
 //    public Admin(Admin other) {

@@ -26,11 +26,7 @@ import java.util.*;
 @Getter
 @Setter
 @NoArgsConstructor
-public class MenuItem implements FilterableItem {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class MenuItem extends BaseEntity implements FilterableItem {
 
     @Column(name="menu_item_name", nullable = false, length = 100)
     private String menuItemName;
@@ -110,14 +106,6 @@ public class MenuItem implements FilterableItem {
 
     @Column(name = "rating", nullable = false, columnDefinition = "DECIMAL(10,1)")
     private BigDecimal rating;
-
-    @CreationTimestamp
-    @Column(name = "created_dttm", nullable = false, updatable = false)
-    private LocalDateTime createdDttm;
-
-    @UpdateTimestamp
-    @Column(name = "updated_dttm", nullable = false)
-    private LocalDateTime updatedDttm;
 
     @OneToMany(mappedBy = "menuItem", cascade = CascadeType.ALL)
     private List<ComboItem> comboItems = new ArrayList<>();

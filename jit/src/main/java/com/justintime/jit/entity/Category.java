@@ -26,11 +26,7 @@ import java.util.stream.Collectors;
 @Setter
 @NoArgsConstructor
 @Table(name="category")
-public class Category {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Category extends BaseEntity{
 
     @Column(name="category_name", unique = true, nullable = false)
     private String categoryName;
@@ -50,15 +46,6 @@ public class Category {
             inverseJoinColumns = @JoinColumn(name = "combo_id")
     )
     private Set<Combo> combos = new HashSet<>();
-
-    @CreationTimestamp
-    @Column(name = "created_dttm", nullable = false, updatable = false)
-    private LocalDateTime createdDttm;
-
-    @UpdateTimestamp
-    @Column(name = "updated_dttm", nullable = false)
-    private LocalDateTime updatedDttm;
-
 
 //    // Copy Constructor
 //    public Category(Category other) {

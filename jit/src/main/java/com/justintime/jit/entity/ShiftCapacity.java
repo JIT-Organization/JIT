@@ -23,11 +23,7 @@ import java.util.stream.Collectors;
 @Setter
 @NoArgsConstructor
 @Table(name = "shift_capacity")
-public class ShiftCapacity {
-
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        private Long id;
+public class ShiftCapacity extends BaseEntity {
 
         @ManyToOne
         @JoinColumn(name = "restaurant_id", nullable = false)
@@ -41,14 +37,6 @@ public class ShiftCapacity {
 
         @Column(name = "total_capacity", nullable = false)
         private Integer totalCapacity;
-
-        @CreationTimestamp
-        @Column(name = "created_dttm", nullable = false, updatable = false)
-        private LocalDateTime createdDttm;
-
-        @UpdateTimestamp
-        @Column(name = "updated_dttm", nullable = false)
-        private LocalDateTime updatedDttm;
 
         @OneToMany(mappedBy = "shiftCapacity", cascade = CascadeType.ALL)
         private List<Reservation> reservations;

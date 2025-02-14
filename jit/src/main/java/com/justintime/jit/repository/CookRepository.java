@@ -5,6 +5,6 @@ import com.justintime.jit.entity.Cook;
 
 import java.util.Optional;
 
-public interface CookRepository extends BaseRepository<Category,Long> {
+public interface CookRepository extends BaseRepository<Cook,Long> {
     Cook findByName(String name);
 }

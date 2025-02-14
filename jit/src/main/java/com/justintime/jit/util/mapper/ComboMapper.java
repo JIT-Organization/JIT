@@ -41,9 +41,9 @@ public class ComboMapper {
             dto.setRestaurantId(combo.getRestaurant().getId());
         }
 
-        dto.setComboItemIds(mapComboItemIds(combo.getComboItemSet()));
-        dto.setCategoryIds(mapCategoryIds(combo.getCategories()));
-        dto.setTimeIntervalIds(mapTimeIntervalIds(combo.getTimeIntervalSet()));
+//        dto.setComboItemIds(mapComboItemIds(combo.getComboItemSet()));
+//        dto.setCategoryIds(mapCategoryIds(combo.getCategories()));
+//        dto.setTimeIntervalIds(mapTimeIntervalIds(combo.getTimeIntervalSet()));
 
         return dto;
     }

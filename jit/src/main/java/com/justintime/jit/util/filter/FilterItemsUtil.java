@@ -1,95 +1,118 @@
 package com.justintime.jit.util.filter;
 
+import com.justintime.jit.dto.ComboDTO;
 import com.justintime.jit.dto.MenuItemDTO;
+import com.justintime.jit.entity.ComboEntities.Combo;
+import com.justintime.jit.entity.Cook;
 import com.justintime.jit.entity.MenuItem;
+import com.justintime.jit.entity.Category;
 import com.justintime.jit.entity.Enums.Filter;
 import com.justintime.jit.repository.OrderRepo.OrderItemRepository;
 import com.justintime.jit.util.mapper.GenericMapperImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.Comparator;
 
 @Component
 public class FilterItemsUtil {
 
-    private final GenericMapperImpl<MenuItem, MenuItemDTO> genericMapper;
-
-    @Autowired
-    public FilterItemsUtil(GenericMapperImpl<MenuItem, MenuItemDTO> genericMapper) {
-        this.genericMapper = genericMapper;
-    }
-
-    public List<MenuItemDTO> filterAndSortItems(
-            List<MenuItem> menuItems,
-            Long addressId,
+    public static <T extends FilterableItem, DTO> List<DTO> filterAndSortItems(
+            List<T> items,
+            Long restaurantId,
             Filter sortBy,
             String priceRange,
             String category,
             boolean onlyForCombos,
-            OrderItemRepository orderItemRepository) {
+            OrderItemRepository orderItemRepository,
+            GenericMapperImpl<T, DTO> genericMapper,
+            Class<DTO> dtoClass) {
 
         if (category != null && !category.trim().isEmpty()) {
-            menuItems = menuItems.stream()
-                    .filter(item -> item.getCategorySet().stream()
-                            .anyMatch(c -> category.equalsIgnoreCase(c.getCategoryName()))) // Corrected for Set<Category>
+            items = items.stream()
+                    .filter(item -> {
+                        if (item instanceof MenuItem m) {
+                            return m.getCategorySet().stream()
+                                    .anyMatch(c -> category.equalsIgnoreCase(c.getCategoryName()));
+                        } else if (item instanceof Combo c) {
+                            return c.getCategories().stream()
+                                    .anyMatch(cat -> category.equalsIgnoreCase(cat.getCategoryName()));
+                        }
+                        return false;
+                    })
                     .collect(Collectors.toList());
         }
 
         if (Filter.POPULARITY.equals(sortBy)) {
-            List<Long> menuItemIds = menuItems.stream()
-                    .map(MenuItem::getId)
+            List<Long> itemIds = items.stream()
+                    .map(FilterableItem::getId)
                     .collect(Collectors.toList());
 
-            List<Object[]> result = orderItemRepository.findMenuItemsWithOrderCount(addressId, menuItemIds);
+            List<Object[]> result = orderItemRepository.findMenuItemsWithOrderCount(restaurantId, itemIds);
 
-            Map<Long, Integer> idToCountMap = result.stream()
+            final var idToCountMap = result.stream()
                     .collect(Collectors.toMap(
-                            obj -> ((MenuItem) obj[0]).getId(),
+                            obj -> ((T) obj[0]).getId(),
                             obj -> ((Number) obj[1]).intValue()
                     ));
 
-            return menuItems.stream()
+            return items.stream()
                     .filter(item -> (!onlyForCombos || item.getOnlyForCombos()) && isWithinPriceRange(item, priceRange))
                     .sorted(Comparator.comparingInt(
-                            (MenuItem item) -> idToCountMap.getOrDefault(item.getId(), 0)
+                            (T item) -> idToCountMap.getOrDefault(item.getId(), 0)
                     ).reversed())
-                    .map(item -> genericMapper.toDTO(item, MenuItemDTO.class)) // Using GenericMapper
+                    .map(item -> convertToDTO(item, genericMapper, dtoClass))
                     .collect(Collectors.toList());
         }
 
-        Predicate<MenuItem> comboFilter = onlyForCombos ? MenuItem::getOnlyForCombos : item -> !item.getOnlyForCombos();
-        Comparator<MenuItem> comparator = getComparator(sortBy != null ? sortBy : Filter.DEFAULT);
+        Predicate<T> comboFilter = onlyForCombos ? FilterableItem::getOnlyForCombos : item -> !item.getOnlyForCombos();
+        Comparator<T> comparator = getComparator(sortBy != null ? sortBy : Filter.DEFAULT);
 
-        return menuItems.stream()
+        return items.stream()
                 .filter(comboFilter)
                 .filter(item -> isWithinPriceRange(item, priceRange))
                 .sorted(comparator)
-                .map(item -> genericMapper.toDTO(item, MenuItemDTO.class)) // Using GenericMapper
+                .map(item -> convertToDTO(item, genericMapper, dtoClass))
                 .collect(Collectors.toList());
     }
 
-    private Comparator<MenuItem> getComparator(Filter sortBy) {
+    private static <T extends FilterableItem, DTO> DTO convertToDTO(T item, GenericMapperImpl<T, DTO> genericMapper, Class<DTO> dtoClass) {
+        DTO dto = genericMapper.toDTO(item, dtoClass);
+
+        if (dto instanceof ComboDTO comboDTO && item instanceof Combo combo) {
+            comboDTO.setCategorySet(
+                    combo.getCategories().stream()
+                            .map(Category::getCategoryName)
+                            .collect(Collectors.toSet())
+            );
+        } else if (dto instanceof MenuItemDTO menuItemDTO && item instanceof MenuItem menuItem) {
+            menuItemDTO.setCategorySet(
+                    menuItem.getCategorySet().stream()
+                            .map(Category::getCategoryName)
+                            .collect(Collectors.toSet())
+            );
+            menuItemDTO.setCookSet(
+                    menuItem.getCookSet().stream()
+                            .map(Cook::getName)
+                            .collect(Collectors.toSet())
+            );
+        }
+        return dto;
+    }
+
+    private static <T extends FilterableItem> Comparator<T> getComparator(Filter sortBy) {
         return switch (sortBy) {
-            case OLDEST -> Comparator.comparing(
-                    MenuItem::getUpdatedDttm, Comparator.nullsLast(Comparator.naturalOrder())
-            );
-            case NEWEST -> Comparator.comparing(
-                    MenuItem::getUpdatedDttm, Comparator.nullsLast(Comparator.naturalOrder())
-            ).reversed();
-            case RATING -> Comparator.comparing(
-                    MenuItem::getRating, Comparator.nullsLast(Comparator.naturalOrder())
-            ).reversed();
-            default -> Comparator.comparing(
-                    MenuItem::getMenuItemName, Comparator.nullsLast(Comparator.naturalOrder())
-            );
+            case OLDEST -> Comparator.comparing((T item) -> item.getUpdatedDttm(), Comparator.nullsLast(Comparator.naturalOrder()));
+            case NEWEST -> Comparator.comparing((T item) -> item.getUpdatedDttm(), Comparator.nullsLast(Comparator.naturalOrder())).reversed();
+            case RATING -> Comparator.comparing((T item) -> item.getRating(), Comparator.nullsLast(Comparator.naturalOrder())).reversed();
+            default -> Comparator.comparing((T item) -> item.getName(), Comparator.nullsLast(Comparator.naturalOrder()));
         };
     }
 
-    private boolean isWithinPriceRange(MenuItem item, String priceRange) {
+    private static boolean isWithinPriceRange(FilterableItem item, String priceRange) {
         if (priceRange == null || priceRange.isEmpty()) {
             return true;
         }
@@ -101,14 +124,13 @@ public class FilterItemsUtil {
 
         if (priceRange.matches("\\d+-\\d+")) {
             String[] parts = priceRange.split("-");
-            BigDecimal minPrice = new BigDecimal(parts[0]);
-            BigDecimal maxPrice = new BigDecimal(parts[1]);
+            BigDecimal minPrice = new BigDecimal(parts[0].trim());
+            BigDecimal maxPrice = new BigDecimal(parts[1].trim());
             return price.compareTo(minPrice) >= 0 && price.compareTo(maxPrice) <= 0;
         } else if (priceRange.matches("above-\\d+")) {
-            BigDecimal minPrice = new BigDecimal(priceRange.split("-")[1]);
+            BigDecimal minPrice = new BigDecimal(priceRange.split("-")[1].trim());
             return price.compareTo(minPrice) > 0;
         }
-
         return true;
     }
 }

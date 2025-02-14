@@ -1,5 +1,6 @@
 package com.justintime.jit.service.impl;
 
+import com.justintime.jit.dto.ComboDTO;
 import com.justintime.jit.dto.MenuItemDTO;
 import com.justintime.jit.entity.Category;
 import com.justintime.jit.entity.Cook;
@@ -13,6 +14,7 @@ import com.justintime.jit.entity.MenuItem;
 import com.justintime.jit.util.filter.FilterItemsUtil;
 import com.justintime.jit.util.mapper.GenericMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.modelmapper.ModelMapper;
 
@@ -25,11 +27,9 @@ import java.util.stream.Collectors;
 
     private final MenuItemRepository menuItemRepository;
 
-    @Autowired
-    private CategoryRepository categoryRepository;
+    private final CategoryRepository categoryRepository;
 
-    @Autowired
-    private CookRepository cookRepository;
+    private final CookRepository cookRepository;
 
     private final OrderItemRepository orderItemRepository;
 
@@ -38,10 +38,14 @@ import java.util.stream.Collectors;
     private final FilterItemsUtil filterItemsUtil;
 
     public MenuItemServiceImpl(MenuItemRepository menuItemRepository,
+                               CategoryRepository categoryRepository,
+                               CookRepository cookRepository,
                                OrderItemRepository orderItemRepository,
                                GenericMapperImpl<MenuItem, MenuItemDTO> menuItemMapper,
                                FilterItemsUtil filterItemsUtil) {
         this.menuItemRepository = menuItemRepository;
+        this.categoryRepository = categoryRepository;
+        this.cookRepository = cookRepository;
         this.orderItemRepository = orderItemRepository;
         this.menuItemMapper = menuItemMapper;
         this.filterItemsUtil = filterItemsUtil;
@@ -70,7 +74,7 @@ import java.util.stream.Collectors;
     public MenuItem addMenuItem(MenuItemDTO menuItemDTO) {
         MenuItem menuItem = menuItemMapper.toEntity(menuItemDTO, MenuItem.class);
         menuItem.setCategorySet(menuItemDTO.getCategorySet().stream()
-                .map(categoryName -> categoryRepository.findByCategoryName(categoryName)
+                .map(categoryRepository::findByCategoryName
 //                        .orElseGet(() -> {
 //                            Category newCategory = new Category();
 //                            newCategory.setCategoryName(categoryName);
@@ -79,7 +83,7 @@ import java.util.stream.Collectors;
                 )
                 .collect(Collectors.toSet()));
         menuItem.setCookSet(menuItemDTO.getCookSet().stream()
-                .map(cookName -> cookRepository.findByName(cookName)
+                .map(cookRepository::findByName
 //                        .orElseGet(() -> {
 //                            Cook newCook = new Cook();
 //                            newCook.setName(cookName);
@@ -118,6 +122,6 @@ import java.util.stream.Collectors;
 
     public List<MenuItemDTO> getMenuItemsByRestaurantId(Long restaurantId, Filter sortBy, String priceRange, String category, boolean onlyForCombos) {
         List<MenuItem> menuItems = menuItemRepository.findByRestaurantId(restaurantId);
-        return filterItemsUtil.filterAndSortItems(menuItems, restaurantId, sortBy, priceRange, category, onlyForCombos, orderItemRepository);
+        return FilterItemsUtil.filterAndSortItems(menuItems, restaurantId, sortBy, priceRange, category, onlyForCombos, orderItemRepository, menuItemMapper ,MenuItemDTO.class);
     }
 }

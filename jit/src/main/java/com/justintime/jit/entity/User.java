@@ -24,11 +24,7 @@ import java.util.stream.Collectors;
 @Setter
 @NoArgsConstructor
 @Table(name = "users")
-public class User {
-
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        private Long id;
+public class User extends BaseEntity{
 
         @Column(name = "first_name", nullable = false)
         private String firstName;
@@ -57,14 +53,6 @@ public class User {
         @Enumerated(EnumType.STRING)
         @Column(name = "role", nullable = false)
         private Role role;
-
-        @CreationTimestamp
-        @Column(name = "created_dttm", nullable = false, updatable = false)
-        private LocalDateTime createdDttm;
-
-        @UpdateTimestamp
-        @Column(name = "updated_dttm", nullable = false)
-        private LocalDateTime updatedDttm;
 
         @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
         private List<Order> orders;

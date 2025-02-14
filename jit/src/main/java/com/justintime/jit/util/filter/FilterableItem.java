@@ -10,5 +10,6 @@ public interface FilterableItem {
     LocalDateTime getUpdatedDttm();
     BigDecimal getRating();
     Boolean getOnlyForCombos();
+    Boolean getOnlyVeg();
     Boolean isCombo();
 }

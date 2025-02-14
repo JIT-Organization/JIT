@@ -3,6 +3,7 @@ package com.justintime.jit.entity.OrderEntities;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.justintime.jit.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,10 +19,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @Table(name = "order_activity")
-public class OrderActivity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+public class OrderActivity extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)
@@ -32,10 +30,6 @@ public class OrderActivity {
 
     @Column(name = "updated_by", nullable = false, length = 100)
     private String updatedBy;
-
-    @UpdateTimestamp
-    @Column(name = "updated_dttm", nullable = false)
-    private LocalDateTime updatedDttm;
 
 //    // Copy constructor
 //    public OrderActivity(OrderActivity other) {
