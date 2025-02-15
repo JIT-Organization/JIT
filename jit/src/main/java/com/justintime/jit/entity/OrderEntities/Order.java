@@ -1,6 +1,9 @@
 package com.justintime.jit.entity.OrderEntities;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.justintime.jit.entity.BaseEntity;
 import com.justintime.jit.entity.Enums.OrderStatus;
 import com.justintime.jit.entity.PaymentEntities.Payment;
 import com.justintime.jit.entity.Restaurant;
@@ -24,20 +27,14 @@ import java.util.stream.Collectors;
 @Setter
 @NoArgsConstructor
 @Table(name = "orders")
-public class Order {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Order extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    @JsonIgnoreProperties("orders")
     private User customer;
 
     @ManyToOne
     @JoinColumn(name = "restaurant_id", nullable = false)
-    @JsonIgnoreProperties("orders")
     private Restaurant restaurant;
 
     @Enumerated(EnumType.STRING)
@@ -50,24 +47,13 @@ public class Order {
     @Column(name = "amount", nullable = false, columnDefinition = "DECIMAL(10,2)")
     private BigDecimal amount;
 
-    @CreationTimestamp
-    @Column(name = "created_dttm", nullable = false, updatable = false)
-    private LocalDateTime createdDttm;
-
-    @UpdateTimestamp
-    @Column(name = "updated_dttm", nullable = false)
-    private LocalDateTime updatedDttm;
-
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    @JsonIgnoreProperties("order")
     private List<Payment> payments;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    @JsonIgnoreProperties("order")
     private List<OrderItem> orderItems;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    @JsonIgnoreProperties("order")
     private List<OrderActivity> orderActivities;
 
 //    // Copy constructor

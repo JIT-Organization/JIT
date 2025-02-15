@@ -1,6 +1,8 @@
 package com.justintime.jit.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,33 +19,15 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @Table(name = "admin")
-public class Admin {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+public class Admin extends BaseEntity{
 
     @ManyToOne
     @JoinColumn(name = "restaurant_id", nullable = false)
-    @JsonIgnoreProperties("admins")
     private Restaurant restaurant;
 
     @ManyToOne
-    @JoinColumn(name = "address_id", nullable = false)
-    @JsonIgnoreProperties("admins")
-    private Address address;
-
-    @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    @JsonIgnoreProperties("admins")
     private User user;
-
-    @CreationTimestamp
-    @Column(name = "created_dttm", nullable = false, updatable = false)
-    private LocalDateTime createdDttm;
-
-    @UpdateTimestamp
-    @Column(name = "updated_dttm", nullable = false)
-    private LocalDateTime updatedDttm;
 
 //    // Copy Constructor
 //    public Admin(Admin other) {

@@ -1,6 +1,8 @@
 package com.justintime.jit.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.justintime.jit.entity.ComboEntities.Combo;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -20,18 +22,12 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @Audited
-public class TimeInterval {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class TimeInterval extends BaseEntity{
 
     @ManyToMany(mappedBy = "timeIntervalSet")
-    @JsonIgnoreProperties("timeIntervalSet")
     private Set<MenuItem> menuItemSet = new HashSet<>();
 
     @ManyToMany(mappedBy = "timeIntervalSet", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JsonIgnoreProperties("timeIntervalSet")
     private Set<Combo> comboSet = new HashSet<>();
 
     @Column(name = "start_time", nullable = false)

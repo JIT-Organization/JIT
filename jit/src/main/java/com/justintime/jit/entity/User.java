@@ -1,6 +1,8 @@
 package com.justintime.jit.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.justintime.jit.entity.Enums.Role;
 import com.justintime.jit.entity.OrderEntities.Order;
 import jakarta.persistence.*;
@@ -22,11 +24,7 @@ import java.util.stream.Collectors;
 @Setter
 @NoArgsConstructor
 @Table(name = "users")
-public class User {
-
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        private Long id;
+public class User extends BaseEntity{
 
         @Column(name = "first_name", nullable = false)
         private String firstName;
@@ -56,28 +54,16 @@ public class User {
         @Column(name = "role", nullable = false)
         private Role role;
 
-        @CreationTimestamp
-        @Column(name = "created_dttm", nullable = false, updatable = false)
-        private LocalDateTime createdDttm;
-
-        @UpdateTimestamp
-        @Column(name = "updated_dttm", nullable = false)
-        private LocalDateTime updatedDttm;
-
         @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
-        @JsonIgnoreProperties("customer")
         private List<Order> orders;
 
         @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
-        @JsonIgnoreProperties("customer")
         private List<Reservation> reservations;
 
         @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-        @JsonIgnoreProperties("user")
         private List<Admin> admins;
 
         @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-        @JsonIgnoreProperties("user")
         private Cook cook;  // A single cook record per user
 
 //        // Copy Constructor

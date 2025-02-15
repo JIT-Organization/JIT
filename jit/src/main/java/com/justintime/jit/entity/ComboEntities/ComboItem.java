@@ -1,5 +1,8 @@
 package com.justintime.jit.entity.ComboEntities;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.justintime.jit.entity.BaseEntity;
 import com.justintime.jit.entity.MenuItem;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -20,11 +23,10 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @Table(name = "combo_item")
-public class ComboItem {
+public class ComboItem extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "quantity", nullable = false, columnDefinition = "INT DEFAULT 1")
+    private Integer quantity = 1;
 
     @ManyToMany(mappedBy = "comboItemSet")
     private Set<Combo> comboSet = new HashSet<>();
@@ -33,13 +35,6 @@ public class ComboItem {
     @JoinColumn(name = "menu_item_id", nullable = false)
     private MenuItem menuItem;
 
-    @CreationTimestamp
-    @Column(name = "created_dttm", nullable = false, updatable = false)
-    private LocalDateTime createdDttm;
-
-    @UpdateTimestamp
-    @Column(name = "updated_dttm", nullable = false)
-    private LocalDateTime updatedDttm;
 //
 //    public Set<Combo> getComboSet() {
 //        return Collections.unmodifiableSet(comboSet);

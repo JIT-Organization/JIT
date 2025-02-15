@@ -8,7 +8,7 @@ import java.util.List;
 
 @Setter
 @Getter
-public class SearchResultDto {
+public class SearchResultDTO {
     private String type; // "Restaurant" or "Food"
     private String name;
     private List<String> associatedNames; // e.g., foods in a restaurant or restaurants serving a food

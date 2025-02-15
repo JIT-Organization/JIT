@@ -1,9 +1,9 @@
 package com.justintime.jit.service.impl;
 
-import com.justintime.jit.dto.SearchResultDto;
-import com.justintime.jit.entity.Food;
+import com.justintime.jit.dto.SearchResultDTO;
+import com.justintime.jit.entity.MenuItem;
 import com.justintime.jit.entity.Restaurant;
-import com.justintime.jit.repository.FoodRepository;
+import com.justintime.jit.repository.MenuItemRepository;
 import com.justintime.jit.repository.RestaurantRepository;
 import com.justintime.jit.service.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,40 +16,40 @@ import java.util.List;
 public class SearchServiceImpl implements SearchService {
 
     @Autowired
-    private FoodRepository foodRepository;
+    private MenuItemRepository menuItemRepository;
 
     @Autowired
     private RestaurantRepository restaurantRepository;
 
     @Override
-    public List<SearchResultDto> searchByName(String query) {
-        List<SearchResultDto> results = new ArrayList<>();
+    public List<SearchResultDTO> searchByName(String query) {
+        List<SearchResultDTO> results = new ArrayList<>();
 
         // Search Restaurants
         List<Restaurant> matchingRestaurants = restaurantRepository.findByRestaurantNameContaining(query);
         for (Restaurant restaurant : matchingRestaurants) {
-            SearchResultDto dto = new SearchResultDto();
+            SearchResultDTO dto = new SearchResultDTO();
             dto.setType("Restaurant");
             dto.setName(restaurant.getRestaurantName());
 
             // Get associated foods
-            List<String> foods = new ArrayList<>();
-            restaurant.getMenu().forEach(food -> foods.add(food.getFood().getFoodName()));
-            dto.setAssociatedNames(foods);
+            List<String> menuItems = new ArrayList<>();
+            restaurant.getMenu().forEach(menuItem -> menuItems.add(menuItem.getMenuItemName()));
+            dto.setAssociatedNames(menuItems);
 
             results.add(dto);
         }
 
         // Search Foods
-        List<Food> matchingFoods = foodRepository.findByFoodNameContaining(query);
-        for (Food food : matchingFoods) {
-            SearchResultDto dto = new SearchResultDto();
-            dto.setType("Food");
-            dto.setName(food.getFoodName());
+        List<MenuItem> matchingMenuItems = menuItemRepository.findByMenuItemNameContaining(query);
+        for (MenuItem menuItem : matchingMenuItems) {
+            SearchResultDTO dto = new SearchResultDTO();
+            dto.setType("MenuItem");
+            dto.setName(menuItem.getMenuItemName());
 
             // Get associated restaurants
             List<String> restaurants = new ArrayList<>();
-            restaurants.add(food.getFoodName());
+            restaurants.add(menuItem.getMenuItemName());
             dto.setAssociatedNames(restaurants);
 
             results.add(dto);

@@ -1,10 +1,10 @@
 package com.justintime.jit.controller;
 
-import com.justintime.jit.entity.Enums.Filter;
+import com.justintime.jit.dto.MenuItemDTO;
+import com.justintime.jit.entity.Enums.Sort;
 import com.justintime.jit.entity.MenuItem;
 import com.justintime.jit.exception.ImageSizeLimitExceededException;
 import com.justintime.jit.util.ImageValidation;
-import com.justintime.jit.service.ComboItemService;
 import com.justintime.jit.service.MenuItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,21 +19,20 @@ public class MenuItemController {
     @Autowired
     private MenuItemService menuItemService;
 
-    @Autowired
-    private ComboItemService comboItemService;
-
     @GetMapping
-    public List<MenuItem> getAllMenuItems() {
+    public List<MenuItemDTO> getAllMenuItems() {
         return menuItemService.getAllMenuItems();
     }
 
-    @GetMapping("/restaurant/{addressId}")
-    public List<MenuItem> getMenuItemsByRestaurant(
-            @PathVariable Long addressId,
-            @RequestParam(required = false) Filter sortBy,
+    @GetMapping("/restaurant/{restaurantId}")
+    public List<MenuItemDTO> getMenuItemsByRestaurant(
+            @PathVariable Long restaurantId,
+            @RequestParam(required = false) Sort sortBy,
             @RequestParam(required = false) String priceRange,
-            @RequestParam(required = false, defaultValue = "false") boolean onlyForCombos) {
-        return menuItemService.getMenuItemsByAddressId(addressId, sortBy, priceRange, onlyForCombos);
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) Boolean onlyVeg,
+            @RequestParam(required = false, defaultValue = "false") Boolean onlyForCombos) {
+        return menuItemService.getMenuItemsByRestaurantId(restaurantId, sortBy, priceRange, category, onlyVeg, onlyForCombos);
     }
 
     @PostMapping("/validateImage")
@@ -49,8 +48,8 @@ public class MenuItemController {
     }
 
     @PostMapping
-    public MenuItem addMenuItem(@RequestBody MenuItem menuItem) {
-        return menuItemService.addMenuItem(menuItem);
+    public MenuItem addMenuItem(@RequestBody MenuItemDTO menuItemDTO) {
+        return menuItemService.addMenuItem(menuItemDTO);
     }
 
     @PutMapping("/{id}")

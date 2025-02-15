@@ -1,6 +1,8 @@
 package com.justintime.jit.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,15 +23,10 @@ import java.util.stream.Collectors;
 @Setter
 @NoArgsConstructor
 @Table(name = "shift_capacity")
-public class ShiftCapacity {
-
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        private Long id;
+public class ShiftCapacity extends BaseEntity {
 
         @ManyToOne
         @JoinColumn(name = "restaurant_id", nullable = false)
-        @JsonIgnoreProperties("shiftCapacities")
         private Restaurant restaurant;
 
         @Column(name = "start_time", nullable = false)
@@ -41,16 +38,7 @@ public class ShiftCapacity {
         @Column(name = "total_capacity", nullable = false)
         private Integer totalCapacity;
 
-        @CreationTimestamp
-        @Column(name = "created_dttm", nullable = false, updatable = false)
-        private LocalDateTime createdDttm;
-
-        @UpdateTimestamp
-        @Column(name = "updated_dttm", nullable = false)
-        private LocalDateTime updatedDttm;
-
         @OneToMany(mappedBy = "shiftCapacity", cascade = CascadeType.ALL)
-        @JsonIgnoreProperties("shiftCapacity")
         private List<Reservation> reservations;
 
 //        // Copy Constructor

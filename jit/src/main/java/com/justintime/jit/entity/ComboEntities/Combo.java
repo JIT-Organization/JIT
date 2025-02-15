@@ -1,11 +1,11 @@
 package com.justintime.jit.entity.ComboEntities;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.justintime.jit.entity.Address;
-import com.justintime.jit.entity.Cook;
+import com.justintime.jit.entity.BaseEntity;
+import com.justintime.jit.entity.Category;
 import com.justintime.jit.entity.OrderEntities.OrderItem;
 import com.justintime.jit.entity.Restaurant;
 import com.justintime.jit.entity.TimeInterval;
+import com.justintime.jit.util.filter.FilterableItem;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -14,11 +14,9 @@ import org.hibernate.envers.Audited;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Entity
 @Audited
@@ -26,11 +24,10 @@ import java.util.stream.Collectors;
 @Setter
 @Table(name = "combo")
 @NoArgsConstructor
-public class Combo {
+public class Combo extends BaseEntity implements FilterableItem {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "combo_name", unique = true, nullable = false)
+    private String comboName;
 
     @ManyToMany(cascade = {CascadeType.MERGE})
     @JoinTable(
@@ -40,13 +37,16 @@ public class Combo {
     )
     private Set<ComboItem> comboItemSet = new HashSet<>();
 
-    @ManyToOne
-    @JoinColumn(name = "address_id", nullable = false)
-    private Address address;
+    @ManyToMany
+    @JoinTable(
+            name = "combo_category",
+            joinColumns = @JoinColumn(name = "combo_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
+    private Set<Category> categories = new HashSet<>();
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "restaurant_id", nullable = false)
-    @JsonIgnoreProperties("combos")
     private Restaurant restaurant;
 
     @Column(name = "price", nullable = false, columnDefinition = "DECIMAL(10,2)")
@@ -61,6 +61,14 @@ public class Combo {
     @Column(name = "offer_price", nullable = false, columnDefinition = "DECIMAL(10,2)")
     private BigDecimal offerPrice;
 
+    @UpdateTimestamp
+    @Column(name = "offer_from")
+    private LocalDateTime offerFrom;
+
+    @UpdateTimestamp
+    @Column(name = "offer_to")
+    private LocalDateTime offerTo;
+
     @Column(name = "count", nullable = false, columnDefinition = "INT DEFAULT 0")
     private Integer count = 0;
 
@@ -70,14 +78,19 @@ public class Combo {
             joinColumns = @JoinColumn(name = "combo_id"),
             inverseJoinColumns = @JoinColumn(name = "time_interval_id")
     )
-    @JsonIgnoreProperties("comboSet")
     private Set<TimeInterval> timeIntervalSet = new HashSet<>();
 
     @Column(name = "preparation_time", nullable = false)
     private Integer preparationTime;
 
-    @Column(name = "food_type", nullable = false, length = 1)
+    @Column(name = "accept_bulk_orders", nullable = false, length = 1)
+    private Boolean acceptBulkOrders;
+
+    @Column(name = "only_veg", nullable = false, length = 1)
     private Boolean onlyVeg;
+
+    @Column(name = "active", nullable = false, length = 1)
+    private Boolean active;
 
     @Column(name = "hotel_special", nullable = false, length = 1)
     private Boolean hotelSpecial;
@@ -88,17 +101,23 @@ public class Combo {
     @Column(name = "rating", nullable = false, columnDefinition = "DECIMAL(10,1)")
     private BigDecimal rating;
 
-    @CreationTimestamp
-    @Column(name = "created_dttm", nullable = false, updatable = false)
-    private LocalDateTime createdDttm;
-
-    @UpdateTimestamp
-    @Column(name = "updated_dttm", nullable = false)
-    private LocalDateTime updatedDttm;
-
-    @OneToMany(mappedBy = "combo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("combo")
+    @OneToMany(mappedBy = "combo", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems;
+
+    @Override
+    public String getName() {
+        return this.comboName;
+    }
+
+    @Override
+    public Boolean getOnlyForCombos() {
+        return false;
+    }
+
+    @Override
+    public Boolean isCombo() {
+        return true;
+    }
 
 //    public Set<ComboItem> getComboItemSet() {
 //        return Collections.unmodifiableSet(comboItemSet);

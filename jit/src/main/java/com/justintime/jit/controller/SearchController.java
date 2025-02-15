@@ -1,6 +1,6 @@
 package com.justintime.jit.controller;
 
-import com.justintime.jit.dto.SearchResultDto;
+import com.justintime.jit.dto.SearchResultDTO;
 import com.justintime.jit.service.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +18,7 @@ public class SearchController {
     private SearchService searchService;
 
     @GetMapping
-    public List<SearchResultDto> searchByName(@RequestParam String query) {
+    public List<SearchResultDTO> searchByName(@RequestParam String query) {
         return searchService.searchByName(query);
     }
 }

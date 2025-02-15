@@ -1,6 +1,9 @@
 package com.justintime.jit.entity.OrderEntities;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.justintime.jit.entity.BaseEntity;
 import com.justintime.jit.entity.ComboEntities.Combo;
 import com.justintime.jit.entity.MenuItem;
 import jakarta.persistence.*;
@@ -21,25 +24,18 @@ import java.time.LocalDateTime;
 @Audited
 @Table(name = "order_item")
 @NoArgsConstructor
-public class OrderItem {
-
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        private Long id;
+public class OrderItem extends BaseEntity {
 
         @ManyToOne
         @JoinColumn(name = "order_id", nullable = false)
-        @JsonIgnoreProperties("orderItems")
         private Order order;
 
         @ManyToOne
         @JoinColumn(name = "menu_item_id", nullable = false)
-        @JsonIgnoreProperties("orderItems")
         private MenuItem menuItem;
 
         @ManyToOne
         @JoinColumn(name = "combo_id", nullable = false)
-        @JsonIgnoreProperties("orderItems")
         private Combo combo;
 
         @Column(name = "quantity", nullable = false, columnDefinition = "int default 1")
@@ -47,14 +43,6 @@ public class OrderItem {
 
         @Column(name = "price", nullable = false, columnDefinition = "DECIMAL(10,2)")
         private BigDecimal price;
-
-        @CreationTimestamp
-        @Column(name = "created_dttm", nullable = false, updatable = false)
-        private LocalDateTime createdDttm;
-
-        @UpdateTimestamp
-        @Column(name = "updated_dttm", nullable = false)
-        private LocalDateTime updatedDttm;
 
 //        public OrderItem(OrderItem other) {
 //                this.id = null; // New instance should not have the same ID
