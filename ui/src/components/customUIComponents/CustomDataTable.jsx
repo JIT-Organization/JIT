@@ -22,7 +22,7 @@ import { ChevronLeft, Filter } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Separator } from "../ui/separator";
 
-export function DataTable({
+export function CustomDataTable({
   columns = [],
   data = [],
   handleRowClick = () => {},
@@ -92,7 +92,9 @@ export function DataTable({
           <Button variant="ghost">
             <Filter />
           </Button>
-          <Button onClick={handleHeaderButtonClick}>{headerButtonName}</Button>
+          {headerButtonName && (
+            <Button onClick={handleHeaderButtonClick}>{headerButtonName}</Button>
+          )}
         </div>
       </div>
       {categories && (
