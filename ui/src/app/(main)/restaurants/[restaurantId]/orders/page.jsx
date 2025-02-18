@@ -5,7 +5,7 @@ import { CustomDataTable } from "@/components/customUIComponents/CustomDataTable
 import { getDistinctCategories } from "@/lib/utils/helper";
 import { useState } from "react";
 
-const orders = () => {
+const Orders = () => {
   const [tableData, setTableData] = useState([...data]);
 
   const handleEditClick = (id) => {
@@ -35,4 +35,4 @@ const orders = () => {
   );
 };
 
-export default orders;
+export default Orders;

@@ -5,7 +5,7 @@ import { CustomDataTable } from "@/components/customUIComponents/CustomDataTable
 import { getDistinctCategories } from "@/lib/utils/helper";
 import { useState } from "react";
 
-const categories = () => {
+const Categories = () => {
   const [tableData, setTableData] = useState([...data]);
 
   const handleToggle = (id, value) => {
@@ -42,4 +42,4 @@ const categories = () => {
   );
 };
 
-export default categories;
+export default Categories;

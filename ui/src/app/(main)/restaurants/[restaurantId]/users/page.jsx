@@ -5,7 +5,7 @@ import { CustomDataTable } from "@/components/customUIComponents/CustomDataTable
 import { getDistinctCategories } from "@/lib/utils/helper";
 import { useState } from "react";
 
-const users = () => {
+const Users = () => {
   const [tableData, setTableData] = useState([...data]);
 
   const handleToggle = (userName, value) => {
@@ -42,4 +42,4 @@ const users = () => {
   );
 };
 
-export default users;
+export default Users;

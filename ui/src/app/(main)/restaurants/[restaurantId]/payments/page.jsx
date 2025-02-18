@@ -5,7 +5,7 @@ import { CustomDataTable } from "@/components/customUIComponents/CustomDataTable
 import { getDistinctCategories } from "@/lib/utils/helper";
 import { useState } from "react";
 
-const payments = () => {
+const Payments = () => {
   const [tableData, setTableData] = useState([...data]);
 
   const handleEditClick = (id) => {
@@ -31,4 +31,4 @@ const payments = () => {
   );
 };
 
-export default payments;
+export default Payments;
