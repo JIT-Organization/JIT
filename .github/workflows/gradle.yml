@@ -1,0 +1,54 @@
+name: Build and Publish Docker Image
+
+on:
+  push:
+    branches-ignore: []  # This ensures no branches are ignored
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+    # Checkout repository code
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # Set up JDK 17
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Grant execute permissions for Gradlew
+      working-directory: ./jit
+      run: chmod +x ./gradlew
+
+
+    # Build the application using Gradle
+    - name: Build with Gradle
+      working-directory: ./jit
+      run: ./gradlew build
+
+    # Build Docker image
+    - name: Build Docker image
+      working-directory: ./jit
+      run: |
+        docker build -t my-java-app:${{ github.sha }} .
+    
+    # Push Docker image to Docker Hub (or another registry)
+    - name: Push Docker image
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - run: |
+        docker tag my-java-app:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/my-java-app:latest
+        docker push ${{ secrets.DOCKER_USERNAME }}/my-java-app:latest
+
+    - name: Logout from Docker Hub
+      run: docker logout
