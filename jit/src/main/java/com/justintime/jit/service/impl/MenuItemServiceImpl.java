@@ -15,6 +15,7 @@ import com.justintime.jit.repository.MenuItemRepository;
 import com.justintime.jit.entity.MenuItem;
 import com.justintime.jit.util.filter.FilterItemsUtil;
 import com.justintime.jit.util.mapper.GenericMapperImpl;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -77,7 +78,7 @@ import java.util.stream.Collectors;
                 .collect(Collectors.toList());
     }
 
-    public MenuItem addMenuItem(MenuItemDTO menuItemDTO) {
+    public MenuItemDTO addMenuItem(MenuItemDTO menuItemDTO) {
         MenuItem menuItem = menuItemMapper.toEntity(menuItemDTO, MenuItem.class);
         menuItem.setCategorySet(menuItemDTO.getCategorySet().stream()
                 .map(categoryRepository::findByCategoryName
@@ -111,29 +112,43 @@ import java.util.stream.Collectors;
                 .collect(Collectors.toSet()));
 
         menuItem.setUpdatedDttm(LocalDateTime.now());
-        return menuItemRepository.save(menuItem);
+        menuItemRepository.save(menuItem);
+        return menuItemDTO;
     }
 
-    public MenuItem updateMenuItem(Long id, MenuItem updatedItem) {
-            MenuItem existingItem = menuItemRepository.findById(id).orElseThrow(() -> new RuntimeException("MenuItem not found"));
-        existingItem.setRestaurant(updatedItem.getRestaurant());
-        existingItem.setMenuItemName(updatedItem.getMenuItemName());
-        existingItem.setDescription(updatedItem.getDescription());
-        existingItem.setPrice(updatedItem.getPrice());
-        existingItem.setOfferPrice(updatedItem.getOfferPrice());
-        existingItem.setStock(updatedItem.getStock());
-        existingItem.setCount(updatedItem.getCount());
-        existingItem.setTimeIntervalSet(updatedItem.getTimeIntervalSet());
-        existingItem.setCookSet(updatedItem.getCookSet());
-        existingItem.setPreparationTime(updatedItem.getPreparationTime());
-        existingItem.setOnlyVeg(updatedItem.getOnlyVeg());
-        existingItem.setOnlyForCombos(updatedItem.getOnlyForCombos());
-        existingItem.setBase64Image(updatedItem.getBase64Image());
-        existingItem.setHotelSpecial(updatedItem.getHotelSpecial());
-        existingItem.setRating(updatedItem.getRating());
+    public MenuItemDTO updateMenuItem(Long id, MenuItemDTO menuItemDTO) {
+        MenuItem existingItem = menuItemRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("MenuItem not found"));
 
-        return menuItemRepository.save(existingItem);
+        MenuItem updatedItem = menuItemMapper.toEntity(menuItemDTO, MenuItem.class);
+
+        updatedItem.setCategorySet(menuItemDTO.getCategorySet().stream()
+                .map(categoryRepository::findByCategoryName)
+                .collect(Collectors.toSet()));
+
+        updatedItem.setCookSet(menuItemDTO.getCookSet().stream()
+                .map(cookRepository::findByName)
+                .collect(Collectors.toSet()));
+
+        updatedItem.setTimeIntervalSet(menuItemDTO.getTimeIntervalSet().stream()
+                .map(timeIntervalDTO -> timeIntervalRepository.findByStartTimeAndEndTime(
+                        timeIntervalDTO.getStartTime(), timeIntervalDTO.getEndTime()
+                ).orElseGet(() -> {
+                    TimeInterval newInterval = new TimeInterval();
+                    newInterval.setStartTime(timeIntervalDTO.getStartTime());
+                    newInterval.setEndTime(timeIntervalDTO.getEndTime());
+                    return timeIntervalRepository.save(newInterval);
+                }))
+                .collect(Collectors.toSet()));
+
+        updatedItem.setUpdatedDttm(LocalDateTime.now());
+
+        BeanUtils.copyProperties(updatedItem, existingItem, "id", "createdDttm");
+
+        menuItemRepository.save(existingItem);
+        return menuItemDTO;
     }
+
 
     public void deleteMenuItem(Long id) {
         menuItemRepository.deleteById(id);

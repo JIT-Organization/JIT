@@ -48,13 +48,13 @@ public class MenuItemController {
     }
 
     @PostMapping
-    public MenuItem addMenuItem(@RequestBody MenuItemDTO menuItemDTO) {
+    public MenuItemDTO addMenuItem(@RequestBody MenuItemDTO menuItemDTO) {
         return menuItemService.addMenuItem(menuItemDTO);
     }
 
     @PutMapping("/{id}")
-    public MenuItem updateMenuItem(@PathVariable Long id, @RequestBody MenuItem updatedItem) {
-        return menuItemService.updateMenuItem(id, updatedItem);
+    public MenuItemDTO updateMenuItem(@PathVariable Long id, @RequestBody MenuItemDTO updatedMenuItemDTO) {
+        return menuItemService.updateMenuItem(id, updatedMenuItemDTO);
     }
 
     @DeleteMapping("/{id}")
