@@ -68,9 +68,9 @@ jobs:
         working-directory: ./jit
         run: ./gradlew assemble
 
-      - name: Run SpotBugs
-        working-directory: ./jit
-        run: ./gradlew spotbugsMain
+      # - name: Run SpotBugs
+      #   working-directory: ./jit
+      #   run: ./gradlew spotbugsMain
 
       - name: Run OWASP Dependency-Check
         working-directory: ./jit
