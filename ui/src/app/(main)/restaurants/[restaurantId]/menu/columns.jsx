@@ -19,27 +19,42 @@ import {
 import { Switch } from "@/components/ui/switch";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
+import CustomPopup from "@/components/customUIComponents/CustomPopup";
 
-export const getMenuListcolumns = (handleSwitchToggle, handleEditClick, handleDeleteClick) => [
+export const getMenuListcolumns = (
+  handleSwitchToggle,
+  handleEditClick,
+  handleDeleteClick
+) => [
   {
     accessorKey: "image",
     header: "Image",
     cell: ({ row }) => (
       <div className="capitalize">
-        <Image src={row.getValue("image")} alt="Food" height={80} width={80} />
+        <Image
+          src={
+            row.getValue("image") ||
+            "https://images.pexels.com/photos/1860208/pexels-photo-1860208.jpeg?cs=srgb&dl=cooked-food-1860208.jpg&fm=jpg"
+          }
+          alt="Food"
+          height={80}
+          width={80}
+        />
       </div>
     ),
   },
   {
-    accessorKey: "name",
+    accessorKey: "menuItemName",
     header: "Name",
-    cell: ({ row }) => <div className="capitalize">{row.getValue("name")}</div>,
+    cell: ({ row }) => (
+      <div className="capitalize">{row.getValue("menuItemName")}</div>
+    ),
   },
   {
-    accessorKey: "cooks",
+    accessorKey: "cookSet",
     header: "Cooks",
     cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("cooks")}</div>
+      <div className="capitalize">{row.getValue("cookSet")}</div>
     ),
   },
   {
@@ -79,10 +94,10 @@ export const getMenuListcolumns = (handleSwitchToggle, handleEditClick, handleDe
     ),
   },
   {
-    accessorKey: "category",
+    accessorKey: "categorySet",
     header: "Categories",
     cell: ({ row }) => {
-      const categories = row.getValue("category");
+      const categories = row.getValue("categorySet");
       return (
         <div className="flex items-end">
           <div className="flex flex-col space-y-2">
@@ -101,41 +116,26 @@ export const getMenuListcolumns = (handleSwitchToggle, handleEditClick, handleDe
     filterFn: "includesString",
   },
   {
-    accessorKey: "email",
-    header: ({ column }) => {
-      const isSorted = column.getIsSorted();
-
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => {
-            if (isSorted === "asc") {
-              column.clearSorting();
-            } else {
-              column.toggleSorting(!isSorted);
-            }
-          }}
-        >
-          Email
-          {isSorted === "asc" ? <ArrowUp className="ml-2" /> : null}
-          {isSorted === "desc" ? <ArrowDown className="ml-2" /> : null}
-        </Button>
-      );
-    },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
-  },
-  {
     id: "actions",
-    header: "Actions",
+    header: <div className="flex justify-center">Actions</div>,
     cell: ({ row }) => {
       return (
-        <div className="flex space-x-2">
-          <Button variant="ghost" onClick={() => handleEditClick(row.original.id)}>
+        <div className="flex justify-center">
+          <Button
+            variant="ghost"
+            onClick={() => handleEditClick(row.original.id)}
+          >
             <Pencil className="text-black h-50 w-50" />
           </Button>
-          <Button variant="ghost" onClick={() => handleDeleteClick(row.original.id)}>
-            <Trash2 className="text-black h-50 w-50" />
-          </Button>
+          <CustomPopup
+            type="delete"
+            trigger={
+              <Button variant="ghost">
+                <Trash2 className="text-black h-50 w-50" />
+              </Button>
+            }
+            onConfirm={() => handleDeleteClick(row.original.id)}
+          />
         </div>
       );
     },

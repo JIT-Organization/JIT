@@ -3,16 +3,14 @@ export const getDistinctCategories = (data) => {
   categorySet.add("All");
 
   data.forEach((item) => {
-    if (item.category) {
-      const categories = Array.isArray(item.category)
-        ? item.category
-        : [item.category];
-      categories.forEach((cat) => categorySet.add(cat));
+    if (item.categorySet?.length > 0) {
+      item.categorySet.map((cat) => categorySet.add(cat));
     }
   });
+  const categoryList = [...categorySet];
+  return categoryList;
+};
 
-  return Array.from(categorySet).map((cat) => ({
-    id: cat.toLowerCase(),
-    label: cat,
-  }));
+export const encodeIdInURL = (id) => {
+  return encodeURIComponent(btoa(id));
 };

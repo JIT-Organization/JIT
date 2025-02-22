@@ -1,40 +1,53 @@
 "use client";
 import { getMenuListcolumns } from "./columns";
-import { data } from "./data";
 import { CustomDataTable } from "@/components/customUIComponents/CustomDataTable";
+import { deleteMenuItem, getMenuItemListOptions, patchUpdateMenuItemList } from "@/lib/api";
 import { getDistinctCategories } from "@/lib/utils/helper";
-import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { usePathname, useRouter } from "next/navigation";
 
 const MenuList = () => {
-  const [tableData, setTableData] = useState([...data]);
+  const router = useRouter();
+  const pathName = usePathname();
+  const id = pathName.split("/")[2];
+  const queryClient = useQueryClient();
+  const { data: menuItemListData, isLoading, error } = useQuery(getMenuItemListOptions(id));
+  const patchMutation = useMutation(patchUpdateMenuItemList(queryClient));
+  const deleteMutation = useMutation(deleteMenuItem(queryClient));
 
-  const handleToggle = (id, value) => {
-    console.log(id, value);
-    setTableData((prev) =>
-      prev.map((row) => (row.id === id ? { ...row, active: value } : row))
-    );
+  if (isLoading) return <p>Loading posts...</p>;
+  if (error) return <p>Error loading posts: {error.message}</p>;
+
+  const handleToggle = async (id, value) => {
+    patchMutation.mutate({ id, fields: { active: value } });
   };
 
   const handleEditClick = (id) => {
-    console.log("Edit clicked for id: ", id);
-  }
+    console.log("Edit clicked for id: ", id, pathName);
+    router.push(`${pathName}/${id}`)
+  };
 
-  
-  const handleDeleteClick = (id) => {
+  const handleDeleteClick = async (id) => {
     console.log("Delete clicked for id: ", id);
-  }
+    deleteMutation.mutate({ id });
+  };
 
-  const columns = getMenuListcolumns(handleToggle, handleEditClick, handleDeleteClick);
+  const columns = getMenuListcolumns(
+    handleToggle,
+    handleEditClick,
+    handleDeleteClick
+  );
 
-  const categories = getDistinctCategories(tableData);
+  const categories = getDistinctCategories(menuItemListData);
+
   return (
     <div>
       <CustomDataTable
         columns={columns}
-        data={tableData}
+        data={menuItemListData || []}
         tabName="Our Menu"
         handleHeaderButtonClick={() => {
-          console.log("Add Food page URL");
+          console.log("Header Button Clicked");
         }}
         headerButtonName="Add Food"
         categories={categories}
