@@ -10,7 +10,7 @@ import com.justintime.jit.entity.MenuItem;
 import com.justintime.jit.entity.Category;
 import com.justintime.jit.entity.TimeInterval;
 import com.justintime.jit.repository.OrderRepo.OrderItemRepository;
-import com.justintime.jit.util.mapper.GenericMapperImpl;
+import com.justintime.jit.util.mapper.GenericMapper;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -34,7 +34,7 @@ public class FilterItemsUtil {
             Boolean onlyVeg,
             Boolean onlyForCombos,
             OrderItemRepository orderItemRepository,
-            GenericMapperImpl<T, DTO> genericMapper,
+            GenericMapper<T, DTO> genericMapper,
             Class<DTO> dtoClass) {
 
         if (onlyVeg != null) {
@@ -94,8 +94,8 @@ public class FilterItemsUtil {
 
     }
 
-    private static <T extends FilterableItem, DTO> DTO convertToDTO(T item, GenericMapperImpl<T, DTO> genericMapper, Class<DTO> dtoClass) {
-        DTO dto = genericMapper.toDTO(item, dtoClass);
+    private static <T extends FilterableItem, DTO> DTO convertToDTO(T item, GenericMapper<T, DTO> genericMapper, Class<DTO> dtoClass) {
+        DTO dto = genericMapper.toDto(item);
 
         if (dto instanceof ComboDTO comboDTO && item instanceof Combo combo) {
             comboDTO.setCategorySet(

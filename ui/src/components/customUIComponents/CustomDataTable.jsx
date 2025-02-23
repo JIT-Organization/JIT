@@ -36,7 +36,7 @@ export function CustomDataTable({
   const [columnVisibility, setColumnVisibility] = React.useState({});
   const [rowSelection, setRowSelection] = React.useState({});
   const [globalFilter, setGlobalFilter] = React.useState("");
-  const [activeCategory, setActiveCategory] = React.useState("all");
+  const [activeCategory, setActiveCategory] = React.useState("All");
 
   const table = useReactTable({
     data,
@@ -66,12 +66,12 @@ export function CustomDataTable({
     router.back();
   };
 
-  const handleActiveToggle = (id, label) => {
-    setActiveCategory(id);
-    if (id === "all") {
+  const handleActiveToggle = (label) => {
+    setActiveCategory(label);
+    if (label === "All") {
       setColumnFilters([]);
     } else {
-      setColumnFilters([{ id: "category", value: label }]);
+      setColumnFilters([{ id: "categorySet", value: label }]);
     }
   };
 
@@ -102,14 +102,14 @@ export function CustomDataTable({
           <div className="flex space-x-5 ml-4">
             {categories.map((category) => (
               <div
-                key={category.id}
+                key={category}
                 className="cursor-pointer"
-                onClick={() => handleActiveToggle(category.id, category.label)}
+                onClick={() => handleActiveToggle(category)}
               >
-                <div className="text-sm">{category.label}</div>
+                <div className="text-sm">{category}</div>
                 <div
                   className={`w-full border-b-4 border-black transition-transform duration-300 ease-in-out origin-center ${
-                    activeCategory === category.id ? "scale-x-100" : "scale-x-0"
+                    activeCategory === category ? "scale-x-100" : "scale-x-0"
                   }`}
                 ></div>
               </div>
