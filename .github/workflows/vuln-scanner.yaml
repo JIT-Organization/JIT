@@ -72,11 +72,12 @@ jobs:
       #   working-directory: ./jit
       #   run: ./gradlew spotbugsMain
 
-      - name: Run OWASP Dependency-Check
+      - name: Run OWASP Dependency-Check with More Memory
         working-directory: ./jit
         run: |
+          export GRADLE_OPTS="-Xmx2g -Dorg.gradle.jvmargs='-Xmx2g'"
           ./gradlew dependencyCheckAnalyze -Ddependency-check.cache-dir=./cache --info
-          ls -R ./jit/build || echo "Build directory not found."
+
 
       - name: Run Basic SQL Injection Pattern Scan
         working-directory: ./jit
