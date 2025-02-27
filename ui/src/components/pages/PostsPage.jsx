@@ -5,9 +5,16 @@ import { DataTable } from "../customUIComponents/DataTable";
 import { data } from "@/app/samplePosts/data";
 import { useState } from "react";
 import { getDistinctCategories } from "@/lib/utils/helper";
+import { useRouter } from "next/navigation";
+
+
+
 
 export default function PostsPage() {
   const [tableData, setTableData] = useState([...data]);
+  const router = useRouter();
+
+
 
   const handleToggle = (id, value) => {
     console.log(id, value);
@@ -37,7 +44,7 @@ export default function PostsPage() {
         data={tableData}
         tabName="Our Menu"
         handleHeaderButtonClick={() => {
-          console.log("Header Button Clicked");
+          router.push("/addFood"); // Change to the desired route
         }}
         headerButtonName="Add Food"
         categories={categories}

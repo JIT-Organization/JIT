@@ -79,6 +79,27 @@ body {
   }
 }
 
+.form-label-width1{
+  width:500px;
+}
+
+.form-label-width2{
+  width:200px;
+}
+
+.display-flex{
+  display: flex;
+}
+.timestyle{
+  margin-top: 190px;
+  border-width: 1px;
+  width: 190px;
+}
+.margin-style{
+  margin-left: 20px;
+  margin-top: 20px;
+}
+
 @layer base {
   * {
     @apply border-border;
