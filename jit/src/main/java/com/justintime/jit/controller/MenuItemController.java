@@ -1,6 +1,7 @@
 package com.justintime.jit.controller;
 
 import com.justintime.jit.dto.MenuItemDTO;
+import com.justintime.jit.dto.PatchMenuItemRequest;
 import com.justintime.jit.entity.Enums.Sort;
 import com.justintime.jit.entity.MenuItem;
 import com.justintime.jit.exception.ImageSizeLimitExceededException;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/menu-items")
+@CrossOrigin(origins = "*")
 public class MenuItemController {
 
     @Autowired
@@ -24,7 +26,7 @@ public class MenuItemController {
         return menuItemService.getAllMenuItems();
     }
 
-    @GetMapping("/restaurant/{restaurantId}")
+    @GetMapping("/{restaurantId}")
     public List<MenuItemDTO> getMenuItemsByRestaurant(
             @PathVariable Long restaurantId,
             @RequestParam(required = false) Sort sortBy,
@@ -53,8 +55,13 @@ public class MenuItemController {
     }
 
     @PutMapping("/{id}")
-    public MenuItemDTO updateMenuItem(@PathVariable Long id, @RequestBody MenuItemDTO updatedMenuItemDTO) {
-        return menuItemService.updateMenuItem(id, updatedMenuItemDTO);
+    public MenuItem updateMenuItem(@PathVariable Long id, @RequestBody MenuItemDTO updatedItem) {
+        return menuItemService.updateMenuItem(id, updatedItem);
+    }
+
+    @PatchMapping("/{id}")
+    public MenuItem patchUpdateMenuItem(@PathVariable Long id, @RequestBody PatchMenuItemRequest payload) {
+        return menuItemService.patchUpdateMenuItem(id, payload.getMenuItemDTO(), payload.getPropertiesToBeUpdated());
     }
 
     @DeleteMapping("/{id}")

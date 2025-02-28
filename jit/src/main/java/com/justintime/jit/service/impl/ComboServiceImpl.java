@@ -11,7 +11,8 @@ import com.justintime.jit.repository.OrderRepo.OrderItemRepository;
 import com.justintime.jit.service.ComboService;
 import com.justintime.jit.entity.Category;
 import com.justintime.jit.util.filter.FilterItemsUtil;
-import com.justintime.jit.util.mapper.GenericMapperImpl;
+import com.justintime.jit.util.mapper.GenericMapper;
+import com.justintime.jit.util.mapper.MapperFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,22 +28,19 @@ public class ComboServiceImpl extends BaseServiceImpl<Combo,Long> implements Com
 
     private final OrderItemRepository orderItemRepository;
 
-    private final GenericMapperImpl<Combo, ComboDTO> comboMapper;
-
     public ComboServiceImpl(ComboRepository comboRepository,
-                            OrderItemRepository orderItemRepository,
-                            GenericMapperImpl<Combo, ComboDTO> comboMapper
+                            OrderItemRepository orderItemRepository
                             ){
         this.comboRepository = comboRepository;
         this.orderItemRepository = orderItemRepository;
-        this.comboMapper = comboMapper;
     }
 
     public List<ComboDTO> getAllCombos() {
+        GenericMapper<Combo, ComboDTO> comboMapper = MapperFactory.getMapper(Combo.class, ComboDTO.class);
         return comboRepository.findAll()
                 .stream()
                 .map(combo -> {
-                    ComboDTO comboDTO = comboMapper.toDTO(combo, ComboDTO.class);
+                    ComboDTO comboDTO = comboMapper.toDto(combo);
 
                     // Map Combo Items
                     comboDTO.setComboItemSet(
@@ -75,6 +73,7 @@ public class ComboServiceImpl extends BaseServiceImpl<Combo,Long> implements Com
 ///////////////////////////////////////////////////////////////////////
     public List<ComboDTO> getCombosByRestaurantId(Long restaurantId, Sort sortBy, String priceRange, String category, Boolean onlyVeg, Boolean onlyForCombos) {
         List<Combo> combos = comboRepository.findByRestaurantId(restaurantId);
+        GenericMapper<Combo, ComboDTO> comboMapper = MapperFactory.getMapper(Combo.class, ComboDTO.class);
         return FilterItemsUtil.filterAndSortItems(combos, restaurantId, sortBy, priceRange, category, onlyVeg, onlyForCombos, orderItemRepository, comboMapper, ComboDTO.class);
     }
 //////////////////////////////////////////////////////////////////////////
