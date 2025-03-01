@@ -13,7 +13,7 @@ import {
 
 export default function AddFood() {
     const [foodName, setFoodName] = useState("");
-    const [time, setTime] = useState("10:00");
+    const [time, setTime] = useState("");
     const [count, setCount] = useState("");
     const [selectedCook, setSelectedCook] = useState("Select Cook");
 
