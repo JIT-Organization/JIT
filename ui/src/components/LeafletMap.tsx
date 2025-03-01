@@ -49,7 +49,6 @@ const LeafletMap = ({ onSelectLocation }: LeafletMapProps) => {
     };
   }, [onSelectLocation]);
 
-  // Function to get the user's location
   const getUserLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(async (position) => {
@@ -81,7 +80,7 @@ const LeafletMap = ({ onSelectLocation }: LeafletMapProps) => {
   );
 };
 
-// Function to get address from lat/lng
+
 const reverseGeocode = async (lat: number, lng: number) => {
   try {
     const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);

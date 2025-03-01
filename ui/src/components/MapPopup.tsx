@@ -1,7 +1,7 @@
 "use client";
+
+
 import React from "react";
-
-
 import { useState, useRef, useEffect } from "react";
 import dynamic from "next/dynamic";
 import Modal from "react-modal";
@@ -18,12 +18,12 @@ const MapPopup = ({ value, onChange }: MapPopupProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const modalRef = useRef<HTMLDivElement | null>(null);
 
-  const [manualAddress, setManualAddress] = useState(value); // Local state for manual input
+  const [manualAddress, setManualAddress] = useState(value);
 
-  // Lazy load LeafletMap to prevent hydration issues
+  
   const LeafletMap = dynamic(() => import("./LeafletMap"), { ssr: false });
 
-  // Close modal if clicking outside
+  
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
@@ -42,19 +42,19 @@ const MapPopup = ({ value, onChange }: MapPopupProps) => {
 
   return (
     <div className="relative w-full">
-      {/* Editable Input Field */}
+      
       <input
         type="text"
         value={manualAddress}
         onChange={(e) => {
           setManualAddress(e.target.value);
-          onChange(e.target.value); // Update parent state
+          onChange(e.target.value); 
         }}
         placeholder="Enter your address or select from the map"
         className="w-full pl-3 pr-10 rounded-lg border-2 border-solid border-black p-3 text-md"
       />
 
-      {/* Map Icon to Open Modal */}
+
       <FaMapMarkerAlt
         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-500 text-xl cursor-pointer"
         onClick={() => setIsOpen(true)}
@@ -71,11 +71,11 @@ const MapPopup = ({ value, onChange }: MapPopupProps) => {
             Close
           </button>
 
-          {/* Pass callback to update input field */}
+          
           <LeafletMap onSelectLocation={(address) => {
-            setManualAddress(address); // Update input field
+            setManualAddress(address); 
             onChange(address);
-            setIsOpen(false); // Close modal after selection
+            setIsOpen(false); 
           }} />
         </div>
       </Modal>

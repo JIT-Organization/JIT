@@ -1,4 +1,6 @@
 "use client";
+
+
 import * as React from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import {
@@ -40,7 +42,6 @@ export default function BusinessProfilePage() {
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
-        {/* Header with Back Button and Title */}
         <div className="flex items-center p-0.5">
           <button
             type="button"
@@ -52,7 +53,7 @@ export default function BusinessProfilePage() {
           <h1 className="text-4xl font-extrabold">Business Profile</h1>
         </div>
 
-        {/* Cover Image Section */}
+
         <div className="rounded-full border-2 border-solid relative">
           <Image
             src="/resources/images/background.jpeg"
@@ -77,7 +78,7 @@ export default function BusinessProfilePage() {
               {...methods.register("coverPic")}
             />
           </div>
-          {/* Profile Picture overlapping the cover */}
+          
           <div className="rounded-full border-2 border-solid absolute -bottom-12 right-4">
             <div className="relative">
               <Image
@@ -107,9 +108,9 @@ export default function BusinessProfilePage() {
           </div>
         </div>
 
-        {/* 2x2 Fields Container (80% of screen width) */}
+        
         <div className="mt-16 p-10 pb-1 w-[80%] mx-left grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Name Field */}
+          
           <FormItem>
             <FormLabel className="text-2xl font-extrabold">Business Name</FormLabel>
             <FormField
@@ -129,7 +130,7 @@ export default function BusinessProfilePage() {
             <FormMessage />
           </FormItem>
 
-          {/* Email Field */}
+          
           <FormItem>
             <FormLabel className="text-2xl font-extrabold">Email</FormLabel>
             <FormField
@@ -149,7 +150,7 @@ export default function BusinessProfilePage() {
             <FormMessage />
           </FormItem>
 
-          {/* Phone Field */}
+          
           <FormItem>
             <FormLabel className="text-2xl font-extrabold">Phone</FormLabel>
             <FormField
@@ -169,7 +170,7 @@ export default function BusinessProfilePage() {
             <FormMessage />
           </FormItem>
 
-          {/* UPI ID Field */}
+          
           <FormItem>
             <FormLabel className="text-2xl font-extrabold">UPI ID</FormLabel>
             <FormField
@@ -190,23 +191,23 @@ export default function BusinessProfilePage() {
           </FormItem>
         </div>
  
-        {/* Address Field with MapPopup */}
+        
         <div className="p-10 w-1/2 mx-left relative">
                   <FormItem>
                     <FormLabel className="text-2xl font-extrabold">Address</FormLabel>
-                    <FormField
-                      name="location"
-                      control={methods.control}
-                      render={({ field }) => (
-                        <FormControl>
-                          <MapPopup
-                            value={location}
-                            onChange={(address) => {
-                              setLocation(address);
-                              methods.setValue("location", address); // Update form state
-                              field.onChange(address); // Ensure reactivity
-                            }}
-                          />
+                      <FormField
+                        name="location"
+                        control={methods.control}
+                        render={({ field }) => (
+                          <FormControl>
+                            <MapPopup
+                              value={location}
+                              onChange={(address) => {
+                                setLocation(address);
+                                methods.setValue("location", address); 
+                                field.onChange(address); 
+                              }}
+                            />
                         </FormControl>
                       )}
                     />
@@ -215,7 +216,7 @@ export default function BusinessProfilePage() {
         </div>
 
 
-        {/* Submit Button */}
+        
         <div className="pl-10 flex justify-left">
           <button 
             type="submit" 
