@@ -1,21 +1,16 @@
 "use client";
-import React from "react";
 
-
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import { Button } from "./ui/button";
 
-interface LeafletMapProps {
-  onSelectLocation: (address: string) => void;
-}
+const LeafletMap = ({ onSelectLocation }) => {
+  const mapRef = useRef(null);
+  const mapContainerRef = useRef(null);
+  const markerRef = useRef(null);
 
-const LeafletMap = ({ onSelectLocation }: LeafletMapProps) => {
-  const mapRef = useRef<L.Map | null>(null);
-  const mapContainerRef = useRef<HTMLDivElement | null>(null);
-  const markerRef = useRef<L.Marker | null>(null);
-
-  const [position, setPosition] = useState<[number, number]>([12.9716, 77.5946]); // Default: Bangalore
+  const [position, setPosition] = useState([12.9716, 77.5946]); // Default: Bangalore
 
   useEffect(() => {
     if (mapContainerRef.current && !mapRef.current) {
@@ -23,9 +18,12 @@ const LeafletMap = ({ onSelectLocation }: LeafletMapProps) => {
 
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(mapRef.current);
 
-      markerRef.current = L.marker(position).addTo(mapRef.current).bindPopup("Default Location: Bangalore").openPopup();
+      markerRef.current = L.marker(position)
+        .addTo(mapRef.current)
+        .bindPopup("Default Location: Bangalore")
+        .openPopup();
 
-      mapRef.current.on("click", async (e: L.LeafletMouseEvent) => {
+      mapRef.current.on("click", async (e) => {
         const { lat, lng } = e.latlng;
         setPosition([lat, lng]);
 
@@ -72,18 +70,29 @@ const LeafletMap = ({ onSelectLocation }: LeafletMapProps) => {
 
   return (
     <div className="flex flex-col items-center">
-      <button onClick={getUserLocation} className="mb-2 p-2 bg-green-500 text-white rounded">
+      <Button onClick={getUserLocation} variant="default" className="mb-2">
         Use My Location
-      </button>
-      <div ref={mapContainerRef} style={{ height: "350px", width: "500px", borderRadius: "10px", overflow: "hidden" }} />
+      </Button>
+
+      <div
+        ref={mapContainerRef}
+        style={{
+          height: "350px",
+          width: "500px",
+          borderRadius: "10px",
+          overflow: "hidden",
+        }}
+      />
     </div>
   );
 };
 
 
-const reverseGeocode = async (lat: number, lng: number) => {
+const reverseGeocode = async (lat, lng) => {
   try {
-    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
+    );
     const data = await response.json();
     return data.display_name || "Unknown Location";
   } catch (error) {

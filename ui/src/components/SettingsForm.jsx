@@ -13,7 +13,9 @@ import {
 import { BiSolidChevronLeft } from "react-icons/bi";
 import Image from "next/image";
 import MapPopup from "./MapPopup";
-
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
+import { Label } from "./ui/label";
 
 
 export default function BusinessProfilePage() {
@@ -43,13 +45,13 @@ export default function BusinessProfilePage() {
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
         <div className="flex items-center p-0.5">
-          <button
+          <Button
             type="button"
-            className="mr-4 text-yellow-500 font-extrabold text-2xl"
+            className="mr-4 text-yellow-500 font-extrabold text-5xl"
             onClick={() => window.history.back()}
           >
-            <BiSolidChevronLeft size={48}/>
-          </button>
+            <BiSolidChevronLeft />
+          </Button>
           <h1 className="text-4xl font-extrabold">Business Profile</h1>
         </div>
 
@@ -63,15 +65,15 @@ export default function BusinessProfilePage() {
             height="100"
           />
           <div className="absolute top-2 right-2">
-            <label
+            <Label
               htmlFor="coverPic"
               className="cursor-pointer p-2 bg-white rounded-full shadow"
             >
               <span role="img" aria-label="edit" className="bg-white rounded-full shadow">
                 ✏️
               </span>
-            </label>
-            <input
+            </Label>
+            <Input
               type="file"
               id="coverPic"
               className="hidden"
@@ -89,15 +91,15 @@ export default function BusinessProfilePage() {
                 height="100"
               />
               <div className="absolute bottom-0 right-0">
-                <label
+                <Label
                   htmlFor="profilePic"
                   className="cursor-pointer p-1 bg-white rounded-full shadow"
                 >
                   <span role="img" aria-label="edit">
                     ✏️
                   </span>
-                </label>
-                <input
+                </Label>
+                <Input
                   type="file"
                   id="profilePic"
                   className="hidden"
@@ -118,7 +120,7 @@ export default function BusinessProfilePage() {
               control={methods.control}
               render={({ field }) => (
                 <FormControl>
-                  <input
+                  <Input
                     type="text"
                     placeholder="Name"
                     className="w-full rounded-lg border-2 border-solid border-black p-3 text-md"
@@ -138,7 +140,7 @@ export default function BusinessProfilePage() {
               control={methods.control}
               render={({ field }) => (
                 <FormControl>
-                  <input
+                  <Input
                     type="email"
                     placeholder="Email"
                     className="w-full rounded-lg border-2 border-solid border-black p-3 text-md"
@@ -158,7 +160,7 @@ export default function BusinessProfilePage() {
               control={methods.control}
               render={({ field }) => (
                 <FormControl>
-                  <input
+                  <Input
                     type="tel"
                     placeholder="Phone"
                     className="w-full rounded-lg border-2 border-solid border-black p-3 text-md"
@@ -178,7 +180,7 @@ export default function BusinessProfilePage() {
               control={methods.control}
               render={({ field }) => (
                 <FormControl>
-                  <input
+                  <Input
                     type="text"
                     placeholder="UPI ID"
                     className="w-full rounded-lg border-2 border-solid border-black p-3 text-md"
@@ -214,23 +216,15 @@ export default function BusinessProfilePage() {
                     <FormMessage />
                   </FormItem>
         </div>
-
-
         
         <div className="pl-10 flex justify-left">
-          <button 
+          <Button 
             type="submit" 
             className="bg-gray-800 text-white font-bold py-2 px-6 rounded-lg transition-all duration-300 hover:bg-black hover:shadow-lg hover:scale-105"
           >
             Save
-          </button>
+          </Button>
         </div>
-        <div id="root">
-
-</div>
-
-
-
       </form>
     </FormProvider>
   );

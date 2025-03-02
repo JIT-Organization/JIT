@@ -1,32 +1,27 @@
 "use client";
 
-
-import React from "react";
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import dynamic from "next/dynamic";
 import Modal from "react-modal";
 import { FaMapMarkerAlt } from "react-icons/fa";
+import { Input } from "./ui/input"; 
+import { Button } from "./ui/button"; 
+
 
 Modal.setAppElement(typeof document !== "undefined" ? document.body : "");
 
-interface MapPopupProps {
-  value: string;
-  onChange: (address: string) => void;
-}
 
-const MapPopup = ({ value, onChange }: MapPopupProps) => {
+const LeafletMap = dynamic(() => import("./LeafletMap"), { ssr: false });
+
+const MapPopup = ({ value, onChange }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const modalRef = useRef<HTMLDivElement | null>(null);
-
+  const modalRef = useRef(null);
   const [manualAddress, setManualAddress] = useState(value);
 
-  
-  const LeafletMap = dynamic(() => import("./LeafletMap"), { ssr: false });
 
-  
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+    const handleClickOutside = (event) => {
+      if (modalRef.current && !modalRef.current.contains(event.target)) {
         setIsOpen(false);
       }
     };
@@ -42,8 +37,8 @@ const MapPopup = ({ value, onChange }: MapPopupProps) => {
 
   return (
     <div className="relative w-full">
-      
-      <input
+
+      <Input
         type="text"
         value={manualAddress}
         onChange={(e) => {
@@ -60,6 +55,7 @@ const MapPopup = ({ value, onChange }: MapPopupProps) => {
         onClick={() => setIsOpen(true)}
       />
 
+
       <Modal
         isOpen={isOpen}
         onRequestClose={() => setIsOpen(false)}
@@ -67,16 +63,24 @@ const MapPopup = ({ value, onChange }: MapPopupProps) => {
         style={{ overlay: { zIndex: 1000 } }}
       >
         <div ref={modalRef} className="bg-white p-4 rounded-lg shadow-lg relative w-auto">
-          <button onClick={() => setIsOpen(false)} className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded">
-            Close
-          </button>
 
-          
-          <LeafletMap onSelectLocation={(address) => {
-            setManualAddress(address); 
-            onChange(address);
-            setIsOpen(false); 
-          }} />
+          <Button
+            onClick={() => setIsOpen(false)}
+            variant="destructive"
+            size="sm"
+            className="absolute top-2 right-2"
+          >
+            Close
+          </Button>
+
+
+          <LeafletMap
+            onSelectLocation={(address) => {
+              setManualAddress(address);
+              onChange(address);
+              setIsOpen(false);
+            }}
+          />
         </div>
       </Modal>
     </div>
@@ -84,4 +88,3 @@ const MapPopup = ({ value, onChange }: MapPopupProps) => {
 };
 
 export default MapPopup;
-
