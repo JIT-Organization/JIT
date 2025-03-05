@@ -75,9 +75,15 @@ export const getStaffMemberColumns = (handleSwitchToggle, handleEditClick, handl
       cell: ({ row }) => {
         return (
           <div className="flex space-x-2">
-            <Button variant="ghost" onClick={() => handleEditClick(row.original.userName)}>
-              <Pencil className="text-black h-50 w-50" />
-            </Button>
+             <CustomPopup
+                    type="user"
+                    trigger={
+                      <Button variant="ghost" onClick={() => handleEditClick(row.original.userName)}>
+                        <Pencil className="text-black h-50 w-50" />
+                      </Button>
+                    }
+                    dialogDescription={"User Info"}
+                  />
             <Button variant="ghost" onClick={() => handleDeleteClick(row.original.userName)}>
               <Trash2 className="text-black h-50 w-50" />
             </Button>

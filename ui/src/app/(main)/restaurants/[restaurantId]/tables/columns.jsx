@@ -43,9 +43,15 @@ export const getTableColumns = ( handleEditClick, handleDeleteClick) => [
       cell: ({ row }) => {
         return (
           <div className="flex space-x-2">
-            <Button variant="ghost" onClick={() => handleEditClick(row.original.id)}>
-              <Pencil className="text-black h-50 w-50" />
-            </Button>
+            <CustomPopup
+                    type="user"
+                    trigger={
+                      <Button variant="ghost">
+                        <Pencil className="text-black h-50 w-50" />
+                      </Button>
+                    }
+                    dialogDescription={"User Info"}
+                  />
             <Button variant="ghost" onClick={() => handleDeleteClick(row.original.id)}>
               <Trash2 className="text-black h-50 w-50" />
             </Button>
