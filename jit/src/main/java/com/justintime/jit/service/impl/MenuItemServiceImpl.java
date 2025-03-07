@@ -53,15 +53,13 @@ public class MenuItemServiceImpl extends BaseServiceImpl<MenuItem, Long> impleme
                 .map(item -> mapToDTO(item, mapper))
                 .collect(Collectors.toList());
     }
-
+  
     @Override
     public MenuItem addMenuItem(MenuItemDTO menuItemDTO) {
         GenericMapper<MenuItem, MenuItemDTO> mapper = MapperFactory.getMapper(MenuItem.class, MenuItemDTO.class);
         MenuItem menuItem = mapper.toEntity(menuItemDTO);
-
         resolveRelationships(menuItem, menuItemDTO);
         menuItem.setUpdatedDttm(LocalDateTime.now());
-
         return menuItemRepository.save(menuItem);
     }
 

@@ -31,7 +31,7 @@ public class ComboDTO {
     private LocalDateTime updatedDttm;
 
     // Related IDs to avoid entity dependencies
-    private Long restaurantId;
+    // private Long restaurantId;
     private Set<ComboItemDTO> comboItemSet;
     private Set<String> categorySet;
     private Set<TimeIntervalDTO> timeIntervalSet;

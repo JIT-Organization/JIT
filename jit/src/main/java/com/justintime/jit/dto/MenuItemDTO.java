@@ -16,7 +16,7 @@ import java.util.Set;
 public class MenuItemDTO {
     private Long id;
     private String menuItemName;
-    private Long restaurantId;
+   // private Long restaurantId;
     private String description;
     private BigDecimal price;
     private BigDecimal offerPrice;

@@ -50,7 +50,7 @@ public class MenuItemController {
     }
 
     @PostMapping
-    public MenuItem addMenuItem(@RequestBody MenuItemDTO menuItemDTO) {
+    public MenuItemDTO addMenuItem(@RequestBody MenuItemDTO menuItemDTO) {
         return menuItemService.addMenuItem(menuItemDTO);
     }
 
