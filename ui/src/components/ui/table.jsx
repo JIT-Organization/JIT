@@ -66,6 +66,18 @@ const TableCell = React.forwardRef(({ className, ...props }, ref) => (
 ))
 TableCell.displayName = "TableCell"
 
+const TableCellLink = React.forwardRef(({ className,onClick, ...props }, ref) => (
+  <td
+    ref={ref}
+    className={cn(
+      "p-2 align-middle text-blue-600 [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+      className
+    )}
+    onClick={onClick}
+    {...props} />
+))
+TableCellLink.displayName = "TableCellLink"
+
 const TableCaption = React.forwardRef(({ className, ...props }, ref) => (
   <caption
     ref={ref}
@@ -83,4 +95,5 @@ export {
   TableRow,
   TableCell,
   TableCaption,
+  TableCellLink
 }

@@ -2,6 +2,7 @@
 import { getOrderColumns } from "./columns";
 import { data } from "./data";
 import { CustomDataTable } from "@/components/customUIComponents/CustomDataTable";
+import PaymentPopup from "@/components/paymentPopup";
 import { getDistinctCategories } from "@/lib/utils/helper";
 import { useState } from "react";
 

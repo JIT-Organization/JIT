@@ -17,10 +17,12 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  TableCellLink
 } from "@/components/ui/table";
 import { ChevronLeft, Filter } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Separator } from "../ui/separator";
+import  {PaymentPopup, ChangePaymentStatus } from "../paymentPopup";
 
 export function CustomDataTable({
   columns = [],
@@ -37,9 +39,16 @@ export function CustomDataTable({
   const [rowSelection, setRowSelection] = React.useState({});
   const [globalFilter, setGlobalFilter] = React.useState("");
   const [activeCategory, setActiveCategory] = React.useState("All");
+  const [popupData, setPopupData] = React.useState(null);
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [gridData,setGridData] = React.useState(data);
+  const [paymentStatusChange, setPaymentStatusChange] = React.useState(false)
+
+  const isFirstRender = React.useRef(true);
+  const isPopupDataUpdated = React.useRef(false);
 
   const table = useReactTable({
-    data,
+    data: gridData,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -74,6 +83,47 @@ export function CustomDataTable({
       setColumnFilters([{ id: "categorySet", value: label }]);
     }
   };
+  
+  React.useEffect(()=>{
+    if (isFirstRender.current) {
+      isFirstRender.current = false; 
+      return; 
+    }
+
+    console.log("gridData updated", gridData);
+
+  },[gridData])
+
+React.useEffect(() => {
+  if (!isPopupDataUpdated.current) {
+    return;
+  }
+  isPopupDataUpdated.current = false; 
+
+  console.log("popupData updated", popupData);
+  if (popupData != null) {
+    setGridData((prevGridData) =>
+      prevGridData.map((item) =>
+        item.id === popupData.id ? popupData : item
+      )
+    );
+    // API CALL  TO UPDATE THE GRID DATA
+  }
+}, [popupData]);
+
+  const handleOnClickFunction = (obj) =>{
+    console.log("on Click Data",gridData)
+    if(obj["payment"].toLowerCase() === "pay"){
+      setPopupData(obj);
+      setIsOpen(true);
+    }
+    if(obj["payment"].toLowerCase() === "paid"){
+      setPopupData(obj);
+      console.log("PAIDDDDD")
+      setPaymentStatusChange(true);
+    }
+
+  } 
 
   return (
     <div className="w-full">
@@ -146,14 +196,29 @@ export function CustomDataTable({
                   onClick={handleRowClick}
                   data-state={row.getIsSelected() && "selected"}
                 >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
+                  {row.getVisibleCells().map((cell) => {
+                    const columnDef = cell.column.columnDef;
+
+                    // Check if the column has an onClick function
+                    const isLinkColumn = typeof columnDef.onClick === "function";
+                    return isLinkColumn ? (
+                      <TableCellLink
+                        key={cell.id}
+                        onClick={() => handleOnClickFunction(row.original)} // Show popup with row data
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCellLink>
+                    ) :
+                      (<TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>)
+                  })}
                 </TableRow>
               ))
             ) : (
@@ -192,6 +257,24 @@ export function CustomDataTable({
           Next
         </Button>
       </div>
+      {isOpen && (
+        <PaymentPopup
+          popupData={popupData}
+          setPopupData ={setPopupData}
+          isOpen={isOpen}
+          setIsOpen={setIsOpen} // Close popup
+          isPopupDataUpdated = {isPopupDataUpdated}
+        />
+      )}
+      {paymentStatusChange && (
+        <ChangePaymentStatus
+          isOpen = {paymentStatusChange}
+          setIsOpen = {setPaymentStatusChange}
+          popupData={popupData}
+          setPopupData={setPopupData}
+          isPopupDataUpdated={isPopupDataUpdated}
+        />
+      )}
     </div>
   );
 }

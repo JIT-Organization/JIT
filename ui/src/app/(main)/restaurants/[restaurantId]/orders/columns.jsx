@@ -55,6 +55,9 @@ export const getOrderColumns = ( handleEditClick, handleDeleteClick) => [
       accessorKey: "payment",
       header: "Payment",
       cell: ({ row }) => <div>{row.getValue("payment")}</div>,
+      onClick: (rowData) => {
+        console.log("Payment clicked for:", rowData);
+      }
     },
     {
       id: "actions",
