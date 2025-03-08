@@ -1,6 +1,5 @@
 package com.justintime.jit.controller;
 
-import com.justintime.jit.dto.RestaurantDTO;
 import com.justintime.jit.entity.Restaurant;
 import com.justintime.jit.service.RestaurantService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,32 +17,32 @@ public class RestaurantController {
 
     // Add a new restaurant
     @PostMapping
-    public ResponseEntity<RestaurantDTO> addRestaurant(@RequestBody RestaurantDTO restaurantDTO) {
-        RestaurantDTO createdRestaurant = restaurantService.addRestaurant(restaurantDTO);
+    public ResponseEntity<Restaurant> addRestaurant(@RequestBody Restaurant restaurant) {
+        Restaurant createdRestaurant = restaurantService.addRestaurant(restaurant);
         return ResponseEntity.ok(createdRestaurant);
     }
 
     // Get all restaurants
     @GetMapping
-    public ResponseEntity<List<RestaurantDTO>> getAllRestaurants() {
-        List<RestaurantDTO> restaurants = restaurantService.getAllRestaurants();
+    public ResponseEntity<List<Restaurant>> getAllRestaurants() {
+        List<Restaurant> restaurants = restaurantService.getAllRestaurants();
         return ResponseEntity.ok(restaurants);
     }
 
-     //Get a restaurant by ID
+    //Get a restaurant by ID
     @GetMapping("/{restaurantId}")
-    public ResponseEntity<RestaurantDTO> getRestaurantById(@PathVariable Long restaurantId) {
-        RestaurantDTO restaurantDTO = restaurantService.getRestaurantById(restaurantId);
-        return ResponseEntity.ok(restaurantDTO);
+    public ResponseEntity<Restaurant> getRestaurantById(@PathVariable Long restaurantId) {
+        Restaurant restaurant = restaurantService.getRestaurantById(restaurantId);
+        return ResponseEntity.ok(restaurant);
     }
 
     // Update restaurant details
     @PutMapping("/{restaurantId}")
-    public ResponseEntity<RestaurantDTO> updateRestaurant(
+    public ResponseEntity<Restaurant> updateRestaurant(
             @PathVariable Long restaurantId,
-            @RequestBody RestaurantDTO restaurantDTO) {
-        RestaurantDTO updatedRestaurantDTO = restaurantService.updateRestaurant(restaurantId, restaurantDTO);
-        return ResponseEntity.ok(updatedRestaurantDTO);
+            @RequestBody Restaurant restaurant) {
+        Restaurant updatedRestaurant = restaurantService.updateRestaurant(restaurantId, restaurant);
+        return ResponseEntity.ok(updatedRestaurant);
     }
 
     // Delete a restaurant

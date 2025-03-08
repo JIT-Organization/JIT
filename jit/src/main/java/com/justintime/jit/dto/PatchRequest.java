@@ -1,11 +1,11 @@
 package com.justintime.jit.dto;
-
 import lombok.Getter;
-
+import lombok.Setter;
 import java.util.List;
 
 @Getter
-public class PatchMenuItemRequest {
-    private MenuItemDTO menuItemDTO;
+@Setter
+public class PatchRequest<T> {
+    private T dto;
     private List<String> propertiesToBeUpdated;
 }

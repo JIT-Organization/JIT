@@ -47,6 +47,10 @@ public class Category extends BaseEntity{
     )
     private Set<Combo> combos = new HashSet<>();
 
+    @ManyToOne
+    @JoinColumn(name = "restaurant_id")  // Ensure this is present
+    private Restaurant restaurant;
+
 //    // Copy Constructor
 //    public Category(Category other) {
 //        this.id = other.id;

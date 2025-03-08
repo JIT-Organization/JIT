@@ -1,90 +1,55 @@
 package com.justintime.jit.service.impl;
 
-import com.justintime.jit.dto.RestaurantDTO;
 import com.justintime.jit.entity.Restaurant;
 import com.justintime.jit.repository.RestaurantRepository;
 import com.justintime.jit.service.RestaurantService;
-import com.justintime.jit.util.mapper.GenericMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.beans.BeanUtils;
 
 import java.util.*;
 
 @Service
 public class RestaurantServiceImpl extends BaseServiceImpl<Restaurant,Long> implements RestaurantService {
-
     @Autowired
     private RestaurantRepository restaurantRepository;
-
-    @Autowired
-    private GenericMapperImpl<Restaurant, RestaurantDTO> restaurantMapper;
 
     private static final int SUGGESTION_THRESHOLD = 3;
 
     @Override
-    public RestaurantDTO addRestaurant(RestaurantDTO restaurantDTO) {
-        Restaurant restaurant = restaurantMapper.toEntity(restaurantDTO, Restaurant.class);
-        Restaurant savedRestaurant = restaurantRepository.save(restaurant);
-        return restaurantMapper.toDTO(savedRestaurant, RestaurantDTO.class);
-    }
-
-
-    @Override
-    public List<RestaurantDTO> getAllRestaurants() {
-        return restaurantRepository.findAll()
-                .stream()
-                .map(item -> restaurantMapper.toDTO(item, RestaurantDTO.class))
-                .toList(); // Collecting to a list
+    public Restaurant addRestaurant(Restaurant restaurant) {
+        return restaurantRepository.save(restaurant);
     }
 
     @Override
-    public RestaurantDTO getRestaurantById(Long id) {
-        Restaurant restaurant = restaurantRepository.findById(id)
+    public List<Restaurant> getAllRestaurants() {
+        return restaurantRepository.findAll();
+    }
+
+    @Override
+    public Restaurant getRestaurantById(Long id) {
+        return restaurantRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Restaurant not found with id: " + id));
-        return restaurantMapper.toDTO(restaurant, RestaurantDTO.class);
     }
 
+
     @Override
-    public RestaurantDTO updateRestaurant(Long id, RestaurantDTO restaurantDTO) {
-        Restaurant existingRestaurant = restaurantRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Restaurant not found with id: " + id));
+    public Restaurant updateRestaurant(Long id, Restaurant restaurant) {
+        Restaurant existingRestaurant = getRestaurantById(id);
 
-        // Copy properties from DTO to entity, ignoring "id" to prevent accidental overwrites
-        BeanUtils.copyProperties(restaurantDTO, existingRestaurant, "id");
+        existingRestaurant.setRestaurantName(restaurant.getRestaurantName());
+        existingRestaurant.setContactNumber(restaurant.getContactNumber());
+        existingRestaurant.setEmail(restaurant.getEmail());
+        existingRestaurant.setAdmins(restaurant.getAdmins());
+        existingRestaurant.setMenu(restaurant.getMenu());
+        existingRestaurant.setOrders(restaurant.getOrders());
+        existingRestaurant.setContactNumber(restaurant.getContactNumber());
 
-        Restaurant updatedRestaurant = restaurantRepository.save(existingRestaurant);
-        return restaurantMapper.toDTO(updatedRestaurant, RestaurantDTO.class);
+        return restaurantRepository.save(existingRestaurant);
     }
 
     @Override
     public void deleteRestaurant(Long id) {
-        Restaurant existingRestaurant = restaurantRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Restaurant not found with id: " + id));
-
+        Restaurant existingRestaurant = getRestaurantById(id);
         restaurantRepository.delete(existingRestaurant);
     }
-
-//    public List<String> findSimilarNames(String name) {
-//        List<String> allNames = restaurantRepository.findAll().stream()
-//                .map(Restaurant::getName)
-//                .collect(Collectors.toList());
-//
-//        return allNames.stream()
-//                .filter(existingName -> existingName.toLowerCase().contains(name.toLowerCase()))
-//                .collect(Collectors.toList());
-//    }
-//
-//    public String suggestCorrectName(String name) {
-//        List<String> allNames = restaurantRepository.findAll().stream()
-//                .map(Restaurant::getName)
-//                .collect(Collectors.toList());
-//
-//        LevenshteinDistance distance = new LevenshteinDistance();
-//
-//        return allNames.stream()
-//                .min(Comparator.comparingInt(existingName -> distance.apply(name.toLowerCase(), existingName.toLowerCase())))
-//                .filter(existingName -> distance.apply(name.toLowerCase(), existingName.toLowerCase()) <= SUGGESTION_THRESHOLD)
-//                .orElse(null);
-//    }
 }

@@ -26,5 +26,6 @@ public interface ComboRepository extends BaseRepository<Combo, Long> {
 
 
     List<Combo> findByRestaurantId(Long restaurantId);
+//    Combo findByComboNameAndCategoryId(String comboName, Long categoryId);
 }
 
