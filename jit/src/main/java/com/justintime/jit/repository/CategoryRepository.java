@@ -27,4 +27,5 @@ public interface CategoryRepository extends BaseRepository<Category,Long> {
     List<Category> findByRestaurantId(Long restaurantId);
 
 
+    Boolean existsByCategoryNameAndRestaurantId(String categoryName,Long restaurantId);
 }

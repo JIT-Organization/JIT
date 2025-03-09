@@ -5,6 +5,7 @@ import com.justintime.jit.entity.ComboEntities.Combo;
 import com.justintime.jit.entity.MenuItem;
 import com.justintime.jit.repository.BaseRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -12,20 +13,8 @@ import java.util.List;
 @Repository
 public interface ComboRepository extends BaseRepository<Combo, Long> {
 
-//    @Query("SELECT new com.justintime.jit.dto.ComboDTO(" +
-//            "c.id, c.comboName, c.description, c.price, c.offerPrice, c.offerFrom, c.offerTo, " +
-//            "c.stock, c.count, c.preparationTime, c.acceptBulkOrders, c.onlyVeg, c.active, " +
-//            "c.hotelSpecial, c.base64Image, c.rating, c.createdDttm, c.updatedDttm, " +
-//            "(SELECT new com.justintime.jit.dto.ComboItemDTO(ci.id, ci.menuItem.id, ci.comboItemName, ci.quantity) " +
-//            " FROM c.comboItemSet ci), " +
-//            "(SELECT cat.categoryName FROM c.categories cat), " +
-//            "(SELECT new com.justintime.jit.dto.TimeIntervalDTO(ti.startTime, ti.endTime) " +
-//            " FROM c.timeIntervalSet ti)) " +
-//            "FROM Combo c")
-//    List<ComboDTO> findAllDTO();
-
-
     List<Combo> findByRestaurantId(Long restaurantId);
-//    Combo findByComboNameAndCategoryId(String comboName, Long categoryId);
+    @Query(value = "SELECT c.* FROM combo c JOIN combo_category cc ON c.id = cc.combo_id WHERE cc.category_id = :categoryId AND c.combo_name = :comboName", nativeQuery = true)
+    Combo findByComboNameAndCategoryId(@Param("comboName") String comboName, @Param("categoryId") Long categoryId);
 }
 

@@ -29,19 +29,19 @@ public class CategoryController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
-    public ResponseEntity<Category> createCategory(@RequestBody Category category) {
-        return ResponseEntity.ok(categoryService.createCategory(category));
+    @PostMapping("/{restaurantId}")
+    public ResponseEntity<Category> createCategory(@PathVariable Long restaurantId,@RequestBody CategoryDTO categoryDTO) {
+        return ResponseEntity.ok(categoryService.createCategory(restaurantId,categoryDTO));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Category> updateCategory(@PathVariable Long id, @RequestBody Category category) {
-        return ResponseEntity.ok(categoryService.updateCategory(id, category));
+    @PutMapping("/{restaurantId}/{id}")
+    public ResponseEntity<Category> updateCategory(@PathVariable Long restaurantId,@PathVariable Long id, @RequestBody CategoryDTO categoryDTO) {
+        return ResponseEntity.ok(categoryService.updateCategory(restaurantId,id, categoryDTO));
     }
 
-    @PatchMapping("/{id}")
-    public Category patchUpdateMenuItem(@PathVariable Long id, @RequestBody PatchRequest<CategoryDTO> payload) {
-        return categoryService.patchUpdateCategory(id, payload.getDto(), payload.getPropertiesToBeUpdated());
+    @PatchMapping("/{restaurantId}/{id}")
+    public Category patchUpdateCategory(@PathVariable Long restaurantId,@PathVariable Long id, @RequestBody PatchRequest<CategoryDTO> payload) {
+        return categoryService.patchUpdateCategory(restaurantId,id, payload.getDto(), payload.getPropertiesToBeUpdated());
     }
 
     @DeleteMapping("/{id}")

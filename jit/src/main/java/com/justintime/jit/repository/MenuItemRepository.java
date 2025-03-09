@@ -1,16 +1,26 @@
 package com.justintime.jit.repository;
 
-import com.justintime.jit.entity.Category;
 import com.justintime.jit.entity.MenuItem;
-import org.springframework.data.jdbc.repository.query.Query;
+
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface MenuItemRepository extends BaseRepository<MenuItem, Long> {
     List<MenuItem> findByRestaurantId(Long restaurantId);
     List<MenuItem> findByMenuItemNameContaining(String restaurantName);
-//MenuItem findByMenuItemNameAndCategoryId(String menuItemName, Long categoryId);
+
+    @Query(value = "SELECT mi.* FROM menu_item mi " +
+            "JOIN category_menu_item cmi ON mi.id = cmi.menu_item_id " +
+            "WHERE mi.menu_item_name IN (:menuItemNames) " +
+            "AND cmi.category_id = :categoryId",
+            nativeQuery = true)
+    Set<MenuItem> findByMenuItemNamesAndCategoryId(@Param("menuItemNames") Set<String> menuItemNames,
+                                                   @Param("categoryId") Long categoryId);
+
+
 }
