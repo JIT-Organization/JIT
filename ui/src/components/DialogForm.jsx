@@ -270,7 +270,7 @@ export default function DialogForm({ type }) {
 
   const form = useForm({
     defaultValues: getDefaultValues(type),
-    mode: "onBlur",
+    // mode: "onBlur",
   });
 
   return (

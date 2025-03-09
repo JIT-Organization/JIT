@@ -1,7 +1,7 @@
 "use client";
 import { getMenuListcolumns } from "./columns";
 import { CustomDataTable } from "@/components/customUIComponents/CustomDataTable";
-import { deleteMenuItem, getMenuItemListOptions, patchUpdateMenuItemList } from "@/lib/api";
+import { deleteMenuItem, getMenuItemListOptions, patchUpdateMenuItemList } from "@/lib/api/api";
 import { getDistinctCategories } from "@/lib/utils/helper";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { usePathname, useRouter } from "next/navigation";
@@ -15,8 +15,8 @@ const MenuList = () => {
   const patchMutation = useMutation(patchUpdateMenuItemList(queryClient));
   const deleteMutation = useMutation(deleteMenuItem(queryClient));
 
-  if (isLoading) return <p>Loading posts...</p>;
-  if (error) return <p>Error loading posts: {error.message}</p>;
+  if (isLoading) return <p>Loading menu items...</p>;
+  if (error) return <p>Error loading menu items: {error.message}</p>;
 
   const handleToggle = async (id, value) => {
     patchMutation.mutate({ id, fields: { active: value } });

@@ -21,6 +21,7 @@ import {
 import { ChevronLeft, Filter } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Separator } from "../ui/separator";
+import CustomPopup from "./CustomPopup";
 
 export function CustomDataTable({
   columns = [],
@@ -29,6 +30,7 @@ export function CustomDataTable({
   tabName,
   handleHeaderButtonClick = () => {},
   headerButtonName,
+  headerDialogType,
   categories,
 }) {
   const [sorting, setSorting] = React.useState([]);
@@ -92,8 +94,16 @@ export function CustomDataTable({
           <Button variant="ghost">
             <Filter />
           </Button>
-          {headerButtonName && (
-            <Button onClick={handleHeaderButtonClick}>{headerButtonName}</Button>
+          {headerDialogType && headerButtonName ? (
+            <CustomPopup
+              type={headerDialogType}
+              trigger={<Button>{headerButtonName}</Button>}
+              // dialogDescription={"Category Info"}
+            />
+          ) : (
+            headerButtonName && (
+              <Button onClick={handleHeaderButtonClick}>{headerButtonName}</Button>
+            )
           )}
         </div>
       </div>
