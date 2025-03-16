@@ -48,10 +48,10 @@ public class CategoryServiceImpl extends BaseServiceImpl<Category,Long> implemen
 
     private CategoryDTO mapToDTO(Category category, GenericMapper<Category, CategoryDTO> mapper) {
         CategoryDTO dto = mapper.toDto(category);
-        dto.setMenuItemSet(category.getMenuItems().stream()
+        dto.setMenuItemSet(category.getMenuItemSet().stream()
                 .map(MenuItem::getName)
                 .collect(Collectors.toSet()));
-        dto.setComboSet(category.getCombos().stream()
+        dto.setComboSet(category.getComboSet().stream()
                 .map(Combo::getComboName)
                 .collect(Collectors.toSet()));
 
@@ -82,8 +82,8 @@ public class CategoryServiceImpl extends BaseServiceImpl<Category,Long> implemen
             GenericMapper<Category, CategoryDTO> mapper = MapperFactory.getMapper(Category.class, CategoryDTO.class);
             Category updatedCategory = mapper.toEntity(updatedCategoryDTO);
             updatedCategory.setRestaurant(restaurantRepository.findById(restaurantId).orElseThrow(() -> new RuntimeException("Restaurant not found")));
-            resolveRelationships(updatedCategory, updatedCategoryDTO);
             updatedCategory.setId(id);
+            resolveRelationships(updatedCategory, updatedCategoryDTO);
             updatedCategory.setUpdatedDttm(LocalDateTime.now());
 
             return categoryRepository.save(updatedCategory);
@@ -114,15 +114,15 @@ public class CategoryServiceImpl extends BaseServiceImpl<Category,Long> implemen
     private void resolveRelationships(Category category, CategoryDTO categoryDTO) {
 
         if (categoryDTO.getMenuItemSet() != null) {
-            Set<MenuItem> menuItems = menuItemRepository.findByMenuItemNamesAndCategoryId(
-                    categoryDTO.getMenuItemSet(), categoryDTO.getId());
-            category.setMenuItems(menuItems);
+
+            Set<MenuItem> menuItems = menuItemRepository.findByMenuItemNamesAndRestaurantId(
+                    categoryDTO.getMenuItemSet(),category.getRestaurant().getId());
+            category.setMenuItemSet(menuItems);
         }
         if (categoryDTO.getComboSet() != null) {
-            category.setCombos(categoryDTO.getComboSet().stream()
-                    .map(comboName -> comboRepository.findByComboNameAndCategoryId(comboName, category.getId()))
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toSet()));
+           Set<Combo> combos = comboRepository.findByComboNamesAndRestaurantId(
+                    categoryDTO.getComboSet(),category.getRestaurant().getId());
+            category.setComboSet(combos);
         }}
 
         private void copySelectedProperties(Object source, Object target, List<String> propertiesToBeChanged){

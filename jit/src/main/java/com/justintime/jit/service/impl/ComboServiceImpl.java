@@ -56,7 +56,7 @@ public class ComboServiceImpl extends BaseServiceImpl<Combo,Long> implements Com
 
                     // Map Categories
                     comboDTO.setCategorySet(
-                            combo.getCategories().stream()
+                            combo.getCategorySet().stream()
                                     .map(Category::getCategoryName)
                                     .collect(Collectors.toSet())
                     );

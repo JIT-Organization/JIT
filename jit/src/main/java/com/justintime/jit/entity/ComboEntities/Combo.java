@@ -43,7 +43,7 @@ public class Combo extends BaseEntity implements FilterableItem {
             joinColumns = @JoinColumn(name = "combo_id"),
             inverseJoinColumns = @JoinColumn(name = "category_id")
     )
-    private Set<Category> categories = new HashSet<>();
+    private Set<Category> categorySet = new HashSet<>();
 
     @ManyToOne
     @JoinColumn(name = "restaurant_id", nullable = false)

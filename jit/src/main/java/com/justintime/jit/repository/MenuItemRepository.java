@@ -16,11 +16,11 @@ public interface MenuItemRepository extends BaseRepository<MenuItem, Long> {
 
     @Query(value = "SELECT mi.* FROM menu_item mi " +
             "JOIN category_menu_item cmi ON mi.id = cmi.menu_item_id " +
-            "WHERE mi.menu_item_name IN (:menuItemNames) " +
-            "AND cmi.category_id = :categoryId",
+            "WHERE mi.menu_item_name IN (:formattedMenuItemNames) " +
+            "AND mi.restaurant_id = :restaurantId",
             nativeQuery = true)
-    Set<MenuItem> findByMenuItemNamesAndCategoryId(@Param("menuItemNames") Set<String> menuItemNames,
-                                                   @Param("categoryId") Long categoryId);
+    Set<MenuItem> findByMenuItemNamesAndRestaurantId(@Param("formattedMenuItemNames") Set<String> formattedMenuItemNames,
+                                                   @Param("restaurantId") Long restaurantId);
 
 
 }

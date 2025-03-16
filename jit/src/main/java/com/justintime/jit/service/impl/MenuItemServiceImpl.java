@@ -31,19 +31,22 @@ public class MenuItemServiceImpl extends BaseServiceImpl<MenuItem, Long> impleme
     private final OrderItemRepository orderItemRepository;
     private final TimeIntervalRepository timeIntervalRepository;
     private final FilterItemsUtil filterItemsUtil;
+    private final RestaurantRepository restaurantRepository;
 
     public MenuItemServiceImpl(MenuItemRepository menuItemRepository,
                                CategoryRepository categoryRepository,
                                CookRepository cookRepository,
                                OrderItemRepository orderItemRepository,
                                TimeIntervalRepository timeIntervalRepository,
-                               FilterItemsUtil filterItemsUtil) {
+                               FilterItemsUtil filterItemsUtil,RestaurantRepository restaurantRepository) {
+
         this.menuItemRepository = menuItemRepository;
         this.categoryRepository = categoryRepository;
         this.cookRepository = cookRepository;
         this.orderItemRepository = orderItemRepository;
         this.timeIntervalRepository = timeIntervalRepository;
         this.filterItemsUtil = filterItemsUtil;
+        this.restaurantRepository= restaurantRepository;
     }
 
     @Override
@@ -55,20 +58,22 @@ public class MenuItemServiceImpl extends BaseServiceImpl<MenuItem, Long> impleme
     }
   
     @Override
-    public MenuItem addMenuItem(MenuItemDTO menuItemDTO) {
+    public MenuItem addMenuItem(Long restaurantId,MenuItemDTO menuItemDTO) {
         GenericMapper<MenuItem, MenuItemDTO> mapper = MapperFactory.getMapper(MenuItem.class, MenuItemDTO.class);
         MenuItem menuItem = mapper.toEntity(menuItemDTO);
+        menuItem.setRestaurant(restaurantRepository.findById(restaurantId).orElseThrow(() -> new RuntimeException("Restaurant not found")));
         resolveRelationships(menuItem, menuItemDTO);
         menuItem.setUpdatedDttm(LocalDateTime.now());
         return menuItemRepository.save(menuItem);
     }
 
     @Override
-    public MenuItem updateMenuItem(Long id, MenuItemDTO menuItemDTO) {
+    public MenuItem updateMenuItem(Long restaurantId,Long id, MenuItemDTO menuItemDTO) {
         MenuItem existingItem = menuItemRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("MenuItem not found"));
         GenericMapper<MenuItem, MenuItemDTO> menuItemMapper = MapperFactory.getMapper(MenuItem.class, MenuItemDTO.class);
         MenuItem patchedItem = menuItemMapper.toEntity(menuItemDTO);
+        patchedItem.setRestaurant(restaurantRepository.findById(restaurantId).orElseThrow(() -> new RuntimeException("Restaurant not found")));
         resolveRelationships(patchedItem, menuItemDTO);
         BeanUtils.copyProperties(patchedItem, existingItem, "id", "createdDttm");
         existingItem.setUpdatedDttm(LocalDateTime.now());
@@ -76,11 +81,12 @@ public class MenuItemServiceImpl extends BaseServiceImpl<MenuItem, Long> impleme
     }
 
     @Override
-    public MenuItem patchUpdateMenuItem(Long id, MenuItemDTO menuItemDTO, List<String> propertiesToBeUpdated) {
+    public MenuItem patchUpdateMenuItem(Long restaurantId,Long id, MenuItemDTO menuItemDTO, List<String> propertiesToBeUpdated) {
         MenuItem existingItem = menuItemRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("MenuItem not found"));
         GenericMapper<MenuItem, MenuItemDTO> menuItemMapper = MapperFactory.getMapper(MenuItem.class, MenuItemDTO.class).setSkipNullEnabled(true);
         MenuItem patchedItem = menuItemMapper.toEntity(menuItemDTO);
+        patchedItem.setRestaurant(restaurantRepository.findById(restaurantId).orElseThrow(() -> new RuntimeException("Restaurant not found")));
         resolveRelationships(patchedItem, menuItemDTO);
         copySelectedProperties(patchedItem, existingItem, propertiesToBeUpdated);
         existingItem.setUpdatedDttm(LocalDateTime.now());
@@ -113,14 +119,14 @@ public class MenuItemServiceImpl extends BaseServiceImpl<MenuItem, Long> impleme
 
     private void resolveRelationships(MenuItem menuItem, MenuItemDTO menuItemDTO) {
         if (menuItemDTO.getCategorySet() != null) {
-            menuItem.setCategorySet(menuItemDTO.getCategorySet().stream()
-                    .map(categoryRepository::findByCategoryName)
-                    .collect(Collectors.toSet()));
+            Set<Category> categories = categoryRepository.findByCategoryNamesAndRestaurantId(
+                    menuItemDTO.getCategorySet(), menuItem.getRestaurant().getId());
+            menuItem.setCategorySet(categories);
         }
         if (menuItemDTO.getCookSet() != null) {
-            menuItem.setCookSet(menuItemDTO.getCookSet().stream()
-                    .map(cookRepository::findByName)
-                    .collect(Collectors.toSet()));
+            Set<Cook> cooks = cookRepository.findByNameInAndRestaurantId(
+                    menuItemDTO.getCookSet(), menuItem.getRestaurant().getId());
+            menuItem.setCookSet(cooks);
         }
         if (menuItemDTO.getTimeIntervalSet() != null) {
             menuItem.setTimeIntervalSet(menuItemDTO.getTimeIntervalSet().stream()

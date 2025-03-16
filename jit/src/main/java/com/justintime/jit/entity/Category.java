@@ -37,7 +37,7 @@ public class Category extends BaseEntity{
             joinColumns = @JoinColumn(name = "category_id"),
             inverseJoinColumns = @JoinColumn(name = "menu_item_id")
     )
-    private Set<MenuItem> menuItems = new HashSet<>();
+    private Set<MenuItem> menuItemSet = new HashSet<>();
 
     @ManyToMany
     @JoinTable(
@@ -45,7 +45,7 @@ public class Category extends BaseEntity{
             joinColumns = @JoinColumn(name = "category_id"),
             inverseJoinColumns = @JoinColumn(name = "combo_id")
     )
-    private Set<Combo> combos = new HashSet<>();
+    private Set<Combo> comboSet = new HashSet<>();
 
     @ManyToOne
     @JoinColumn(name = "restaurant_id")  // Ensure this is present

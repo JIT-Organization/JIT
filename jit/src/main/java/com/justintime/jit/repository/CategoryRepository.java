@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface CategoryRepository extends BaseRepository<Category,Long> {
@@ -17,15 +18,15 @@ public interface CategoryRepository extends BaseRepository<Category,Long> {
 
     Category findByCategoryName(String categoryName);
 
-//    @Query(value = "SELECT DISTINCT c.* FROM category c " +
-//            "JOIN category_menu_item mc ON c.id = mc.category_id " +
-//            "JOIN menu_item m ON mc.menu_item_id = m.id " +
-//            "WHERE m.restaurant_id = :restaurantId",
-//            nativeQuery = true)
-//    List<Category> findDistinctCategoriesByRestaurantId(@Param("restaurantId") Long restaurantId);
-
     List<Category> findByRestaurantId(Long restaurantId);
 
-
     Boolean existsByCategoryNameAndRestaurantId(String categoryName,Long restaurantId);
+
+    @Query(value = "SELECT c.* FROM category c " +
+            "WHERE c.category_name IN (:categoryNames) " +
+            "AND c.restaurant_id = :restaurantId",
+            nativeQuery = true)
+    Set<Category> findByCategoryNamesAndRestaurantId(@Param("categoryNames") Set<String> categoryNames,
+                                                     @Param("restaurantId") Long restaurantId);
+
 }

@@ -63,9 +63,6 @@ public class User extends BaseEntity{
         @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
         private List<Admin> admins;
 
-        @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-        private Cook cook;  // A single cook record per user
-
 //        // Copy Constructor
 //        public User(User other) {
 //                this.id = other.id;
