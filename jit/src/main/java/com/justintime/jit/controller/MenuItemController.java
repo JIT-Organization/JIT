@@ -1,7 +1,7 @@
 package com.justintime.jit.controller;
 
 import com.justintime.jit.dto.MenuItemDTO;
-import com.justintime.jit.dto.PatchMenuItemRequest;
+import com.justintime.jit.dto.PatchRequest;
 import com.justintime.jit.entity.Enums.Sort;
 import com.justintime.jit.entity.MenuItem;
 import com.justintime.jit.exception.ImageSizeLimitExceededException;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/menu-items")
+@RequestMapping("/jit-api/menu-items")
 @CrossOrigin(origins = "*")
 public class MenuItemController {
 
@@ -49,19 +49,19 @@ public class MenuItemController {
         }
     }
 
-    @PostMapping
-    public MenuItemDTO addMenuItem(@RequestBody MenuItemDTO menuItemDTO) {
-        return menuItemService.addMenuItem(menuItemDTO);
+    @PostMapping("/{restaurantId}")
+    public MenuItem addMenuItem(@PathVariable Long restaurantId,@RequestBody MenuItemDTO menuItemDTO) {
+        return menuItemService.addMenuItem(restaurantId,menuItemDTO);
     }
 
-    @PutMapping("/{id}")
-    public MenuItem updateMenuItem(@PathVariable Long id, @RequestBody MenuItemDTO updatedItem) {
-        return menuItemService.updateMenuItem(id, updatedItem);
+    @PutMapping("/{restaurantId}/{id}")
+    public MenuItem updateMenuItem(@PathVariable Long restaurantId,@PathVariable Long id, @RequestBody MenuItemDTO updatedItem) {
+        return menuItemService.updateMenuItem(restaurantId,id, updatedItem);
     }
 
-    @PatchMapping("/{id}")
-    public MenuItem patchUpdateMenuItem(@PathVariable Long id, @RequestBody PatchMenuItemRequest payload) {
-        return menuItemService.patchUpdateMenuItem(id, payload.getMenuItemDTO(), payload.getPropertiesToBeUpdated());
+    @PatchMapping("/{restaurantId}/{id}")
+    public MenuItem patchUpdateMenuItem(@PathVariable Long restaurantId,@PathVariable Long id, @RequestBody PatchRequest<MenuItemDTO> payload) {
+        return menuItemService.patchUpdateMenuItem(restaurantId,id, payload.getDto(), payload.getPropertiesToBeUpdated());
     }
 
     @DeleteMapping("/{id}")

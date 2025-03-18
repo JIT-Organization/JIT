@@ -63,7 +63,7 @@ public class Restaurant extends BaseEntity{
         private List<Combo> combos;
 
         @OneToMany(mappedBy = "restaurant")
-        private List<Cook> cooks;
+        private List<Cook> Ccooks;
 
         @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
         private List<Order> orders;
@@ -76,6 +76,9 @@ public class Restaurant extends BaseEntity{
 
         @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
         private List<Admin> admins;
+
+        @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
+        private List<Category> categories;
 
 //        // Copy Constructor
 //        public Restaurant(Restaurant other) {

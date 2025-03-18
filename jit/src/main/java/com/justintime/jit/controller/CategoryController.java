@@ -1,5 +1,7 @@
 package com.justintime.jit.controller;
 
+import com.justintime.jit.dto.CategoryDTO;
+import com.justintime.jit.dto.PatchRequest;
 import com.justintime.jit.service.CategoryService;
 import com.justintime.jit.entity.Category;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,32 +11,38 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/categories")
+@RequestMapping("/jit-api/categories")
+@CrossOrigin(origins = "*")
 public class CategoryController {
 
     @Autowired
     private CategoryService categoryService;
 
-    @GetMapping
-    public List<Category> getAllCategories() {
-        return categoryService.getAllCategories();
+    @GetMapping("/getAll/{restaurantId}")
+    public List<CategoryDTO> getAllCategories(@PathVariable Long restaurantId) {
+        return categoryService.getAllCategories(restaurantId);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Category> getCategoryById(@PathVariable Long id) {
+    public ResponseEntity<CategoryDTO> getCategoryById(@PathVariable Long id) {
         return categoryService.getCategoryById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
-    public ResponseEntity<Category> createCategory(@RequestBody Category category) {
-        return ResponseEntity.ok(categoryService.createCategory(category));
+    @PostMapping("/{restaurantId}")
+    public ResponseEntity<Category> createCategory(@PathVariable Long restaurantId,@RequestBody CategoryDTO categoryDTO) {
+        return ResponseEntity.ok(categoryService.createCategory(restaurantId,categoryDTO));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Category> updateCategory(@PathVariable Long id, @RequestBody Category category) {
-        return ResponseEntity.ok(categoryService.updateCategory(id, category));
+    @PutMapping("/{restaurantId}/{id}")
+    public ResponseEntity<Category> updateCategory(@PathVariable Long restaurantId,@PathVariable Long id, @RequestBody CategoryDTO categoryDTO) {
+        return ResponseEntity.ok(categoryService.updateCategory(restaurantId,id, categoryDTO));
+    }
+
+    @PatchMapping("/{restaurantId}/{id}")
+    public Category patchUpdateCategory(@PathVariable Long restaurantId,@PathVariable Long id, @RequestBody PatchRequest<CategoryDTO> payload) {
+        return categoryService.patchUpdateCategory(restaurantId,id, payload.getDto(), payload.getPropertiesToBeUpdated());
     }
 
     @DeleteMapping("/{id}")

@@ -39,10 +39,6 @@ public class Cook extends BaseEntity{
     @JoinColumn(name = "restaurant_id", nullable = false)
     private Restaurant restaurant;
 
-    @OneToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-
     @ManyToMany(mappedBy = "cookSet")
     private Set<MenuItem> menuItemSet;
 }

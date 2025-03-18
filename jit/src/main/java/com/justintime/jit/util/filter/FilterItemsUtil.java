@@ -50,7 +50,7 @@ public class FilterItemsUtil {
                             return m.getCategorySet().stream()
                                     .anyMatch(c -> category.equalsIgnoreCase(c.getCategoryName()));
                         } else if (item instanceof Combo c) {
-                            return c.getCategories().stream()
+                            return c.getCategorySet().stream()
                                     .anyMatch(cat -> category.equalsIgnoreCase(cat.getCategoryName()));
                         }
                         return false;
@@ -99,7 +99,7 @@ public class FilterItemsUtil {
 
         if (dto instanceof ComboDTO comboDTO && item instanceof Combo combo) {
             comboDTO.setCategorySet(
-                    combo.getCategories().stream()
+                    combo.getCategorySet().stream()
                             .map(Category::getCategoryName)
                             .collect(Collectors.toSet())
             );
