@@ -1,8 +1,7 @@
-package com.justintime.jit.controller;
+package com.justintime.jit.exception;
 
+import com.justintime.jit.controller.BaseController;
 import com.justintime.jit.dto.ApiResponse;
-import com.justintime.jit.exception.ResourceNotFoundException;
-import com.justintime.jit.exception.TokenExpiredException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -11,7 +10,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import javax.security.auth.login.LoginException;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler extends BaseController{
+public class GlobalExceptionHandler extends BaseController {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleGeneralExceptions(Exception ex) {

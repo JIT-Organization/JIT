@@ -5,6 +5,7 @@ import com.justintime.jit.service.JwtService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -19,19 +20,14 @@ import java.util.function.Function;
 @Service
 public class JwtServiceImpl implements JwtService {
 
-    private final String secretKey;
+    private static final String secretKey = "N3VzdCFuVCFtMzUzY3JldEtleTRKU09Od2ViVDBrM25z";
     private final UserRepository userRepository;
-    private final long accessTokenExpiration = 1000 * 60 * 15;
-    private final long refreshTokenExpiration = 1000 * 60 * 60 * 12;
+    private static final long accessTokenExpiration = 1000 * 60 * 15;
+    private static final long refreshTokenExpiration = 1000 * 60 * 60 * 12;
 
     @Autowired
     public JwtServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
-        try{
-            this.secretKey = generateKey();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private List<Long> getRestaurantIds(String email) {
@@ -100,14 +96,8 @@ public class JwtServiceImpl implements JwtService {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    private Key getKey(){
+    private Key getKey() {
         byte[] keyBytes = Base64.getDecoder().decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
-    }
-
-    private String generateKey() throws NoSuchAlgorithmException {
-        KeyGenerator keyGenerator = KeyGenerator.getInstance("HmacSHA256");
-        SecretKey secretKey = keyGenerator.generateKey();
-        return Base64.getEncoder().encodeToString(secretKey.getEncoded());
     }
 }

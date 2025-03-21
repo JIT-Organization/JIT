@@ -9,6 +9,7 @@ import com.justintime.jit.service.RefreshTokenService;
 import com.justintime.jit.service.UserAuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -43,6 +44,7 @@ public class UserAuthServiceImpl extends BaseServiceImpl<User, Long> implements 
     }
 
     @Override
+    @Transactional
     public void register(User user) {
         user.setPasswordHash(passwordEncoder.encode(user.getPasswordHash()));
         userRepository.save(user);

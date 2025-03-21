@@ -40,8 +40,8 @@ public class AuthController extends BaseController {
     }
 
     @PostMapping("refresh")
-    public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<ApiResponse<String>> refreshToken(HttpServletRequest request, HttpServletResponse response) {
         String newToken = userAuthService.refresh(request, response);
-        return ResponseEntity.ok(newToken);
+        return success(newToken);
     }
 }
