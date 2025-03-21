@@ -68,15 +68,15 @@ jobs:
         working-directory: ./jit
         run: ./gradlew assemble
 
-      # - name: Run SpotBugs
-      #   working-directory: ./jit
-      #   run: ./gradlew spotbugsMain
-
-      - name: Run OWASP Dependency-Check
+      - name: Run SpotBugs
         working-directory: ./jit
-        run: |
-          ./gradlew dependencyCheckAnalyze -Ddependency-check.cache-dir=./cache --info
-          ls -R ./jit/build || echo "Build directory not found."
+        run: ./gradlew spotbugsMain
+
+      # - name: Run OWASP Dependency-Check
+      #   working-directory: ./jit
+      #   run: |
+      #     ./gradlew dependencyCheckAnalyze -Ddependency-check.cache-dir=./cache --info
+      #     ls -R ./jit/build || echo "Build directory not found."
 
       - name: Run Basic SQL Injection Pattern Scan
         working-directory: ./jit
