@@ -1,5 +1,6 @@
 package com.justintime.jit.controller;
 
+import com.justintime.jit.dto.ApiResponse;
 import com.justintime.jit.dto.LoginRequestDto;
 import com.justintime.jit.entity.User;
 import com.justintime.jit.service.RefreshTokenService;
@@ -19,7 +20,7 @@ import static org.springframework.http.ResponseEntity.ok;
 
 @RestController
 @RequestMapping("/")
-public class AuthController {
+public class AuthController extends BaseController {
 
     @Autowired
     private UserAuthService userAuthService;
@@ -33,8 +34,9 @@ public class AuthController {
     }
 
     @PostMapping("login")
-    public String login(@RequestBody LoginRequestDto loginRequestDto, HttpServletResponse response) throws LoginException {
-        return userAuthService.login(loginRequestDto, response);
+    public ResponseEntity<ApiResponse<String>> login(@RequestBody LoginRequestDto loginRequestDto, HttpServletResponse response) throws LoginException {
+        String token =  userAuthService.login(loginRequestDto, response);
+        return success(token, "Login Successful");
     }
 
     @PostMapping("refresh")

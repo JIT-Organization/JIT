@@ -50,9 +50,9 @@ public class UserAuthServiceImpl extends BaseServiceImpl<User, Long> implements 
 
     @Override
     public String login(LoginRequestDto loginRequestDto, HttpServletResponse response) throws LoginException {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequestDto.getEmail(), loginRequestDto.getPassword()));
         try{
+            Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequestDto.getEmail(), loginRequestDto.getPassword()));
             if(authentication.isAuthenticated()){
                 String accessToken = jwtService.generateAccessToken(loginRequestDto.getEmail());
                 String refreshToken = refreshTokenService.createRefreshToken(loginRequestDto.getEmail());

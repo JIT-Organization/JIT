@@ -41,6 +41,7 @@ public class JwtServiceImpl implements JwtService {
     private String generateToken(String email, long expiration) {
         Map<String, Object> claims = new HashMap<>();
         List<Long> restaurantIds = getRestaurantIds(email);
+        claims.put("role", userRepository.findByEmail(email).getRole().toString());
         if(!restaurantIds.isEmpty()) {
             if(restaurantIds.size() == 1) {
                 claims.put("restaurantId", restaurantIds.get(0));
