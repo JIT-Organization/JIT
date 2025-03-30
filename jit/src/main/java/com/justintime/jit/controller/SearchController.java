@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/search")
+@RequestMapping("/jit-api/search")
 public class SearchController {
     //this is a search controller helper class
     @Autowired
