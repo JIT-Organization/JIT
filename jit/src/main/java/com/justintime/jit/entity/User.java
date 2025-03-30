@@ -16,6 +16,7 @@ import org.hibernate.envers.Audited;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Entity
@@ -39,7 +40,7 @@ public class User extends BaseEntity{
         private Boolean isActive;
 
         @Column(name = "user_name", nullable = false)
-        private String userName;
+        private String username;
 
         @Column(name = "email", nullable = false)
         private String email;
@@ -60,8 +61,13 @@ public class User extends BaseEntity{
         @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
         private List<Reservation> reservations;
 
-        @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-        private List<Admin> admins;
+        @ManyToMany
+        @JoinTable(
+                name = "user_restaurant",
+                joinColumns = @JoinColumn(name = "user_id"),
+                inverseJoinColumns = @JoinColumn(name = "restaurant_id")
+        )
+        private Set<Restaurant> restaurants;
 
 //        // Copy Constructor
 //        public User(User other) {

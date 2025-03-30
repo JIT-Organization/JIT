@@ -19,6 +19,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
+import CustomPopup from "@/components/customUIComponents/CustomPopup";
 
 export const getCategoryColumns = ( handleSwitchToggle, handleEditClick, handleDeleteClick ) => [
     {

@@ -16,6 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import CustomPopup from "@/components/customUIComponents/CustomPopup";
 
 export const getTableColumns = ( handleEditClick, handleDeleteClick) => [
     {

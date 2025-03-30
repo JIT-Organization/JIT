@@ -39,7 +39,7 @@ public class RestaurantServiceImpl extends BaseServiceImpl<Restaurant,Long> impl
         existingRestaurant.setRestaurantName(restaurant.getRestaurantName());
         existingRestaurant.setContactNumber(restaurant.getContactNumber());
         existingRestaurant.setEmail(restaurant.getEmail());
-        existingRestaurant.setAdmins(restaurant.getAdmins());
+//        existingRestaurant.setAdmins(restaurant.getAdmins());
         existingRestaurant.setMenu(restaurant.getMenu());
         existingRestaurant.setOrders(restaurant.getOrders());
         existingRestaurant.setContactNumber(restaurant.getContactNumber());

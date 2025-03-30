@@ -1,8 +1,11 @@
 import axios from "axios";
+import { getAxiosInstance } from "../utils/helper";
+
+const axiosInstance = getAxiosInstance();
 
 export const getRequest = async (url, errorMessage = "Failed to fetch data") => {
   try {
-    const response = await axios.get(url);
+    const response = await axiosInstance.get(url);
     if (response.status !== 200) {
       throw new Error(`Failed to fetch from ${url}`);
     }
@@ -17,12 +20,12 @@ export const getRequest = async (url, errorMessage = "Failed to fetch data") => 
 
 
 export const patchRequest = async (url, data) => {
-  const response = await axios.patch(url, data);
+  const response = await axiosInstance.patch(url, data);
   return response.data;
 };
 
 export const deleteRequest = async (url) => {
-  const response = await axios.delete(url);
+  const response = await axiosInstance.delete(url);
   return response.data;
 };
 

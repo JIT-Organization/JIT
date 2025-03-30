@@ -16,6 +16,7 @@ import org.hibernate.envers.Audited;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Entity
@@ -74,8 +75,13 @@ public class Restaurant extends BaseEntity{
         @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
         private List<Reservation> reservations;
 
-        @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
-        private List<Admin> admins;
+        @ManyToMany(cascade = CascadeType.REMOVE)
+        @JoinTable(
+                name = "user_restaurant",
+                joinColumns = @JoinColumn(name = "restaurant_id"),
+                inverseJoinColumns = @JoinColumn(name = "user_id")
+        )
+        private Set<User> users;
 
         @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
         private List<Category> categories;

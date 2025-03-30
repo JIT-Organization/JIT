@@ -15,20 +15,6 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    // POST: Register a new user
-    @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody User user) {
-        userService.save(user);
-        return ResponseEntity.ok("User registered successfully");
-    }
-
-    // POST: Login a user
-    @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody User user) {
-        // Add logic for authentication
-        return ResponseEntity.ok("Login successful");
-    }
-
     // GET: Retrieve all users
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {
@@ -60,7 +46,7 @@ public class UserController {
     // GET: Search users by username (or other parameters)
     @GetMapping("/search")
     public ResponseEntity<List<User>> searchUsers(@RequestParam String userName) {
-        List<User> users = userService.findByUserName(userName);
+        List<User> users = userService.findByUsername(userName);
         return ResponseEntity.ok(users);
     }
 }
