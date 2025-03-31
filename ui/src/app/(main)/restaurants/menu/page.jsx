@@ -10,7 +10,7 @@ const MenuList = () => {
   const router = useRouter();
   const pathName = usePathname();
   const queryClient = useQueryClient();
-  const { data: menuItemListData, isLoading, error } = useQuery(getMenuItemListOptions);
+  const { data: menuItemListData, isLoading, error } = useQuery(getMenuItemListOptions());
   const patchMutation = useMutation(patchUpdateMenuItemList(queryClient));
   const deleteMutation = useMutation(deleteMenuItem(queryClient));
 

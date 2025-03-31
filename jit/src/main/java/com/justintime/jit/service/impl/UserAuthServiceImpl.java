@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -65,7 +66,7 @@ public class UserAuthServiceImpl extends BaseServiceImpl<User, Long> implements 
                         .maxAge(12 * 60 * 60)
                         .sameSite("Strict")
                         .build();
-                response.addHeader("Set-Cookie", refreshCookie.toString());
+                response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
                 return accessToken;
             }
         } catch (Exception e) {
@@ -100,7 +101,7 @@ public class UserAuthServiceImpl extends BaseServiceImpl<User, Long> implements 
                 .maxAge(12* 60 * 60)
                 .sameSite("Strict")
                 .build();
-        response.addHeader("Set-Cookie", cookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
         return newAccessToken;
     }
 }

@@ -7,20 +7,19 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
 import java.security.Key;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.function.Function;
 
 @Service
 public class JwtServiceImpl implements JwtService {
 
-    private static final String secretKey = "N3VzdCFuVCFtMzUzY3JldEtleTRKU09Od2ViVDBrM25z";
+    @Value("${jwt.secret.key}")
+    private String secretKey;
     private final UserRepository userRepository;
     private static final long accessTokenExpiration = 1000 * 60 * 15;
     private static final long refreshTokenExpiration = 1000 * 60 * 60 * 12;
@@ -68,6 +67,19 @@ public class JwtServiceImpl implements JwtService {
     public String extractEmail(String token) {
         return extractClaim(token, Claims::getSubject);
     }
+
+    @Override
+    public Object extractRestaurantId(String token) {
+        return extractClaim(token, claims -> {
+            if (claims.containsKey("restaurantId")) {
+                return claims.get("restaurantId", Long.class);
+            } else if (claims.containsKey("restaurantIds")) {
+                return claims.get("restaurantIds", List.class);
+            }
+            return null;
+        });
+    }
+
 
     private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);

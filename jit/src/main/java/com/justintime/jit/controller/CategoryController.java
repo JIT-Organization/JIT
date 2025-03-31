@@ -6,6 +6,7 @@ import com.justintime.jit.service.CategoryService;
 import com.justintime.jit.entity.Category;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,8 +18,8 @@ public class CategoryController {
     @Autowired
     private CategoryService categoryService;
 
-    @GetMapping("/getAll/{restaurantId}")
-    public List<CategoryDTO> getAllCategories(@PathVariable Long restaurantId) {
+    @GetMapping("/getAll")
+    public List<CategoryDTO> getAllCategories(@AuthenticationPrincipal Long restaurantId) {
         return categoryService.getAllCategories(restaurantId);
     }
 
@@ -29,18 +30,18 @@ public class CategoryController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/{restaurantId}")
-    public ResponseEntity<Category> createCategory(@PathVariable Long restaurantId,@RequestBody CategoryDTO categoryDTO) {
+    @PostMapping
+    public ResponseEntity<Category> createCategory(@AuthenticationPrincipal Long restaurantId,@RequestBody CategoryDTO categoryDTO) {
         return ResponseEntity.ok(categoryService.createCategory(restaurantId,categoryDTO));
     }
 
-    @PutMapping("/{restaurantId}/{id}")
-    public ResponseEntity<Category> updateCategory(@PathVariable Long restaurantId,@PathVariable Long id, @RequestBody CategoryDTO categoryDTO) {
+    @PutMapping("/{id}")
+    public ResponseEntity<Category> updateCategory(@AuthenticationPrincipal Long restaurantId,@PathVariable Long id, @RequestBody CategoryDTO categoryDTO) {
         return ResponseEntity.ok(categoryService.updateCategory(restaurantId,id, categoryDTO));
     }
 
-    @PatchMapping("/{restaurantId}/{id}")
-    public Category patchUpdateCategory(@PathVariable Long restaurantId,@PathVariable Long id, @RequestBody PatchRequest<CategoryDTO> payload) {
+    @PatchMapping("/{id}")
+    public Category patchUpdateCategory(@AuthenticationPrincipal Long restaurantId,@PathVariable Long id, @RequestBody PatchRequest<CategoryDTO> payload) {
         return categoryService.patchUpdateCategory(restaurantId,id, payload.getDto(), payload.getPropertiesToBeUpdated());
     }
 

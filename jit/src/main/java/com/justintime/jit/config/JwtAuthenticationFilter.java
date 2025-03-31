@@ -39,9 +39,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if(email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = context.getBean(UserService.class).loadUserByUsername(email);
+            Long restaurantId = (Long) jwtService.extractRestaurantId(token);
             if(jwtService.validateToken(token, userDetails)) {
-                UsernamePasswordAuthenticationToken userPassToken =
-                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                CustomAuthToken userPassToken =
+                        new CustomAuthToken(restaurantId, userDetails,null, userDetails.getAuthorities());
                 userPassToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(userPassToken);
             }
