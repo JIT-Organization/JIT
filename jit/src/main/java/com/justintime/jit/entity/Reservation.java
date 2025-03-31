@@ -35,7 +35,7 @@ public class Reservation extends BaseEntity{
         @PrePersist
         protected void onCreate() {
                 long number = 1_000_000_000L + (Math.abs(random.nextLong()) % 9_000_000_000L);
-                reservationNumber = "RE-" + number;
+                reservationNumber = "RES-" + number;
         }
 
         @ManyToOne
