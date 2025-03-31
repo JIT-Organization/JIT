@@ -28,7 +28,7 @@ public class Payment extends BaseEntity {
 
     @PrePersist
     protected void onCreate(){
-        this.paymentNumber = "PY-" + UUID.randomUUID().toString().substring(0, 10).toUpperCase();
+        this.paymentNumber = "PAY-" + UUID.randomUUID().toString().substring(0, 10).toUpperCase();
     }
 
     @ManyToOne
