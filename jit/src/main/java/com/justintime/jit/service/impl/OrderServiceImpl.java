@@ -146,7 +146,7 @@ public class OrderServiceImpl implements OrderService {
     }
     private OrderDTO mapToDTO(Order order, GenericMapper<Order, OrderDTO> mapper){
         OrderDTO dto = mapper.toDto(order);
-        dto.setUserName(order.getUser().getFirstName()+" "+order.getUser().getLastName());
+        dto.setOrderedBy(order.getUser().getFirstName()+" "+order.getUser().getLastName());
         dto.setDiningTables(order.getReservation().getDiningTableSet()
                 .stream()
                 .map(DiningTable::getTableNumber)

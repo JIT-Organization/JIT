@@ -17,7 +17,7 @@ import java.util.List;
 public class OrderDTO {
     private Long id;
     private String orderNumber;
-    private String userName;
+    private String orderedBy;
     private String reservationNumber;
     private List<String> diningTables;
     private OrderStatus status;
