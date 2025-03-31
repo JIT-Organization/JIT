@@ -1,10 +1,12 @@
 package com.justintime.jit.controller;
 
+import com.justintime.jit.dto.OrderDTO;
 import com.justintime.jit.entity.Enums.OrderStatus;
 import com.justintime.jit.entity.OrderEntities.Order;
 import com.justintime.jit.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -18,55 +20,48 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
-    // Create a new order
-    @PostMapping
-    public ResponseEntity<Order> createOrder(@RequestBody Order order) {
-        Order createdOrder = orderService.createOrder(order);
-        return ResponseEntity.ok(createdOrder);
+    @PostMapping("/{restaurantId}/{userId}")
+    public ResponseEntity<String> createOrder(@PathVariable Long restaurantId, @PathVariable Long userId, @RequestBody OrderDTO orderDTO) {
+        return orderService.createOrder(restaurantId, userId, orderDTO);
     }
 
-    // Get all orders
-    @GetMapping
-    public ResponseEntity<List<Order>> getAllOrders() {
-        List<Order> orders = orderService.getAllOrders();
-        return ResponseEntity.ok(orders);
+    @GetMapping("/{restaurantId}")
+    public ResponseEntity<List<OrderDTO>> getAllOrders(@PathVariable Long restaurantId) {
+        List<OrderDTO> orderDTOs = orderService.getOrdersByRestaurantId(restaurantId);
+        return ResponseEntity.ok(orderDTOs);
     }
 
-    // Get an order by ID
-    @GetMapping("/{orderId}")
-    public ResponseEntity<Order> getOrderById(@PathVariable Long orderId) {
-        Order order = orderService.getOrderById(orderId);
-        return ResponseEntity.ok(order);
+    @GetMapping("/{restaurantId}/{orderId}")
+    public ResponseEntity<OrderDTO> getOrderById(@PathVariable Long restaurantId, @PathVariable Long orderId) {
+        OrderDTO orderDTO = orderService.getOrderByRestaurantAndId(restaurantId, orderId);
+        return ResponseEntity.ok(orderDTO);
     }
 
-    // Update order status
-    @PutMapping("/{orderId}/status")
-    public ResponseEntity<Order> updateOrderStatus(
+    @PutMapping("/{restaurantId}/{orderId}/status")
+    public ResponseEntity<OrderDTO> updateOrderStatus(
+            @PathVariable Long restaurantId,
             @PathVariable Long orderId,
             @RequestParam OrderStatus status) {
-        Order updatedOrder = orderService.updateOrderStatus(orderId, status);
-        return ResponseEntity.ok(updatedOrder);
+        OrderDTO updatedOrderDTO = orderService.updateOrderStatus(restaurantId, orderId, status);
+        return ResponseEntity.ok(updatedOrderDTO);
     }
 
-    // Delete an order
-    @DeleteMapping("/{orderId}")
-    public ResponseEntity<String> deleteOrder(@PathVariable Long orderId) {
-        orderService.deleteOrder(orderId);
+    @DeleteMapping("/{restaurantId}/{orderId}")
+    public ResponseEntity<String> deleteOrder(@PathVariable Long restaurantId, @PathVariable Long orderId) {
+        orderService.deleteOrder(restaurantId,orderId);
         return ResponseEntity.ok("Order deleted successfully.");
     }
 
-    // Get orders by restaurant ID and customer ID
-    @GetMapping("/{restaurantId}/customers/{customerId}/orders")
-    public ResponseEntity<List<Order>> getOrdersByRestaurantAndCustomerId(
+    @GetMapping("/{restaurantId}/users/{userId}/orders")
+    public ResponseEntity<List<OrderDTO>> getOrdersByRestaurantAndUserId(
             @PathVariable(required = false) Long restaurantId,
-            @PathVariable(required = false) Long customerId) {
+            @PathVariable(required = false) Long userId) {
 
-        // Convert to Optional before passing to service
         Optional<Long> optRestaurantId = Optional.ofNullable(restaurantId);
-        Optional<Long> optCustomerId = Optional.ofNullable(customerId);
+        Optional<Long> optUserId = Optional.ofNullable(userId);
 
-        List<Order> orders = orderService.getOrdersByRestaurantAndCustomerId(optRestaurantId, optCustomerId);
-        return ResponseEntity.ok(orders);
+        List<OrderDTO> orderDTOs = orderService.getOrdersByRestaurantAndUserId(optRestaurantId, optUserId);
+        return ResponseEntity.ok(orderDTOs);
     }
 
     @GetMapping("/{restaurantId}/revenue")

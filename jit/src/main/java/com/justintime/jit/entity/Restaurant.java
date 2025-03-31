@@ -64,7 +64,7 @@ public class Restaurant extends BaseEntity{
         private List<Combo> combos;
 
         @OneToMany(mappedBy = "restaurant")
-        private List<Cook> Ccooks;
+        private List<Cook> cooks;
 
         @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
         private List<Order> orders;
@@ -74,6 +74,9 @@ public class Restaurant extends BaseEntity{
 
         @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
         private List<Reservation> reservations;
+
+        @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
+        private List<DiningTable> diningTables;
 
         @ManyToMany(cascade = CascadeType.REMOVE)
         @JoinTable(

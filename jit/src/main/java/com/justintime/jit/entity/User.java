@@ -55,10 +55,10 @@ public class User extends BaseEntity{
         @Column(name = "role", nullable = false)
         private Role role;
 
-        @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
+        @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
         private List<Order> orders;
 
-        @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
+        @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
         private List<Reservation> reservations;
 
         @ManyToMany

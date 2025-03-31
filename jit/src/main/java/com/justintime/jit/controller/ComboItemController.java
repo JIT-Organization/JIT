@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/jit-api/ComboItems")
+@RequestMapping("/jit-api/comboItems")
 public class ComboItemController {
     @Autowired
     private ComboItemService comboItemService;
