@@ -51,6 +51,8 @@ public class Category extends BaseEntity{
     @JoinColumn(name = "restaurant_id")  // Ensure this is present
     private Restaurant restaurant;
 
+    private boolean isPublic;
+
 //    // Copy Constructor
 //    public Category(Category other) {
 //        this.id = other.id;

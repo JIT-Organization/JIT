@@ -4,7 +4,7 @@ export const getDistinctCategories = (data) => {
   const categorySet = new Set();
   categorySet.add("All");
 
-  data.forEach((item) => {
+  (data||[]).forEach((item) => {
     if (item.categorySet?.length > 0) {
       item.categorySet.map((cat) => categorySet.add(cat));
     }
@@ -32,6 +32,28 @@ export const getAxiosInstance = () => {
       Authorization: `Bearer ${jwtToken}`,
     }
   })
+
+  axiosInstance.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+      if (error.response && error.response.status === 401) {
+        try {
+          const refreshResponse = await axios.post("http://localhost:8080/refresh", {}, { withCredentials: true });
+          const newToken = refreshResponse.data?.data;
+          
+          if (newToken) {
+            sessionStorage.setItem("jwtToken", newToken);
+            error.config.headers.Authorization = `Bearer ${newToken}`;
+            return axiosInstance.request(error.config);
+          }
+        } catch (refreshError) {
+          console.error("Token refresh failed", refreshError);
+          window.location.href = "/login";
+        }
+      }
+      return Promise.reject(error);
+    }
+  );
 
   return {
     get: (url, config = {}) => axiosInstance.get(url, config),

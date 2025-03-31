@@ -9,9 +9,8 @@ import { usePathname, useRouter } from "next/navigation";
 const MenuList = () => {
   const router = useRouter();
   const pathName = usePathname();
-  const id = pathName.split("/")[2];
   const queryClient = useQueryClient();
-  const { data: menuItemListData, isLoading, error } = useQuery(getMenuItemListOptions(id));
+  const { data: menuItemListData, isLoading, error } = useQuery(getMenuItemListOptions());
   const patchMutation = useMutation(patchUpdateMenuItemList(queryClient));
   const deleteMutation = useMutation(deleteMenuItem(queryClient));
 
