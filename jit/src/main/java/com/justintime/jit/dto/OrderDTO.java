@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -20,6 +21,7 @@ public class OrderDTO {
     private String orderedBy;
     private String reservationNumber;
     private List<String> diningTables;
+    private BigDecimal amount;
     private OrderStatus status;
     private LocalDateTime serveTime;
     private String notes;
