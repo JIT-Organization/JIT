@@ -16,12 +16,15 @@ import com.justintime.jit.service.OrderService;
 import com.justintime.jit.util.mapper.GenericMapper;
 import com.justintime.jit.util.mapper.MapperFactory;
 import org.aspectj.weaver.ast.Or;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -98,6 +101,20 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public OrderDTO patchUpdateOrder(Long restaurantId, Long orderId, OrderDTO orderDTO, List<String> propertiesToBeUpdated){
+        Order existingOrder = orderRepository.findByRestaurantIdAndId(restaurantId, orderId)
+                .orElseThrow(()->new ResourceNotFoundException("Order not found with id: " + orderId + " for restaurant: " + restaurantId));
+        GenericMapper<Order, OrderDTO> mapper = MapperFactory.getMapper(Order.class, OrderDTO.class);
+        existingOrder.setRestaurant(restaurantRepository.findById(restaurantId).orElseThrow(() -> new RuntimeException("Restaurant not found")));
+        Order patchedOrder = mapper.toEntity(orderDTO);
+        resolveRelationships(patchedOrder, orderDTO);
+        copySelectedProperties(patchedOrder, existingOrder,propertiesToBeUpdated);
+        existingOrder.setUpdatedDttm(LocalDateTime.now());
+        orderRepository.save(existingOrder);
+        return mapToDTO(existingOrder,mapper);
+    }
+
+    @Override
     public void deleteOrder(Long restaurantId, Long id) {
         Order existingOrder = orderRepository.findByRestaurantIdAndId(restaurantId, id)
                 .orElseThrow(()->new ResourceNotFoundException("Order not found with id: " + id + " for restaurant: " + restaurantId));
@@ -130,6 +147,7 @@ public class OrderServiceImpl implements OrderService {
                 .map(order -> mapToDTO(order, mapper))
                 .collect(Collectors.toList());
     }
+
     private void resolveRelationships(Order order, OrderDTO orderDTO){
         if (orderDTO.getReservationNumber()!=null){
             Reservation reservation = reservationRepository.findByReservationNumber(orderDTO.getReservationNumber());
@@ -144,6 +162,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
     }
+
     private OrderDTO mapToDTO(Order order, GenericMapper<Order, OrderDTO> mapper){
         OrderDTO dto = mapper.toDto(order);
         dto.setOrderedBy(order.getUser().getFirstName()+" "+order.getUser().getLastName());
@@ -155,5 +174,16 @@ public class OrderServiceImpl implements OrderService {
                 .map(Payment::getPaymentNumber)
                 .collect(Collectors.toList()));
         return dto;
+    }
+
+    private void copySelectedProperties(Object source, Object target, List<String> propertiesToBeChanged) {
+        BeanWrapper srcWrapper = new BeanWrapperImpl(source);
+        BeanWrapper targetWrapper = new BeanWrapperImpl(target);
+
+        for (String property : propertiesToBeChanged) {
+            if (srcWrapper.isReadableProperty(property) && srcWrapper.getPropertyValue(property) != null) {
+                targetWrapper.setPropertyValue(property, srcWrapper.getPropertyValue(property));
+            }
+        }
     }
 }

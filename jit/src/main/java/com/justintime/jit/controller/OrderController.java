@@ -1,6 +1,7 @@
 package com.justintime.jit.controller;
 
 import com.justintime.jit.dto.OrderDTO;
+import com.justintime.jit.dto.PatchRequest;
 import com.justintime.jit.entity.Enums.OrderStatus;
 import com.justintime.jit.entity.OrderEntities.Order;
 import com.justintime.jit.service.OrderService;
@@ -44,6 +45,14 @@ public class OrderController {
             @RequestParam OrderStatus status) {
         OrderDTO updatedOrderDTO = orderService.updateOrderStatus(restaurantId, orderId, status);
         return ResponseEntity.ok(updatedOrderDTO);
+    }
+
+    @PatchMapping("/{restaurantId}/{orderId}")
+    public OrderDTO patchUpdateOrder(
+            @PathVariable Long restaurantId,
+            @PathVariable Long orderId,
+            @RequestBody PatchRequest<OrderDTO> payload){
+        return orderService.patchUpdateOrder(restaurantId, orderId, payload.getDto(), payload.getPropertiesToBeUpdated());
     }
 
     @DeleteMapping("/{restaurantId}/{orderId}")
