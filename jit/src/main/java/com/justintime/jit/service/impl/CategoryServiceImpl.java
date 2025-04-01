@@ -58,8 +58,8 @@ public class CategoryServiceImpl extends BaseServiceImpl<Category,Long> implemen
         return dto;
     }
 
-    public Optional<CategoryDTO> getCategoryById(Long id) {
-        Optional<Category> category = categoryRepository.findById(id);
+    public Optional<CategoryDTO> getCategoryByRestaurantIdAndId(Long restaurantId, Long id) {
+        Optional<Category> category = categoryRepository.findByRestaurantIdAndId(restaurantId, id);
         GenericMapper<Category, CategoryDTO> mapper = MapperFactory.getMapper(Category.class, CategoryDTO.class);
         return category.map(cat -> mapToDTO(cat, mapper));
     }
