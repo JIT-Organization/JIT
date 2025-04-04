@@ -17,6 +17,7 @@ export default function MultiSelect({
     }
   };
 
+  console.log("options", options);
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -28,18 +29,22 @@ export default function MultiSelect({
         <Command>
           <CommandInput placeholder="Search options..." />
           <CommandList>
-            {options.map((option) => (
-              <CommandItem
-                key={option.value}
-                onSelect={() => toggleOption(option.value)}
-                className="cursor-pointer"
-              >
-                <span className="flex-1">{option.label}</span>
-                {value.includes(option.value) && (
-                  <Check className="ml-auto h-4 w-4" />
-                )}
-              </CommandItem>
-            ))}
+            {options.map((option) =>
+              option.value ? (
+                <CommandItem
+                  key={option.value}
+                  onSelect={() => toggleOption(option.value)}
+                  className="cursor-pointer"
+                >
+                  <span className="flex-1">{option.label}</span>
+                  {value.includes(option.value) && (
+                    <Check className="ml-auto h-4 w-4" />
+                  )}
+                </CommandItem>
+              ) : (
+                <CommandItem>{option.label}</CommandItem>
+              )
+            )}
           </CommandList>
         </Command>
       </PopoverContent>

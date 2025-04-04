@@ -18,12 +18,11 @@ import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class CategoryServiceImpl extends BaseServiceImpl<Category,Long> implements CategoryService {
@@ -43,18 +42,17 @@ public class CategoryServiceImpl extends BaseServiceImpl<Category,Long> implemen
         return categories.stream()
                 .map(category -> mapToDTO(category, mapper))
                 .collect(Collectors.toList());
-
     }
 
     private CategoryDTO mapToDTO(Category category, GenericMapper<Category, CategoryDTO> mapper) {
         CategoryDTO dto = mapper.toDto(category);
-        dto.setMenuItemSet(category.getMenuItemSet().stream()
-                .map(MenuItem::getName)
-                .collect(Collectors.toSet()));
-        dto.setComboSet(category.getComboSet().stream()
-                .map(Combo::getComboName)
-                .collect(Collectors.toSet()));
-
+        dto.setFoodItems(
+                Stream.concat(
+                        category.getMenuItemSet().stream().map(MenuItem::getName),
+                        category.getComboSet().stream().map(Combo::getComboName)
+                ).collect(Collectors.collectingAndThen(Collectors.toSet(), Collections::unmodifiableSet))
+        );
+        dto.setFoodCount(dto.getFoodItems().size());
         return dto;
     }
 
@@ -105,33 +103,43 @@ public class CategoryServiceImpl extends BaseServiceImpl<Category,Long> implemen
     }
 
     public void deleteCategory(Long id) {
-        if (!categoryRepository.existsById(id)) {
-            throw new RuntimeException("Category not found with id " + id);
-        }
+        Category existingCategory = categoryRepository.findById(id).orElseThrow(() -> new RuntimeException("Category not found"));
+        existingCategory.setComboSet(null);
+        existingCategory.setMenuItemSet(null);
         categoryRepository.deleteById(id);
     }
 
     private void resolveRelationships(Category category, CategoryDTO categoryDTO) {
 
-        if (categoryDTO.getMenuItemSet() != null) {
-
+        if (categoryDTO.getFoodItems() != null) {
             Set<MenuItem> menuItems = menuItemRepository.findByMenuItemNamesAndRestaurantId(
-                    categoryDTO.getMenuItemSet(),category.getRestaurant().getId());
+                    categoryDTO.getFoodItems(), category.getRestaurant().getId());
+            Set<Combo> combos = comboRepository.findByComboNamesAndRestaurantId(
+                    categoryDTO.getFoodItems(), category.getRestaurant().getId());
             category.setMenuItemSet(menuItems);
-        }
-        if (categoryDTO.getComboSet() != null) {
-           Set<Combo> combos = comboRepository.findByComboNamesAndRestaurantId(
-                    categoryDTO.getComboSet(),category.getRestaurant().getId());
             category.setComboSet(combos);
-        }}
+        }
+    }
 
-        private void copySelectedProperties(Object source, Object target, List<String> propertiesToBeChanged){
-            BeanWrapper srcWrapper = new BeanWrapperImpl(source);
-            BeanWrapper targetWrapper = new BeanWrapperImpl(target);
+    private void copySelectedProperties(Object source, Object target, List<String> propertiesToBeChanged) {
+        if (source == null || target == null) {
+            throw new IllegalArgumentException("Source and target must not be null");
+        }
 
-            for (String property : propertiesToBeChanged) {
-                if (srcWrapper.isReadableProperty(property) && srcWrapper.getPropertyValue(property) != null) {
-                    targetWrapper.setPropertyValue(property, srcWrapper.getPropertyValue(property));
-                }
-            }}
+        BeanWrapper srcWrapper = new BeanWrapperImpl(source);
+        BeanWrapper targetWrapper = new BeanWrapperImpl(target);
+
+        List<String> propertiesToBeChangedClone = new ArrayList<>(propertiesToBeChanged);
+        if(propertiesToBeChangedClone.contains("foodItems")) {
+            propertiesToBeChangedClone.remove("foodItems");
+            propertiesToBeChangedClone.add("menuItemSet");
+            propertiesToBeChangedClone.add("categorySet");
+        }
+
+        for (String property : propertiesToBeChangedClone) {
+            if (srcWrapper.isReadableProperty(property) && srcWrapper.getPropertyValue(property) != null) {
+                targetWrapper.setPropertyValue(property, srcWrapper.getPropertyValue(property));
+            }
+        }
+    }
 }

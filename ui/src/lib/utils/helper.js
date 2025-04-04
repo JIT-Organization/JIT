@@ -17,6 +17,13 @@ export const encodeIdInURL = (id) => {
   return encodeURIComponent(btoa(id));
 };
 
+export const getSelectOptions = (data) => {
+  return data?.map((item) => ({
+    label: item.menuItemName,
+    value: item.menuItemName,
+  }));
+};
+
 export const getAxiosInstance = () => {
   const jwtToken = sessionStorage.getItem("jwtToken")
   console.log(jwtToken)
