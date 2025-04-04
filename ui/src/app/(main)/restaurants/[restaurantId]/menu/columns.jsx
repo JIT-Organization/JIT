@@ -121,18 +121,15 @@ export const getMenuListcolumns = (
     cell: ({ row }) => {
       return (
         <div className="flex justify-center">
-          <Button
-            variant="ghost"
-            onClick={() => handleEditClick(row.original.id)}
-          >
-            <Pencil className="text-black h-50 w-50" />
-          </Button>
+          <span className="cursor-pointer hover:bg-gray-600/10 h-10 w-10 flex justify-center items-center rounded-md" onClick={() => handleEditClick(row.original.id)}>
+            <Pencil className="text-black h-5" />
+          </span>
           <CustomPopup
             type="delete"
             trigger={
-              <Button variant="ghost">
-                <Trash2 className="text-black h-50 w-50" />
-              </Button>
+              <span className="cursor-pointer hover:bg-gray-600/20 h-10 w-10 flex justify-center items-center rounded-md">
+                <Trash2 className="text-black h-5" />
+              </span>
             }
             onConfirm={() => handleDeleteClick(row.original.id)}
           />
