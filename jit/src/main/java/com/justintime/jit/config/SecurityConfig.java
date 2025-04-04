@@ -91,7 +91,7 @@ public class SecurityConfig {
     }
 
     private AuthenticationFailureHandler customAuthFailureHandler() {
-        return (HttpServletRequest request, HttpServletResponse response, AuthenticationException excpetion) -> {
+        return (HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) -> {
             try {
                 response.sendRedirect("/refresh");
             } catch (Exception e) {
