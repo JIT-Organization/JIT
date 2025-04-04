@@ -48,10 +48,10 @@ public class Category extends BaseEntity{
     private Set<Combo> comboSet = new HashSet<>();
 
     @ManyToOne
-    @JoinColumn(name = "restaurant_id")  // Ensure this is present
+    @JoinColumn(name = "restaurant_id")
     private Restaurant restaurant;
 
-    private boolean isPublic;
+    private Boolean isPublic;
 
 //    // Copy Constructor
 //    public Category(Category other) {

@@ -32,6 +32,8 @@ export function CustomDataTable({
   headerButtonName,
   headerDialogType,
   categories,
+  onSubmitClick,
+  selectOptions
 }) {
   const [sorting, setSorting] = React.useState([]);
   const [columnFilters, setColumnFilters] = React.useState([]);
@@ -99,6 +101,8 @@ export function CustomDataTable({
               type={headerDialogType}
               trigger={<Button>{headerButtonName}</Button>}
               // dialogDescription={"Category Info"}
+              onSubmit={onSubmitClick}
+              selectOptions={selectOptions}
             />
           ) : (
             headerButtonName && (

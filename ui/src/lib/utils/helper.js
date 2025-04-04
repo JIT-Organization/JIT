@@ -17,7 +17,14 @@ export const encodeIdInURL = (id) => {
   return encodeURIComponent(btoa(id));
 };
 
-export const getAxiosInstance = (cookies = "") => {
+export const getSelectOptions = (data) => {
+  return data?.map((item) => ({
+    label: item.menuItemName,
+    value: item.menuItemName,
+  }));
+};
+
+export const getAxiosInstance = () => {
   const axiosInstance = axios.create({
     withCredentials: true,
     headers: {
