@@ -18,6 +18,10 @@ export const getRequest = async (url, errorMessage = "Failed to fetch data") => 
   }
 };
 
+export const postRequest = async (url, data) => {
+  const response = await axiosInstance.post(url, data)
+  return response.data;
+}
 
 export const patchRequest = async (url, data) => {
   const response = await axiosInstance.patch(url, data);
@@ -29,16 +33,24 @@ export const deleteRequest = async (url) => {
   return response.data;
 };
 
-export const handleMutate = async (queryClient, queryKey, id, fields) => {
+export const handleMutate = async (queryClient, queryKey, id, fields, mode = "update") => {
   await queryClient.cancelQueries(queryKey);
 
   const previousData = queryClient.getQueryData(queryKey);
 
   queryClient.setQueryData(queryKey, (oldData) => {
     if (!oldData) return oldData;
-    return oldData.map((row) =>
-      row.id === id ? { ...row, ...fields } : row
-    );
+
+    switch (mode) {
+      case "create":
+        return [fields, ...oldData];
+      case "update":
+        return oldData.map((row) => row.id === id ? { ...row, ...fields } : row)
+      case "delete":
+        return oldData.filter((row) => row.id !== id);
+      default:
+        return oldData
+    }
   });
 
   return { previousData };

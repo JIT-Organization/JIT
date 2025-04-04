@@ -1,5 +1,5 @@
 import { URLS } from "./urls";
-import { getRequest, patchRequest, deleteRequest, handleMutate, handleError } from "./api-helper";
+import { getRequest, patchRequest, deleteRequest, handleMutate, handleError, postRequest } from "./api-helper";
 
 const cacheConfig = {
   staleTime: 60 * 60 * 1000,  
@@ -77,6 +77,22 @@ export const getCategoriesListOptions = () => ({
   ...cacheConfig
 });
 
+export const createCategory = (queryClient) => ({
+  mutationFn: async ({ id, fields }) => {
+    return await postRequest(URLS.categoriesList, {
+      ...fields
+    });
+  },
+  onMutate: async ({ fields }) => handleMutate(queryClient, ["categoriesList"], null, fields, "create"),
+  onError: (error, variables, context) => {
+    console.error("Failed to update item:", error);
+    handleError(queryClient, ["categoriesList"], context);
+  },
+  onSettled: () => {
+    queryClient.invalidateQueries(["categoriesList"]);
+  },
+});
+
 export const patchUpdateCategoriesList = (queryClient) => ({
   mutationFn: async ({ id, fields }) => {
     return await patchRequest(`${URLS.categoriesList}/${id}`, {
@@ -98,6 +114,9 @@ export const deleteCategoryItem = (queryClient) => ({
   mutationFn: async ({ id }) => deleteRequest(`${URLS.categoriesList}/${id}`),
   onMutate: async ({ id }) => handleMutate(queryClient, ["categoriesList"], id),
   onError: (err, variables, context) => handleError(queryClient, ["categoriesList"], context),
+  onSettled: () => {
+    queryClient.invalidateQueries(["categoriesList"]);
+  },
 });
 
 export const getUsersListOptions = (id) => ({
