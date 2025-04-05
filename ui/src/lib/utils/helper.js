@@ -17,38 +17,43 @@ export const encodeIdInURL = (id) => {
   return encodeURIComponent(btoa(id));
 };
 
-export const getAxiosInstance = () => {
-  const jwtToken = sessionStorage.getItem("jwtToken")
-  console.log(jwtToken)
-  if (!jwtToken) {
-    window.location.href = "/login";
-    throw new Error("Unauthorized: No JWT Token Found");
-  }
-
+export const getAxiosInstance = (cookies = "") => {
   const axiosInstance = axios.create({
     withCredentials: true,
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${jwtToken}`,
+      ...(cookies && { Cookie: cookies })
     }
   })
+  const refreshInstance = axios.create({
+    baseURL: "http://localhost:8080",
+    withCredentials: true,
+    headers: {
+      "Content-Type": "application/json",
+      ...(cookies && { Cookie: cookies }),
+    },
+  });
+  const isServer = typeof window === "undefined";
 
   axiosInstance.interceptors.response.use(
     (response) => response,
     async (error) => {
-      if (error.response && error.response.status === 401) {
+      const originalRequest = error.config;  
+      if (
+        error.response?.status === 401 &&
+        !originalRequest._retry &&
+        !originalRequest.url.includes("/refresh")
+      ) {
+        originalRequest._retry = true;
         try {
-          const refreshResponse = await axios.post("http://localhost:8080/refresh", {}, { withCredentials: true });
-          const newToken = refreshResponse.data?.data;
-          
-          if (newToken) {
-            sessionStorage.setItem("jwtToken", newToken);
-            error.config.headers.Authorization = `Bearer ${newToken}`;
-            return axiosInstance.request(error.config);
-          }
+          console.log("refresh cookie", cookies)
+          await refreshInstance.post("/refresh");
+          return axiosInstance(originalRequest);
         } catch (refreshError) {
           console.error("Token refresh failed", refreshError);
-          window.location.href = "/login";
+          if (!isServer) {
+            window.location.href = "/login";
+          }
         }
       }
       return Promise.reject(error);
@@ -61,5 +66,6 @@ export const getAxiosInstance = () => {
     put: (url, body, config = {}) => axiosInstance.put(url, body, config),
     patch: (url, body, config = {}) => axiosInstance.patch(url, body, config),
     delete: (url, config = {}) => axiosInstance.delete(url, config),
+    prefetch: (queryClient, queryOptions) => queryClient.prefetchQuery(queryOptions)
   }
 }

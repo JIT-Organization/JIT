@@ -62,12 +62,22 @@ public class UserAuthServiceImpl extends BaseServiceImpl<User, Long> implements 
                 ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
                         .httpOnly(true)
 //                        .secure(true)
-                        .path("/refresh")
+                        .path("/")
                         .maxAge(12 * 60 * 60)
                         .sameSite("Strict")
                         .build();
+                ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
+                        .httpOnly(true)
+//                        .secure(true)
+                        .path("/")
+                        .maxAge(15 * 60)
+                        .sameSite("Strict")
+                        .build();
                 response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
-                return accessToken;
+                System.out.println(response.getHeaders(HttpHeaders.SET_COOKIE));
+                response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+                System.out.println(response.getHeaders(HttpHeaders.SET_COOKIE));
+//                return accessToken;
             }
         } catch (Exception e) {
             throw new LoginException("Try Again");
@@ -102,6 +112,15 @@ public class UserAuthServiceImpl extends BaseServiceImpl<User, Long> implements 
                 .sameSite("Strict")
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-        return newAccessToken;
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", newAccessToken)
+                .httpOnly(true)
+//                        .secure(true)
+                .path("/")
+                .maxAge(15 * 60)
+                .sameSite("Strict")
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+//        return newAccessToken;
+        return "";
     }
 }

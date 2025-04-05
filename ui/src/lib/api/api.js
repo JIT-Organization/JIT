@@ -6,6 +6,18 @@ const cacheConfig = {
   gcTime: 2 * 60 * 60 * 1000, 
 };
 
+export const login = (data) => {
+  postRequest("http://localhost:8080/login", data, {withCredential: true})
+}
+
+export const refresh = () => {
+  try{
+    postRequest("http://localhost:8080/refresh", {}, {withCredential: true})
+  } catch (e) {
+    console.log(e)
+  }
+}
+
 export const getMenuItemListOptions = () => ({
   queryKey: ["menuItemList"],
   queryFn: () => getRequest(`${URLS.menuItemList}`, "Failed to fetch Menu Item List"),
@@ -128,6 +140,7 @@ export const deleteTableItem = (queryClient) => ({
   onMutate: async ({ id }) => handleMutate(queryClient, ["tablesList"], id),
   onError: (err, variables, context) => handleError(queryClient, ["tablesList"], context),
 });
+
 
 // export const getMenuItemListOptions = (id) => ({
 //   queryKey: ["menuItemList"],
