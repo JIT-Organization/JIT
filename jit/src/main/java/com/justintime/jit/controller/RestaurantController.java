@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/restaurants")
+@RequestMapping("/jit-api/restaurants")
 public class RestaurantController {
 
     @Autowired
@@ -29,7 +29,7 @@ public class RestaurantController {
         return ResponseEntity.ok(restaurants);
     }
 
-     //Get a restaurant by ID
+    //Get a restaurant by ID
     @GetMapping("/{restaurantId}")
     public ResponseEntity<Restaurant> getRestaurantById(@PathVariable Long restaurantId) {
         Restaurant restaurant = restaurantService.getRestaurantById(restaurantId);

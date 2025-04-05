@@ -1,25 +1,28 @@
 package com.justintime.jit.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Audited
-@Data
-@Table(name="reservation")
+@Getter
+@Setter
 @NoArgsConstructor
-@AllArgsConstructor
-public class Reservation {
-
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        private Long id;
+@Table(name="reservation")
+public class Reservation extends BaseEntity{
 
         @ManyToOne
         @JoinColumn(name = "customer_id", nullable = false)
@@ -43,15 +46,55 @@ public class Reservation {
         private Integer headCount;
 
         @Column(name = "status", nullable = false, length = 50)
-        private String status = "PENDING";
-
-        @Column(name = "created_dttm", nullable = false, updatable = false)
-        private LocalDateTime createdDttm = LocalDateTime.now();
-
-        @Column(name = "updated_dttm", nullable = false)
-        private LocalDateTime updatedDttm = LocalDateTime.now();
+        private String status;
 
         @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL)
         private List<ReservationActivity> reservationActivities;
 
+//        // Copy Constructor
+//        public Reservation(Reservation other) {
+//                this.id = other.id;
+//                this.customer = other.customer != null ? new User(other.customer) : null;
+//                this.restaurant = other.restaurant != null ? new Restaurant(other.restaurant) : null;
+//                this.shiftCapacity = other.shiftCapacity != null ? new ShiftCapacity(other.shiftCapacity) : null;
+//                this.reservationStart = other.reservationStart;
+//                this.reservationEnd = other.reservationEnd;
+//                this.headCount = other.headCount;
+//                this.status = other.status;
+//                this.createdDttm = other.createdDttm;
+//                this.updatedDttm = other.updatedDttm;
+//                this.reservationActivities = other.reservationActivities != null ? other.reservationActivities.stream().map(ReservationActivity::new).collect(Collectors.toList()) : null; // Deep copy of reservationActivities
+//        }
+//
+//        public User getCustomer() {
+//                return customer != null ? new User(customer) : null; // Defensive copy
+//        }
+//
+//        public void setCustomer(User customer) {
+//                this.customer = customer != null ? new User(customer) : null; // Defensive copy
+//        }
+//
+//        public Restaurant getRestaurant() {
+//                return restaurant != null ? new Restaurant(restaurant) : null; // Defensive copy
+//        }
+//
+//        public void setRestaurant(Restaurant restaurant) {
+//                this.restaurant = restaurant != null ? new Restaurant(restaurant) : null; // Defensive copy
+//        }
+//
+//        public ShiftCapacity getShiftCapacity() {
+//                return shiftCapacity != null ? new ShiftCapacity(shiftCapacity) : null; // Defensive copy
+//        }
+//
+//        public void setShiftCapacity(ShiftCapacity shiftCapacity) {
+//                this.shiftCapacity = shiftCapacity != null ? new ShiftCapacity(shiftCapacity) : null; // Defensive copy
+//        }
+//
+//        public List<ReservationActivity> getReservationActivities() {
+//                return reservationActivities != null ? reservationActivities.stream().map(ReservationActivity::new).collect(Collectors.toList()) : null; // Defensive copy
+//        }
+//
+//        public void setReservationActivities(List<ReservationActivity> reservationActivities) {
+//                this.reservationActivities = reservationActivities != null ? reservationActivities.stream().map(ReservationActivity::new).collect(Collectors.toList()) : null; // Defensive copy
+//        }
 }

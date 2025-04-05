@@ -1,5 +1,6 @@
 package com.justintime.jit.service;
 
+import com.justintime.jit.dto.RestaurantDTO;
 import com.justintime.jit.entity.Restaurant;
 
 import java.util.List;

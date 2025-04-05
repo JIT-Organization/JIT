@@ -1,47 +1,64 @@
 package com.justintime.jit.entity.ComboEntities;
 
-
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.justintime.jit.entity.BaseEntity;
 import com.justintime.jit.entity.MenuItem;
-import com.justintime.jit.entity.OrderEntities.Order;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
 @Audited
-@Data
-@Table(name="combo_item")
+@Getter
+@Setter
 @NoArgsConstructor
-@AllArgsConstructor
-public class ComboItem {
+@Table(name = "combo_item")
+public class ComboItem extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "quantity", nullable = false, columnDefinition = "INT DEFAULT 1")
+    private Integer quantity = 1;
 
-    @ManyToMany
-    @JoinTable(
-            name = "combo_item_combo",
-            joinColumns = @JoinColumn(name = "combo_item_id"),
-            inverseJoinColumns = @JoinColumn(name = "combo_id")
-    )
+    @ManyToMany(mappedBy = "comboItemSet")
     private Set<Combo> comboSet = new HashSet<>();
 
     @ManyToOne
-    @JoinColumn(name="menu_item_id",nullable = false)
+    @JoinColumn(name = "menu_item_id", nullable = false)
     private MenuItem menuItem;
 
-    @Column(name = "created_dttm", nullable = false, columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime createdDttm = LocalDateTime.now();
+//
+//    public Set<Combo> getComboSet() {
+//        return Collections.unmodifiableSet(comboSet);
+//    }
+//
+//    public void setComboSet(Set<Combo> comboSet) {
+//        this.comboSet = comboSet != null ? new HashSet<>(comboSet) : new HashSet<>();
+//    }
+//
+//    public MenuItem getMenuItem() {
+//        return menuItem == null ? null : new MenuItem(menuItem);
+//    }
+//
+//    public void setMenuItem(MenuItem menuItem) {
+//        this.menuItem = menuItem == null ? null : new MenuItem(menuItem);
+//    }
+//
+//    public ComboItem(ComboItem other) {
+//        this.id = null; // Ensure new instance doesn't have the same ID
+//        this.comboSet = new HashSet<>(other.comboSet); // Deep copy of comboSet if necessary
+//        this.menuItem = new MenuItem(other.menuItem); // Deep copy of MenuItem, assuming MenuItem has a copy constructor
+//        this.createdDttm = other.createdDttm;
+//        this.updatedDttm = other.updatedDttm;
+//    }
 
-    @Column(name = "updated_dttm", nullable = false, columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime updatedDttm = LocalDateTime.now();
 
 }

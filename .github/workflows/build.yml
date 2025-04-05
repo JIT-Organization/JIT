@@ -1,0 +1,58 @@
+name: Build and Test Workflow
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'dev'
+      - 'version/*'
+      - 'sprint/*'
+  pull_request:
+    branches:
+      - 'main'
+      - 'dev'
+      - 'version/*'
+      - 'sprint/*'
+
+jobs:
+  backend:  
+    name: Build Backend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: temurin
+
+      - name: Grant execute permission for Gradlew
+        working-directory: ./jit
+        run: chmod +x gradlew
+
+      - name: Build Backend with Gradle
+        working-directory: ./jit
+        run: ./gradlew build --no-daemon
+
+  frontend:  
+    name: Build Frontend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4  # Updated to v4 for consistency
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4  # Updated to v4 for consistency
+        with:
+          node-version: 18
+
+      - name: Install and Build Frontend
+        working-directory: ./ui  
+        run: |
+          rm -rf node_modules package-lock.json  # Ensure a clean install
+          npm install --legacy-peer-deps
+          npm run build

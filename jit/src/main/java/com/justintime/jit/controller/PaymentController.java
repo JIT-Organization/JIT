@@ -9,15 +9,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/payments")
+@RequestMapping("/jit-api/payments")
 public class PaymentController {
 
-    private PaymentService paymentService;
-
     @Autowired
-    public PaymentController(PaymentService paymentService) {
-        this.paymentService = paymentService;
-    }
+    private PaymentService paymentService;
 
     @GetMapping
     public List<Payment> getAllPayments() {
@@ -50,5 +46,10 @@ public class PaymentController {
     public ResponseEntity<Void> deletePayment(@PathVariable Long id) {
         paymentService.deletePayment(id);
         return ResponseEntity.noContent().build();
+    }
+    @GetMapping("/orders/{orderId}/payments")
+    public ResponseEntity<List<Payment>> getPaymentsByOrderId(@PathVariable Long orderId) {
+        List<Payment> payments = paymentService.getPaymentsByOrderId(orderId);
+        return ResponseEntity.ok(payments);
     }
 }

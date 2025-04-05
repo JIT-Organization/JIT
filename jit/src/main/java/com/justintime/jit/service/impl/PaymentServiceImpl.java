@@ -15,7 +15,7 @@ public class PaymentServiceImpl implements PaymentService {
     private PaymentRepository paymentRepository;
 
     @Autowired
-    public void PaymentService(PaymentRepository paymentRepository) {
+    public void paymentService(PaymentRepository paymentRepository) {
         this.paymentRepository = paymentRepository;
     }
 
@@ -48,5 +48,10 @@ public class PaymentServiceImpl implements PaymentService {
     public void deletePayment(Long id) {
         paymentRepository.deleteById(id);
     }
+
+    public List<Payment> getPaymentsByOrderId(Long orderId) {
+        return paymentRepository.findByOrderId(orderId);
+    }
+
 }
 
