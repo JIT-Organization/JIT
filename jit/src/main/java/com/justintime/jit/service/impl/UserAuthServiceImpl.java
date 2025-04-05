@@ -52,7 +52,7 @@ public class UserAuthServiceImpl extends BaseServiceImpl<User, Long> implements 
     }
 
     @Override
-    public String login(LoginRequestDto loginRequestDto, HttpServletResponse response) throws LoginException {
+    public void login(LoginRequestDto loginRequestDto, HttpServletResponse response) throws LoginException {
         try{
             Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequestDto.getEmail(), loginRequestDto.getPassword()));
@@ -62,21 +62,28 @@ public class UserAuthServiceImpl extends BaseServiceImpl<User, Long> implements 
                 ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
                         .httpOnly(true)
 //                        .secure(true)
-                        .path("/refresh")
+                        .path("/")
                         .maxAge(12 * 60 * 60)
                         .sameSite("Strict")
                         .build();
+                ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
+                        .httpOnly(true)
+//                        .secure(true)
+                        .path("/")
+                        .maxAge(15 * 60)
+                        .sameSite("Strict")
+                        .build();
                 response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
-                return accessToken;
+                response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+//                return accessToken;
             }
         } catch (Exception e) {
             throw new LoginException("Try Again");
         }
-        return "";
     }
 
     @Override
-    public String refresh(HttpServletRequest request, HttpServletResponse response) throws TokenExpiredException {
+    public void refresh(HttpServletRequest request, HttpServletResponse response) throws TokenExpiredException {
         String refreshToken = null;
         if (request.getCookies() != null) {
             for (var cookie : request.getCookies()) {
@@ -97,11 +104,19 @@ public class UserAuthServiceImpl extends BaseServiceImpl<User, Long> implements 
         ResponseCookie cookie = ResponseCookie.from("refreshToken", newRefreshToken)
                 .httpOnly(true)
 //                .secure(true)
-                .path("/refresh")
+                .path("/")
                 .maxAge(12* 60 * 60)
                 .sameSite("Strict")
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-        return newAccessToken;
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", newAccessToken)
+                .httpOnly(true)
+//                        .secure(true)
+                .path("/")
+                .maxAge(15 * 60)
+                .sameSite("Strict")
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+//        return newAccessToken;
     }
 }

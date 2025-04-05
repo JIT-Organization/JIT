@@ -55,7 +55,8 @@ public class SecurityConfig {
                 .httpBasic(httpBasic -> httpBasic.authenticationEntryPoint(authenticationEntryPoint()))
 //                .formLogin(form -> form
 //                        .loginPage("/login")
-//                        .failureForwardUrl("/refresh")
+//                        .failureHandler(customAuthFailureHandler())
+////                        .failureForwardUrl("/refresh")
 //                        .defaultSuccessUrl("/", true)
 //                        .permitAll())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

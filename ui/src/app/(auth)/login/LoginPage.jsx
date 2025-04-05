@@ -17,20 +17,8 @@ const LoginPage = () => {
     setError("");
 
     try {
-      const res = await axios.post(
-        "http://localhost:8080/login",
-        {
-          email,
-          password,
-        },
-        {
-          withCredentials: true,
-        }
-      );
-
-      const token = res.data.data;
-      sessionStorage.setItem("jwtToken", token);
-
+      // login({email, password});
+      await axios.post("http://localhost:8080/login", { email, password }, { withCredentials: true })
       router.push(`/restaurants/menu`);
     } catch (err) {
       setError("Invalid email or password");
