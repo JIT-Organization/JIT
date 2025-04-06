@@ -9,9 +9,9 @@ import java.util.List;
 @Setter
 @Getter
 public class SearchResultDTO {
-    private String type; // "Restaurant" or "Food"
+    private String type;
     private String name;
-    private List<String> associatedNames; // e.g., foods in a restaurant or restaurants serving a food
+    private List<String> associatedNames;
 
     public List<String> getAssociatedNames() {
         return associatedNames != null ? new ArrayList<>(associatedNames) : null; // Defensive copy

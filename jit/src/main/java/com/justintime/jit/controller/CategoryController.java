@@ -22,9 +22,9 @@ public class CategoryController {
         return categoryService.getAllCategories(restaurantId);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<CategoryDTO> getCategoryById(@PathVariable Long id) {
-        return categoryService.getCategoryById(id)
+    @GetMapping("/{restaurantId}/{id}")
+    public ResponseEntity<CategoryDTO> getCategoryByRestaurantIdAndId(@PathVariable Long restaurantId, @PathVariable Long id) {
+        return categoryService.getCategoryByRestaurantIdAndId(restaurantId, id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

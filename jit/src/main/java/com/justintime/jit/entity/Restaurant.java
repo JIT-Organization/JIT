@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.justintime.jit.entity.ComboEntities.Combo;
 import com.justintime.jit.entity.OrderEntities.Order;
+import com.justintime.jit.util.CodeNumberGenerator;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,6 +27,14 @@ import java.util.stream.Collectors;
 @Table(name = "restaurant")
 @NoArgsConstructor
 public class Restaurant extends BaseEntity{
+
+        @Column(name="restaurant_number", unique = true, nullable = false)
+        private String restaurantNumber;
+
+        @PrePersist
+        protected void onCreate(){
+                this.restaurantNumber = CodeNumberGenerator.generateCode("restaurant");
+        }
 
         @Column(name = "restaurant_name", nullable = false)
         private String restaurantName;
@@ -64,7 +73,7 @@ public class Restaurant extends BaseEntity{
         private List<Combo> combos;
 
         @OneToMany(mappedBy = "restaurant")
-        private List<Cook> Ccooks;
+        private List<Cook> cooks;
 
         @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
         private List<Order> orders;
@@ -74,6 +83,9 @@ public class Restaurant extends BaseEntity{
 
         @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
         private List<Reservation> reservations;
+
+        @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
+        private List<DiningTable> diningTables;
 
         @ManyToMany(cascade = CascadeType.REMOVE)
         @JoinTable(

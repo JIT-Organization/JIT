@@ -9,6 +9,7 @@ import com.justintime.jit.util.ImageValidation;
 import com.justintime.jit.service.MenuItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,6 +37,10 @@ public class MenuItemController {
         return menuItemService.getMenuItemsByRestaurantId(restaurantId, sortBy, priceRange, category, onlyVeg, onlyForCombos);
     }
 
+    @GetMapping("/{restaurantId}/{id}")
+    public MenuItemDTO getMenuItemByRestaurantIdAndId(@PathVariable Long restaurantId, @PathVariable Long id){
+        return menuItemService.getMenuItemByRestaurantIdAndId(restaurantId, id);
+    }
     @PostMapping("/validateImage")
     public ResponseEntity<String> validateImage(@RequestParam("image") String base64Image) {
         long maxSizeInBytes = 3 * 1024 * 1024;  // Example: 3 MB limit for image size
@@ -55,7 +60,7 @@ public class MenuItemController {
 
     @PutMapping("/{restaurantId}/{id}")
     public MenuItem updateMenuItem(@PathVariable Long restaurantId,@PathVariable Long id, @RequestBody MenuItemDTO updatedItem) {
-        return menuItemService.updateMenuItem(restaurantId,id, updatedItem);
+        return menuItemService.updateMenuItem(restaurantId,id,updatedItem);
     }
 
     @PatchMapping("/{restaurantId}/{id}")
