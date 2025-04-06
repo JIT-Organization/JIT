@@ -9,6 +9,7 @@ import com.justintime.jit.entity.PaymentEntities.Payment;
 import com.justintime.jit.entity.Reservation;
 import com.justintime.jit.entity.Restaurant;
 import com.justintime.jit.entity.User;
+import com.justintime.jit.util.CodeNumberGenerator;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,6 +22,7 @@ import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Entity
@@ -34,12 +36,9 @@ public class Order extends BaseEntity {
     @Column(name = "order_number", unique = true, nullable = false, updatable = false)
     private String orderNumber;
 
-    private static final SecureRandom random = new SecureRandom();
-
     @PrePersist
     protected void onCreate() {
-        long number = 1_000_000_000L + (Math.abs(random.nextLong()) % 9_000_000_000L);
-        orderNumber = "ORD-" + number;
+        this.orderNumber = CodeNumberGenerator.generateCode("order");
     }
 
     @ManyToOne
