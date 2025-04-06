@@ -3,6 +3,7 @@ package com.justintime.jit.entity.PaymentEntities;
 import com.justintime.jit.entity.BaseEntity;
 import com.justintime.jit.entity.Enums.PaymentStatus;
 import com.justintime.jit.entity.OrderEntities.Order;
+import com.justintime.jit.util.CodeNumberGenerator;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,10 +11,8 @@ import lombok.Setter;
 import org.hibernate.envers.Audited;
 
 import java.math.BigDecimal;
-import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Entity
 @Audited
@@ -28,7 +27,7 @@ public class Payment extends BaseEntity {
 
     @PrePersist
     protected void onCreate(){
-        this.paymentNumber = "PAY-" + UUID.randomUUID().toString().substring(0, 10).toUpperCase();
+        this.paymentNumber = CodeNumberGenerator.generateCode("payment");
     }
 
     @ManyToOne

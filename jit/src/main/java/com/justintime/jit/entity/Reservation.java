@@ -3,6 +3,7 @@ package com.justintime.jit.entity;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.justintime.jit.util.CodeNumberGenerator;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,12 +31,9 @@ public class Reservation extends BaseEntity{
         @Column(unique = true, nullable = false, updatable = false)
         private String reservationNumber;
 
-        private static final SecureRandom random = new SecureRandom();
-
         @PrePersist
         protected void onCreate() {
-                long number = 1_000_000_000L + (Math.abs(random.nextLong()) % 9_000_000_000L);
-                reservationNumber = "RES-" + number;
+                this.reservationNumber = CodeNumberGenerator.generateCode("reservation");
         }
 
         @ManyToOne
