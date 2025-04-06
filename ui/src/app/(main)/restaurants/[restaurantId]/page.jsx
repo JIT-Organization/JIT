@@ -1,4 +1,6 @@
-
+import Components from "@/components/Components";
+//import { useRouter } from 'next/router';
+//import { usePathname } from 'next/navigation';
 
 export default async function Restaurant({ params }) {
     // const router = useRouter();

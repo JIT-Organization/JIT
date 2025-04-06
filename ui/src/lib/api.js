@@ -2,13 +2,22 @@ import axios from "axios";
 import { URLS } from "./url/urls";
 import { encodeIdInURL } from "./utils/helper";
 
-const restaurantId = 2
+export const postsQueryOptions = {
+  queryKey: ["posts"],
+  queryFn: async () => {
+    const response = await fetch("https://jsonplaceholder.typicode.com/posts");
+    if (!response.ok) {
+      throw new Error("Failed to fetch posts");
+    }
+    return response.json();
+  },
+};
 
-export const getMenuItemListOptions = {
+export const getMenuItemListOptions = (id) => ({
   queryKey: ["menuItemList"],
   queryFn: async () => {
     try {
-      const response = await axios.get(`${URLS.menuItemList}/${restaurantId}`);
+      const response = await axios.get(`${URLS.menuItemList}/${id}`);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -19,20 +28,9 @@ export const getMenuItemListOptions = {
       throw new Error("Failed to fetch Menu Item List");
     }
   },
-  select: (data) =>
-    data.map(({ image, menuItemName, cookSet, price, offerPrice, active, categorySet, id }) => ({
-      image,
-      menuItemName,
-      cookSet,
-      price,
-      offerPrice,
-      active,
-      categorySet,
-      id,
-    })),
   staleTime: 60 * 60 * 1000,
   gcTime: 2 * 60 * 60 * 1000,
-};
+});
 
 export const patchUpdateMenuItemList = (queryClient) => ({
   mutationFn: async ({ id, fields }) => {

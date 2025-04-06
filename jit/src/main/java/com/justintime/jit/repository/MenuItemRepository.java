@@ -22,5 +22,5 @@ public interface MenuItemRepository extends BaseRepository<MenuItem, Long> {
     Set<MenuItem> findByMenuItemNamesAndRestaurantId(@Param("formattedMenuItemNames") Set<String> formattedMenuItemNames,
                                                    @Param("restaurantId") Long restaurantId);
 
-
+    MenuItem findByRestaurantIdAndId(Long restaurantId, Long id);
 }

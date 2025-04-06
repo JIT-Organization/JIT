@@ -3,6 +3,7 @@ package com.justintime.jit.entity;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.justintime.jit.util.CodeNumberGenerator;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,8 +13,11 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Entity
@@ -24,13 +28,30 @@ import java.util.stream.Collectors;
 @Table(name="reservation")
 public class Reservation extends BaseEntity{
 
+        @Column(unique = true, nullable = false, updatable = false)
+        private String reservationNumber;
+
+        @PrePersist
+        protected void onCreate() {
+                this.reservationNumber = CodeNumberGenerator.generateCode("reservation");
+        }
+
         @ManyToOne
-        @JoinColumn(name = "customer_id", nullable = false)
-        private User customer;
+        @JoinColumn(name = "user_id", nullable = false)
+        private User user;
 
         @ManyToOne
         @JoinColumn(name = "restaurant_id", nullable = false)
         private Restaurant restaurant;
+
+        @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+        @JoinTable(
+                name = "dining_table_reservation",
+                joinColumns = @JoinColumn(name = "reservation_id"),
+                inverseJoinColumns = @JoinColumn(name = "dining_table_id"),
+                uniqueConstraints = @UniqueConstraint(columnNames = {"reservation_id", "dining_table_id"})
+        )
+        private Set<DiningTable> diningTableSet = new HashSet<>();
 
         @ManyToOne
         @JoinColumn(name = "shift_capacity_id", nullable = false)

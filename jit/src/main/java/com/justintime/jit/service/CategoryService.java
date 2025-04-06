@@ -8,7 +8,7 @@ import java.util.Optional;
 public interface CategoryService extends BaseService<Category,Long>{
     List<CategoryDTO> getAllCategories(Long restaurantId);
     Category createCategory(Long restaurantId,CategoryDTO categoryDTO);
-    Optional<CategoryDTO> getCategoryById(Long id);
+    Optional<CategoryDTO> getCategoryByRestaurantIdAndId(Long restaurantId, Long id);
     Category updateCategory(Long restaurantId,Long id, CategoryDTO updatedCategoryDTO);
     Category patchUpdateCategory(Long restaurantId,Long id,CategoryDTO categoryDTO,List<String>propertiesToBeUpdated);
     void deleteCategory(Long id);
