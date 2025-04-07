@@ -35,13 +35,13 @@ public class AuthController extends BaseController {
 
     @PostMapping("login")
     public ResponseEntity<ApiResponse<String>> login(@RequestBody LoginRequestDto loginRequestDto, HttpServletResponse response) throws LoginException {
-        String token =  userAuthService.login(loginRequestDto, response);
-        return success(token, "Login Successful");
+        userAuthService.login(loginRequestDto, response);
+        return success(null, "Login Successful");
     }
 
     @PostMapping("refresh")
     public ResponseEntity<ApiResponse<String>> refreshToken(HttpServletRequest request, HttpServletResponse response) {
-        String newToken = userAuthService.refresh(request, response);
-        return success(newToken);
+        userAuthService.refresh(request, response);
+        return success(null);
     }
 }

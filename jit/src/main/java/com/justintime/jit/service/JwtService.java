@@ -7,4 +7,5 @@ public interface JwtService {
     String generateAccessToken(String email);
     String extractEmail(String token);
     boolean validateToken(String token, UserDetails userDetails);
+    Object extractRestaurantId(String token);
 }

@@ -10,6 +10,6 @@ import javax.security.auth.login.LoginException;
 
 public interface UserAuthService {
     void register(User user);
-    String login(LoginRequestDto loginRequestDto, HttpServletResponse response) throws LoginException;
-    String refresh(HttpServletRequest request, HttpServletResponse response);
+    void login(LoginRequestDto loginRequestDto, HttpServletResponse response) throws LoginException;
+    void refresh(HttpServletRequest request, HttpServletResponse response);
 }

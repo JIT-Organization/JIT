@@ -1,22 +1,44 @@
 import { URLS } from "./urls";
 import { getRequest, patchRequest, deleteRequest, handleMutate, handleError } from "./api-helper";
-import { encodeIdInURL } from "../utils/helper";
 
 const cacheConfig = {
   staleTime: 60 * 60 * 1000,  
   gcTime: 2 * 60 * 60 * 1000, 
 };
 
-export const getMenuItemListOptions = (id) => ({
+export const login = (data) => {
+  postRequest("http://localhost:8080/login", data, {withCredential: true})
+}
+
+export const refresh = () => {
+  try{
+    postRequest("http://localhost:8080/refresh", {}, {withCredential: true})
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+export const getMenuItemListOptions = () => ({
   queryKey: ["menuItemList"],
-  queryFn: () => getRequest(`${URLS.menuItemList}/${id}`, "Failed to fetch Menu Item List"),
+  queryFn: () => getRequest(`${URLS.menuItemList}`, "Failed to fetch Menu Item List"),
+  select: (data) =>
+    data.map(({ image, menuItemName, cookSet, price, offerPrice, active, categorySet, id }) => ({
+      image,
+      menuItemName,
+      cookSet,
+      price,
+      offerPrice,
+      active,
+      categorySet,
+      id,
+    })),
   ...cacheConfig
 });
 
 export const patchUpdateMenuItemList = (queryClient) => ({
   mutationFn: async ({ id, fields }) => {
     return await patchRequest(`${URLS.menuItemList}/${id}`, {
-      menuItemDTO: { ...fields },
+      dto: { ...fields },
       propertiesToBeUpdated: Object.keys(fields),
     });
   },
@@ -49,16 +71,16 @@ export const deleteOrderItem = (queryClient) => ({
   onError: (err, variables, context) => handleError(queryClient, ["ordersList"], context),
 });
 
-export const getCategoriesListOptions = (id) => ({
+export const getCategoriesListOptions = () => ({
   queryKey: ["categoriesList"],
-  queryFn: () => getRequest(`${URLS.categoriesList}/${id}`, "Failed to fetch Categories List"),
+  queryFn: () => getRequest(`${URLS.categoriesList}/getAll`, "Failed to fetch Categories List"),
   ...cacheConfig
 });
 
 export const patchUpdateCategoriesList = (queryClient) => ({
   mutationFn: async ({ id, fields }) => {
     return await patchRequest(`${URLS.categoriesList}/${id}`, {
-      categoryItemDTO: { ...fields },
+      dto: { ...fields },
       propertiesToBeUpdated: Object.keys(fields),
     });
   },
@@ -118,6 +140,7 @@ export const deleteTableItem = (queryClient) => ({
   onMutate: async ({ id }) => handleMutate(queryClient, ["tablesList"], id),
   onError: (err, variables, context) => handleError(queryClient, ["tablesList"], context),
 });
+
 
 // export const getMenuItemListOptions = (id) => ({
 //   queryKey: ["menuItemList"],

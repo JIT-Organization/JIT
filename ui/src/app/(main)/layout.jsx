@@ -29,15 +29,15 @@ export default function RootLayout({ children }) {
   const sidebarLinks = useMemo(
     () => [
       { href: "/dashboard", label: "Dashboard", icon: <FaTachometerAlt /> },
-      { href: "/restaurants/1/kitchen", label: "Kitchen", icon: <FaUtensils /> },
-      { href: "/restaurants/1/menu", label: "Our Menu", icon: <FaCartPlus /> },
-      { href: "/restaurants/1/createOrder", label: "New Order", icon: <FaClipboardList /> },
-      { href: "/restaurants/1/orders", label: "View Orders", icon: <FaListAlt /> },
-      { href: "/restaurants/1/payments", label: "Payment History", icon: <FaCreditCard /> },
-      { href: "/restaurants/1/categories", label: "Categories", icon: <FaLayerGroup /> },
-      { href: "/restaurants/1/users", label: "Users", icon: <FaUsers /> },
-      { href: "/restaurants/1/tables", label: "Tables", icon: <FaTable /> },
-      { href: "/restaurants/1/settings", label: "Settings", icon: <FaCog /> },
+      { href: "/restaurants/kitchen", label: "Kitchen", icon: <FaUtensils /> },
+      { href: "/restaurants/menu", label: "Our Menu", icon: <FaCartPlus /> },
+      { href: "/restaurants/createOrder", label: "New Order", icon: <FaClipboardList /> },
+      { href: "/restaurants/orders", label: "View Orders", icon: <FaListAlt /> },
+      { href: "/restaurants/payments", label: "Payment History", icon: <FaCreditCard /> },
+      { href: "/restaurants/categories", label: "Categories", icon: <FaLayerGroup /> },
+      { href: "/restaurants/users", label: "Users", icon: <FaUsers /> },
+      { href: "/restaurants/tables", label: "Tables", icon: <FaTable /> },
+      { href: "/restaurants/settings", label: "Settings", icon: <FaCog /> },
     ],
     []
   );

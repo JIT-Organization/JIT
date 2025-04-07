@@ -9,9 +9,8 @@ import { usePathname, useRouter } from "next/navigation";
 const Categories = () => {
    const router = useRouter();
    const pathName = usePathname();
-   const id = pathName.split("/")[2];
    const queryClient = useQueryClient();
-   const { data: categoriesList, isLoading, error } = useQuery(getCategoriesListOptions(id));
+   const { data: categoriesList, isLoading, error } = useQuery(getCategoriesListOptions());
    const patchMutation = useMutation(patchUpdateCategoriesList(queryClient));
    const deleteMutation = useMutation(deleteCategoryItem(queryClient));
  
@@ -19,7 +18,7 @@ const Categories = () => {
    if (error) return <p>Error loading categories: {error.message}</p>;
  
   const handleToggle = (id, value) => {
-    patchMutation.mutate({ id, fields: { active: value } });
+    patchMutation.mutate({ id, fields: { isPublic: value } });
     //  setTableData((prev) =>
     //   prev.map((row) => (row.id === id ? { ...row, public: value } : row))
     // );

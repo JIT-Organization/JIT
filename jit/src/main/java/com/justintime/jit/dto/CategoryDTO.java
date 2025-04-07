@@ -19,4 +19,6 @@ public class CategoryDTO {
     private String categoryName;
     private Set<String> menuItemSet;
     private Set<String> comboSet;
+    private boolean isPublic;
+    private String foodCount;
 }
