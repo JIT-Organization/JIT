@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/jit-api/OrderItems")
+@RequestMapping("/jit-api/orderItems")
 public class OrderItemController {
 
 
