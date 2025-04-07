@@ -1,5 +1,9 @@
 package com.justintime.jit.controller;
 
+import com.justintime.jit.dto.ApiResponse;
+import com.justintime.jit.dto.MenuItemDTO;
+import com.justintime.jit.dto.PatchRequest;
+import com.justintime.jit.dto.RestaurantDTO;
 import com.justintime.jit.entity.Restaurant;
 import com.justintime.jit.service.RestaurantService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/jit-api/restaurants")
-public class RestaurantController {
+public class RestaurantController extends BaseController {
 
     @Autowired
     private RestaurantService restaurantService;
@@ -23,33 +27,40 @@ public class RestaurantController {
     }
 
     // Get all restaurants
-    @GetMapping
-    public ResponseEntity<List<Restaurant>> getAllRestaurants() {
-        List<Restaurant> restaurants = restaurantService.getAllRestaurants();
-        return ResponseEntity.ok(restaurants);
-    }
+//    @GetMapping
+//    public ResponseEntity<List<Restaurant>> getAllRestaurants() {
+//        List<Restaurant> restaurants = restaurantService.getAllRestaurants();
+//        return ResponseEntity.ok(restaurants);
+//    }
 
     //Get a restaurant by ID
-    @GetMapping("/{restaurantId}")
-    public ResponseEntity<Restaurant> getRestaurantById(@PathVariable Long restaurantId) {
-        Restaurant restaurant = restaurantService.getRestaurantById(restaurantId);
-        return ResponseEntity.ok(restaurant);
+    @GetMapping("/{restaurantCode}")
+    public ResponseEntity<ApiResponse<RestaurantDTO>> getRestaurantByCode(@PathVariable String restaurantCode) {
+        RestaurantDTO restaurant = restaurantService.getRestaurantByRestaurantCode(restaurantCode);
+        return success(restaurant);
     }
 
     // Update restaurant details
-    @PutMapping("/{restaurantId}")
-    public ResponseEntity<Restaurant> updateRestaurant(
-            @PathVariable Long restaurantId,
+    @PutMapping("/{restaurantCode}")
+    public ResponseEntity<ApiResponse<RestaurantDTO>> updateRestaurant(
+            @PathVariable String restaurantCode,
             @RequestBody Restaurant restaurant) {
-        Restaurant updatedRestaurant = restaurantService.updateRestaurant(restaurantId, restaurant);
-        return ResponseEntity.ok(updatedRestaurant);
+        restaurantService.updateRestaurant(restaurantCode, restaurant);
+        return success(null);
+    }
+
+    @PatchMapping("/{restaurantCode}")
+    public ResponseEntity<ApiResponse<RestaurantDTO>> patchUpdateRestaurant (
+            @PathVariable String restaurantCode, @RequestBody PatchRequest<RestaurantDTO> payload) {
+        restaurantService.patchUpdateRestaurant(restaurantCode, payload.getDto(), payload.getPropertiesToBeUpdated());
+        return success(null);
     }
 
     // Delete a restaurant
-    @DeleteMapping("/{restaurantId}")
-    public ResponseEntity<String> deleteRestaurant(@PathVariable Long restaurantId) {
-        restaurantService.deleteRestaurant(restaurantId);
-        return ResponseEntity.ok("Restaurant deleted successfully.");
+    @DeleteMapping("/{restaurantCode}")
+    public ResponseEntity<ApiResponse<RestaurantDTO>> deleteRestaurant(@PathVariable String restuarantCode) {
+        restaurantService.deleteRestaurant(restuarantCode);
+        return success(null, "Restaurant deleted successfully.");
     }
 
 //    @GetMapping("/search")

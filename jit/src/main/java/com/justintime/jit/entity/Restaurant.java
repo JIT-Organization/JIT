@@ -28,13 +28,8 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 public class Restaurant extends BaseEntity{
 
-        @Column(name="restaurant_number", unique = true, nullable = false)
-        private String restaurantNumber;
-
-        @PrePersist
-        protected void onCreate(){
-                this.restaurantNumber = CodeNumberGenerator.generateCode("restaurant");
-        }
+        @Column(name="restaurant_code", length = 12, unique = true, nullable = false)
+        private String restaurantCode;
 
         @Column(name = "restaurant_name", nullable = false)
         private String restaurantName;

@@ -16,4 +16,5 @@ public interface RestaurantRepository extends BaseRepository<Restaurant, Long> {
 
     List<Restaurant> findByRestaurantNameContaining(String restaurantName);
 
+    Restaurant findByRestaurantCode(String restaurantCode);
 }
