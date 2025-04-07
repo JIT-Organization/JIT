@@ -9,8 +9,11 @@ public interface RestaurantService {
     Restaurant addRestaurant(Restaurant restaurant);
     List<Restaurant> getAllRestaurants();
     Restaurant getRestaurantById(Long id);
-    Restaurant updateRestaurant(Long id, Restaurant restaurant);
-    void deleteRestaurant(Long id);
+    void updateRestaurant(String code, Restaurant restaurant);
+    void deleteRestaurant(String restaurantCode);
+    RestaurantDTO getRestaurantByRestaurantCode(String restaurantCode);
+
+    void patchUpdateRestaurant(String restaurantCode, RestaurantDTO dto, List<String> propertiesToBeUpdated);
 
 //    List<String> findSimilarNames(String name);
 //

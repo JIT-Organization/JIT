@@ -1,7 +1,6 @@
 package com.justintime.jit.service.impl;
 
 import com.justintime.jit.dto.CategoryDTO;
-import com.justintime.jit.dto.MenuItemDTO;
 import com.justintime.jit.entity.Category;
 import com.justintime.jit.entity.ComboEntities.Combo;
 import com.justintime.jit.entity.MenuItem;
@@ -10,11 +9,10 @@ import com.justintime.jit.repository.ComboRepo.ComboRepository;
 import com.justintime.jit.repository.MenuItemRepository;
 import com.justintime.jit.repository.RestaurantRepository;
 import com.justintime.jit.service.CategoryService;
+import com.justintime.jit.util.CommonServiceImplUtil;
 import com.justintime.jit.util.mapper.GenericMapper;
 import com.justintime.jit.util.mapper.MapperFactory;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +33,8 @@ public class CategoryServiceImpl extends BaseServiceImpl<Category,Long> implemen
     private ComboRepository comboRepository;
     @Autowired
     private RestaurantRepository restaurantRepository;
+    @Autowired
+    private CommonServiceImplUtil commonServiceImplUtil;
 
     public List<CategoryDTO> getAllCategories(Long restaurantId) {
         List<Category> categories= categoryRepository.findByRestaurantId(restaurantId);
@@ -97,7 +97,13 @@ public class CategoryServiceImpl extends BaseServiceImpl<Category,Long> implemen
         Category patchedCategory = mapper.toEntity(categoryDTO);
         patchedCategory.setRestaurant(restaurantRepository.findById(restaurantId).orElseThrow(() -> new RuntimeException("Restaurant not found")));
         resolveRelationships(patchedCategory, categoryDTO);
-        copySelectedProperties(patchedCategory, existingCategory, propertiesToBeUpdated);
+        List<String> propertiesToBeChangedClone = new ArrayList<>(propertiesToBeUpdated);
+        if(propertiesToBeChangedClone.contains("foodItems")) {
+            propertiesToBeChangedClone.remove("foodItems");
+            propertiesToBeChangedClone.add("menuItemSet");
+            propertiesToBeChangedClone.add("comboSet");
+        }
+        commonServiceImplUtil.copySelectedProperties(patchedCategory, existingCategory, propertiesToBeUpdated);
         existingCategory.setUpdatedDttm(LocalDateTime.now());
         return categoryRepository.save(existingCategory);
     }
@@ -118,28 +124,6 @@ public class CategoryServiceImpl extends BaseServiceImpl<Category,Long> implemen
                     categoryDTO.getFoodItems(), category.getRestaurant().getId());
             category.setMenuItemSet(menuItems);
             category.setComboSet(combos);
-        }
-    }
-
-    private void copySelectedProperties(Object source, Object target, List<String> propertiesToBeChanged) {
-        if (source == null || target == null) {
-            throw new IllegalArgumentException("Source and target must not be null");
-        }
-
-        BeanWrapper srcWrapper = new BeanWrapperImpl(source);
-        BeanWrapper targetWrapper = new BeanWrapperImpl(target);
-
-        List<String> propertiesToBeChangedClone = new ArrayList<>(propertiesToBeChanged);
-        if(propertiesToBeChangedClone.contains("foodItems")) {
-            propertiesToBeChangedClone.remove("foodItems");
-            propertiesToBeChangedClone.add("menuItemSet");
-            propertiesToBeChangedClone.add("comboSet");
-        }
-
-        for (String property : propertiesToBeChangedClone) {
-            if (srcWrapper.isReadableProperty(property) && srcWrapper.getPropertyValue(property) != null) {
-                targetWrapper.setPropertyValue(property, srcWrapper.getPropertyValue(property));
-            }
         }
     }
 }
