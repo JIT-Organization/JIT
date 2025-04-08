@@ -39,6 +39,10 @@ const MenuList = () => {
     handleDeleteClick
   );
 
+  const handleHeaderButtonClick = () => {
+    router.push(`${pathName}/${'add_food'}`)
+  };
+
   const categories = getDistinctCategories(menuItemListData);
 
   return (
@@ -47,9 +51,7 @@ const MenuList = () => {
         columns={columns}
         data={menuItemListData || []}
         tabName="Our Menu"
-        handleHeaderButtonClick={() => {
-          console.log("Header Button Clicked");
-        }}
+        handleHeaderButtonClick={handleHeaderButtonClick}
         headerButtonName="Add Food"
         categories={categories}
       />
