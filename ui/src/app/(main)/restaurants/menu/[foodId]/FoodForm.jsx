@@ -1,0 +1,337 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import ImageUploader from './ImageUploader';
+
+const FoodForm = ({ onFormChange }) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    price: '',
+    description: '',
+    cooks: [],
+    count: '',
+    timings: [{ from: '', to: '' }],
+    availability: [],
+    offerPrice: '',
+    offerFrom: '',
+    offerTo: '',
+    preparationTime: '',
+    acceptBulkOrder: false,
+    foodType: 'veg',
+    onlyCombo: false,
+    isActive: true,
+    special: 'no',
+    categories: [],
+    images: []
+  });
+
+  useEffect(() => {
+    onFormChange(formData);
+  }, [formData]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleTimingChange = (index, field, value) => {
+    const newTimings = [...formData.timings];
+    newTimings[index][field] = value;
+    setFormData(prev => ({ ...prev, timings: newTimings }));
+  };
+  
+  const addTiming = () => {
+    setFormData(prev => ({
+      ...prev,
+      timings: [...prev.timings, { from: '', to: '' }]
+    }));
+  };
+  
+  const removeTiming = (index) => {
+    const newTimings = formData.timings.filter((_, i) => i !== index);
+    setFormData(prev => ({ ...prev, timings: newTimings }));
+  };
+  
+
+  return (
+    <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="font-bold block">Food Name</label>
+          <input
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            className="border p-2 w-full rounded"
+          />
+        </div>
+        <div>
+          <label className="font-bold block">Price</label>
+          <input
+            name="price"
+            value={formData.price}
+            onChange={handleChange}
+            className="border p-2 w-full rounded"
+          />
+        </div>
+      </div>
+
+        <div>
+          <label className="font-bold block">Description</label>
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            className="border p-2 w-full rounded bg-yellow-50"
+          />
+        </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="font-bold block">Responsible Cooks</label>
+          <select
+            name="cooks"
+            value={formData.cooks}
+            onChange={handleChange}
+            className="border p-2 w-full rounded bg-yellow-50"
+          >
+            <option value="">Select</option>
+            <option value="Cook 1, Cook 2">Cook 1, Cook 2</option>
+            <option value="Cook 3">Cook 3</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="font-bold block">Count</label>
+          <input
+            name="count"
+            type="text"
+            value={formData.count}
+            onChange={handleChange}
+            placeholder="e.g. 120 / day"
+            className="border p-2 w-full rounded bg-yellow-50"
+          />
+        </div>
+      </div>
+
+        <div className="mb-4">
+          <label className="font-bold block mb-2">Timings</label>
+          <div className="bg-gray-200 p-4 rounded">
+            {formData.timings.map((timeSlot, index) => (
+              <div key={index} className="flex gap-4 mb-2 items-center">
+                <div className="flex-1">
+                  <label className="text-sm">Available From</label>
+                  <input
+                    type="time"
+                    value={timeSlot.from}
+                    onChange={(e) => handleTimingChange(index, 'from', e.target.value)}
+                    className="border p-2 w-full rounded bg-yellow-50"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="text-sm">Available To</label>
+                  <input
+                    type="time"
+                    value={timeSlot.to}
+                    onChange={(e) => handleTimingChange(index, 'to', e.target.value)}
+                    className="border p-2 w-full rounded bg-yellow-50"
+                  />
+                </div>
+                {formData.timings.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeTiming(index)}
+                    className="text-red-500 text-xl"
+                  >
+                    &times;
+                  </button>
+                )}
+              </div>
+            ))}
+
+            <button
+              type="button"
+              onClick={addTiming}
+              className="mt-2 px-3 py-1 bg-orange-500 text-white rounded-full"
+            >
+              +
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="font-bold block">Availability</label>
+            <select
+              name="availability"
+              value={formData.availability}
+              onChange={handleChange}
+              className="border p-2 w-full rounded bg-yellow-50"
+            >
+              <option value="">Select Days</option>
+              <option value="Saturday, Sunday">Saturday, Sunday</option>
+              <option value="All Days">All Days</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="font-bold block">Offer Price</label>
+            <input
+              name="offerPrice"
+              value={formData.offerPrice}
+              onChange={handleChange}
+              className="border p-2 w-full rounded bg-yellow-50"
+            />
+          </div>
+        {/* </div> */}
+
+        {/* <div className="flex gap-4 items-end"> */}
+          <div className="flex-1">
+            <label className="font-bold block">Offer From</label>
+            <input
+              name="offerFrom"
+              type="datetime-local"
+              value={formData.offerFrom}
+              onChange={handleChange}
+              className="border p-2 w-full rounded"
+            />
+          </div>
+          <div className="flex-1">
+            <label className="font-bold block">Offer To</label>
+            <input
+              name="offerTo"
+              type="datetime-local"
+              value={formData.offerTo}
+              onChange={handleChange}
+              className="border p-2 w-full rounded"
+            />
+          </div>
+        {/* </div> */}
+
+        <div>
+          <label className="font-bold block">Preparation Time</label>
+          <input
+            name="preparationTime"
+            value={formData.preparationTime}
+            onChange={handleChange}
+            placeholder="Time in minutes"
+            className="border p-2 w-full rounded bg-yellow-50"
+          />
+        </div>
+
+        <div>
+          <label className="font-bold block">Accept Bulk Orders</label>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className={`px-4 py-2 rounded ${formData.acceptBulkOrder === true ? 'bg-yellow-500' : 'bg-gray-200'}`}
+              onClick={() => setFormData(prev => ({ ...prev, acceptBulkOrder: true }))}
+            >
+              Yes
+            </button>
+            <button
+              type="button"
+              className={`px-4 py-2 rounded ${formData.acceptBulkOrder === false ? 'bg-yellow-500' : 'bg-gray-200'}`}
+              onClick={() => setFormData(prev => ({ ...prev, acceptBulkOrder: false }))}
+            >
+              No
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label className="font-bold block">Food Type</label>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className={`px-4 py-2 rounded ${formData.foodType === 'veg' ? 'bg-yellow-500' : 'bg-gray-200'}`}
+              onClick={() => setFormData(prev => ({ ...prev, foodType: 'veg' }))}
+            >
+              Veg
+            </button>
+            <button
+              type="button"
+              className={`px-4 py-2 rounded ${formData.foodType === 'non-veg' ? 'bg-yellow-500' : 'bg-gray-200'}`}
+              onClick={() => setFormData(prev => ({ ...prev, foodType: 'non-veg' }))}
+            >
+              Non-Veg
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label className="font-bold block">Only for Combos</label>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className={`px-4 py-2 rounded ${formData.onlyCombo === true ? 'bg-yellow-500' : 'bg-gray-200'}`}
+              onClick={() => setFormData(prev => ({ ...prev, onlyCombo: true }))}
+            >
+              Yes
+            </button>
+            <button
+              type="button"
+              className={`px-4 py-2 rounded ${formData.onlyCombo === false ? 'bg-yellow-500' : 'bg-gray-200'}`}
+              onClick={() => setFormData(prev => ({ ...prev, onlyCombo: false }))}
+            >
+              No
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label className="font-bold block">Add to Hotel’s Special</label>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className={`px-4 py-2 rounded ${formData.special === 'yes' ? 'bg-yellow-500' : 'bg-gray-200'}`}
+              onClick={() => setFormData(prev => ({ ...prev, special: 'yes' }))}
+            >
+              Yes
+            </button>
+            <button
+              type="button"
+              className={`px-4 py-2 rounded ${formData.special === 'no' ? 'bg-yellow-500' : 'bg-gray-200'}`}
+              onClick={() => setFormData(prev => ({ ...prev, special: 'no' }))}
+            >
+              No
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label className="font-bold block">Active</label>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className={`px-4 py-2 rounded ${formData.isActive === true ? 'bg-yellow-500' : 'bg-gray-200'}`}
+              onClick={() => setFormData(prev => ({ ...prev, isActive: true }))}
+            >
+              Yes
+            </button>
+            <button
+              type="button"
+              className={`px-4 py-2 rounded ${formData.isActive === false ? 'bg-yellow-500' : 'bg-gray-200'}`}
+              onClick={() => setFormData(prev => ({ ...prev, isActive: false }))}
+            >
+              No
+            </button>
+          </div>
+        </div>
+        </div>
+
+        <div>
+          <label className="font-bold block">Images</label>
+          <div className="flex gap-2">
+          <ImageUploader
+            multiple
+            onChange={(imagesArray) => setFormData(prev => ({ ...prev, images: imagesArray }))}
+          />
+          </div>
+        </div>
+
+    </form>
+  );
+};
+
+export default FoodForm;
