@@ -103,7 +103,7 @@ public class CategoryServiceImpl extends BaseServiceImpl<Category,Long> implemen
             propertiesToBeChangedClone.add("menuItemSet");
             propertiesToBeChangedClone.add("comboSet");
         }
-        commonServiceImplUtil.copySelectedProperties(patchedCategory, existingCategory, propertiesToBeUpdated);
+        commonServiceImplUtil.copySelectedProperties(patchedCategory, existingCategory, propertiesToBeChangedClone);
         existingCategory.setUpdatedDttm(LocalDateTime.now());
         return categoryRepository.save(existingCategory);
     }
