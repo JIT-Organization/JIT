@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import ImageUploader from './ImageUploader';
+import MultiSelect from '@/components/customUIComponents/MultiSelect';
 
 const FoodForm = ({ onFormChange }) => {
   const [formData, setFormData] = useState({
@@ -51,7 +52,32 @@ const FoodForm = ({ onFormChange }) => {
     const newTimings = formData.timings.filter((_, i) => i !== index);
     setFormData(prev => ({ ...prev, timings: newTimings }));
   };
-  
+
+  const categoryOptions = [
+    { value: 'breakfast', label: 'Breakfast' },
+    { value: 'lunch', label: 'Lunch' },
+    { value: 'dinner', label: 'Dinner' },
+    { value: 'snacks', label: 'Snacks' },
+    { value: 'dessert', label: 'Dessert' },
+  ];
+
+  const cooksOptions = [
+    { value: 'breakfast', label: 'cook 1' },
+    { value: 'lunch', label: 'cook 2' },
+    { value: 'dinner', label: 'cook 3' },
+    { value: 'snacks', label: 'cook 4' },
+    { value: 'dessert', label: 'cook 5' },
+
+  ];
+  const availabilityOptions = [
+    { value: 'monday', Label: 'Monday' },
+    { value: 'tuesday', label: 'Tuesday' },
+    { value: 'wednesday', label: 'Wednesday' },
+    { value: 'thursday', label: 'Thursday' },
+    { value: 'friday', label: 'Friday' },
+    { value: 'saturday', label: 'Saturday' },
+    { value: 'sunday', label: 'Sunday' },
+  ]
 
   return (
     <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
@@ -89,7 +115,19 @@ const FoodForm = ({ onFormChange }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="font-bold block">Responsible Cooks</label>
-          <select
+          <MultiSelect
+            options={cooksOptions}
+            value={formData.cooks}
+            onChange={(val) =>
+              setFormData((prev) => ({
+                ...prev,
+                cooks: val,
+              }))
+            }
+            placeholder="Select cooks"
+            className="border p-2 w-full rounded bg-yellow-50"
+          />
+          {/* <select
             name="cooks"
             value={formData.cooks}
             onChange={handleChange}
@@ -98,7 +136,7 @@ const FoodForm = ({ onFormChange }) => {
             <option value="">Select</option>
             <option value="Cook 1, Cook 2">Cook 1, Cook 2</option>
             <option value="Cook 3">Cook 3</option>
-          </select>
+          </select> */}
         </div>
 
         <div>
@@ -162,7 +200,18 @@ const FoodForm = ({ onFormChange }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="font-bold block">Availability</label>
-            <select
+            <MultiSelect
+              options={availabilityOptions}
+              value={formData.availability}
+              onChange={(val) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  availability: val,
+                }))
+              }
+              placeholder="Select availabile days"
+            />
+            {/* <select
               name="availability"
               value={formData.availability}
               onChange={handleChange}
@@ -171,7 +220,7 @@ const FoodForm = ({ onFormChange }) => {
               <option value="">Select Days</option>
               <option value="Saturday, Sunday">Saturday, Sunday</option>
               <option value="All Days">All Days</option>
-            </select>
+            </select> */}
           </div>
 
           <div>
@@ -319,6 +368,45 @@ const FoodForm = ({ onFormChange }) => {
           </div>
         </div>
         </div>
+
+        <div>
+          <label className="font-bold block mb-1">Categories</label>
+          <MultiSelect
+            options={categoryOptions}
+            value={formData.categories}
+            onChange={(val) =>
+              setFormData((prev) => ({
+                ...prev,
+                categories: val,
+              }))
+            }
+            placeholder="Select categories"
+          />
+          <div className="flex flex-wrap gap-2 mt-2 bg-gray-600/20 p-6 overflow-auto h-20">
+            {(formData.categories || []).map((val) => {
+              const option = categoryOptions.find((o) => o.value === val);
+              return (
+                <span
+                  key={val}
+                  className="flex items-center gap-1 rounded bg-black text-white px-2 py-1 text-sm"
+                >
+                  {option?.label || val}
+                  <div
+                    className="cursor-pointer h-4 w-4"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setFormData((prev) => ({
+                        ...prev,
+                        categories: prev.categories.filter((v) => v !== val),
+                      }));
+                    }}
+                  />
+                </span>
+              );
+            })}
+          </div>
+        </div>
+
 
         <div>
           <label className="font-bold block">Images</label>
