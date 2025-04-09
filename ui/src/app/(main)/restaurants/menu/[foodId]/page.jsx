@@ -10,9 +10,13 @@ import {
   CardTitle,
   CardContent,
 } from '@/components/ui/card';
+import { createMenuItemFood } from '@/lib/api/api';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 const MenuFood = () => {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const postMutation = useMutation(createMenuItemFood(queryClient));
   const [formData, setFormData] = useState({});
 
   const handleFormChange = (data) => {
@@ -21,6 +25,7 @@ const MenuFood = () => {
 
   const handleSubmit = () => {
     console.log('Submitting:', formData);
+    postMutation.mutate({ fields: formData });
   };
 
   const handleDelete = () => {
