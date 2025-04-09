@@ -162,7 +162,7 @@ const FoodForm = ({ onFormChange }) => {
                   <input
                     type="time"
                     value={timeSlot.startTime}
-                    onChange={(e) => handleTimingChange(index, 'from', e.target.value)}
+                    onChange={(e) => handleTimingChange(index, 'startTime', e.target.value)}
                     className="border p-2 w-full rounded bg-yellow-50"
                   />
                 </div>
@@ -171,7 +171,7 @@ const FoodForm = ({ onFormChange }) => {
                   <input
                     type="time"
                     value={timeSlot.endTime}
-                    onChange={(e) => handleTimingChange(index, 'to', e.target.value)}
+                    onChange={(e) => handleTimingChange(index, 'endTime', e.target.value)}
                     className="border p-2 w-full rounded bg-yellow-50"
                   />
                 </div>

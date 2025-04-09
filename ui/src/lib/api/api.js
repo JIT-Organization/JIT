@@ -1,5 +1,5 @@
 import { URLS } from "./urls";
-import { getRequest, patchRequest, deleteRequest, handleMutate, handleError } from "./api-helper";
+import { getRequest, patchRequest, deleteRequest, handleMutate, handleError, postRequest } from "./api-helper";
 
 const cacheConfig = {
   staleTime: 60 * 60 * 1000,  
@@ -51,6 +51,23 @@ export const patchUpdateMenuItemList = (queryClient) => ({
     queryClient.invalidateQueries(["menuItemList"]);
   },
 });
+
+export const createMenuItemFood = (queryClient) => ({
+  mutationFn: async ({ id, fields }) => {
+    return await postRequest(URLS.menuItemList, {
+      ...fields
+    });
+  },
+  onMutate: async ({ fields }) => handleMutate(queryClient, ["menuItemList"], null, fields, "create"),
+  onError: (error, variables, context) => {
+    console.error("Failed to update item:", error);
+    handleError(queryClient, ["menuItemList"], context);
+  },
+  onSettled: () => {
+    queryClient.invalidateQueries(["menuItemList"]);
+  },
+});
+
 
 export const deleteMenuItem = (queryClient) => ({
   mutationFn: async ({ id }) => deleteRequest(`${URLS.menuItemList}/${id}`),

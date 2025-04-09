@@ -18,6 +18,10 @@ export const getRequest = async (url, errorMessage = "Failed to fetch data") => 
   }
 };
 
+export const postRequest = async (url, data) => {
+  const response = await axiosInstance.post(url, data)
+  return response.data;
+}
 
 export const patchRequest = async (url, data) => {
   const response = await axiosInstance.patch(url, data);
