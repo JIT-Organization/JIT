@@ -6,23 +6,23 @@ import MultiSelect from '@/components/customUIComponents/MultiSelect';
 
 const FoodForm = ({ onFormChange }) => {
   const [formData, setFormData] = useState({
-    name: '',
+    menuItemName: '',
     price: '',
     description: '',
-    cooks: [],
+    cookSet: [],
     count: '',
-    timings: [{ from: '', to: '' }],
+    timeIntervalSet: [{ startTime: '', endTime: '' }],
     availability: [],
     offerPrice: '',
     offerFrom: '',
     offerTo: '',
     preparationTime: '',
-    acceptBulkOrder: false,
-    foodType: 'veg',
-    onlyCombo: false,
-    isActive: true,
-    special: 'no',
-    categories: [],
+    acceptBulkOrders: false,
+    onlyVeg: true,
+    onlyForCombos: false,
+    active: true,
+    hotelSpecial: 'no',
+    categorySet: [],
     images: []
   });
 
@@ -36,21 +36,21 @@ const FoodForm = ({ onFormChange }) => {
   };
 
   const handleTimingChange = (index, field, value) => {
-    const newTimings = [...formData.timings];
+    const newTimings = [...formData.timeIntervalSet];
     newTimings[index][field] = value;
-    setFormData(prev => ({ ...prev, timings: newTimings }));
+    setFormData(prev => ({ ...prev, timeIntervalSet: newTimings }));
   };
   
   const addTiming = () => {
     setFormData(prev => ({
       ...prev,
-      timings: [...prev.timings, { from: '', to: '' }]
+      timeIntervalSet: [...prev.timeIntervalSet, { startTime: '', endTime: '' }]
     }));
   };
   
   const removeTiming = (index) => {
-    const newTimings = formData.timings.filter((_, i) => i !== index);
-    setFormData(prev => ({ ...prev, timings: newTimings }));
+    const newTimings = formData.timeIntervalSet.filter((_, i) => i !== index);
+    setFormData(prev => ({ ...prev, timeIntervalSet: newTimings }));
   };
 
   const categoryOptions = [
@@ -85,8 +85,8 @@ const FoodForm = ({ onFormChange }) => {
         <div>
           <label className="font-bold block">Food Name</label>
           <input
-            name="name"
-            value={formData.name}
+            name="menuItemName"
+            value={formData.menuItemName}
             onChange={handleChange}
             className="border p-2 w-full rounded"
           />
@@ -117,19 +117,19 @@ const FoodForm = ({ onFormChange }) => {
           <label className="font-bold block">Responsible Cooks</label>
           <MultiSelect
             options={cooksOptions}
-            value={formData.cooks}
+            value={formData.cookSet}
             onChange={(val) =>
               setFormData((prev) => ({
                 ...prev,
-                cooks: val,
+                cookSet: val,
               }))
             }
             placeholder="Select cooks"
             className="border p-2 w-full rounded bg-yellow-50"
           />
           {/* <select
-            name="cooks"
-            value={formData.cooks}
+            name="cookSet"
+            value={formData.cookSet}
             onChange={handleChange}
             className="border p-2 w-full rounded bg-yellow-50"
           >
@@ -155,13 +155,13 @@ const FoodForm = ({ onFormChange }) => {
         <div className="mb-4">
           <label className="font-bold block mb-2">Timings</label>
           <div className="bg-gray-200 p-4 rounded">
-            {formData.timings.map((timeSlot, index) => (
+            {formData.timeIntervalSet.map((timeSlot, index) => (
               <div key={index} className="flex gap-4 mb-2 items-center">
                 <div className="flex-1">
                   <label className="text-sm">Available From</label>
                   <input
                     type="time"
-                    value={timeSlot.from}
+                    value={timeSlot.startTime}
                     onChange={(e) => handleTimingChange(index, 'from', e.target.value)}
                     className="border p-2 w-full rounded bg-yellow-50"
                   />
@@ -170,12 +170,12 @@ const FoodForm = ({ onFormChange }) => {
                   <label className="text-sm">Available To</label>
                   <input
                     type="time"
-                    value={timeSlot.to}
+                    value={timeSlot.endTime}
                     onChange={(e) => handleTimingChange(index, 'to', e.target.value)}
                     className="border p-2 w-full rounded bg-yellow-50"
                   />
                 </div>
-                {formData.timings.length > 1 && (
+                {formData.timeIntervalSet.length > 1 && (
                   <button
                     type="button"
                     onClick={() => removeTiming(index)}
@@ -273,15 +273,15 @@ const FoodForm = ({ onFormChange }) => {
           <div className="flex gap-2">
             <button
               type="button"
-              className={`px-4 py-2 rounded ${formData.acceptBulkOrder === true ? 'bg-yellow-500' : 'bg-gray-200'}`}
-              onClick={() => setFormData(prev => ({ ...prev, acceptBulkOrder: true }))}
+              className={`px-4 py-2 rounded ${formData.acceptBulkOrders === true ? 'bg-yellow-500' : 'bg-gray-200'}`}
+              onClick={() => setFormData(prev => ({ ...prev, acceptBulkOrders: true }))}
             >
               Yes
             </button>
             <button
               type="button"
-              className={`px-4 py-2 rounded ${formData.acceptBulkOrder === false ? 'bg-yellow-500' : 'bg-gray-200'}`}
-              onClick={() => setFormData(prev => ({ ...prev, acceptBulkOrder: false }))}
+              className={`px-4 py-2 rounded ${formData.acceptBulkOrders === false ? 'bg-yellow-500' : 'bg-gray-200'}`}
+              onClick={() => setFormData(prev => ({ ...prev, acceptBulkOrders: false }))}
             >
               No
             </button>
@@ -293,15 +293,15 @@ const FoodForm = ({ onFormChange }) => {
           <div className="flex gap-2">
             <button
               type="button"
-              className={`px-4 py-2 rounded ${formData.foodType === 'veg' ? 'bg-yellow-500' : 'bg-gray-200'}`}
-              onClick={() => setFormData(prev => ({ ...prev, foodType: 'veg' }))}
+              className={`px-4 py-2 rounded ${formData.onlyVeg === true ? 'bg-yellow-500' : 'bg-gray-200'}`}
+              onClick={() => setFormData(prev => ({ ...prev, onlyVeg: true }))}
             >
               Veg
             </button>
             <button
               type="button"
-              className={`px-4 py-2 rounded ${formData.foodType === 'non-veg' ? 'bg-yellow-500' : 'bg-gray-200'}`}
-              onClick={() => setFormData(prev => ({ ...prev, foodType: 'non-veg' }))}
+              className={`px-4 py-2 rounded ${formData.onlyVeg === false ? 'bg-yellow-500' : 'bg-gray-200'}`}
+              onClick={() => setFormData(prev => ({ ...prev, onlyVeg: false }))}
             >
               Non-Veg
             </button>
@@ -313,15 +313,15 @@ const FoodForm = ({ onFormChange }) => {
           <div className="flex gap-2">
             <button
               type="button"
-              className={`px-4 py-2 rounded ${formData.onlyCombo === true ? 'bg-yellow-500' : 'bg-gray-200'}`}
-              onClick={() => setFormData(prev => ({ ...prev, onlyCombo: true }))}
+              className={`px-4 py-2 rounded ${formData.onlyForCombos === true ? 'bg-yellow-500' : 'bg-gray-200'}`}
+              onClick={() => setFormData(prev => ({ ...prev, onlyForCombos: true }))}
             >
               Yes
             </button>
             <button
               type="button"
-              className={`px-4 py-2 rounded ${formData.onlyCombo === false ? 'bg-yellow-500' : 'bg-gray-200'}`}
-              onClick={() => setFormData(prev => ({ ...prev, onlyCombo: false }))}
+              className={`px-4 py-2 rounded ${formData.onlyForCombos === false ? 'bg-yellow-500' : 'bg-gray-200'}`}
+              onClick={() => setFormData(prev => ({ ...prev, onlyForCombos: false }))}
             >
               No
             </button>
@@ -333,15 +333,15 @@ const FoodForm = ({ onFormChange }) => {
           <div className="flex gap-2">
             <button
               type="button"
-              className={`px-4 py-2 rounded ${formData.special === 'yes' ? 'bg-yellow-500' : 'bg-gray-200'}`}
-              onClick={() => setFormData(prev => ({ ...prev, special: 'yes' }))}
+              className={`px-4 py-2 rounded ${formData.hotelSpecial === 'yes' ? 'bg-yellow-500' : 'bg-gray-200'}`}
+              onClick={() => setFormData(prev => ({ ...prev, hotelSpecial: 'yes' }))}
             >
               Yes
             </button>
             <button
               type="button"
-              className={`px-4 py-2 rounded ${formData.special === 'no' ? 'bg-yellow-500' : 'bg-gray-200'}`}
-              onClick={() => setFormData(prev => ({ ...prev, special: 'no' }))}
+              className={`px-4 py-2 rounded ${formData.hotelSpecial === 'no' ? 'bg-yellow-500' : 'bg-gray-200'}`}
+              onClick={() => setFormData(prev => ({ ...prev, hotelSpecial: 'no' }))}
             >
               No
             </button>
@@ -353,15 +353,15 @@ const FoodForm = ({ onFormChange }) => {
           <div className="flex gap-2">
             <button
               type="button"
-              className={`px-4 py-2 rounded ${formData.isActive === true ? 'bg-yellow-500' : 'bg-gray-200'}`}
-              onClick={() => setFormData(prev => ({ ...prev, isActive: true }))}
+              className={`px-4 py-2 rounded ${formData.active === true ? 'bg-yellow-500' : 'bg-gray-200'}`}
+              onClick={() => setFormData(prev => ({ ...prev, active: true }))}
             >
               Yes
             </button>
             <button
               type="button"
-              className={`px-4 py-2 rounded ${formData.isActive === false ? 'bg-yellow-500' : 'bg-gray-200'}`}
-              onClick={() => setFormData(prev => ({ ...prev, isActive: false }))}
+              className={`px-4 py-2 rounded ${formData.active === false ? 'bg-yellow-500' : 'bg-gray-200'}`}
+              onClick={() => setFormData(prev => ({ ...prev, active: false }))}
             >
               No
             </button>
@@ -373,17 +373,17 @@ const FoodForm = ({ onFormChange }) => {
           <label className="font-bold block mb-1">Categories</label>
           <MultiSelect
             options={categoryOptions}
-            value={formData.categories}
+            value={formData.categorySet}
             onChange={(val) =>
               setFormData((prev) => ({
                 ...prev,
-                categories: val,
+                categorySet: val,
               }))
             }
             placeholder="Select categories"
           />
           <div className="flex flex-wrap gap-2 mt-2 bg-gray-600/20 p-6 overflow-auto h-20">
-            {(formData.categories || []).map((val) => {
+            {(formData.categorySet || []).map((val) => {
               const option = categoryOptions.find((o) => o.value === val);
               return (
                 <span
@@ -397,7 +397,7 @@ const FoodForm = ({ onFormChange }) => {
                       e.stopPropagation();
                       setFormData((prev) => ({
                         ...prev,
-                        categories: prev.categories.filter((v) => v !== val),
+                        categorySet: prev.categorySet.filter((v) => v !== val),
                       }));
                     }}
                   />
