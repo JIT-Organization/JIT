@@ -14,7 +14,7 @@ public class GlobalExceptionHandler extends BaseController {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleGeneralExceptions(Exception ex) {
-        return error("Something went wrong", HttpStatus.INTERNAL_SERVER_ERROR);
+        return error(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(LoginException.class)

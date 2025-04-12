@@ -119,22 +119,38 @@ export const deleteCategoryItem = (queryClient) => ({
   },
 });
 
-export const getUsersListOptions = (id) => ({
+export const getUsersListOptions = (resCode) => ({
   queryKey: ["usersList"],
-  queryFn: () => getRequest(`${URLS.usersList}/${id}`, "Failed to fetch Users List"),
+  queryFn: () => getRequest(`${URLS.usersList}/${resCode}`, "Failed to fetch Users List"),
   ...cacheConfig
 });
 
 export const patchUpdateUserItemList = (queryClient) => ({
-  mutationFn: async ({ id, fields }) => {
-    return await patchRequest(`${URLS.usersList}/${id}`, {
-      userItemDTO: { ...fields },
+  mutationFn: async ({ username, fields }) => {
+    return await patchRequest(`${URLS.usersList}/TGSR/${username}`, {
+      dto: { ...fields },
       propertiesToBeUpdated: Object.keys(fields),
     });
   },
   onMutate: async ({ id, fields }) => handleMutate(queryClient, ["usersList"], id, fields),
   onError: (error, variables, context) => {
     console.error("Failed to update item:", error);
+    handleError(queryClient, ["usersList"], context);
+  },
+  onSettled: () => {
+    queryClient.invalidateQueries(["usersList"]);
+  },
+});
+
+export const createUser = (queryClient) => ({
+  mutationFn: async ({ fields }) => {
+    return await postRequest(URLS.usersList, {
+      ...fields
+    });
+  },
+  onMutate: async ({ fields }) => handleMutate(queryClient, ["usersList"], null, fields, "create"),
+  onError: (error, variables, context) => {
+    console.error("Failed to create item:", error);
     handleError(queryClient, ["usersList"], context);
   },
   onSettled: () => {

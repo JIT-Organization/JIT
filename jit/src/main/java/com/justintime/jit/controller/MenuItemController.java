@@ -69,7 +69,6 @@ public class MenuItemController {
     }
 
     @PatchMapping("/{id}")
-
     public MenuItem patchUpdateMenuItem(@AuthenticationPrincipal Long restaurantId,@PathVariable Long id, @RequestBody PatchRequest<MenuItemDTO> payload) {
         return menuItemService.patchUpdateMenuItem(restaurantId,id, payload.getDto(), payload.getPropertiesToBeUpdated());
     }

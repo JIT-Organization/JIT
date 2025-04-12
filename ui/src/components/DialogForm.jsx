@@ -22,8 +22,7 @@ import { DialogClose } from "./ui/dialog";
 import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
 import MultiSelect from "./customUIComponents/MultiSelect";
 import { X } from "lucide-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { patchUpdateCategoriesList } from "@/lib/api/api";
+import { Switch } from "./ui/switch";
 
 export default function DialogForm({ type, data, onSubmit, selectOptions }) {
   const getDefaultValues = (type) => {
@@ -42,6 +41,7 @@ export default function DialogForm({ type, data, onSubmit, selectOptions }) {
           email: "",
           role: "",
           shift: "",
+          isActive: true
         };
 
       case "table":
@@ -100,9 +100,10 @@ export default function DialogForm({ type, data, onSubmit, selectOptions }) {
         rules: { required: "Role is required" },
         render: (props) => {
           const options = [
-            { label: "Manager", value: "manager" },
-            { label: "Cook", value: "cook" },
-            { label: "Server", value: "server" },
+            { label: "Manager", value: "MANAGER" },
+            { label: "Cook", value: "COOK" },
+            { label: "Server", value: "SERVER" },
+            { label: "Admin", value: "ADMIN"}
           ];
 
           return (
@@ -143,6 +144,22 @@ export default function DialogForm({ type, data, onSubmit, selectOptions }) {
                 ))}
               </SelectContent>
             </Select>
+          );
+        },
+      },
+      {
+        name: "isActive",
+        label: "Active",
+        render: (props) => {
+          console.log(props)
+          return (
+            <Switch
+              checked={props.value === true}
+              onCheckedChange={(value) => {
+                props.onChange(value);
+              }}
+              onBlur={props.onBlur}
+            />
           );
         },
       },

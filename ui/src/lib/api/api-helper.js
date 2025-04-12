@@ -43,11 +43,11 @@ export const handleMutate = async (queryClient, queryKey, id, fields, mode = "up
 
     switch (mode) {
       case "create":
-        return [fields, ...oldData];
+        return [fields, ...oldData.data];
       case "update":
-        return oldData.map((row) => row.id === id ? { ...row, ...fields } : row)
+        return oldData.data.map((row) => row.id === id ? { ...row, ...fields } : row)
       case "delete":
-        return oldData.filter((row) => row.id !== id);
+        return oldData.data.filter((row) => row.id !== id);
       default:
         return oldData
     }
