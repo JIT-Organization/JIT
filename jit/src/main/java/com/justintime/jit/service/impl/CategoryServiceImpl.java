@@ -129,7 +129,7 @@ public class CategoryServiceImpl extends BaseServiceImpl<Category,Long> implemen
         BeanWrapper srcWrapper = new BeanWrapperImpl(source);
         BeanWrapper targetWrapper = new BeanWrapperImpl(target);
 
-        List<String> propertiesToBeChangedClone = new ArrayList<>(propertiesToBeChanged);
+        HashSet<String> propertiesToBeChangedClone = new HashSet<>(propertiesToBeChanged);
         if(propertiesToBeChangedClone.contains("foodItems")) {
             propertiesToBeChangedClone.remove("foodItems");
             propertiesToBeChangedClone.add("menuItemSet");
