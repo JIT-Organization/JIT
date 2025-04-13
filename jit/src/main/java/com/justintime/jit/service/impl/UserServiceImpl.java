@@ -1,41 +1,34 @@
 package com.justintime.jit.service.impl;
 
-import com.justintime.jit.dto.LoginRequestDto;
-import com.justintime.jit.dto.MenuItemDTO;
 import com.justintime.jit.dto.UserDTO;
 import com.justintime.jit.entity.Enums.Role;
-import com.justintime.jit.entity.MenuItem;
 import com.justintime.jit.entity.User;
 import com.justintime.jit.entity.UserPrincipal;
 import com.justintime.jit.repository.UserRepository;
-import com.justintime.jit.service.JwtService;
 import com.justintime.jit.service.UserService;
+import com.justintime.jit.util.CommonServiceImplUtil;
 import com.justintime.jit.util.mapper.GenericMapper;
 import com.justintime.jit.util.mapper.MapperFactory;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl extends BaseServiceImpl<User, Long> implements UserService {
 
     private final UserRepository userRepository;
 
+    private final CommonServiceImplUtil commonServiceImplUtil;
+
     @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, CommonServiceImplUtil commonServiceImplUtil) {
         this.userRepository = userRepository;
+        this.commonServiceImplUtil = commonServiceImplUtil;
     }
 
     @Override
@@ -76,13 +69,13 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
     }
 
     @Override
-    public UserDTO patchUpdateUser(String restaurantCode, String username, UserDTO dto, List<String> propertiesToBeUpdated) {
+    public UserDTO patchUpdateUser(String restaurantCode, String username, UserDTO dto, HashSet<String> propertiesToBeUpdated) {
         User existingUser = userRepository.findByRestaurantCodeAndUsername(restaurantCode, username);
         GenericMapper<User, UserDTO> userMapper = MapperFactory.getMapper(User.class, UserDTO.class);
         User patchedUser = userMapper.toEntity(dto);
         // TODO write a validation where the username should be unique if they are updating it
         HashSet<String> propertiesToBeUpdatedClone = new HashSet<>(propertiesToBeUpdated);
-        copySelectedProperties(patchedUser, existingUser, propertiesToBeUpdatedClone);
+        commonServiceImplUtil.copySelectedProperties(patchedUser, existingUser, propertiesToBeUpdatedClone);
         existingUser.setUpdatedDttm(LocalDateTime.now());
         userRepository.save(existingUser);
         return userMapper.toDto(existingUser);
@@ -105,16 +98,5 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
             throw new UsernameNotFoundException("User not found");
         }
         return new UserPrincipal(user);
-    }
-
-    private void copySelectedProperties(Object source, Object target, HashSet<String> propertiesToBeChanged) {
-        BeanWrapper srcWrapper = new BeanWrapperImpl(source);
-        BeanWrapper targetWrapper = new BeanWrapperImpl(target);
-
-        for (String property : propertiesToBeChanged) {
-            if (srcWrapper.isReadableProperty(property) && srcWrapper.getPropertyValue(property) != null) {
-                targetWrapper.setPropertyValue(property, srcWrapper.getPropertyValue(property));
-            }
-        }
     }
 }

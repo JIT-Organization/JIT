@@ -38,9 +38,7 @@ const Users = () => {
   }
 
   const onUpdateSubmit = (row) => (values) => {
-    console.log(row)
     const formValues = { ...values };
-    console.log(formValues)
     const username = row.username;
     const formValueKeys = Object.keys(formValues);
     formValueKeys.forEach((key) => {
@@ -69,7 +67,7 @@ const Users = () => {
     <div>
       <CustomDataTable
         columns={columns}
-        data={usersListData.data}
+        data={usersListData}
         tabName="Users"
         headerButtonName="Add User"
         headerDialogType="user"

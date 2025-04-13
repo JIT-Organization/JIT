@@ -6,6 +6,7 @@ import com.justintime.jit.entity.Enums.Role;
 import com.justintime.jit.entity.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
+import java.util.HashSet;
 import java.util.List;
 
 public interface UserService extends BaseService<User, Long>, UserDetailsService {
@@ -17,5 +18,5 @@ public interface UserService extends BaseService<User, Long>, UserDetailsService
 
     List<UserDTO> getUsersByRestaurantCode(String restaurantCode);
 
-    UserDTO patchUpdateUser(String restaurantCode, String username, UserDTO dto, List<String> propertiesToBeUpdated);
+    UserDTO patchUpdateUser(String restaurantCode, String username, UserDTO dto, HashSet<String> propertiesToBeUpdated);
 }

@@ -4,6 +4,7 @@ import com.justintime.jit.dto.MenuItemDTO;
 import com.justintime.jit.entity.Enums.Sort;
 import com.justintime.jit.entity.MenuItem;
 
+import java.util.HashSet;
 import java.util.List;
 
 public interface MenuItemService extends BaseService<MenuItem,Long>{
@@ -13,6 +14,6 @@ public interface MenuItemService extends BaseService<MenuItem,Long>{
     MenuItemDTO getMenuItemByRestaurantIdAndId(Long restaurantId, Long id);
     MenuItem addMenuItem(Long restaurantId,MenuItemDTO menuItemDTO);
     MenuItem updateMenuItem(Long restaurantId,Long id, MenuItemDTO updatedItem);
-    MenuItem patchUpdateMenuItem(Long restaurantId,Long id, MenuItemDTO updatedItem, List<String> propertiesToBeUpdated);
+    MenuItem patchUpdateMenuItem(Long restaurantId,Long id, MenuItemDTO updatedItem, HashSet<String> propertiesToBeUpdated);
     void deleteMenuItem(Long id);
 }

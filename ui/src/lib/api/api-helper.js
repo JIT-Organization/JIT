@@ -9,7 +9,7 @@ export const getRequest = async (url, errorMessage = "Failed to fetch data") => 
     if (response.status !== 200) {
       throw new Error(`Failed to fetch from ${url}`);
     }
-    return response.data;
+    return response.data.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       throw new Error(error.response?.data?.message || errorMessage);
@@ -43,11 +43,11 @@ export const handleMutate = async (queryClient, queryKey, id, fields, mode = "up
 
     switch (mode) {
       case "create":
-        return [fields, ...oldData.data];
+        return [fields, ...oldData];
       case "update":
-        return oldData.data.map((row) => row.id === id ? { ...row, ...fields } : row)
+        return oldData.map((row) => row.id === id ? { ...row, ...fields } : row)
       case "delete":
-        return oldData.data.filter((row) => row.id !== id);
+        return oldData.filter((row) => row.id !== id);
       default:
         return oldData
     }
