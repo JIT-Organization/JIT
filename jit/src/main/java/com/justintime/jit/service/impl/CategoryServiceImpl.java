@@ -16,7 +16,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -90,20 +89,20 @@ public class CategoryServiceImpl extends BaseServiceImpl<Category,Long> implemen
 
 
     @Override
-    public Category patchUpdateCategory(Long restaurantId,Long id, CategoryDTO categoryDTO, List<String> propertiesToBeUpdated) {
+    public Category patchUpdateCategory(Long restaurantId, Long id, CategoryDTO categoryDTO, HashSet<String> propertiesToBeUpdated) {
         Category existingCategory = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
         GenericMapper<Category, CategoryDTO> mapper = MapperFactory.getMapper(Category.class, CategoryDTO.class).setSkipNullEnabled(true);
         Category patchedCategory = mapper.toEntity(categoryDTO);
         patchedCategory.setRestaurant(restaurantRepository.findById(restaurantId).orElseThrow(() -> new RuntimeException("Restaurant not found")));
         resolveRelationships(patchedCategory, categoryDTO);
-        List<String> propertiesToBeChangedClone = new ArrayList<>(propertiesToBeUpdated);
+        HashSet<String> propertiesToBeChangedClone = new HashSet<>(propertiesToBeUpdated);
         if(propertiesToBeChangedClone.contains("foodItems")) {
             propertiesToBeChangedClone.remove("foodItems");
             propertiesToBeChangedClone.add("menuItemSet");
             propertiesToBeChangedClone.add("comboSet");
         }
-        commonServiceImplUtil.copySelectedProperties(patchedCategory, existingCategory, propertiesToBeUpdated);
+        commonServiceImplUtil.copySelectedProperties(patchedCategory, existingCategory, propertiesToBeChangedClone);
         existingCategory.setUpdatedDttm(LocalDateTime.now());
         return categoryRepository.save(existingCategory);
     }

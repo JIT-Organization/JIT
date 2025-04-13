@@ -3,6 +3,7 @@ package com.justintime.jit.service;
 import com.justintime.jit.dto.RestaurantDTO;
 import com.justintime.jit.entity.Restaurant;
 
+import java.util.HashSet;
 import java.util.List;
 
 public interface RestaurantService {
@@ -13,7 +14,7 @@ public interface RestaurantService {
     void deleteRestaurant(String restaurantCode);
     RestaurantDTO getRestaurantByRestaurantCode(String restaurantCode);
 
-    void patchUpdateRestaurant(String restaurantCode, RestaurantDTO dto, List<String> propertiesToBeUpdated);
+    void patchUpdateRestaurant(String restaurantCode, RestaurantDTO dto, HashSet<String> propertiesToBeUpdated);
 
 //    List<String> findSimilarNames(String name);
 //

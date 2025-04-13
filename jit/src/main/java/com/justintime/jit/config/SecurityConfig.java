@@ -50,7 +50,7 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/jit-api/**","register", "login", "refresh").permitAll()
+                        .requestMatchers("register", "login", "refresh").permitAll()
                         .anyRequest().authenticated())
                 .httpBasic(httpBasic -> httpBasic.authenticationEntryPoint(authenticationEntryPoint()))
 //                .formLogin(form -> form

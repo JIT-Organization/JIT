@@ -68,7 +68,7 @@ public class RestaurantServiceImpl extends BaseServiceImpl<Restaurant,Long> impl
     }
 
     @Override
-    public void patchUpdateRestaurant(String restaurantCode, RestaurantDTO dto, List<String> propertiesToBeUpdated) {
+    public void patchUpdateRestaurant(String restaurantCode, RestaurantDTO dto, HashSet<String> propertiesToBeUpdated) {
         Restaurant existingItem = restaurantRepository.findByRestaurantCode(restaurantCode);
         GenericMapper<Restaurant, RestaurantDTO> restaurantMapper = MapperFactory.getMapper(Restaurant.class, RestaurantDTO.class);
         Restaurant patchedRestaurant = restaurantMapper.toEntity(dto);

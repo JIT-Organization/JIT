@@ -1,5 +1,6 @@
 package com.justintime.jit.controller;
 
+import com.justintime.jit.dto.ApiResponse;
 import com.justintime.jit.dto.MenuItemDTO;
 import com.justintime.jit.dto.PatchRequest;
 import com.justintime.jit.entity.Enums.Sort;
@@ -18,7 +19,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/jit-api/menu-items")
-public class MenuItemController {
+public class MenuItemController extends BaseController {
 
     @Autowired
     private MenuItemService menuItemService;
@@ -32,19 +33,19 @@ public class MenuItemController {
 //    }
 
     @GetMapping
-    public List<MenuItemDTO> getMenuItemsByRestaurant(
+    public ResponseEntity<ApiResponse<List<MenuItemDTO>>> getMenuItemsByRestaurant(
             @AuthenticationPrincipal Long restaurantId,
             @RequestParam(required = false) Sort sortBy,
             @RequestParam(required = false) String priceRange,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) Boolean onlyVeg,
             @RequestParam(required = false, defaultValue = "false") Boolean onlyForCombos) {
-        return menuItemService.getMenuItemsByRestaurantId(restaurantId, sortBy, priceRange, category, onlyVeg, onlyForCombos);
+        return success(menuItemService.getMenuItemsByRestaurantId(restaurantId, sortBy, priceRange, category, onlyVeg, onlyForCombos));
     }
 
     @GetMapping("/{restaurantId}/{id}")
-    public MenuItemDTO getMenuItemByRestaurantIdAndId(@PathVariable Long restaurantId, @PathVariable Long id){
-        return menuItemService.getMenuItemByRestaurantIdAndId(restaurantId, id);
+    public ResponseEntity<ApiResponse<MenuItemDTO>> getMenuItemByRestaurantIdAndId(@PathVariable Long restaurantId, @PathVariable Long id){
+        return success(menuItemService.getMenuItemByRestaurantIdAndId(restaurantId, id));
     }
     @PostMapping("/validateImage")
     public ResponseEntity<String> validateImage(@RequestParam("image") String base64Image) {
@@ -59,8 +60,8 @@ public class MenuItemController {
     }
 
     @PostMapping
-    public MenuItem addMenuItem(@AuthenticationPrincipal Long restaurantId,@RequestBody MenuItemDTO menuItemDTO) {
-        return menuItemService.addMenuItem(restaurantId,menuItemDTO);
+    public ResponseEntity<ApiResponse<MenuItem>> addMenuItem(@AuthenticationPrincipal Long restaurantId, @RequestBody MenuItemDTO menuItemDTO) {
+        return success(menuItemService.addMenuItem(restaurantId,menuItemDTO), "Created Menu Item Successfully");
     }
 
     @PutMapping("/{id}")
@@ -69,8 +70,8 @@ public class MenuItemController {
     }
 
     @PatchMapping("/{id}")
-    public MenuItem patchUpdateMenuItem(@AuthenticationPrincipal Long restaurantId,@PathVariable Long id, @RequestBody PatchRequest<MenuItemDTO> payload) {
-        return menuItemService.patchUpdateMenuItem(restaurantId,id, payload.getDto(), payload.getPropertiesToBeUpdated());
+    public ResponseEntity<ApiResponse<MenuItem>> patchUpdateMenuItem(@AuthenticationPrincipal Long restaurantId,@PathVariable Long id, @RequestBody PatchRequest<MenuItemDTO> payload) {
+        return success(menuItemService.patchUpdateMenuItem(restaurantId,id, payload.getDto(), payload.getPropertiesToBeUpdated()));
     }
 
     @DeleteMapping("/{id}")

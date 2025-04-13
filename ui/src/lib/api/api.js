@@ -170,10 +170,44 @@ export const getTablesListOptions = (id) => ({
   ...cacheConfig
 });
 
+export const patchTables = (queryClient) => ({
+  mutationFn: async ({ fields }) => {
+    return await patchRequest(`${URLS.tablesList}/TGSR`, {
+      dto: { ...fields },
+      propertiesToBeUpdated: Object.keys(fields),
+    });
+  },
+  onMutate: async ({ tableNumber, fields }) => handleMutate(queryClient, ["tablesList"], tableNumber, fields),
+  onError: (error, variables, context) => {
+    console.error("Failed to update item:", error);
+    handleError(queryClient, ["tablesList"], context);
+  },
+  onSettled: () => {
+    queryClient.invalidateQueries(["tablesList"]);
+  },
+})
+
+export const createTable = (queryClient) => ({
+  mutationFn: async ({ payload }) => {
+    return await postRequest(`${URLS.tablesList}/TGSR`, payload);
+  },
+  onMutate: async ({ tableNumber, fields }) => handleMutate(queryClient, ["tablesList"], tableNumber, fields),
+  onError: (error, variables, context) => {
+    console.error("Failed to update item:", error);
+    handleError(queryClient, ["tablesList"], context);
+  },
+  onSettled: () => {
+    queryClient.invalidateQueries(["tablesList"]);
+  },
+})
+
 export const deleteTableItem = (queryClient) => ({
-  mutationFn: async ({ id }) => deleteRequest(`${URLS.tablesList}/${id}`),
+  mutationFn: async ({ restaurantCode, tableNumber }) => deleteRequest(`${URLS.tablesList}/${restaurantCode}/${tableNumber}`),
   onMutate: async ({ id }) => handleMutate(queryClient, ["tablesList"], id),
   onError: (err, variables, context) => handleError(queryClient, ["tablesList"], context),
+  onSettled: () => {
+    queryClient.invalidateQueries(["tablesList"]);
+  },
 });
 
 

@@ -13,6 +13,7 @@ import com.justintime.jit.repository.ReservationRepository;
 import com.justintime.jit.repository.RestaurantRepository;
 import com.justintime.jit.repository.UserRepository;
 import com.justintime.jit.service.OrderService;
+import com.justintime.jit.util.CommonServiceImplUtil;
 import com.justintime.jit.util.mapper.GenericMapper;
 import com.justintime.jit.util.mapper.MapperFactory;
 import org.aspectj.weaver.ast.Or;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -35,6 +37,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private OrderRepository orderRepository;
+
+    @Autowired
+    private CommonServiceImplUtil commonServiceImplUtil;
 
     @Autowired
     private RestaurantRepository restaurantRepository;
@@ -101,14 +106,14 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderDTO patchUpdateOrder(Long restaurantId, Long orderId, OrderDTO orderDTO, List<String> propertiesToBeUpdated){
+    public OrderDTO patchUpdateOrder(Long restaurantId, Long orderId, OrderDTO orderDTO, HashSet<String> propertiesToBeUpdated){
         Order existingOrder = orderRepository.findByRestaurantIdAndId(restaurantId, orderId)
                 .orElseThrow(()->new ResourceNotFoundException("Order not found with id: " + orderId + " for restaurant: " + restaurantId));
         GenericMapper<Order, OrderDTO> mapper = MapperFactory.getMapper(Order.class, OrderDTO.class);
         existingOrder.setRestaurant(restaurantRepository.findById(restaurantId).orElseThrow(() -> new RuntimeException("Restaurant not found")));
         Order patchedOrder = mapper.toEntity(orderDTO);
         resolveRelationships(patchedOrder, orderDTO);
-        copySelectedProperties(patchedOrder, existingOrder,propertiesToBeUpdated);
+        commonServiceImplUtil.copySelectedProperties(patchedOrder, existingOrder,propertiesToBeUpdated);
         existingOrder.setUpdatedDttm(LocalDateTime.now());
         orderRepository.save(existingOrder);
         return mapToDTO(existingOrder,mapper);

@@ -2,10 +2,10 @@ package com.justintime.jit.entity;
 
 
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 
 import java.util.HashSet;
@@ -24,6 +24,10 @@ public class DiningTable extends BaseEntity{
 
     @Column(name = "chairs", nullable = false)
     private Integer chairs;
+
+//    @Type(type = "yes_no")
+    @Column(name="availability")
+    private Boolean isAvailable;
 
     @ManyToOne
     @JoinColumn(name = "restaurant_id")

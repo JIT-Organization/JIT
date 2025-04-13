@@ -41,14 +41,14 @@ export default function DialogForm({ type, data, onSubmit, selectOptions }) {
           email: "",
           role: "",
           shift: "",
-          isActive: true
+          isActive: true,
         };
 
       case "table":
         return {
           tableNumber: "",
           seatingCapacity: "",
-          available: "yes",
+          isAvailable: "yes",
         };
 
       default:
@@ -103,7 +103,7 @@ export default function DialogForm({ type, data, onSubmit, selectOptions }) {
             { label: "Manager", value: "MANAGER" },
             { label: "Cook", value: "COOK" },
             { label: "Server", value: "SERVER" },
-            { label: "Admin", value: "ADMIN"}
+            { label: "Admin", value: "ADMIN" },
           ];
 
           return (
@@ -151,7 +151,7 @@ export default function DialogForm({ type, data, onSubmit, selectOptions }) {
         name: "isActive",
         label: "Active",
         render: (props) => {
-          console.log(props)
+          console.log(props);
           return (
             <Switch
               checked={props.value === true}
@@ -234,12 +234,17 @@ export default function DialogForm({ type, data, onSubmit, selectOptions }) {
         name: "tableNumber",
         label: "Table Number",
         rules: { required: "Table Number is required" },
-        render: (props) => (
-          <Input type="text" placeholder="Enter table number" {...props} />
-        ),
+        render: (props) => {
+          const isEditMode = data?.tableNumber !== undefined;
+          return isEditMode ? (
+            <div>{props.value}</div>
+          ) : (
+            <Input type="text" placeholder="Enter table number" {...props} />
+          );
+        },
       },
       {
-        name: "seatingCapacity",
+        name: "chairs",
         label: "Seating Capacity",
         rules: {
           required: "Seating Capacity is required",
@@ -257,7 +262,7 @@ export default function DialogForm({ type, data, onSubmit, selectOptions }) {
         ),
       },
       {
-        name: "available",
+        name: "isAvailable",
         label: "Availability",
         rules: { required: "Availability is required" },
         render: (props) => (

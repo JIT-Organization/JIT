@@ -33,13 +33,6 @@ public class UserController extends BaseController {
         return success(users);
     }
 
-//    // GET: Retrieve a single user by ID
-//    @GetMapping("/{id}")
-//    public ResponseEntity<User> getUserById(@PathVariable Long id) {
-//        User user = userService.findById(id);
-//        return ResponseEntity.ok(user);
-//    }
-
     // PUT: Update a user by ID
     @PutMapping("/{id}")
     public ResponseEntity<String> updateUser(@PathVariable Long id, @RequestBody User user) {

@@ -6,6 +6,7 @@ import com.justintime.jit.entity.OrderEntities.Order;
 import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,7 +15,7 @@ public interface OrderService {
     List<OrderDTO> getOrdersByRestaurantId(Long restaurantId);
     OrderDTO getOrderByRestaurantAndId(Long restaurantId, Long id);
     OrderDTO updateOrderStatus(Long restaurantId, Long id, OrderStatus status);
-    OrderDTO patchUpdateOrder(Long restaurantId, Long orderId, OrderDTO orderDTO, List<String> propertiesToBeUpdated);
+    OrderDTO patchUpdateOrder(Long restaurantId, Long orderId, OrderDTO orderDTO, HashSet<String> propertiesToBeUpdated);
     void deleteOrder(Long restaurantId, Long id);
     List<OrderDTO> getOrdersByRestaurantAndUserId(Optional<Long> restaurantId, Optional<Long> userId);
     BigDecimal calculateTotalRevenue(Long restaurantId);

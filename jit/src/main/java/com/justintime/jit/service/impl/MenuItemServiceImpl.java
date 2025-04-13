@@ -7,19 +7,18 @@ import com.justintime.jit.entity.Enums.Sort;
 import com.justintime.jit.repository.*;
 import com.justintime.jit.repository.OrderRepo.OrderItemRepository;
 import com.justintime.jit.service.MenuItemService;
+import com.justintime.jit.util.CommonServiceImplUtil;
 import com.justintime.jit.util.filter.FilterItemsUtil;
 import com.justintime.jit.util.mapper.GenericMapper;
 import com.justintime.jit.util.mapper.MapperFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,6 +31,9 @@ public class MenuItemServiceImpl extends BaseServiceImpl<MenuItem, Long> impleme
     private final TimeIntervalRepository timeIntervalRepository;
     private final FilterItemsUtil filterItemsUtil;
     private final RestaurantRepository restaurantRepository;
+
+    @Autowired
+    private CommonServiceImplUtil commonServiceImplUtil;
 
     public MenuItemServiceImpl(MenuItemRepository menuItemRepository,
                                CategoryRepository categoryRepository,
@@ -88,14 +90,14 @@ public class MenuItemServiceImpl extends BaseServiceImpl<MenuItem, Long> impleme
     }
 
     @Override
-    public MenuItem patchUpdateMenuItem(Long restaurantId,Long id, MenuItemDTO menuItemDTO, List<String> propertiesToBeUpdated) {
+    public MenuItem patchUpdateMenuItem(Long restaurantId, Long id, MenuItemDTO menuItemDTO, HashSet<String> propertiesToBeUpdated) {
         MenuItem existingItem = menuItemRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("MenuItem not found"));
         GenericMapper<MenuItem, MenuItemDTO> menuItemMapper = MapperFactory.getMapper(MenuItem.class, MenuItemDTO.class);
         MenuItem patchedItem = menuItemMapper.toEntity(menuItemDTO);
         patchedItem.setRestaurant(restaurantRepository.findById(restaurantId).orElseThrow(() -> new RuntimeException("Restaurant not found")));
         resolveRelationships(patchedItem, menuItemDTO);
-        copySelectedProperties(patchedItem, existingItem, propertiesToBeUpdated);
+        commonServiceImplUtil.copySelectedProperties(patchedItem, existingItem, propertiesToBeUpdated);
         existingItem.setUpdatedDttm(LocalDateTime.now());
         return menuItemRepository.save(existingItem);
     }
@@ -154,16 +156,4 @@ public class MenuItemServiceImpl extends BaseServiceImpl<MenuItem, Long> impleme
                 .map(interval -> new TimeIntervalDTO(interval.getStartTime(), interval.getEndTime()))
                 .collect(Collectors.toSet());
     }
-
-    private void copySelectedProperties(Object source, Object target, List<String> propertiesToBeChanged) {
-        BeanWrapper srcWrapper = new BeanWrapperImpl(source);
-        BeanWrapper targetWrapper = new BeanWrapperImpl(target);
-
-        for (String property : propertiesToBeChanged) {
-            if (srcWrapper.isReadableProperty(property) && srcWrapper.getPropertyValue(property) != null) {
-                targetWrapper.setPropertyValue(property, srcWrapper.getPropertyValue(property));
-            }
-        }
-    }
-
 }
