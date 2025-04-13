@@ -1,21 +1,10 @@
 "use client";
 import * as React from "react";
 import {
-  ArrowDown,
-  ArrowUp,
-  MoreHorizontal,
   Pencil,
   Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
@@ -121,13 +110,13 @@ export const getMenuListcolumns = (
     cell: ({ row }) => {
       return (
         <div className="flex justify-center">
-          <Button className="cursor-pointer hover:bg-gray-600/10 h-10 w-10 flex justify-center items-center rounded-md" onClick={() => handleEditClick(row.original.id)}>
+          <Button className="cursor-pointer hover:bg-gray-600/10 h-10 w-10 flex justify-center items-center rounded-md" variant="ghost" onClick={() => handleEditClick(row.original.id)}>
             <Pencil className="text-black h-5" />
           </Button>
           <CustomPopup
             type="delete"
             trigger={
-              <Button className="cursor-pointer hover:bg-gray-600/20 h-10 w-10 flex justify-center items-center rounded-md">
+              <Button className="cursor-pointer hover:bg-gray-600/20 h-10 w-10 flex justify-center items-center rounded-md" variant="ghost">
                 <Trash2 className="text-black h-5" />
               </Button>
             }

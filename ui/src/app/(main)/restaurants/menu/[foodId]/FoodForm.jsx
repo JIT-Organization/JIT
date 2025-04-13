@@ -21,7 +21,7 @@ const FoodForm = ({ onFormChange }) => {
     onlyVeg: true,
     onlyForCombos: false,
     active: true,
-    hotelSpecial: 'no',
+    hotelSpecial: false,
     categorySet: [],
     images: []
   });
@@ -333,15 +333,15 @@ const FoodForm = ({ onFormChange }) => {
           <div className="flex gap-2">
             <button
               type="button"
-              className={`px-4 py-2 rounded ${formData.hotelSpecial === 'yes' ? 'bg-yellow-500' : 'bg-gray-200'}`}
-              onClick={() => setFormData(prev => ({ ...prev, hotelSpecial: 'yes' }))}
+              className={`px-4 py-2 rounded ${formData.hotelSpecial ? 'bg-yellow-500' : 'bg-gray-200'}`}
+              onClick={() => setFormData(prev => ({ ...prev, hotelSpecial: true }))}
             >
               Yes
             </button>
             <button
               type="button"
-              className={`px-4 py-2 rounded ${formData.hotelSpecial === 'no' ? 'bg-yellow-500' : 'bg-gray-200'}`}
-              onClick={() => setFormData(prev => ({ ...prev, hotelSpecial: 'no' }))}
+              className={`px-4 py-2 rounded ${formData.hotelSpecial ? 'bg-yellow-500' : 'bg-gray-200'}`}
+              onClick={() => setFormData(prev => ({ ...prev, hotelSpecial: false }))}
             >
               No
             </button>
