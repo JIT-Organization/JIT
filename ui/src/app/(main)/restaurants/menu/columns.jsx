@@ -1,21 +1,10 @@
 "use client";
 import * as React from "react";
 import {
-  ArrowDown,
-  ArrowUp,
-  MoreHorizontal,
   Pencil,
   Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
