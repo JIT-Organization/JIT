@@ -68,7 +68,7 @@ const ImageUploader = ({
       />
       <button
         onClick={() => inputRef.current.click()}
-        className="bg-blue-600 text-white px-4 py-2 rounded"
+        className="bg-yellow-500 text-white px-4 py-2 rounded"
       >
         Upload {multiple ? 'Images' : 'Image'}
       </button>
