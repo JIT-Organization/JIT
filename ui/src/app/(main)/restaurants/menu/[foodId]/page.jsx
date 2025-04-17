@@ -75,7 +75,7 @@ const MenuFood = () => {
       <CardContent className="sticky top-16 z-10 overflow-hidden">
         <div className="flex flex-1 overflow-hidden">
           <div
-            className="flex-1 overflow-y-auto p-4"
+            className="flex-1 overflow-y-auto p-0 pt-4"
             style={{ maxHeight: 'calc(100vh - 170px)' }}
           >
             <FoodForm
