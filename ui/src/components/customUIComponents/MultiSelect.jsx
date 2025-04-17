@@ -2,12 +2,14 @@ import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
 import { Command, CommandInput, CommandList, CommandItem } from "../ui/command";
 import { Check } from "lucide-react";
 import { Button } from "../ui/button";
+import { cn } from "@/lib/utils";
 
 export default function MultiSelect({
   options,
   value,
   onChange,
   placeholder = "Select options",
+  className = '', 
 }) {
   const toggleOption = (optionValue) => {
     if (value.includes(optionValue)) {
@@ -20,8 +22,21 @@ export default function MultiSelect({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" className="w-full justify-start text-left">
-          <span className="text-muted-foreground">{placeholder}</span>
+        <Button
+          variant="outline"
+          className={cn(
+            "w-full justify-start text-left",
+            className
+          )}
+        >
+          <span className={value.length ? "truncate" : "text-muted-foreground"}>
+            {value.length
+              ? options
+                  .filter((opt) => value.includes(opt.value))
+                  .map((opt) => opt.label)
+                  .join(", ")
+              : placeholder}
+          </span>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0">

@@ -1,11 +1,13 @@
 'use client';
 
+import { cn } from '@/lib/utils';
 import { useEffect, useRef, useState } from 'react';
 
 const ImageUploader = ({
   multiple = false,
   onChange,
   defaultImages = [],
+  className =''
 }) => {
   const [images, setImages] = useState(defaultImages);
   const [mainIndex, setMainIndex] = useState(0);
@@ -57,7 +59,7 @@ const ImageUploader = ({
   };
 
   return (
-    <div className="space-y-4">
+    <div className={cn("space-y-4", className)}>
       <input
         type="file"
         multiple={multiple}
