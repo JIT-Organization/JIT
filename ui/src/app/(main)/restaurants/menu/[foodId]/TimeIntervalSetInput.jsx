@@ -1,8 +1,9 @@
 'use client';
 
+import { cn } from '@/lib/utils';
 import React from 'react';
 
-const TimeIntervalSetInput = ({ value = [], onChange }) => {
+const TimeIntervalSetInput = ({ value = [], onChange, className }) => {
   const handleTimingChange = (index, field, val) => {
     const updated = [...value];
     updated[index][field] = val;
@@ -19,7 +20,7 @@ const TimeIntervalSetInput = ({ value = [], onChange }) => {
   };
 
   return (
-    <div className="bg-gray-100 p-4 rounded">
+    <div className={cn("bg-gray-100 p-4 rounded", className)}>
       {value.map((slot, index) => (
         <div key={index} className="flex gap-4 mb-2 items-end">
           <div className="flex-1">
