@@ -44,24 +44,24 @@ const availabilityOptions = [
 ];
 
 const formFields = [
-  { name: 'menuItemName', label: 'Food Name', type: 'input', placeholder: 'Enter food name', labelCol: 'col-span-12', controlCol: 'col-span-12' },
-  { name: 'price', label: 'Price', type: 'input', placeholder: 'Enter price', labelCol: 'col-span-12', controlCol: 'col-span-12' },
-  { name: 'description', label: 'Description', type: 'textarea', placeholder: 'Enter food description', labelCol: 'col-span-12', controlCol: 'col-span-12' },
-  { name: 'cookSet', label: 'Responsible Cooks', type: 'multiSelect', options: cooksOptions, placeholder: 'Select cooks', labelCol: 'col-span-12', controlCol: 'col-span-12' },
-  { name: 'count', label: 'Count', type: 'input', placeholder: 'e.g. 120 / day', labelCol: 'col-span-12', controlCol: 'col-span-12' },
-  { name: 'timeIntervalSet', label: 'Timings', type: 'custom', Component: TimeIntervalSetInput , labelCol: 'col-span-12', controlCol: 'col-span-12'},
-  { name: 'availability', label: 'Availability', type: 'multiSelect', options: availabilityOptions, placeholder: 'Select available days', labelCol: 'col-span-12', controlCol: 'col-span-12' },
-  { name: 'offerPrice', label: 'Offer Price', type: 'input', placeholder: 'Enter offer price', labelCol: 'col-span-12', controlCol: 'col-span-12' },
-  { name: 'offerFrom', label: 'Offer From', type: 'dateTimePicker', labelCol: 'col-span-12', controlCol: 'col-span-12' },
-  { name: 'offerTo', label: 'Offer To', type: 'dateTimePicker', labelCol: 'col-span-12', controlCol: 'col-span-12' },
-  { name: 'preparationTime', label: 'Preparation Time', type: 'input', placeholder: 'Time in minutes', labelCol: 'col-span-12', controlCol: 'col-span-12' },
-  { name: 'acceptBulkOrders', label: 'Accept Bulk Orders', type: 'toggleGroup', options: ['yes', 'no'], labelCol: 'col-span-12', controlCol: 'col-span-12' },
-  { name: 'onlyVeg', label: 'Food Type', type: 'toggleGroup', options: ['veg', 'non-veg'], labelCol: 'col-span-12', controlCol: 'col-span-12' },
-  { name: 'onlyForCombos', label: 'Only for Combos', type: 'toggleGroup', options: ['yes', 'no'], labelCol: 'col-span-12', controlCol: 'col-span-12' },
-  { name: 'hotelSpecial', label: 'Hotel Special', type: 'toggleGroup', options: ['yes', 'no'], labelCol: 'col-span-12', controlCol: 'col-span-12'},
-  { name: 'active', label: 'Active', type: 'toggleGroup', options: ['yes', 'no'], labelCol: 'col-span-12', controlCol: 'col-span-12',},
-  { name: 'categorySet', label: 'Categories', type: 'multiSelect', options: categoryOptions, placeholder: 'Select categories', labelCol: 'col-span-12', controlCol: 'col-span-12',},
-  { name: 'images', type: 'imageUploader', labelCol: 'col-span-0', controlCol: 'col-span-12',},
+  { name: 'menuItemName', label: 'Food Name', type: 'input', placeholder: 'Enter food name', fieldCol: 'col-span-12 md:col-span-6', labelCol: 'col-span-12', controlCol: 'col-span-12' },
+  { name: 'price', label: 'Price', type: 'input', placeholder: 'Enter price', fieldCol: 'col-span-12 md:col-span-6', labelCol: 'col-span-12', controlCol: 'col-span-12' },
+  { name: 'description', label: 'Description', type: 'textarea', placeholder: 'Enter food description', fieldCol: 'col-span-12 md:col-span-12', labelCol: 'col-span-12', controlCol: 'col-span-12' },
+  { name: 'timeIntervalSet', label: 'Timings', type: 'custom', Component: TimeIntervalSetInput , fieldCol: 'col-span-12 md:col-span-8', labelCol: 'col-span-12', controlCol: 'col-span-12'},
+  { name: 'count', label: 'Count', type: 'input', placeholder: 'e.g. 120 / day', fieldCol: 'col-span-12 md:col-span-4', labelCol: 'col-span-12', controlCol: 'col-span-12' },
+  { name: 'cookSet', label: 'Responsible Cooks', type: 'multiSelect', options: cooksOptions, placeholder: 'Select cooks', fieldCol: 'col-span-12 md:col-span-6', labelCol: 'col-span-12', controlCol: 'col-span-12' },
+  { name: 'availability', label: 'Availability', type: 'multiSelect', options: availabilityOptions, placeholder: 'Select available days', fieldCol: 'col-span-12 md:col-span-6', labelCol: 'col-span-12', controlCol: 'col-span-12' },
+  { name: 'offerPrice', label: 'Offer Price', type: 'input', placeholder: 'Enter offer price', fieldCol: 'col-span-12 md:col-span-6', labelCol: 'col-span-12', controlCol: 'col-span-12' },
+  { name: 'offerFrom', label: 'Offer From', type: 'dateTimePicker', fieldCol: 'col-span-12 md:col-span-6', labelCol: 'col-span-12', controlCol: 'col-span-12' },
+  { name: 'offerTo', label: 'Offer To', type: 'dateTimePicker', fieldCol: 'col-span-12 md:col-span-6', labelCol: 'col-span-12', controlCol: 'col-span-12' },
+  { name: 'preparationTime', label: 'Preparation Time', type: 'input', placeholder: 'Time in minutes', fieldCol: 'col-span-12 md:col-span-6', labelCol: 'col-span-12', controlCol: 'col-span-12' },
+  { name: 'categorySet', label: 'Categories', type: 'multiSelect', options: categoryOptions, placeholder: 'Select categories', fieldCol: 'col-span-12 md:col-span-6', labelCol: 'col-span-12', controlCol: 'col-span-12',},
+  { name: 'acceptBulkOrders', label: 'Accept Bulk Orders', type: 'toggleGroup', options: ['yes', 'no'], fieldCol: 'col-span-12 md:col-span-6', labelCol: 'col-span-12', controlCol: 'col-span-12' },
+  { name: 'onlyVeg', label: 'Food Type', type: 'toggleGroup', options: ['veg', 'non-veg'], fieldCol: 'col-span-12 md:col-span-6', labelCol: 'col-span-12', controlCol: 'col-span-12' },
+  { name: 'onlyForCombos', label: 'Only for Combos', type: 'toggleGroup', options: ['yes', 'no'], fieldCol: 'col-span-12 md:col-span-6', labelCol: 'col-span-12', controlCol: 'col-span-12' },
+  { name: 'hotelSpecial', label: 'Hotel Special', type: 'toggleGroup', options: ['yes', 'no'], fieldCol: 'col-span-12 md:col-span-6', labelCol: 'col-span-12', controlCol: 'col-span-12'},
+  { name: 'active', label: 'Active', type: 'toggleGroup', options: ['yes', 'no'], fieldCol: 'col-span-12 md:col-span-6', labelCol: 'col-span-12', controlCol: 'col-span-12',},
+  { name: 'images', type: 'imageUploader', fieldCol: 'col-span-12 md:col-span-12', labelCol: 'col-span-0', controlCol: 'col-span-12',},
 ];
 
 const renderField = (fieldConfig, formField) => {
@@ -98,8 +98,8 @@ const renderField = (fieldConfig, formField) => {
             <ToggleGroupItem  
               className={`
                 border p-2 w-full rounded
-                hover:bg-yellow-400
-                data-[state=on]:bg-yellow-500
+                hover:bg-yellow-50
+                data-[state=on]:bg-yellow-50
                 transition-colors duration-200
               `} 
               key={opt} value={opt}>
@@ -158,6 +158,7 @@ const FoodForm = forwardRef(({ onFormChange, onSubmit }, ref) => {
   }));
 
   return (
+    <div className='grid grid-cols-12 '>
     <Form {...form}>
       {formFields.map((fieldConfig) => (
         <FormField 
@@ -165,7 +166,7 @@ const FoodForm = forwardRef(({ onFormChange, onSubmit }, ref) => {
           control={form.control}
           name={fieldConfig.name}
           render={({ field: formField }) => (
-            <FormItem className="mb-4">
+            <FormItem className={`mb-4 mr-4 ${fieldConfig.fieldCol ?? 'col-span-12'}`}>
               <div className="grid grid-cols-12 pa-8 ma-8 gap-2 items-start sm:items-center">
                 <FormLabel className={`${fieldConfig.labelCol ?? 'col-span-3'}`}>
                   {fieldConfig.label}
@@ -180,6 +181,7 @@ const FoodForm = forwardRef(({ onFormChange, onSubmit }, ref) => {
         />
       ))}
     </Form>
+    </div>
   );
 });
 
