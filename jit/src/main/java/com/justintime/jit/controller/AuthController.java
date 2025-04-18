@@ -1,5 +1,6 @@
 package com.justintime.jit.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.justintime.jit.dto.ApiResponse;
 import com.justintime.jit.dto.LoginRequestDto;
 import com.justintime.jit.entity.User;
@@ -40,7 +41,7 @@ public class AuthController extends BaseController {
     }
 
     @PostMapping("refresh")
-    public ResponseEntity<ApiResponse<String>> refreshToken(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<ApiResponse<String>> refreshToken(HttpServletRequest request, HttpServletResponse response) throws JsonProcessingException {
         userAuthService.refresh(request, response);
         return success(null);
     }

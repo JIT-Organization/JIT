@@ -60,6 +60,7 @@ public class RestaurantController extends BaseController {
     @DeleteMapping("/{restaurantCode}")
     public ResponseEntity<ApiResponse<RestaurantDTO>> deleteRestaurant(@PathVariable String restaurantCode) {
         restaurantService.deleteRestaurant(restaurantCode);
+        return success(null);
     }
 
 //    @GetMapping("/search")

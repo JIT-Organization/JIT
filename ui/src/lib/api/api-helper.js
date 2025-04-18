@@ -33,7 +33,7 @@ export const deleteRequest = async (url) => {
   return response.data;
 };
 
-export const handleMutate = async (queryClient, queryKey, id, fields, mode = "update") => {
+export const handleMutate = async (queryClient, queryKey, id, fields, checkColumn = "id", mode = "update") => {
   await queryClient.cancelQueries(queryKey);
 
   const previousData = queryClient.getQueryData(queryKey);
@@ -45,7 +45,7 @@ export const handleMutate = async (queryClient, queryKey, id, fields, mode = "up
       case "create":
         return [fields, ...oldData];
       case "update":
-        return oldData.map((row) => row.id === id ? { ...row, ...fields } : row)
+        return oldData.map((row) => row[checkColumn] === id ? { ...row, ...fields } : row)
       case "delete":
         return oldData.filter((row) => row.id !== id);
       default:
