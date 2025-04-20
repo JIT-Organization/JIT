@@ -42,8 +42,8 @@ public class MenuItemController {
         return menuItemService.getMenuItemsByRestaurantId(restaurantId, sortBy, priceRange, category, onlyVeg, onlyForCombos);
     }
 
-    @GetMapping("/{restaurantId}/{id}")
-    public MenuItemDTO getMenuItemByRestaurantIdAndId(@PathVariable Long restaurantId, @PathVariable Long id){
+    @GetMapping("/{id}")
+    public MenuItemDTO getMenuItemByRestaurantIdAndId(@AuthenticationPrincipal Long restaurantId, @PathVariable Long id){
         return menuItemService.getMenuItemByRestaurantIdAndId(restaurantId, id);
     }
     @PostMapping("/validateImage")

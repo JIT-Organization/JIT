@@ -35,6 +35,13 @@ export const getMenuItemListOptions = () => ({
   ...cacheConfig
 });
 
+export const getMenuItemFood = (id) => ({
+  queryKey: ['menuItemFood', id],
+  queryFn: () => getRequest(`${URLS.menuItemList}/${id}`, 'Failed to fetch Menu Item'),
+  enabled: !isNaN(Number(id)),
+  ...cacheConfig,
+});
+
 export const patchUpdateMenuItemList = (queryClient) => ({
   mutationFn: async ({ id, fields }) => {
     return await patchRequest(`${URLS.menuItemList}/${id}`, {

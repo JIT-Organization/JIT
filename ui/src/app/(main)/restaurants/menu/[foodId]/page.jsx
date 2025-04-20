@@ -1,41 +1,57 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import FoodForm from './FoodForm';
 import FoodPreview from './FoodPreview';
-import { useRouter } from "next/navigation";
-import { ChevronLeft } from "lucide-react";
+import { useRouter, useParams } from 'next/navigation';
+import { ChevronLeft } from 'lucide-react';
 import {
   Card,
   CardTitle,
   CardContent,
 } from '@/components/ui/card';
-import { createMenuItemFood } from '@/lib/api/api';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { createMenuItemFood, patchUpdateMenuItemList, getMenuItemFood, deleteMenuItem } from '@/lib/api/api';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 const MenuFood = () => {
   const router = useRouter();
+  const { foodId } = useParams();
   const queryClient = useQueryClient();
-  const postMutation = useMutation(createMenuItemFood(queryClient));
-
   const formRef = useRef();
   const [formData, setFormData] = useState({});
-
+  const isEdit = foodId && !isNaN(Number(foodId));
+  
+  const { data:existingData, isLoading } = useQuery(getMenuItemFood(foodId));
+  
+  useEffect(() => {
+    if (existingData) {
+      setFormData(existingData);
+    }
+  }, [existingData]);
+  
   const handleFormChange = (data) => {
     setFormData(data);
   };
-
+  
   const handleSubmit = () => {
     formRef.current?.submitForm();
   };
-
+  
+  const deleteMutation = useMutation(deleteMenuItem(queryClient));
+  const createMutation = useMutation(createMenuItemFood(queryClient));
+  const updateMutation = useMutation(patchUpdateMenuItemList(queryClient));
+  
   const handleFinalSubmit = (data) => {
-    console.log('Final submitted data:', data);
-    postMutation.mutate({ fields: data });
+    const mutationFn = isEdit ? updateMutation : createMutation;
+    mutationFn.mutate({
+      id: foodId,
+      fields: data,
+    });
   };
-
+  
   const handleDelete = () => {
     console.log('Deleting:', formData);
+    deleteMutation.mutate({id:foodId});
   };
 
   const handleBackClick = () => {
@@ -53,15 +69,19 @@ const MenuFood = () => {
             >
               <ChevronLeft />
             </button>
-            <h1 className="text-2xl font-bold">Add Food</h1>
+            <h1 className="text-2xl font-bold">
+              {isEdit ? 'Edit Food' : 'Add Food'}
+            </h1>
           </div>
           <div className="space-x-2">
-            <button
-              onClick={handleDelete}
-              className="bg-red-600 text-white px-4 py-2 rounded"
-            >
-              Delete
-            </button>
+            {isEdit && (
+              <button
+                onClick={handleDelete}
+                className="bg-red-600 text-white px-4 py-2 rounded"
+              >
+                Delete
+              </button>
+            )}
             <button
               onClick={handleSubmit}
               className="bg-yellow-500 text-black px-4 py-2 rounded"
@@ -82,6 +102,8 @@ const MenuFood = () => {
               ref={formRef}
               onFormChange={handleFormChange}
               onSubmit={handleFinalSubmit}
+              defaultValues={formData}
+              isLoading={isLoading}
             />
           </div>
 
