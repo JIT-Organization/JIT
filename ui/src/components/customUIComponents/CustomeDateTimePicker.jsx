@@ -15,49 +15,64 @@ import {
 
 export function DateTimePicker({ value, onChange, className }) {
   const [open, setOpen] = React.useState(false);
-  const [selectedDate, setSelectedDate] = React.useState(value || new Date());
-  const [hour, setHour] = React.useState(12);
-  const [minute, setMinute] = React.useState(0);
-  const [ampm, setAmPm] = React.useState("AM");
+  const initialDate = value ? new Date(value) : new Date();
+
+  const [selectedDate, setSelectedDate] = React.useState(() => {
+    const date = new Date(initialDate);
+    return isNaN(date.getTime()) ? null : date;
+  });
+
+  const [hour, setHour] = React.useState(() =>
+    selectedDate ? (selectedDate.getHours() % 12 || 12) : 12
+  );
+  const [minute, setMinute] = React.useState(() =>
+    selectedDate ? selectedDate.getMinutes() : 0
+  );
+  const [ampm, setAmPm] = React.useState(() =>
+    selectedDate ? (selectedDate.getHours() >= 12 ? "PM" : "AM") : "AM"
+  );
 
   const convertTo24Hour = (h, ampmVal) => {
     if (ampmVal === "AM") return h === 12 ? 0 : h;
     return h === 12 ? 12 : h + 12;
   };
 
-   React.useEffect(() => {
+  // Sync when external value changes
+  React.useEffect(() => {
     if (!value) return;
 
-    const incomingTime = value.getTime();
-    const currentTime = new Date(selectedDate);
-    currentTime.setHours(convertTo24Hour(hour, ampm));
-    currentTime.setMinutes(minute);
+    const newVal = typeof value === "string" ? new Date(value) : value;
+    if (isNaN(newVal.getTime())) return;
 
-    if (incomingTime !== currentTime.getTime()) {
-      setSelectedDate(value);
-      const h = value.getHours();
-      setHour(h % 12 || 12);
-      setMinute(value.getMinutes());
-      setAmPm(h >= 12 ? "PM" : "AM");
+    setSelectedDate(new Date(newVal));
+    const h = newVal.getHours();
+    setHour(h % 12 || 12);
+    setMinute(newVal.getMinutes());
+    setAmPm(h >= 12 ? "PM" : "AM");
+  }, [value]);
+
+  // Emit onChange when date/time updates
+  React.useEffect(() => {
+    if (!selectedDate) return;
+
+    const updated = new Date(selectedDate);
+    updated.setHours(convertTo24Hour(hour, ampm));
+    updated.setMinutes(minute);
+    updated.setSeconds(0);
+    updated.setMilliseconds(0);
+
+    // Only emit if date is different
+    if (!value || updated.getTime() !== new Date(value).getTime()) {
+      onChange?.(updated);
     }
-  }, [value, hour, minute, ampm]);
-
-   React.useEffect(() => {
-    const newDate = new Date(selectedDate);
-    newDate.setHours(convertTo24Hour(hour, ampm));
-    newDate.setMinutes(minute);
-    newDate.setSeconds(0);
-
-    if (newDate.getTime() !== selectedDate.getTime()) {
-      onChange?.(newDate);
-    }
-  }, [selectedDate, hour, minute, ampm, onChange]);
+  }, [selectedDate, hour, minute, ampm]);
 
   const handleDateSelect = (date) => {
     if (date) {
       const newDate = new Date(date);
       newDate.setHours(convertTo24Hour(hour, ampm));
       newDate.setMinutes(minute);
+      newDate.setSeconds(0);
       setSelectedDate(newDate);
     }
   };
@@ -70,12 +85,14 @@ export function DateTimePicker({ value, onChange, className }) {
           className={cn(
             "justify-start text-left font-normal",
             !selectedDate && "text-muted-foreground",
-            className 
+            className
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
           <span className="truncate overflow-hidden whitespace-nowrap block">
-          {selectedDate ? format(selectedDate, "PPP hh:mm a") : <span>Pick date & time</span>}
+            {selectedDate
+              ? format(selectedDate, "PPP hh:mm a")
+              : "Pick date & time"}
           </span>
         </Button>
       </PopoverTrigger>
