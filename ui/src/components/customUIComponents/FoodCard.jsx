@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 
 const FoodCard = ({ id, image, name, rating, cost, timeTaken, tags = [] }) => {
   return (
-    <Card className="w-72 overflow-hidden"> {/* Consistent Card Structure */}
+    <Card className="w-full overflow-hidden"> {/* Consistent Card Structure */}
       
       {/* Header Section with Image */}
       <CardHeader className="relative w-full h-36">
