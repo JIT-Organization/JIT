@@ -21,7 +21,7 @@ const CreateOrder = () => {
   const [activeCategory, setActiveCategory] = useState("All");
   const [cartItems, setCartItems] = useState([]);
 
-  const filteredItems = useMemo(() => {
+  const filteredMenuItems = useMemo(() => {
     return menuItems.filter((item) => {
       const categoryList = item?.categorySet ?? [];
       const matchesCategory = activeCategory === "All" || categoryList.includes(activeCategory);
@@ -35,14 +35,14 @@ const CreateOrder = () => {
   const handleAddToCart = (food) => {
     setCartItems((prevCart) => {
       const index = prevCart.findIndex((item) => item.id === food.id);
-      if (index !== -1) {
-        const updatedCart = [...prevCart];
-        updatedCart[index].qty += 1;
-        return updatedCart;
-      } else {
+      if (index === -1) {
         return [...prevCart, { ...food, qty: 1 }];
-      }
+      } return [...prevCart];
     });
+  };
+
+  const getCartQuantityById = (id) => {
+    return cartItems ? cartItems.find((item) => item.id === id)?.qty || 0 : 0;
   };
 
   const handleUpdateQty = (id, type) => {
@@ -94,7 +94,7 @@ const CreateOrder = () => {
         <div className="flex flex-1 overflow-hidden" style={{ maxHeight: 'calc(100vh - 195px)' }}>
           <div className="flex-1 overflow-y-auto p-0 pb-4">
             <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
-              {filteredItems.map((food) => (
+              {filteredMenuItems.map((food) => (
                 <div
                   key={food.id}
                   onClick={() =>
@@ -106,7 +106,8 @@ const CreateOrder = () => {
                   }
                   className="cursor-pointer w-[200px] mx-auto"
                 >
-                  <FoodCard id={food.id} name={food.menuItemName} price={food.price} />
+                  <FoodCard food={food} key={food.id} 
+                  handleUpdateQty={handleUpdateQty} quantity={getCartQuantityById(food.id)}/>
                 </div>
               ))}
             </div>
