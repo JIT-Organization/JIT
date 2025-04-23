@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/card';
 import { createMenuItemFood, patchUpdateMenuItemList, getMenuItemFood, deleteMenuItem } from '@/lib/api/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import FoodCard from '@/components/customUIComponents/FoodCard';
 
 const MenuFood = () => {
   const router = useRouter();
@@ -25,12 +26,12 @@ const MenuFood = () => {
   
   useEffect(() => {
     if (existingData) {
-      setFormData(existingData);
+      setFormData({...existingData, tag:existingData.hotelSpecial? "Hotel special" : "illa"});
     }
   }, [existingData]);
   
   const handleFormChange = (data) => {
-    setFormData(data);
+    setFormData({...data, tag:data.hotelSpecial? "Hotel special" : "illa"});
   };
   
   const handleSubmit = () => {
@@ -107,8 +108,10 @@ const MenuFood = () => {
             />
           </div>
 
-          <div className="hidden md:block w-[300px] border-l p-4 bg-white sticky top-0 overflow-y-auto">
-            <FoodPreview formData={formData} />
+          <div className="hidden md:flex w-[300px] border-l p-4 bg-white sticky top-0 overflow-y-auto items-center justify-center"
+           style={{ height: 'calc(100vh - 170px)' }} >
+            {/* <FoodPreview formData={formData} /> */}
+            <FoodCard food={formData} />
           </div>
         </div>
       </CardContent>

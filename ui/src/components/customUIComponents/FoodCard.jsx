@@ -1,44 +1,103 @@
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 
-const FoodCard = ({ id, image, name, rating, cost, timeTaken, tags = [] }) => {
+const FoodCard = ({ food,
+  quantity,
+  handleUpdateQty,
+}) => {
+  const cost = food.offerPrice || food.price;
+  const originalCost = food.offerPrice ? food.price : null;
+  const [isEditable, setIsEditable] = useState(false);
+
   return (
-    <Card className="w-full overflow-hidden"> {/* Consistent Card Structure */}
+    <Card className="w-full  border-2 border-yellow-400 rounded-xl overflow-hidden shadow hover:shadow-md transition-all relative">
       
-      {/* Header Section with Image */}
-      <CardHeader className="relative w-full h-36">
-        <Image src={image} alt={name} layout="fill" objectFit="cover" className="rounded-t-xl" />
-      </CardHeader>
+      <div className="relative h-32 w-full" onClick={() => {setIsEditable(true)}}>
+        <Image
+          src={
+            food.image ||
+            "https://images.pexels.com/photos/1860208/pexels-photo-1860208.jpeg?cs=srgb&dl=cooked-food-1860208.jpg&fm=jpg"
+          }
+          alt={food.menuItemName}
+          layout="fill"
+          objectFit="cover"
+          className="rounded-t-md"
+        />
 
-      {/* Food Details Section */}
-      <CardContent>
-        <CardTitle className="text-lg">{name}</CardTitle>
-        <CardDescription className="text-gray-500">⭐ {rating}/5 • ⏱️ {timeTaken}</CardDescription>
-        
-        <div className="mt-2 flex justify-between items-center">
-          <span className="text-lg font-bold">${cost}</span>
+        <div className="absolute top-2 left-2 bg-white text-green-700 text-xs font-medium px-2 py-0.5 rounded-full shadow">
+          ⭐ {food.rating || "4.5"}
         </div>
 
-        {/* Tags (e.g., Chef Recommended, Spicy) */}
-        {tags.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-2">
-            {tags.map((tag, index) => (
-              <span key={index} className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-lg">
-                {tag}
-              </span>
-            ))}
+        {/* {food.tag && ( */}
+          <div className="absolute bottom-2 right-2 bg-black text-white text-[10px] px-2 py-0.5 rounded shadow">
+            {food.tag || "New Arrival"}
+          </div>
+        {/* )} */}
+
+        {quantity > 0 && !isEditable && (
+          <div className="absolute top-2 right-2 bg-green-600 text-white text-[10px] px-2 py-0.5 rounded-full shadow">
+            Selected ({quantity})
           </div>
         )}
-      </CardContent>
 
-      {/* Footer Section */}
-      <CardFooter className="justify-center">
-        <Link href={`/menu-details/${id}`} className="text-blue-500 hover:underline text-sm">
-          View Details
-        </Link>
-      </CardFooter>
+        {quantity > 0 && isEditable && (
+          <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center text-white font-bold text-lg space-x-4">
+            <button
+              className="px-2 py-1 bg-white text-black rounded"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleUpdateQty(food.id, "decrement");
+              }}
+            >
+              –
+            </button>
+            <span>{quantity}</span>
+            <button
+              className="px-2 py-1 bg-white text-black rounded"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleUpdateQty(food.id, "increment");
+              }}
+            >
+              +
+            </button>
+          </div>
+        )}
+      </div>
+
+      <CardContent className="p-3 space-y-1" onClick={() => {setIsEditable(false)}}>
+        <div className="flex justify-between items-center">
+          <div className="font-bold text-sm">{food.menuItemName}</div>
+          <div
+            className={`w-4 h-4 border-[1.5px] ${
+              food.onlyVeg ? "border-green-700" : "border-red-700"
+            } flex items-center justify-center bg-white`}
+          >
+            <div
+              className={`w-2 h-2 ${
+                food.onlyVeg ? "bg-green-700" : "bg-red-700"
+              } clip-triangle`}
+            />
+          </div>
+        </div>
+
+        {food.description && (
+          <div className="text-xs text-gray-600 line-clamp-2">{food.description}</div>
+        )}
+
+        <div className="flex justify-between items-center">
+          <div className="text-sm font-semibold text-green-700">
+            {originalCost && (
+              <span className="line-through text-gray-400 text-xs mr-1">
+                ₹{originalCost}
+              </span>
+            )}
+            ₹{cost}
+          </div>
+          <div className="text-xs text-gray-500">⏱ {food.preparationTime || 20} mins</div>
+        </div>
+      </CardContent>
     </Card>
   );
 };
