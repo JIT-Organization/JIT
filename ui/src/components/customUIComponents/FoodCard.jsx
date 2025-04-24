@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 const FoodCard = ({ food,
   quantity,
   handleUpdateQty,
+  openCustomizeDialog
 }) => {
   const cost = food.offerPrice || food.price;
   const originalCost = food.offerPrice ? food.price : null;
@@ -42,28 +43,42 @@ const FoodCard = ({ food,
         )}
 
         {quantity > 0 && isEditable && (
-          <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center text-white font-bold text-lg space-x-4">
-            <button
-              className="px-2 py-1 bg-white text-black rounded"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleUpdateQty(food.id, "decrement");
-              }}
-            >
-              –
-            </button>
-            <span>{quantity}</span>
-            <button
-              className="px-2 py-1 bg-white text-black rounded"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleUpdateQty(food.id, "increment");
-              }}
-            >
-              +
-            </button>
-          </div>
-        )}
+  <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col items-center justify-center text-white font-bold text-lg">
+    <div className="flex space-x-4 items-center">
+      <button
+        className="px-2 py-1 bg-white text-black rounded"
+        onClick={(e) => {
+          e.stopPropagation();
+          handleUpdateQty(food.id, "decrement");
+        }}
+      >
+        –
+      </button>
+      <span>{quantity}</span>
+      <button
+        className="px-2 py-1 bg-white text-black rounded"
+        onClick={(e) => {
+          e.stopPropagation();
+          handleUpdateQty(food.id, "increment");
+        }}
+      >
+        +
+      </button>
+    </div>
+
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        openCustomizeDialog(food.id);
+      }}   
+      className="mt-2 bg-white text-blue-600 text-xs font-medium px-2 py-0.5 rounded-full shadow hover:bg-blue-50"
+      style={{ fontSize: "10px" }}
+    >
+      Customize
+    </button>
+  </div>
+)}
+
       </div>
 
       <CardContent className="p-3 space-y-1" onClick={() => {setIsEditable(false)}}>

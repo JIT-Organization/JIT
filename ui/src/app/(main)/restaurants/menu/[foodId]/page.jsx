@@ -108,10 +108,17 @@ const MenuFood = () => {
             />
           </div>
 
-          <div className="hidden md:flex w-[300px] border-l p-4 bg-white sticky top-0 overflow-y-auto items-center justify-center"
-           style={{ height: 'calc(100vh - 170px)' }} >
-            {/* <FoodPreview formData={formData} /> */}
+          <div
+            className="hidden md:flex w-[300px] border-l p-4 bg-white sticky top-0 overflow-y-auto items-center justify-center flex-col"
+          >
+            <h2 className="text-lg font-semibold text-gray-700 mb-2">Food preview</h2>
+            
             <FoodCard food={formData} />
+
+            <p className="text-sm text-gray-500 mt-4 text-center px-2">
+              This is how your food will be displayed. <br />
+              Prepare wisely.
+            </p>
           </div>
         </div>
       </CardContent>

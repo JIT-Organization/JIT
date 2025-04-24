@@ -10,6 +10,7 @@ import DataTableHeader from "@/components/customUIComponents/DataTableHeader";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import BillPreview from "./BillPreview";
 import { useIsMobile } from "@/hooks/use-mobile";
+import CustomizeDialog from "@/components/customUIComponents/CustomizeDialog";
 
 const CreateOrder = () => {
   const router = useRouter();
@@ -41,6 +42,25 @@ const CreateOrder = () => {
     });
   };
 
+  const [customizeItemData, setCustomizeItemData] = useState(null);
+  const [showCustomizeDialog, setShowCustomizeDialog] = useState(false);
+  
+  const openCustomizeDialog = (id) => {
+    setCustomizeItemData(cartItems.find((x)=> x.id == id));
+    setShowCustomizeDialog(true);
+  };
+  const closeCustomizeDialog = () => {
+    setShowCustomizeDialog(false)
+  }
+  const handleSaveCustomizeDialog = (id, notes) => {
+    setCartItems((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, customNotes: notes } : item
+      )
+    );
+    setShowCustomizeDialog(false);
+  };
+
   const getCartQuantityById = (id) => {
     return cartItems ? cartItems.find((item) => item.id === id)?.qty || 0 : 0;
   };
@@ -63,12 +83,6 @@ const CreateOrder = () => {
         .filter((item) => item.qty > 0);
     });
   };
- const customizeItem = (id) => {
-    const item = cartItems.find((item) => item.id === id);
-    if (item) {
-      console.log('customizeItem', item)
-    }
- }
   const categories = getDistinctCategories(menuItems);
 
   if (isLoading) return <p>Loading menu...</p>;
@@ -86,12 +100,12 @@ const CreateOrder = () => {
           setActiveCategory={setActiveCategory}
           setColumnFilters={() => {}}
           headerButtonName="Place Order"
-          headerButtonClick={() => router.back()}
+          headerButtonClick={() => console.log(cartItems)}
         />
       </CardTitle>
 
-      <CardContent className="sticky mt-0 px-2 py-0 top-16 z-10 overflow-hidden">
-        <div className="flex flex-1 overflow-hidden" style={{ maxHeight: 'calc(100vh - 195px)' }}>
+      <CardContent className="mt-0 px-2 py-0">
+        <div className="flex flex-1 overflow-hidden" style={{ height: 'calc(100vh - 191px)' }}>
           <div className="flex-1 overflow-y-auto p-0 pb-4">
             <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
               {filteredMenuItems.map((food) => (
@@ -104,17 +118,17 @@ const CreateOrder = () => {
                       price: food.price,
                     })
                   }
-                  className="cursor-pointer w-[200px] mx-auto"
+                className="cursor-pointer w-full"
                 >
                   <FoodCard food={food} key={food.id} 
-                  handleUpdateQty={handleUpdateQty} quantity={getCartQuantityById(food.id)}/>
+                  handleUpdateQty={handleUpdateQty} quantity={getCartQuantityById(food.id)} openCustomizeDialog={openCustomizeDialog}/>
                 </div>
               ))}
             </div>
           </div>
 
           <div className="hidden lg:block w-[300px] border-l px-2x py-0 sticky top-0 overflow-y-auto">
-            <BillPreview cartItems={cartItems} handleUpdateQty={handleUpdateQty} customizeItem={customizeItem} />
+            <BillPreview cartItems={cartItems} handleUpdateQty={handleUpdateQty} openCustomizeDialog={openCustomizeDialog} />
           </div>
         </div>
       </CardContent>
@@ -130,19 +144,27 @@ const CreateOrder = () => {
 
           {showPopup && (
             <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
-              <div className="bg-white w-11/12 max-h-[90vh] overflow-y-auto rounded-lg p-4 relative">
+              <div className="bg-white w-11/12 max-w-md max-h-[90vh] overflow-y-auto rounded-lg p-4 relative flex flex-col">
                 <button
                   className="text-red-500 absolute top-2 right-2 text-xl"
                   onClick={() => setShowPopup(false)}
                 >
                   ❌
                 </button>
-                <BillPreview cartItems={cartItems} handleUpdateQty={handleUpdateQty} />
+                <div className="flex justify-center">
+                <BillPreview cartItems={cartItems} handleUpdateQty={handleUpdateQty}  openCustomizeDialog={openCustomizeDialog} />
+                </div>
               </div>
             </div>
           )}
         </>
       )}
+      <CustomizeDialog
+        isOpen={showCustomizeDialog}
+        onSave={handleSaveCustomizeDialog}
+        item={customizeItemData}
+        onClose={closeCustomizeDialog}
+      />
     </Card>
   );
 };
