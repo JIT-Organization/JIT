@@ -1,18 +1,24 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
-import FoodForm from './FoodForm';
-import FoodPreview from './FoodPreview';
 import { useRouter, useParams } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Card,
   CardTitle,
   CardContent,
 } from '@/components/ui/card';
-import { createMenuItemFood, patchUpdateMenuItemList, getMenuItemFood, deleteMenuItem } from '@/lib/api/api';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import FoodForm from './FoodForm';
 import FoodCard from '@/components/customUIComponents/FoodCard';
+
+import {
+  createMenuItemFood,
+  patchUpdateMenuItemList,
+  getMenuItemFood,
+  deleteMenuItem
+} from '@/lib/api/api';
 
 const MenuFood = () => {
   const router = useRouter();
@@ -21,27 +27,33 @@ const MenuFood = () => {
   const formRef = useRef();
   const [formData, setFormData] = useState({});
   const isEdit = foodId && !isNaN(Number(foodId));
-  
-  const { data:existingData, isLoading } = useQuery(getMenuItemFood(foodId));
-  
+
+  const { data: existingData, isLoading } = useQuery(getMenuItemFood(foodId));
+
   useEffect(() => {
     if (existingData) {
-      setFormData({...existingData, tag:existingData.hotelSpecial? "Hotel special" : "illa"});
+      setFormData({
+        ...existingData,
+        tag: existingData.hotelSpecial ? 'Hotel special' : 'illa',
+      });
     }
   }, [existingData]);
-  
+
   const handleFormChange = (data) => {
-    setFormData({...data, tag:data.hotelSpecial? "Hotel special" : "illa"});
+    setFormData({
+      ...data,
+      tag: data.hotelSpecial ? 'Hotel special' : 'illa',
+    });
   };
-  
+
   const handleSubmit = () => {
     formRef.current?.submitForm();
   };
-  
+
   const deleteMutation = useMutation(deleteMenuItem(queryClient));
   const createMutation = useMutation(createMenuItemFood(queryClient));
   const updateMutation = useMutation(patchUpdateMenuItemList(queryClient));
-  
+
   const handleFinalSubmit = (data) => {
     const mutationFn = isEdit ? updateMutation : createMutation;
     mutationFn.mutate({
@@ -49,10 +61,9 @@ const MenuFood = () => {
       fields: data,
     });
   };
-  
+
   const handleDelete = () => {
-    console.log('Deleting:', formData);
-    deleteMutation.mutate({id:foodId});
+    deleteMutation.mutate({ id: foodId });
   };
 
   const handleBackClick = () => {
@@ -64,31 +75,34 @@ const MenuFood = () => {
       <CardTitle className="sticky top-16 z-20 bg-white shadow">
         <div className="p-4 border-b shadow flex justify-between items-center">
           <div className="flex items-center space-x-2">
-            <button
+            <Button
+              variant="ghost"
               onClick={handleBackClick}
-              className="flex items-center text-yellow pr-4 rounded-md"
+              className="flex items-center text-yellow pr-4"
+              size="icon"
             >
               <ChevronLeft />
-            </button>
+            </Button>
             <h1 className="text-2xl font-bold">
               {isEdit ? 'Edit Food' : 'Add Food'}
             </h1>
           </div>
-          <div className="space-x-2">
+          <div className="space-x-2 flex">
             {isEdit && (
-              <button
+              <Button
+                variant="destructive"
                 onClick={handleDelete}
-                className="bg-red-600 text-white px-4 py-2 rounded"
+                className="px-4"
               >
                 Delete
-              </button>
+              </Button>
             )}
-            <button
+            <Button
+              className="bg-yellow-500 hover:bg-yellow-600 text-black px-4"
               onClick={handleSubmit}
-              className="bg-yellow-500 text-black px-4 py-2 rounded"
             >
               Submit
-            </button>
+            </Button>
           </div>
         </div>
       </CardTitle>
@@ -96,7 +110,7 @@ const MenuFood = () => {
       <CardContent className="sticky top-16 z-10 overflow-hidden">
         <div className="flex flex-1 overflow-hidden">
           <div
-            className="flex-1 overflow-y-auto p-0 pt-4"
+            className="flex-1 overflow-y-auto p-2 pt-4"
             style={{ maxHeight: 'calc(100vh - 170px)' }}
           >
             <FoodForm
@@ -108,11 +122,11 @@ const MenuFood = () => {
             />
           </div>
 
-          <div
-            className="hidden md:flex w-[300px] border-l p-4 bg-white sticky top-0 overflow-y-auto items-center justify-center flex-col"
-          >
-            <h2 className="text-lg font-semibold text-gray-700 mb-2">Food preview</h2>
-            
+          <div className="hidden md:flex w-[300px] border-l p-4 bg-white sticky top-0 overflow-y-auto items-center justify-center flex-col">
+            <h2 className="text-lg font-semibold text-gray-700 mb-2">
+              Food preview
+            </h2>
+
             <FoodCard food={formData} />
 
             <p className="text-sm text-gray-500 mt-4 text-center px-2">

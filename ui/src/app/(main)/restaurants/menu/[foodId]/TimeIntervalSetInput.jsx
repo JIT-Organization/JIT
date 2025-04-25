@@ -2,6 +2,8 @@
 
 import { cn } from '@/lib/utils';
 import React from 'react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 const TimeIntervalSetInput = ({ value = [], onChange, className }) => {
   const handleTimingChange = (index, field, val) => {
@@ -24,45 +26,51 @@ const TimeIntervalSetInput = ({ value = [], onChange, className }) => {
       {value.map((slot, index) => (
         <div key={index} className="flex gap-4 mb-2 items-end">
           <div className="flex-1">
-            <label htmlFor={`start-${index}`} className="text-sm block">Available From</label>
-            <input
+            <label htmlFor={`start-${index}`} className="text-sm block mb-1">
+              Available From
+            </label>
+            <Input
               id={`start-${index}`}
               type="time"
               value={slot.startTime}
               onChange={(e) => handleTimingChange(index, 'startTime', e.target.value)}
-              className="border p-2 w-full rounded bg-yellow-50"
+              className="bg-yellow-50"
             />
           </div>
           <div className="flex-1">
-            <label htmlFor={`end-${index}`} className="text-sm block">Available To</label>
-            <input
+            <label htmlFor={`end-${index}`} className="text-sm block mb-1">
+              Available To
+            </label>
+            <Input
               id={`end-${index}`}
               type="time"
               value={slot.endTime}
               onChange={(e) => handleTimingChange(index, 'endTime', e.target.value)}
-              className="border p-2 w-full rounded bg-yellow-50"
+              className="bg-yellow-50"
             />
           </div>
           {value.length > 1 && (
-            <button
+            <Button
               type="button"
               onClick={() => removeTiming(index)}
+              variant="ghost"
+              size="icon"
               className="text-red-500 text-xl pb-1"
               title="Remove this time slot"
             >
               &times;
-            </button>
+            </Button>
           )}
         </div>
       ))}
 
-      <button
+      <Button
         type="button"
         onClick={addTiming}
-        className="mt-2 px-3 py-1 bg-orange-500 text-white rounded-full"
+        className="mt-2 px-3 py-1 bg-orange-500 hover:bg-orange-600 text-white rounded-full"
       >
         +
-      </button>
+      </Button>
     </div>
   );
 };
