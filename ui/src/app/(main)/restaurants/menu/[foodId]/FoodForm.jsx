@@ -18,6 +18,7 @@ import TimeIntervalSetInput from './TimeIntervalSetInput';
 import { DateTimePicker } from '@/components/customUIComponents/CustomeDateTimePicker';
 import { useQuery } from '@tanstack/react-query';
 import { getCategoriesListOptions, getUsersListOptions } from '@/lib/api/api';
+import { Textarea } from '@/components/ui/textarea';
 
 const defaultFormValues = {
   menuItemName: '',
@@ -73,10 +74,10 @@ const renderField = (fieldConfig, formField) => {
       className="border p-2 w-full rounded bg-yellow-50" {...formField} placeholder={fieldConfig.placeholder} />;
     case 'textarea':
       return (
-        <textarea
+        <Textarea
           {...formField}
           placeholder={fieldConfig.placeholder}
-          className="border p-2 w-full rounded bg-yellow-50"
+          className="w-full bg-yellow-50"
         />
       );
     case 'multiSelect':

@@ -1,80 +1,88 @@
 import React from "react";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const BillPreview = ({ cartItems, handleUpdateQty, openCustomizeDialog }) => {
-
   return (
-    <>
-      <div className="w-full max-w-xs flex flex-col border rounded shadow-md h-full">
-        <div className="p-4 border-b shrink-0">
-          <h2 className="text-lg font-semibold">Order Summary</h2>
-        </div>
+    <Card className="w-full max-w-xs flex flex-col h-full">
+      <CardHeader className="p-4 border-b">
+        <CardTitle className="text-lg">Order Summary</CardTitle>
+      </CardHeader>
 
-        <div className="flex-1 overflow-y-auto p-4">
-          {cartItems.length === 0 ? (
-            <p>No items added</p>
-          ) : (
-            <ul className="space-y-2">
-              {cartItems.map((item) => (
-                <li
-                  key={item.id}
-                  className="flex justify-between border-b pb-2 text-sm"
-                >
-                  <div className="flex flex-col">
-                    <span className="text-xs font-medium">{item.name}</span>
-                    <div className="flex items-center gap-1 mt-1 text-xs">
-                      <button
-                        onClick={() => handleUpdateQty(item.id, "decrement")}
-                        className="px-1 py-0.5 border rounded"
-                      >
-                        -
-                      </button>
-                      <span>{item.qty}</span>
-                      <button
-                        onClick={() => handleUpdateQty(item.id, "increment")}
-                        className="px-1 py-0.5 border rounded"
-                      >
-                        +
-                      </button>
-                    </div>
+      <ScrollArea className="flex-1 p-4">
+        {cartItems.length === 0 ? (
+          <p className="text-sm">No items added</p>
+        ) : (
+          <ul className="space-y-2">
+            {cartItems.map((item) => (
+              <li
+                key={item.id}
+                className="flex justify-between border-b pb-2 text-sm"
+              >
+                <div className="flex flex-col">
+                  <span className="text-xs font-medium">{item.name}</span>
+                  <div className="flex items-center gap-1 mt-1 text-xs">
+                    <Button
+                      variant="outline"
+                      size="xs"
+                      className="px-1 py-0.5 h-6"
+                      onClick={() => handleUpdateQty(item.id, "decrement")}
+                    >
+                      -
+                    </Button>
+                    <span>{item.qty}</span>
+                    <Button
+                      variant="outline"
+                      size="xs"
+                      className="px-1 py-0.5 h-6"
+                      onClick={() => handleUpdateQty(item.id, "increment")}
+                    >
+                      +
+                    </Button>
                   </div>
+                </div>
 
-                  <div className="flex flex-col items-end">
-                    <span className="text-sm font-semibold">
-                      ₹ {(item.price * item.qty).toFixed(2)}
-                    </span>
-                    <div className="flex gap-2 mt-1">
-                      <button
-                        onClick={() => openCustomizeDialog(item.id)}
-                        className="text-blue-500 text-xs underline"
-                      >
-                        Customize
-                      </button>
-                      <button
-                        onClick={() => handleUpdateQty(item.id, "remove")}
-                        className="text-red-500 text-xs underline"
-                      >
-                        Remove
-                      </button>
-                    </div>
+                <div className="flex flex-col items-end">
+                  <span className="text-sm font-semibold">
+                    ₹ {(item.price * item.qty).toFixed(2)}
+                  </span>
+                  <div className="flex gap-2 mt-1">
+                    <button
+                      onClick={() => openCustomizeDialog(item.id)}
+                      className="text-blue-500 text-xs underline"
+                    >
+                      Customize
+                    </button>
+                    <button
+                      onClick={() => handleUpdateQty(item.id, "remove")}
+                      className="text-red-500 text-xs underline"
+                    >
+                      Remove
+                    </button>
                   </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </ScrollArea>
 
-        <div className="p-4 border-t font-bold flex justify-between shrink-0">
-          <span>Total:</span>
-          <span>
-            ₹
-            {cartItems
-              .reduce((total, item) => total + item.price * item.qty, 0)
-              .toFixed(2)}
-          </span>
-        </div>
-      </div>
-
-    </>
+      <CardFooter className="p-4 border-t font-bold flex justify-between">
+        <span>Total:</span>
+        <span>
+          ₹
+          {cartItems
+            .reduce((total, item) => total + item.price * item.qty, 0)
+            .toFixed(2)}
+        </span>
+      </CardFooter>
+    </Card>
   );
 };
 

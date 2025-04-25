@@ -7,10 +7,12 @@ import { getMenuItemListOptions } from "@/lib/api/api";
 import { getDistinctCategories } from "@/lib/utils/helper";
 import FoodCard from "@/components/customUIComponents/FoodCard";
 import DataTableHeader from "@/components/customUIComponents/DataTableHeader";
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import BillPreview from "./BillPreview";
 import { useIsMobile } from "@/hooks/use-mobile";
 import CustomizeDialog from "@/components/customUIComponents/CustomizeDialog";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const CreateOrder = () => {
   const router = useRouter();
@@ -38,25 +40,26 @@ const CreateOrder = () => {
       const index = prevCart.findIndex((item) => item.id === food.id);
       if (index === -1) {
         return [...prevCart, { ...food, qty: 1 }];
-      } return [...prevCart];
+      }
+      return [...prevCart];
     });
   };
 
   const [customizeItemData, setCustomizeItemData] = useState(null);
   const [showCustomizeDialog, setShowCustomizeDialog] = useState(false);
-  
+
   const openCustomizeDialog = (id) => {
-    setCustomizeItemData(cartItems.find((x)=> x.id == id));
+    setCustomizeItemData(cartItems.find((x) => x.id == id));
     setShowCustomizeDialog(true);
   };
+
   const closeCustomizeDialog = () => {
-    setShowCustomizeDialog(false)
-  }
+    setShowCustomizeDialog(false);
+  };
+
   const handleSaveCustomizeDialog = (id, notes) => {
     setCartItems((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, customNotes: notes } : item
-      )
+      prev.map((item) => (item.id === id ? { ...item, customNotes: notes } : item))
     );
     setShowCustomizeDialog(false);
   };
@@ -66,8 +69,8 @@ const CreateOrder = () => {
   };
 
   const handleUpdateQty = (id, type) => {
-    setCartItems((prevCart) => {
-      return prevCart
+    setCartItems((prevCart) =>
+      prevCart
         .map((item) => {
           if (item.id === id) {
             if (type === "increment") {
@@ -75,14 +78,15 @@ const CreateOrder = () => {
             } else if (type === "decrement") {
               return { ...item, qty: item.qty - 1 };
             } else if (type === "remove") {
-              return { ...item, qty: 0}
+              return { ...item, qty: 0 };
             }
           }
           return item;
         })
-        .filter((item) => item.qty > 0);
-    });
+        .filter((item) => item.qty > 0)
+    );
   };
+
   const categories = getDistinctCategories(menuItems);
 
   if (isLoading) return <p>Loading menu...</p>;
@@ -90,7 +94,7 @@ const CreateOrder = () => {
 
   return (
     <Card>
-      <CardTitle className="sticky top-16 z-20 shadow">
+      <CardTitle className="sticky top-16 z-20 shadow bg-white">
         <DataTableHeader
           tabName="Create Order"
           globalFilter={globalFilter}
@@ -105,7 +109,7 @@ const CreateOrder = () => {
       </CardTitle>
 
       <CardContent className="mt-0 px-2 py-0">
-        <div className="flex flex-1 overflow-hidden" style={{ height: 'calc(100vh - 191px)' }}>
+        <div className="flex flex-1 overflow-hidden" style={{ height: "calc(100vh - 191px)" }}>
           <div className="flex-1 overflow-y-auto p-0 pb-4">
             <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
               {filteredMenuItems.map((food) => (
@@ -118,47 +122,61 @@ const CreateOrder = () => {
                       price: food.price,
                     })
                   }
-                className="cursor-pointer w-full"
+                  className="cursor-pointer w-full"
                 >
-                  <FoodCard food={food} key={food.id} 
-                  handleUpdateQty={handleUpdateQty} quantity={getCartQuantityById(food.id)} openCustomizeDialog={openCustomizeDialog}/>
+                  <FoodCard
+                    food={food}
+                    handleUpdateQty={handleUpdateQty}
+                    quantity={getCartQuantityById(food.id)}
+                    openCustomizeDialog={openCustomizeDialog}
+                  />
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="hidden lg:block w-[300px] border-l px-2x py-0 sticky top-0 overflow-y-auto">
-            <BillPreview cartItems={cartItems} handleUpdateQty={handleUpdateQty} openCustomizeDialog={openCustomizeDialog} />
+          <div className="hidden lg:block w-[300px] border-l px-2 py-0 sticky top-0 overflow-y-auto">
+            <BillPreview
+              cartItems={cartItems}
+              handleUpdateQty={handleUpdateQty}
+              openCustomizeDialog={openCustomizeDialog}
+            />
           </div>
         </div>
       </CardContent>
 
       {isMobile && (
         <>
-          <button
+          <Button
             onClick={() => setShowPopup(true)}
-            className="fixed bottom-4 right-4 bg-blue-600 text-white p-3 rounded-full shadow-lg z-50"
+            className="fixed bottom-4 right-4 bg-blue-600 text-white rounded-full p-4 shadow-lg z-50"
           >
             🧾
-          </button>
+          </Button>
 
           {showPopup && (
             <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
-              <div className="bg-white w-11/12 max-w-md max-h-[90vh] overflow-y-auto rounded-lg p-4 relative flex flex-col">
-                <button
-                  className="text-red-500 absolute top-2 right-2 text-xl"
+              <div className="bg-white w-11/12 max-w-md max-h-[90vh] rounded-lg p-4 relative flex flex-col">
+                <Button
+                  variant="ghost"
+                  className="absolute top-2 right-2 text-red-500 text-xl"
                   onClick={() => setShowPopup(false)}
                 >
                   ❌
-                </button>
-                <div className="flex justify-center">
-                <BillPreview cartItems={cartItems} handleUpdateQty={handleUpdateQty}  openCustomizeDialog={openCustomizeDialog} />
-                </div>
+                </Button>
+                <ScrollArea className="flex justify-center">
+                  <BillPreview
+                    cartItems={cartItems}
+                    handleUpdateQty={handleUpdateQty}
+                    openCustomizeDialog={openCustomizeDialog}
+                  />
+                </ScrollArea>
               </div>
             </div>
           )}
         </>
       )}
+
       <CustomizeDialog
         isOpen={showCustomizeDialog}
         onSave={handleSaveCustomizeDialog}
