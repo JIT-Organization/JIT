@@ -4,6 +4,7 @@ import com.justintime.jit.entity.Restaurant;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface RestaurantRepository extends BaseRepository<Restaurant, Long> {
@@ -16,5 +17,5 @@ public interface RestaurantRepository extends BaseRepository<Restaurant, Long> {
 
     List<Restaurant> findByRestaurantNameContaining(String restaurantName);
 
-    Restaurant findByRestaurantCode(String restaurantCode);
+    Optional<Restaurant> findByRestaurantCode(String restaurantCode);
 }

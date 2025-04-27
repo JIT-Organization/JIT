@@ -89,7 +89,7 @@ export const getMenuListcolumns = (
     cell: ({ row }) => (
       <Switch
         checked={row.original.active}
-        onCheckedChange={(value) => handleSwitchToggle(row.original.id, value)}
+        onCheckedChange={(value) => handleSwitchToggle(row.index, value)}
       />
     ),
   },
@@ -121,17 +121,17 @@ export const getMenuListcolumns = (
     cell: ({ row }) => {
       return (
         <div className="flex justify-center">
-          <Button className="cursor-pointer hover:bg-gray-600/10 h-10 w-10 flex justify-center items-center rounded-md" onClick={() => handleEditClick(row.original.id)}>
+          <Button className="cursor-pointer hover:bg-gray-600/10 h-10 w-10 flex justify-center items-center rounded-md" variant="ghost" onClick={() => handleEditClick(row.original.id)}>
             <Pencil className="text-black h-5" />
           </Button>
           <CustomPopup
             type="delete"
             trigger={
-              <Button className="cursor-pointer hover:bg-gray-600/20 h-10 w-10 flex justify-center items-center rounded-md">
+              <Button className="cursor-pointer hover:bg-gray-600/20 h-10 w-10 flex justify-center items-center rounded-md" variant="ghost">
                 <Trash2 className="text-black h-5" />
               </Button>
             }
-            onConfirm={() => handleDeleteClick(row.original.id)}
+            onConfirm={() => handleDeleteClick(row.original.menuItemName)}
           />
         </div>
       );

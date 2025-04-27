@@ -1,10 +1,14 @@
 import { URLS } from "./urls";
 import { getRequest, patchRequest, deleteRequest, handleMutate, handleError, postRequest } from "./api-helper";
+import Cookies from "js-cookie";
 
 const cacheConfig = {
   staleTime: 60 * 60 * 1000,  
   gcTime: 2 * 60 * 60 * 1000, 
 };
+
+const resCodes = Cookies.get("resCodes")
+console.log(resCodes)
 
 export const login = (data) => {
   postRequest("http://localhost:8080/login", data, {withCredential: true})
@@ -20,7 +24,8 @@ export const refresh = () => {
 
 export const getMenuItemListOptions = () => ({
   queryKey: ["menuItemList"],
-  queryFn: () => getRequest(`${URLS.menuItemList}`, "Failed to fetch Menu Item List"),
+  queryFn: () => getRequest(`${URLS.menuItemList}/TGSR`, "Failed to fetch Menu Item List"),
+  // queryFn: () => getRequest("/api/menu-items", "Failed to fetch Menu Item List"),
   select: (data) =>
     data.map(({ image, menuItemName, cookSet, price, offerPrice, active, categorySet, id }) => ({
       image,
@@ -36,13 +41,13 @@ export const getMenuItemListOptions = () => ({
 });
 
 export const patchUpdateMenuItemList = (queryClient) => ({
-  mutationFn: async ({ id, fields }) => {
-    return await patchRequest(`${URLS.menuItemList}/${id}`, {
+  mutationFn: async ({ menuItemName, fields }) => {
+    return await patchRequest(`${URLS.menuItemList}/TGSR/${menuItemName}`, {
       dto: { ...fields },
       propertiesToBeUpdated: Object.keys(fields),
     });
   },
-  onMutate: async ({ id, fields }) => handleMutate(queryClient, ["menuItemList"], id, fields),
+  onMutate: async ({ menuItemName, fields }) => handleMutate(queryClient, ["menuItemList"], menuItemName, fields, "menuItemName"),
   onError: (error, variables, context) => {
     console.error("Failed to update item:", error);
     handleError(queryClient, ["menuItemList"], context);
@@ -53,9 +58,12 @@ export const patchUpdateMenuItemList = (queryClient) => ({
 });
 
 export const deleteMenuItem = (queryClient) => ({
-  mutationFn: async ({ id }) => deleteRequest(`${URLS.menuItemList}/${id}`),
+  mutationFn: async ({ menuItemName }) => deleteRequest(`${URLS.menuItemList}/TGSR/${menuItemName}`),
   onMutate: async ({ id }) => handleMutate(queryClient, ["menuItemList"], id),
   onError: (err, variables, context) => handleError(queryClient, ["menuItemList"], context),
+  onSettled: () => {
+    queryClient.invalidateQueries(["menuItemList"]);
+  },
 });
 
 
@@ -83,7 +91,7 @@ export const createCategory = (queryClient) => ({
       ...fields
     });
   },
-  onMutate: async ({ fields }) => handleMutate(queryClient, ["categoriesList"], null, fields, "create"),
+  onMutate: async ({ fields }) => handleMutate(queryClient, ["categoriesList"], null, fields, "", "create"),
   onError: (error, variables, context) => {
     console.error("Failed to update item:", error);
     handleError(queryClient, ["categoriesList"], context);

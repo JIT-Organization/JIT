@@ -28,11 +28,11 @@ import java.util.*;
 @NoArgsConstructor
 public class MenuItem extends BaseEntity implements FilterableItem {
 
-    @Column(name="menu_item_name", nullable = false, length = 100)
+    @Column(name="menu_item_name", length = 100)
     private String menuItemName;
 
     @ManyToOne
-    @JoinColumn(name = "restaurant_id", nullable = false)
+    @JoinColumn(name = "restaurant_id")
     private Restaurant restaurant;
 
     @ManyToMany(cascade = CascadeType.ALL)
@@ -43,13 +43,13 @@ public class MenuItem extends BaseEntity implements FilterableItem {
     )
     private Set<Category> categorySet = new HashSet<>();
 
-    @Column(name="description", nullable = false, columnDefinition = "TEXT")
+    @Column(name="description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "price", nullable = false, columnDefinition = "DECIMAL(10,2)")
+    @Column(name = "price", columnDefinition = "DECIMAL(10,2)")
     private BigDecimal price;
 
-    @Column(name = "offer_price", nullable = false, columnDefinition = "DECIMAL(10,2)")
+    @Column(name = "offer_price", columnDefinition = "DECIMAL(10,2)")
     private BigDecimal offerPrice;
 
     @UpdateTimestamp
@@ -60,10 +60,10 @@ public class MenuItem extends BaseEntity implements FilterableItem {
     @Column(name = "offer_to")
     private LocalDateTime offerTo;
 
-    @Column(name = "stock", nullable = false, columnDefinition = "INT DEFAULT 0")
+    @Column(name = "stock", columnDefinition = "INT DEFAULT 0")
     private Integer stock = 0;
 
-    @Column(name = "count", nullable = false, columnDefinition = "INT DEFAULT 0")
+    @Column(name = "count", columnDefinition = "INT DEFAULT 0")
     private Integer count = 0;
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
@@ -83,28 +83,28 @@ public class MenuItem extends BaseEntity implements FilterableItem {
     )
     private Set<TimeInterval> timeIntervalSet = new HashSet<>();
 
-    @Column(name = "preparation_time", nullable = false)
+    @Column(name = "preparation_time")
     private Integer preparationTime;
 
-    @Column(name = "accept_bulk_orders", nullable = false, length = 1)
+    @Column(name = "accept_bulk_orders", length = 1)
     private Boolean acceptBulkOrders;
 
-    @Column(name = "only_veg", nullable = false, length = 1)
+    @Column(name = "only_veg", length = 1)
     private Boolean onlyVeg;
 
-    @Column(name = "only_for_combos", nullable = false, length = 1)
+    @Column(name = "only_for_combos", length = 1)
     private Boolean onlyForCombos;
 
-    @Column(name = "active", nullable = false, length = 1)
+    @Column(name = "active", length = 1)
     private Boolean active;
 
-    @Column(name = "hotel_special", nullable = false, length = 1)
+    @Column(name = "hotel_special", length = 1)
     private Boolean hotelSpecial;
 
     @Column(name = "image", columnDefinition = "TEXT")
     private String base64Image;
 
-    @Column(name = "rating", nullable = false, columnDefinition = "DECIMAL(10,1)")
+    @Column(name = "rating", columnDefinition = "DECIMAL(10,1)")
     private BigDecimal rating;
 
     @OneToMany(mappedBy = "menuItem", cascade = CascadeType.ALL)

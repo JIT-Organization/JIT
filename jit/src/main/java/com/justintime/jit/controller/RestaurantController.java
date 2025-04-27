@@ -58,9 +58,9 @@ public class RestaurantController extends BaseController {
 
     // Delete a restaurant
     @DeleteMapping("/{restaurantCode}")
-    public ResponseEntity<ApiResponse<RestaurantDTO>> deleteRestaurant(@PathVariable String restuarantCode) {
-        restaurantService.deleteRestaurant(restuarantCode);
-        return success(null, "Restaurant deleted successfully.");
+    public ResponseEntity<ApiResponse<RestaurantDTO>> deleteRestaurant(@PathVariable String restaurantCode) {
+        restaurantService.deleteRestaurant(restaurantCode);
+        return success(null);
     }
 
 //    @GetMapping("/search")

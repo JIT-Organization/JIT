@@ -8,9 +8,9 @@ import java.util.Collection;
 
 @Getter
 public class CustomAuthToken extends UsernamePasswordAuthenticationToken {
-    private final Long restaurantId;
-    public CustomAuthToken(Long restaurantId, Object principal, Object credentials, Collection<? extends GrantedAuthority> authorities) {
+    private final String restaurantCode;
+    public CustomAuthToken(String restaurantCode, Object principal, Object credentials, Collection<? extends GrantedAuthority> authorities) {
         super(principal, credentials, authorities);
-        this.restaurantId = restaurantId;
+        this.restaurantCode = restaurantCode;
     }
 }
