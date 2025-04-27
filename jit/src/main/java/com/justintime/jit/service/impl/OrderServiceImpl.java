@@ -1,12 +1,16 @@
 package com.justintime.jit.service.impl;
 
-import com.justintime.jit.dto.MenuItemDTO;
 import com.justintime.jit.dto.OrderDTO;
+import com.justintime.jit.dto.OrderItemDTO;
 import com.justintime.jit.entity.*;
+import com.justintime.jit.entity.ComboEntities.Combo;
 import com.justintime.jit.entity.Enums.OrderStatus;
 import com.justintime.jit.entity.OrderEntities.Order;
+import com.justintime.jit.entity.OrderEntities.OrderItem;
 import com.justintime.jit.entity.PaymentEntities.Payment;
 import com.justintime.jit.exception.ResourceNotFoundException;
+import com.justintime.jit.repository.ComboRepo.ComboRepository;
+import com.justintime.jit.repository.MenuItemRepository;
 import com.justintime.jit.repository.OrderRepo.OrderRepository;
 import com.justintime.jit.repository.PaymentRepo.PaymentRepository;
 import com.justintime.jit.repository.ReservationRepository;
@@ -16,7 +20,7 @@ import com.justintime.jit.service.OrderService;
 import com.justintime.jit.util.CommonServiceImplUtil;
 import com.justintime.jit.util.mapper.GenericMapper;
 import com.justintime.jit.util.mapper.MapperFactory;
-import org.aspectj.weaver.ast.Or;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,13 +30,12 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class OrderServiceImpl implements OrderService {
 
     @Autowired
@@ -51,22 +54,28 @@ public class OrderServiceImpl implements OrderService {
     private PaymentRepository paymentRepository;
 
     @Autowired
+    private MenuItemRepository menuItemRepository;
+
+    @Autowired
+    private ComboRepository comboRepository;
+
+    @Autowired
     private UserRepository userRepository;
 
+    private final GenericMapper<OrderItem, OrderItemDTO> orderItemMapper =
+            MapperFactory.getMapper(OrderItem.class, OrderItemDTO.class);
+
+
     @Override
-    public ResponseEntity<String> createOrder(Long restaurantId, Long userId, OrderDTO orderDTO) {
-        if (orderDTO.getPaymentNumber()==null){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Please select a payment method before placing an order");
-        }
+    public ResponseEntity<String> createOrder(String restaurantCode, String username, OrderDTO orderDTO) {
         GenericMapper<Order, OrderDTO> mapper = MapperFactory.getMapper(Order.class, OrderDTO.class);
         Order order = mapper.toEntity(orderDTO);
-        order.setRestaurant(restaurantRepository.findById(restaurantId)
-                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found with id: " + restaurantId)));
-        resolveRelationships(order, orderDTO);
-        order.setUser(userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId)));
+        order.setRestaurant(restaurantRepository.findByRestaurantCode(restaurantCode));
+        order.setUser(userRepository.findByRestaurantCodeAndUsername(restaurantCode, username));
+        order.setStatus(OrderStatus.PENDING);
         resolveRelationships(order, orderDTO);
         Order savedOrder = orderRepository.save(order);
+        saveEachOrderItem(orderDTO, restaurantCode, savedOrder);
         if (savedOrder.getId() != null) {
             return ResponseEntity.ok("Order created successfully with Order Number: " + savedOrder.getOrderNumber());
         } else {
@@ -75,10 +84,10 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderDTO> getOrdersByRestaurantId(Long restaurantId) {
-        List<Order> orders = orderRepository.findByRestaurantId(restaurantId);
+    public List<OrderDTO> getOrdersByRestaurantId(String restaurantCode) {
+        List<Order> orders = orderRepository.findByRestaurantCode(restaurantCode);
         if (orders.isEmpty()) {
-            throw new ResourceNotFoundException("No orders found for restaurant with id: " + restaurantId);
+            throw new ResourceNotFoundException("No orders found for restaurant with code: " + restaurantCode);
         }
         GenericMapper<Order, OrderDTO> mapper = MapperFactory.getMapper(Order.class, OrderDTO.class);
         return orders.stream()
@@ -87,18 +96,16 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderDTO getOrderByRestaurantAndId(Long restaurantId, Long id) {
-        Order order = orderRepository.findByRestaurantIdAndId(restaurantId, id)
-                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id + " for restaurant: " + restaurantId));
+    public OrderDTO getOrderByRestaurantAndId(String restaurantCode, Long id) {
+        Order order = orderRepository.findByRestaurantCodeAndId(restaurantCode, id);
 
         GenericMapper<Order, OrderDTO> mapper = MapperFactory.getMapper(Order.class, OrderDTO.class);
         return mapToDTO(order, mapper);
     }
 
     @Override
-    public OrderDTO updateOrderStatus(Long restaurantId, Long id, OrderStatus status) {
-        Order existingOrder = orderRepository.findByRestaurantIdAndId(restaurantId, id)
-                .orElseThrow(()->new ResourceNotFoundException("Order not found with id: " + id + " for restaurant: " + restaurantId));
+    public OrderDTO updateOrderStatus(String restaurantCode, Long id, OrderStatus status) {
+        Order existingOrder = orderRepository.findByRestaurantCodeAndId(restaurantCode, id);
         existingOrder.setStatus(status);  // Update the order's status
         orderRepository.save(existingOrder);
         GenericMapper<Order, OrderDTO> mapper = MapperFactory.getMapper(Order.class, OrderDTO.class);
@@ -106,12 +113,12 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderDTO patchUpdateOrder(Long restaurantId, Long orderId, OrderDTO orderDTO, HashSet<String> propertiesToBeUpdated){
-        Order existingOrder = orderRepository.findByRestaurantIdAndId(restaurantId, orderId)
-                .orElseThrow(()->new ResourceNotFoundException("Order not found with id: " + orderId + " for restaurant: " + restaurantId));
+    public OrderDTO patchUpdateOrder(String restaurantCode, Long orderId, OrderDTO orderDTO, HashSet<String> propertiesToBeUpdated){
+        Order existingOrder = orderRepository.findByRestaurantCodeAndId(restaurantCode, orderId);
         GenericMapper<Order, OrderDTO> mapper = MapperFactory.getMapper(Order.class, OrderDTO.class);
-        existingOrder.setRestaurant(restaurantRepository.findById(restaurantId).orElseThrow(() -> new RuntimeException("Restaurant not found")));
+        existingOrder.setRestaurant(restaurantRepository.findByRestaurantCode(restaurantCode));
         Order patchedOrder = mapper.toEntity(orderDTO);
+        String resCode = "TGSR";
         resolveRelationships(patchedOrder, orderDTO);
         commonServiceImplUtil.copySelectedProperties(patchedOrder, existingOrder,propertiesToBeUpdated);
         existingOrder.setUpdatedDttm(LocalDateTime.now());
@@ -120,14 +127,13 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void deleteOrder(Long restaurantId, Long id) {
-        Order existingOrder = orderRepository.findByRestaurantIdAndId(restaurantId, id)
-                .orElseThrow(()->new ResourceNotFoundException("Order not found with id: " + id + " for restaurant: " + restaurantId));
+    public void deleteOrder(String restaurantCode, Long id) {
+        Order existingOrder = orderRepository.findByRestaurantCodeAndId(restaurantCode, id);
         orderRepository.delete(existingOrder);
     }
 
-    public BigDecimal calculateTotalRevenue(Long restaurantId) {
-        List<Order> orders = orderRepository.findByRestaurantId(restaurantId);
+    public BigDecimal calculateTotalRevenue(String restaurantCode) {
+        List<Order> orders = orderRepository.findByRestaurantCode(restaurantCode);
         return orders.stream()
                 .flatMap(order -> order.getPayments().stream())
                 .map(Payment::getAmount)
@@ -165,7 +171,6 @@ public class OrderServiceImpl implements OrderService {
             List<Payment> payment = paymentRepository.findByOrderId(orderDTO.getId());
             order.setPayments(payment);
         }
-
     }
 
     private OrderDTO mapToDTO(Order order, GenericMapper<Order, OrderDTO> mapper){
@@ -178,6 +183,18 @@ public class OrderServiceImpl implements OrderService {
         dto.setPaymentNumber(order.getPayments().stream()
                 .map(Payment::getPaymentNumber)
                 .collect(Collectors.toList()));
+        dto.setOrderItems(order.getOrderItems().stream()
+                .map(
+                        orderItem -> OrderItemDTO.builder()
+                                    .orderItemStatus(orderItem.getOrderItemStatus().name())
+                                    .itemName(Objects.nonNull(orderItem.getMenuItem()) ?
+                                            orderItem.getMenuItem().getMenuItemName() : orderItem.getCombo().getComboName())
+                                    .isCombo(Objects.nonNull(orderItem.getCombo()))
+                                    .quantity(orderItem.getQuantity())
+                                    .totalPrice(orderItem.getTotalPrice())
+                                    .build()
+                )
+                .toList());
         return dto;
     }
 
@@ -189,6 +206,43 @@ public class OrderServiceImpl implements OrderService {
             if (srcWrapper.isReadableProperty(property) && srcWrapper.getPropertyValue(property) != null) {
                 targetWrapper.setPropertyValue(property, srcWrapper.getPropertyValue(property));
             }
+        }
+    }
+
+    private void saveEachOrderItem(OrderDTO orderDTO, String resCode, Order savedOrder) {
+        List<OrderItemDTO> orderItemDTOList = orderDTO.getOrderItems();
+
+        Set<String> comboItemNames = new HashSet<>();
+        Set<String> menuItemNames = new HashSet<>();
+
+        for (OrderItemDTO dto : orderItemDTOList) {
+            if (Boolean.TRUE.equals(dto.getIsCombo())) {
+                comboItemNames.add(dto.getItemName());
+            } else {
+                menuItemNames.add(dto.getItemName());
+            }
+        }
+
+        Map<String, Combo> comboMap = comboRepository
+                .findByComboNamesAndRestaurantCode(comboItemNames, resCode)
+                .stream()
+                .collect(Collectors.toMap(Combo::getComboName, Function.identity()));
+
+        Map<String, MenuItem> menuItemMap = menuItemRepository
+                .findByMenuItemNamesAndRestaurantCode(menuItemNames, resCode)
+                .stream()
+                .collect(Collectors.toMap(MenuItem::getMenuItemName, Function.identity()));
+
+        for (OrderItemDTO dto : orderItemDTOList) {
+            OrderItem orderItem = orderItemMapper.toEntity(dto);
+
+            if (Boolean.TRUE.equals(dto.getIsCombo())) {
+                orderItem.setCombo(comboMap.get(dto.getItemName()));
+            } else {
+                orderItem.setMenuItem(menuItemMap.get(dto.getItemName()));
+            }
+
+            orderItem.setOrder(savedOrder);
         }
     }
 }

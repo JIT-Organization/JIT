@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.justintime.jit.entity.BaseEntity;
 import com.justintime.jit.entity.ComboEntities.Combo;
+import com.justintime.jit.entity.Enums.OrderStatus;
 import com.justintime.jit.entity.MenuItem;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -31,18 +32,21 @@ public class OrderItem extends BaseEntity {
         private Order order;
 
         @ManyToOne
-        @JoinColumn(name = "menu_item_id", nullable = false)
+        @JoinColumn(name = "menu_item_id")
         private MenuItem menuItem;
 
         @ManyToOne
-        @JoinColumn(name = "combo_id", nullable = false)
+        @JoinColumn(name = "combo_id")
         private Combo combo;
 
         @Column(name = "quantity", nullable = false, columnDefinition = "int default 1")
         private int quantity;
 
         @Column(name = "price", nullable = false, columnDefinition = "DECIMAL(10,2)")
-        private BigDecimal price;
+        private BigDecimal totalPrice;
+
+        @Enumerated(EnumType.STRING)
+        private OrderStatus orderItemStatus;
 
 //        public OrderItem(OrderItem other) {
 //                this.id = null; // New instance should not have the same ID
