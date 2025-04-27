@@ -40,6 +40,13 @@ export const getMenuItemListOptions = () => ({
   ...cacheConfig
 });
 
+export const getMenuItemFood = (id) => ({
+  queryKey: ['menuItemFood', id],
+  queryFn: () => getRequest(`${URLS.menuItemList}/${id}`, 'Failed to fetch Menu Item'),
+  enabled: !isNaN(Number(id)),
+  ...cacheConfig,
+});
+
 export const patchUpdateMenuItemList = (queryClient) => ({
   mutationFn: async ({ menuItemName, fields }) => {
     return await patchRequest(`${URLS.menuItemList}/TGSR/${menuItemName}`, {
@@ -57,9 +64,25 @@ export const patchUpdateMenuItemList = (queryClient) => ({
   },
 });
 
+export const createMenuItemFood = (queryClient) => ({
+  mutationFn: async ({ id, fields }) => {
+    return await postRequest(URLS.menuItemList, {
+      ...fields
+    });
+  },
+  onMutate: async ({ fields }) => handleMutate(queryClient, ["menuItemList"], null, fields, "create"),
+  onError: (error, variables, context) => {
+    console.error("Failed to update item:", error);
+    handleError(queryClient, ["menuItemList"], context);
+  },
+  onSettled: () => {
+    queryClient.invalidateQueries(["menuItemList"]);
+  },
+});
+
 export const deleteMenuItem = (queryClient) => ({
   mutationFn: async ({ menuItemName }) => deleteRequest(`${URLS.menuItemList}/TGSR/${menuItemName}`),
-  onMutate: async ({ id }) => handleMutate(queryClient, ["menuItemList"], id),
+  onMutate: async ({ menuItemName }) => handleMutate(queryClient, ["menuItemList"], menuItemName, null, "menuItemName", "delete"),
   onError: (err, variables, context) => handleError(queryClient, ["menuItemList"], context),
   onSettled: () => {
     queryClient.invalidateQueries(["menuItemList"]);
@@ -69,7 +92,7 @@ export const deleteMenuItem = (queryClient) => ({
 
 export const getOrdersListOptions = (id) => ({
   queryKey: ["ordersList"],
-  queryFn: () => getRequest(`${URLS.ordersList}/${id}`, "Failed to fetch Orders List"),
+  queryFn: () => getRequest(`${URLS.ordersList}/TGSR`, "Failed to fetch Orders List"),
   ...cacheConfig
 });
 

@@ -2,6 +2,7 @@ package com.justintime.jit.service.impl;
 
 import com.justintime.jit.dto.RestaurantDTO;
 import com.justintime.jit.entity.Restaurant;
+import com.justintime.jit.exception.ResourceNotFoundException;
 import com.justintime.jit.repository.RestaurantRepository;
 import com.justintime.jit.service.RestaurantService;
 import com.justintime.jit.util.CommonServiceImplUtil;
@@ -42,7 +43,8 @@ public class RestaurantServiceImpl extends BaseServiceImpl<Restaurant,Long> impl
 
     @Override
     public void updateRestaurant(String code, Restaurant restaurant) {
-        Restaurant existingRestaurant = restaurantRepository.findByRestaurantCode(code);
+        Restaurant existingRestaurant = restaurantRepository.findByRestaurantCode(code)
+                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
 
         existingRestaurant.setRestaurantName(restaurant.getRestaurantName());
         existingRestaurant.setContactNumber(restaurant.getContactNumber());
@@ -56,20 +58,23 @@ public class RestaurantServiceImpl extends BaseServiceImpl<Restaurant,Long> impl
 
     @Override
     public void deleteRestaurant(String restaurantCode) {
-        Restaurant existingRestaurant = restaurantRepository.findByRestaurantCode(restaurantCode);
+        Restaurant existingRestaurant = restaurantRepository.findByRestaurantCode(restaurantCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
         restaurantRepository.delete(existingRestaurant);
     }
 
     @Override
     public RestaurantDTO getRestaurantByRestaurantCode(String restaurantCode) {
-        Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode);
+        Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
         GenericMapper<Restaurant, RestaurantDTO> mapper = MapperFactory.getMapper(Restaurant.class, RestaurantDTO.class);
         return mapper.toDto(restaurant);
     }
 
     @Override
     public void patchUpdateRestaurant(String restaurantCode, RestaurantDTO dto, HashSet<String> propertiesToBeUpdated) {
-        Restaurant existingItem = restaurantRepository.findByRestaurantCode(restaurantCode);
+        Restaurant existingItem = restaurantRepository.findByRestaurantCode(restaurantCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
         GenericMapper<Restaurant, RestaurantDTO> restaurantMapper = MapperFactory.getMapper(Restaurant.class, RestaurantDTO.class);
         Restaurant patchedRestaurant = restaurantMapper.toEntity(dto);
         commonServiceImplUtil.copySelectedProperties(patchedRestaurant, existingItem, propertiesToBeUpdated);

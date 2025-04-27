@@ -47,7 +47,7 @@ export const handleMutate = async (queryClient, queryKey, id, fields, checkColum
       case "update":
         return oldData.map((row) => row[checkColumn] === id ? { ...row, ...fields } : row)
       case "delete":
-        return oldData.filter((row) => row.id !== id);
+        return oldData.filter((row) => row[checkColumn] !== id);
       default:
         return oldData
     }

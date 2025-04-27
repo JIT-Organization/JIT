@@ -4,6 +4,7 @@ import com.justintime.jit.dto.DiningTableDTO;
 import com.justintime.jit.entity.DiningTable;
 import com.justintime.jit.entity.Reservation;
 import com.justintime.jit.entity.Restaurant;
+import com.justintime.jit.exception.ResourceNotFoundException;
 import com.justintime.jit.repository.DiningTableRepository;
 import com.justintime.jit.repository.RestaurantRepository;
 import com.justintime.jit.service.DiningTableService;
@@ -55,7 +56,7 @@ public class DiningTableServiceImpl implements DiningTableService {
     public DiningTableDTO createTable(String restaurantCode, DiningTableDTO dto) {
         DiningTable table = mapper.toEntity(dto);
         // TODO Add validations for the fields entering into the db
-        Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode);
+        Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode).orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
         table.setRestaurant(restaurant);
         diningTableRepository.save(table);
         return dto;

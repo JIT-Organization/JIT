@@ -31,6 +31,12 @@ public interface UserRepository extends BaseRepository<User, Long> {
             "WHERE u.email = :email", nativeQuery = true)
     List<Long> findRestaurantIdsByEmail(@Param("email") String email);
 
+    @Query(value = "SELECT r.restaurant_code FROM restaurant r " +
+            "JOIN user_restaurant ur ON r.id = ur.restaurant_id " +
+            "JOIN users u ON ur.user_id = u.id " +
+            "WHERE u.email = :email", nativeQuery = true)
+    List<String> findRestaurantCodesByEmail(@Param("email") String email);
+
     @Query(value = "SELECT u.* FROM users u " +
             "JOIN user_restaurant ur ON u.id = ur.user_id " +
             "JOIN restaurant r ON ur.restaurant_id = r.id " +

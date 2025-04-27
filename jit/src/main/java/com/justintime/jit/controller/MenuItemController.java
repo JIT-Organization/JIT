@@ -11,7 +11,6 @@ import com.justintime.jit.util.ImageValidation;
 import com.justintime.jit.service.MenuItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,15 +31,15 @@ public class MenuItemController extends BaseController {
 //        return menuItemService.getAllMenuItems();
 //    }
 
-    @GetMapping
+    @GetMapping("/{restaurantCode}")
     public ResponseEntity<ApiResponse<List<MenuItemDTO>>> getMenuItemsByRestaurant(
-            @AuthenticationPrincipal Long restaurantId,
+            @PathVariable String restaurantCode,
             @RequestParam(required = false) Sort sortBy,
             @RequestParam(required = false) String priceRange,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) Boolean onlyVeg,
             @RequestParam(required = false, defaultValue = "false") Boolean onlyForCombos) {
-        return success(menuItemService.getMenuItemsByRestaurantId(restaurantId, sortBy, priceRange, category, onlyVeg, onlyForCombos));
+        return success(menuItemService.getMenuItemsByRestaurantId(restaurantCode, sortBy, priceRange, category, onlyVeg, onlyForCombos));
     }
 
     @GetMapping("/{restaurantId}/{id}")
@@ -59,24 +58,24 @@ public class MenuItemController extends BaseController {
         }
     }
 
-    @PostMapping
-    public ResponseEntity<ApiResponse<MenuItem>> addMenuItem(@AuthenticationPrincipal Long restaurantId, @RequestBody MenuItemDTO menuItemDTO) {
-        return success(menuItemService.addMenuItem(restaurantId,menuItemDTO), "Created Menu Item Successfully");
+    @PostMapping("/{restaurantCode}")
+    public ResponseEntity<ApiResponse<MenuItem>> addMenuItem(@PathVariable String restaurantCode, @RequestBody MenuItemDTO menuItemDTO) {
+        return success(menuItemService.addMenuItem(restaurantCode,menuItemDTO), "Created Menu Item Successfully");
     }
 
-    @PutMapping("/{id}")
-    public MenuItem updateMenuItem(@AuthenticationPrincipal Long restaurantId,@PathVariable Long id, @RequestBody MenuItemDTO updatedItem) {
-        return menuItemService.updateMenuItem(restaurantId,id, updatedItem);
+    @PutMapping("/{restaurantCode}/{id}")
+    public MenuItem updateMenuItem(@PathVariable String restaurantCode,@PathVariable Long id, @RequestBody MenuItemDTO updatedItem) {
+        return menuItemService.updateMenuItem(restaurantCode,id, updatedItem);
     }
 
-    @PatchMapping("/{id}")
-    public ResponseEntity<ApiResponse<MenuItem>> patchUpdateMenuItem(@AuthenticationPrincipal Long restaurantId,@PathVariable Long id, @RequestBody PatchRequest<MenuItemDTO> payload) {
-        return success(menuItemService.patchUpdateMenuItem(restaurantId,id, payload.getDto(), payload.getPropertiesToBeUpdated()));
+    @PatchMapping("/{restaurantCode}/{menuItemName}")
+    public ResponseEntity<ApiResponse<MenuItemDTO>> patchUpdateMenuItem(@PathVariable String restaurantCode,@PathVariable String menuItemName, @RequestBody PatchRequest<MenuItemDTO> payload) {
+        return success(menuItemService.patchUpdateMenuItem(restaurantCode,menuItemName, payload.getDto(), payload.getPropertiesToBeUpdated()));
     }
 
-    @DeleteMapping("/{id}")
-    public void deleteMenuItem(@PathVariable Long id) {
-        menuItemService.deleteMenuItem(id);
+    @DeleteMapping("/{restaurantCode}/{menuItemName}")
+    public void deleteMenuItem(@PathVariable String restaurantCode, @PathVariable String menuItemName) {
+        menuItemService.deleteMenuItem(restaurantCode, menuItemName);
     }
 }
 
