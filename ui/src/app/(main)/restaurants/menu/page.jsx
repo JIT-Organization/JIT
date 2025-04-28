@@ -17,8 +17,10 @@ const MenuList = () => {
   if (isLoading) return <p>Loading menu items...</p>;
   if (error) return <p>Error loading menu items: {error.message}</p>;
 
-  const handleToggle = async (id, value) => {
-    patchMutation.mutate({ id, fields: { active: value } });
+  const handleToggle = async (index, value) => {
+    const menuItemName = menuItemListData[index].menuItemName
+    console.log(menuItemName)
+    patchMutation.mutate({ menuItemName, fields: { active: value } });
   };
 
   const handleEditClick = (id) => {
@@ -26,9 +28,9 @@ const MenuList = () => {
     router.push(`${pathName}/${id}`)
   };
 
-  const handleDeleteClick = async (id) => {
-    console.log("Delete clicked for id: ", id);
-    deleteMutation.mutate({ id });
+  const handleDeleteClick = async (menuItemName) => {
+    console.log("Delete clicked for menuItemName: ", menuItemName);
+    deleteMutation.mutate({ menuItemName });
   };
 
   const columns = getMenuListcolumns(

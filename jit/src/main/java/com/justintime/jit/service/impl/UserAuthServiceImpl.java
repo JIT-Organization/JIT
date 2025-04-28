@@ -1,5 +1,7 @@
 package com.justintime.jit.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.justintime.jit.dto.LoginRequestDto;
 import com.justintime.jit.entity.User;
 import com.justintime.jit.exception.TokenExpiredException;
@@ -20,6 +22,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.security.auth.login.LoginException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.List;
 
 @Service
 public class UserAuthServiceImpl extends BaseServiceImpl<User, Long> implements UserAuthService {
@@ -57,8 +63,11 @@ public class UserAuthServiceImpl extends BaseServiceImpl<User, Long> implements 
             Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequestDto.getEmail(), loginRequestDto.getPassword()));
             if(authentication.isAuthenticated()){
+                ObjectMapper objectMapper = new ObjectMapper();
                 String accessToken = jwtService.generateAccessToken(loginRequestDto.getEmail());
                 String refreshToken = refreshTokenService.createRefreshToken(loginRequestDto.getEmail());
+                List<String> restaurantCodesList = userRepository.findRestaurantCodesByEmail(loginRequestDto.getEmail());
+                String restaurantCodes = Base64.getEncoder().encodeToString(objectMapper.writeValueAsString(restaurantCodesList).getBytes(StandardCharsets.UTF_8));
                 ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
                         .httpOnly(true)
 //                        .secure(true)
@@ -73,8 +82,14 @@ public class UserAuthServiceImpl extends BaseServiceImpl<User, Long> implements 
                         .maxAge(15 * 60)
                         .sameSite("Strict")
                         .build();
+                ResponseCookie resCodesCookie = ResponseCookie.from("resCodes", restaurantCodes)
+                        .path("/")
+//                        .secure(true)
+                        .sameSite("Strict")
+                        .build();
                 response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
                 response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+                response.addHeader(HttpHeaders.SET_COOKIE, resCodesCookie.toString());
 //                return accessToken;
             }
         } catch (Exception e) {
@@ -83,7 +98,7 @@ public class UserAuthServiceImpl extends BaseServiceImpl<User, Long> implements 
     }
 
     @Override
-    public void refresh(HttpServletRequest request, HttpServletResponse response) throws TokenExpiredException {
+    public void refresh(HttpServletRequest request, HttpServletResponse response) throws TokenExpiredException, JsonProcessingException {
         String refreshToken = null;
         if (request.getCookies() != null) {
             for (var cookie : request.getCookies()) {
@@ -98,9 +113,12 @@ public class UserAuthServiceImpl extends BaseServiceImpl<User, Long> implements 
             throw new TokenExpiredException("Please login again");
         }
 
+        ObjectMapper objectMapper = new ObjectMapper();
         String newRefreshToken = refreshTokenService.rotateRefreshToken(refreshToken);
         String email = refreshTokenService.getEmailFromRefreshToken(newRefreshToken);
         String newAccessToken = jwtService.generateAccessToken(email);
+        List<String> restaurantCodesList = userRepository.findRestaurantCodesByEmail(email);
+        String restaurantCodes = Base64.getEncoder().encodeToString(objectMapper.writeValueAsString(restaurantCodesList).getBytes(StandardCharsets.UTF_8));
         ResponseCookie cookie = ResponseCookie.from("refreshToken", newRefreshToken)
                 .httpOnly(true)
 //                .secure(true)
@@ -116,7 +134,13 @@ public class UserAuthServiceImpl extends BaseServiceImpl<User, Long> implements 
                 .maxAge(15 * 60)
                 .sameSite("Strict")
                 .build();
+        ResponseCookie resCodesCookie = ResponseCookie.from("resCodes", restaurantCodes)
+                .path("/")
+//                        .secure(true)
+                .sameSite("Strict")
+                .build();
         response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, resCodesCookie.toString());
 //        return newAccessToken;
     }
 }

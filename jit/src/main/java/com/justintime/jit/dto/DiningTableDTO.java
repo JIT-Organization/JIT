@@ -10,7 +10,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DiningTableDTO {
-    private Long id;
+    private Boolean isAvailable;
     private String tableNumber;
     private Integer chairs;
 }

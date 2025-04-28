@@ -17,8 +17,7 @@ import java.util.Set;
 public class CategoryDTO {
     private Long id;
     private String categoryName;
-    private Set<String> menuItemSet;
-    private Set<String> comboSet;
-    private boolean isPublic;
-    private String foodCount;
+    private Set<String> foodItems;
+    private Boolean isPublic;
+    private Integer foodCount;
 }

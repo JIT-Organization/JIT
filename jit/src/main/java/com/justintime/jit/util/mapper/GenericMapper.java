@@ -1,6 +1,5 @@
 package com.justintime.jit.util.mapper;
 
-import com.justintime.jit.entity.MenuItem;
 import org.modelmapper.ModelMapper;
 
 public class GenericMapper<T, D> {

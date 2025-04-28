@@ -28,6 +28,11 @@ const Orders = () => {
     deleteMutation.mutate({ id });
   }
 
+  const toggleRowClick = (row) => {
+    console.log(row)
+    row.toggleExpanded()
+  }
+
   const columns = getOrderColumns( handleEditClick, handleDeleteClick);
 
   const categories = getDistinctCategories(orderListData);
@@ -41,6 +46,8 @@ const Orders = () => {
           console.log("Orders Page URL");
         }}
         headerButtonName="New Order"
+        handleRowClick={toggleRowClick}
+        expandableRowContent={() => {}}
       />
     </div>
   );

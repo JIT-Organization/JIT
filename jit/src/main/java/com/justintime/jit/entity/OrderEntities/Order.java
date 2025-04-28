@@ -50,16 +50,16 @@ public class Order extends BaseEntity {
     private Restaurant restaurant;
 
     @Enumerated(EnumType.STRING)
-    @Column(name ="status", nullable = false)
+    @Column(name ="status")
     private OrderStatus status;
 
-    @Column(name = "order_date", nullable = false, updatable = false)
+    @Column(name = "order_date", updatable = false)
     private LocalDateTime orderDate = LocalDateTime.now();
 
-    @Column(name="notes")
+    @Column(name="notes", columnDefinition = "TEXT")
     private String notes;
 
-    @Column(name = "serve_time", nullable = false)
+    @Column(name = "serve_time")
     private LocalDateTime serveTime;
 
     @Column(name = "amount", nullable = false, columnDefinition = "DECIMAL(10,2)")

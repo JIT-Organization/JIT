@@ -17,9 +17,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-import DataTableHeader from "./DataTableHeader";
-import DataTablePagination from "./DataTablePagination";
+import { ChevronLeft, Filter } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Separator } from "../ui/separator";
+import CustomPopup from "./CustomPopup";
 
 export function CustomDataTable({
   columns = [],
@@ -29,7 +30,7 @@ export function CustomDataTable({
   handleHeaderButtonClick = () => {},
   headerButtonName,
   headerDialogType,
-  categories = [],
+  categories,
 }) {
   const [sorting, setSorting] = React.useState([]);
   const [columnFilters, setColumnFilters] = React.useState([]);
@@ -80,16 +81,18 @@ export function CustomDataTable({
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                ))}
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
+                  );
+                })}
               </TableRow>
             ))}
           </TableHeader>
@@ -98,7 +101,7 @@ export function CustomDataTable({
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  onClick={() => handleRowClick(row.original)}
+                  onClick={handleRowClick}
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
