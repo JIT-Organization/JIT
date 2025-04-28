@@ -17,7 +17,15 @@ export const encodeIdInURL = (id) => {
   return encodeURIComponent(btoa(id));
 };
 
+export const getSelectOptions = (data) => {
+  return data?.map((item) => ({
+    label: item.menuItemName,
+    value: item.menuItemName,
+  }));
+};
+
 export const getAxiosInstance = (cookies = "") => {
+  // TODO add cookies logic when we try to to prefetching
   const axiosInstance = axios.create({
     withCredentials: true,
     headers: {

@@ -21,5 +21,19 @@ public interface ComboRepository extends BaseRepository<Combo, Long> {
             nativeQuery = true)
     Set<Combo> findByComboNamesAndRestaurantId(@Param("formattedComboNames") Set<String> formattedComboNames,
                                                @Param("restaurantId") Long restaurantId);
+
+    @Query(value = "SELECT c.* FROM combo c " +
+                    "JOIN restaurant r ON c.restaurant_id = r.id " +
+                    "WHERE c.combo_name IN (:comboNames) " +
+                    "AND r.restaurant_code = :restaurantCode ",
+            nativeQuery = true)
+    Set<Combo> findByComboNamesAndRestaurantCode(@Param("comboNames") Set<String> comboNames, @Param("restaurantCode") String restaurantCode);
+
+    @Query(value = "SELECT c.* FROM combo c " +
+            "JOIN restaurant r ON c.restaurant_id = r.id " +
+            "WHERE c.combo_name = :comboName " +
+            "AND r.restaurant_code = :restaurantCode ",
+            nativeQuery = true)
+    Combo findComboByComboNamesAndRestaurantCode(@Param("comboName") String comboName, @Param("restaurantCode") String restaurantCode);
 }
 

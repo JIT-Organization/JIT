@@ -1,22 +1,21 @@
 package com.justintime.jit.service.impl;
 
-import com.justintime.jit.dto.LoginRequestDto;
+import com.justintime.jit.dto.UserDTO;
 import com.justintime.jit.entity.Enums.Role;
 import com.justintime.jit.entity.User;
 import com.justintime.jit.entity.UserPrincipal;
 import com.justintime.jit.repository.UserRepository;
-import com.justintime.jit.service.JwtService;
 import com.justintime.jit.service.UserService;
+import com.justintime.jit.util.CommonServiceImplUtil;
+import com.justintime.jit.util.mapper.GenericMapper;
+import com.justintime.jit.util.mapper.MapperFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -24,9 +23,12 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
 
     private final UserRepository userRepository;
 
+    private final CommonServiceImplUtil commonServiceImplUtil;
+
     @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, CommonServiceImplUtil commonServiceImplUtil) {
         this.userRepository = userRepository;
+        this.commonServiceImplUtil = commonServiceImplUtil;
     }
 
     @Override
@@ -57,6 +59,26 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
             existingUser.setUpdatedDttm(LocalDateTime.now()); // Set updated timestamp
             return userRepository.save(existingUser);
         }).orElseThrow(() -> new RuntimeException("User not found with id " + id));
+    }
+
+    @Override
+    public List<UserDTO> getUsersByRestaurantCode(String restaurantCode) {
+        List<User> users = userRepository.findAllByRestaurantCode(restaurantCode);
+        GenericMapper<User, UserDTO> userMapper = MapperFactory.getMapper(User.class, UserDTO.class);
+        return users.stream().map(userMapper::toDto).toList();
+    }
+
+    @Override
+    public UserDTO patchUpdateUser(String restaurantCode, String username, UserDTO dto, HashSet<String> propertiesToBeUpdated) {
+        User existingUser = userRepository.findByRestaurantCodeAndUsername(restaurantCode, username);
+        GenericMapper<User, UserDTO> userMapper = MapperFactory.getMapper(User.class, UserDTO.class);
+        User patchedUser = userMapper.toEntity(dto);
+        // TODO write a validation where the username should be unique if they are updating it
+        HashSet<String> propertiesToBeUpdatedClone = new HashSet<>(propertiesToBeUpdated);
+        commonServiceImplUtil.copySelectedProperties(patchedUser, existingUser, propertiesToBeUpdatedClone);
+        existingUser.setUpdatedDttm(LocalDateTime.now());
+        userRepository.save(existingUser);
+        return userMapper.toDto(existingUser);
     }
 
     @Override

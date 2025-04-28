@@ -22,7 +22,7 @@ public class RestaurantIdResolver implements HandlerMethodArgumentResolver {
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         if(authentication instanceof CustomAuthToken customAuthToken) {
-            return customAuthToken.getRestaurantId();
+            return customAuthToken.getRestaurantCode();
         }
         return null;
     }

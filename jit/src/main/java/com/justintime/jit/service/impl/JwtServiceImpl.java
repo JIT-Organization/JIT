@@ -29,19 +29,19 @@ public class JwtServiceImpl implements JwtService {
         this.userRepository = userRepository;
     }
 
-    private List<Long> getRestaurantIds(String email) {
-        return userRepository.findRestaurantIdsByEmail(email);
+    private List<String> getRestaurantCodes(String email) {
+        return userRepository.findRestaurantCodesByEmail(email);
     }
 
     private String generateToken(String email, long expiration) {
         Map<String, Object> claims = new HashMap<>();
-        List<Long> restaurantIds = getRestaurantIds(email);
+        List<String> restaurantCodes = getRestaurantCodes(email);
         claims.put("role", userRepository.findByEmail(email).getRole().toString());
-        if(!restaurantIds.isEmpty()) {
-            if(restaurantIds.size() == 1) {
-                claims.put("restaurantId", restaurantIds.get(0));
+        if(!restaurantCodes.isEmpty()) {
+            if(restaurantCodes.size() == 1) {
+                claims.put("restaurantCode", restaurantCodes.get(0));
             } else {
-                claims.put("restaurantIds", restaurantIds);
+                claims.put("restaurantCodes", restaurantCodes);
             }
         }
         return Jwts.builder()
@@ -69,12 +69,12 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public Object extractRestaurantId(String token) {
+    public Object extractRestaurantCode(String token) {
         return extractClaim(token, claims -> {
-            if (claims.containsKey("restaurantId")) {
-                return claims.get("restaurantId", Long.class);
-            } else if (claims.containsKey("restaurantIds")) {
-                return claims.get("restaurantIds", List.class);
+            if (claims.containsKey("restaurantCode")) {
+                return claims.get("restaurantCode", String.class);
+            } else if (claims.containsKey("restaurantCodes")) {
+                return claims.get("restaurantCodes", List.class);
             }
             return null;
         });

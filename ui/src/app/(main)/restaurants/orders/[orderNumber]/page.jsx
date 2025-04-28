@@ -8,7 +8,7 @@ import { getDistinctCategories } from "@/lib/utils/helper";
 import FoodCard from "@/components/customUIComponents/FoodCard";
 import DataTableHeader from "@/components/customUIComponents/DataTableHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import BillPreview from "../../../../components/BillPreview";
+import BillPreview from "@/components/BillPreview";
 import { useIsMobile } from "@/hooks/use-mobile";
 import CustomizeDialog from "@/components/customUIComponents/CustomizeDialog";
 import { Button } from "@/components/ui/button";

@@ -1,24 +1,20 @@
-'use client';
+"use client";
 
-import { useRef, useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import { ChevronLeft } from 'lucide-react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  Card,
-  CardTitle,
-  CardContent,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import FoodForm from './FoodForm';
-import FoodCard from '@/components/customUIComponents/FoodCard';
+import { useRef, useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
+import { ChevronLeft } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Card, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import FoodForm from "@/components/FoodForm";
+import FoodCard from "@/components/customUIComponents/FoodCard";
 
 import {
   createMenuItemFood,
   patchUpdateMenuItemList,
   getMenuItemFood,
-  deleteMenuItem
-} from '@/lib/api/api';
+  deleteMenuItem,
+} from "@/lib/api/api";
 
 const MenuFood = () => {
   const router = useRouter();
@@ -34,7 +30,7 @@ const MenuFood = () => {
     if (existingData) {
       setFormData({
         ...existingData,
-        tag: existingData.hotelSpecial ? 'Hotel special' : 'illa',
+        tag: existingData.hotelSpecial ? "Hotel special" : "illa",
       });
     }
   }, [existingData]);
@@ -42,7 +38,7 @@ const MenuFood = () => {
   const handleFormChange = (data) => {
     setFormData({
       ...data,
-      tag: data.hotelSpecial ? 'Hotel special' : 'illa',
+      tag: data.hotelSpecial ? "Hotel special" : "illa",
     });
   };
 
@@ -84,7 +80,7 @@ const MenuFood = () => {
               <ChevronLeft />
             </Button>
             <h1 className="text-2xl font-bold">
-              {isEdit ? 'Edit Food' : 'Add Food'}
+              {isEdit ? "Edit Food" : "Add Food"}
             </h1>
           </div>
           <div className="space-x-2 flex">
@@ -111,7 +107,7 @@ const MenuFood = () => {
         <div className="flex flex-1 overflow-hidden">
           <div
             className="flex-1 overflow-y-auto p-2 pt-4"
-            style={{ maxHeight: 'calc(100vh - 170px)' }}
+            style={{ maxHeight: "calc(100vh - 170px)" }}
           >
             <FoodForm
               ref={formRef}

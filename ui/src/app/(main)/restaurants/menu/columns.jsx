@@ -78,7 +78,7 @@ export const getMenuListcolumns = (
     cell: ({ row }) => (
       <Switch
         checked={row.original.active}
-        onCheckedChange={(value) => handleSwitchToggle(row.original.id, value)}
+        onCheckedChange={(value) => handleSwitchToggle(row.index, value)}
       />
     ),
   },
@@ -120,7 +120,7 @@ export const getMenuListcolumns = (
                 <Trash2 className="text-black h-5" />
               </Button>
             }
-            onConfirm={() => handleDeleteClick(row.original.id)}
+            onConfirm={() => handleDeleteClick(row.original.menuItemName)}
           />
         </div>
       );

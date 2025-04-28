@@ -18,6 +18,8 @@ export default function DataTableHeader({
   activeCategory,
   setActiveCategory,
   setColumnFilters,
+  onSubmitClick,
+  selectOptions
 }) {
   const router = useRouter();
 
@@ -51,6 +53,8 @@ export default function DataTableHeader({
           </Button>
           {headerDialogType && headerButtonName ? (
             <CustomPopup
+              onSubmit={onSubmitClick}
+              selectOptions={selectOptions}
               type={headerDialogType}
               trigger={<Button>{headerButtonName}</Button>}
             />

@@ -22,14 +22,15 @@ import { DialogClose } from "./ui/dialog";
 import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
 import MultiSelect from "./customUIComponents/MultiSelect";
 import { X } from "lucide-react";
+import { Switch } from "./ui/switch";
 
-export default function DialogForm({ type }) {
+export default function DialogForm({ type, data, onSubmit, selectOptions }) {
   const getDefaultValues = (type) => {
     switch (type) {
       case "category":
         return {
           categoryName: "",
-          foodItem: "",
+          foodItems: [],
           visibility: "public",
         };
 
@@ -40,13 +41,14 @@ export default function DialogForm({ type }) {
           email: "",
           role: "",
           shift: "",
+          isActive: true,
         };
 
       case "table":
         return {
           tableNumber: "",
           seatingCapacity: "",
-          available: "yes",
+          isAvailable: "yes",
         };
 
       default:
@@ -98,9 +100,10 @@ export default function DialogForm({ type }) {
         rules: { required: "Role is required" },
         render: (props) => {
           const options = [
-            { label: "Manager", value: "manager" },
-            { label: "Cook", value: "cook" },
-            { label: "Server", value: "server" },
+            { label: "Manager", value: "MANAGER" },
+            { label: "Cook", value: "COOK" },
+            { label: "Server", value: "SERVER" },
+            { label: "Admin", value: "ADMIN" },
           ];
 
           return (
@@ -144,6 +147,22 @@ export default function DialogForm({ type }) {
           );
         },
       },
+      {
+        name: "isActive",
+        label: "Active",
+        render: (props) => {
+          console.log(props);
+          return (
+            <Switch
+              checked={props.value === true}
+              onCheckedChange={(value) => {
+                props.onChange(value);
+              }}
+              onBlur={props.onBlur}
+            />
+          );
+        },
+      },
     ],
     category: [
       {
@@ -155,27 +174,21 @@ export default function DialogForm({ type }) {
         ),
       },
       {
-        name: "foodItem",
-        label: "Food Item",
-        rules: { required: "Food Item is required" },
+        name: "foodItems",
+        label: "Food Items",
+        rules: { required: "Food Items are required" },
         render: (props) => {
-          const options = [
-            { label: "Idly", value: "idly" },
-            { label: "Pongal", value: "pongal" },
-            { label: "Dosa", value: "dosa" },
-          ];
-
           return (
             <div>
               <MultiSelect
-                options={options}
+                options={selectOptions}
                 value={props.value || []}
                 onChange={props.onChange}
                 placeholder="Select foods"
               />
               <div className="flex flex-wrap gap-2 mt-2 bg-gray-600/20 p-6 overflow-auto h-20">
                 {(props.value || []).map((val) => {
-                  const option = options.find((o) => o.value === val);
+                  const option = selectOptions?.find((o) => o.value === val);
                   return (
                     <span
                       key={val}
@@ -221,12 +234,17 @@ export default function DialogForm({ type }) {
         name: "tableNumber",
         label: "Table Number",
         rules: { required: "Table Number is required" },
-        render: (props) => (
-          <Input type="text" placeholder="Enter table number" {...props} />
-        ),
+        render: (props) => {
+          const isEditMode = data?.tableNumber !== undefined;
+          return isEditMode ? (
+            <div>{props.value}</div>
+          ) : (
+            <Input type="text" placeholder="Enter table number" {...props} />
+          );
+        },
       },
       {
-        name: "seatingCapacity",
+        name: "chairs",
         label: "Seating Capacity",
         rules: {
           required: "Seating Capacity is required",
@@ -244,7 +262,7 @@ export default function DialogForm({ type }) {
         ),
       },
       {
-        name: "available",
+        name: "isAvailable",
         label: "Availability",
         rules: { required: "Availability is required" },
         render: (props) => (
@@ -264,13 +282,9 @@ export default function DialogForm({ type }) {
     ],
   };
 
-  const onSubmit = () => {
-    console.log("Submit Clicked!", form.getValues());
-  };
-
   const form = useForm({
-    defaultValues: getDefaultValues(type),
-    // mode: "onBlur",
+    defaultValues: data || getDefaultValues(type),
+    mode: "onBlur",
   });
 
   return (

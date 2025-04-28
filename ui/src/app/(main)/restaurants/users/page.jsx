@@ -1,33 +1,34 @@
 "use client";
 import { getStaffMemberColumns } from "./columns";
 import { CustomDataTable } from "@/components/customUIComponents/CustomDataTable";
-import { deleteUserItem, getUsersListOptions, patchUpdateUserItemList } from "@/lib/api/api";
+import { createUser, deleteUserItem, getUsersListOptions, patchUpdateUserItemList } from "@/lib/api/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { usePathname, useRouter } from "next/navigation";
 
 const Users = () => {
-  const router = useRouter();
-  const pathName = usePathname();
-  const id = pathName.split("/")[2];
   const queryClient = useQueryClient();
-  const { data: usersListData, isLoading, error } = useQuery(getUsersListOptions(id));
+  const { data: usersListData, isLoading, error } = useQuery(getUsersListOptions("TGSR"));
   const patchMutation = useMutation(patchUpdateUserItemList(queryClient));
   const deleteMutation = useMutation(deleteUserItem(queryClient));
+  const postMutation = useMutation(createUser(queryClient));
 
   if (isLoading) return <p>Loading Users...</p>;
   if (error) return <p>Error loading users: {error.message}</p>;
 
-  const handleToggle = (userName, value) => {
-    console.log(userName, value);
-    patchMutation.mutate({ id, fields: { active: value } });
-    // setTableData((prev) =>
-    //   prev.map((row) => (row.userName === userName ? { ...row, status: value ? "active" : "inactive" } : row))
-    // );
+  const handleToggle = (username, value) => {
+    patchMutation.mutate({ username, fields: { isActive: value } });
   };
 
-  const handleEditClick = (id) => {
-    console.log("Edit clicked for id: ", id);
-    router.push(`${pathName}/${id}`)
+  const handleEditClick = (data) => {
+    const obj = {
+      name: data.firstName + " " + data.lastName,
+      email: data.email,
+      phoneNumber: data.phoneNumber,
+      role: data.role,
+      shift: data?.shift,
+      username: data?.username,
+      onToggle: handleToggle
+    }
+    return obj
   }
 
   
@@ -36,7 +37,31 @@ const Users = () => {
     deleteMutation.mutate({ id });
   }
 
-  const columns = getStaffMemberColumns(handleToggle, handleEditClick, handleDeleteClick);
+  const onUpdateSubmit = (row) => (values) => {
+    const formValues = { ...values };
+    const username = row.username;
+    const formValueKeys = Object.keys(formValues);
+    formValueKeys.forEach((key) => {
+      if (Array.isArray(row[key]) && Array.isArray(formValues[key])) {
+        if (JSON.stringify(row[key]) === JSON.stringify(formValues[key])) {
+          delete formValues[key];
+        }
+      }
+      if (row[key] === formValues[key]) {
+        delete formValues[key];
+      }
+    });
+    if (Object.keys(formValues).length !== 0)
+      patchMutation.mutate({ username, fields: { ...formValues } });
+  };
+
+  const onAddSubmit = (values) => {
+    // postMutation.mutate({ fields: values });
+    console.log(values)
+    // TODO create a user along with sending the user email and password from the mail server
+  };
+
+  const columns = getStaffMemberColumns(handleToggle, handleEditClick, handleDeleteClick, onUpdateSubmit);
 
   return (
     <div>
@@ -44,11 +69,9 @@ const Users = () => {
         columns={columns}
         data={usersListData}
         tabName="Users"
-        handleHeaderButtonClick={() => {
-          console.log("Header Button Clicked");
-        }}
         headerButtonName="Add User"
         headerDialogType="user"
+        onSubmitClick={onAddSubmit}
       />
     </div>
   );

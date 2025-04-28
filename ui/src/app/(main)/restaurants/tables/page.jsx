@@ -1,33 +1,45 @@
 "use client";
 import { getTableColumns } from "./columns";
 import { CustomDataTable } from "@/components/customUIComponents/CustomDataTable";
-import { deleteTableItem, getTablesListOptions } from "@/lib/api/api";
+import { createTable, deleteTableItem, getTablesListOptions, patchTables } from "@/lib/api/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { usePathname, useRouter } from "next/navigation";
 
 const Tables = () => {
-  const router = useRouter();
-  const pathName = usePathname();
-  const id = pathName.split("/")[2];
   const queryClient = useQueryClient();
-  const { data: tablesListData, isLoading, error } = useQuery(getTablesListOptions(id));
+  const { data: tablesListData, isLoading, error } = useQuery(getTablesListOptions("TGSR"));
+  const patchMutation = useMutation(patchTables(queryClient))
   const deleteMutation = useMutation(deleteTableItem(queryClient));
+  const postMutation = useMutation(createTable(queryClient));
 
   if (isLoading) return <p>Loading Tables ...</p>;
   if (error) return <p>Error loading tables: {error.message}</p>;
 
-  const handleEditClick = (id) => {
-    console.log("Edit clicked for id: ", id);
-    router.push(`${pathName}/${id}`)
+  const handleEditClick = (row) => {
+    return { ...row, isAvailable: row.isAvailable ? "yes" : "no"};
   }
 
+  const handleUpdate = (row) => (values) => {
+    const formValues = { ...values, isAvailable: values?.isAvailable === "yes" };
+    const formValueKeys = Object.keys(formValues);
+    formValueKeys.forEach((key) => {
+      if (key != "tableNumber" && row[key] === formValues[key]) {
+        delete formValues[key];
+      }
+    });
+    if (Object.keys(formValues).length !== 0)
+      patchMutation.mutate({ fields: { ...formValues } });
+  };
   
-  const handleDeleteClick = (id) => {
-    console.log("Delete clicked for id: ", id);
-    deleteMutation.mutate({ id });
+  const handleDeleteClick = (tableNumber) => {
+    deleteMutation.mutate({restaurantCode: "TGSR", tableNumber});
   }
 
-  const columns = getTableColumns( handleEditClick, handleDeleteClick);
+  const handleCreate = (values) => {
+    const payload = { ...values, isAvailable: values?.isAvailable === "yes" };
+    postMutation.mutate({ payload })
+  }
+
+  const columns = getTableColumns( handleEditClick, handleDeleteClick, handleUpdate);
 
   return (
     <div>
@@ -35,11 +47,9 @@ const Tables = () => {
         columns={columns}
         data={tablesListData}
         tabName="Tables"
-        handleHeaderButtonClick={() => {
-          console.log("Add Table URL");
-        }}
         headerButtonName="Add Table"
         headerDialogType="table"
+        onSubmitClick={handleCreate}
       />
     </div>
   );

@@ -1,5 +1,6 @@
 package com.justintime.jit.controller;
 
+import com.justintime.jit.dto.ApiResponse;
 import com.justintime.jit.dto.MenuItemDTO;
 import com.justintime.jit.dto.PatchRequest;
 import com.justintime.jit.entity.Enums.Sort;
@@ -10,7 +11,6 @@ import com.justintime.jit.util.ImageValidation;
 import com.justintime.jit.service.MenuItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +18,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/jit-api/menu-items")
-public class MenuItemController {
+public class MenuItemController extends BaseController {
 
     @Autowired
     private MenuItemService menuItemService;
@@ -31,20 +31,20 @@ public class MenuItemController {
 //        return menuItemService.getAllMenuItems();
 //    }
 
-    @GetMapping
-    public List<MenuItemDTO> getMenuItemsByRestaurant(
-            @AuthenticationPrincipal Long restaurantId,
+    @GetMapping("/{restaurantCode}")
+    public ResponseEntity<ApiResponse<List<MenuItemDTO>>> getMenuItemsByRestaurant(
+            @PathVariable String restaurantCode,
             @RequestParam(required = false) Sort sortBy,
             @RequestParam(required = false) String priceRange,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) Boolean onlyVeg,
             @RequestParam(required = false, defaultValue = "false") Boolean onlyForCombos) {
-        return menuItemService.getMenuItemsByRestaurantId(restaurantId, sortBy, priceRange, category, onlyVeg, onlyForCombos);
+        return success(menuItemService.getMenuItemsByRestaurantId(restaurantCode, sortBy, priceRange, category, onlyVeg, onlyForCombos));
     }
 
-    @GetMapping("/{id}")
-    public MenuItemDTO getMenuItemByRestaurantIdAndId(@AuthenticationPrincipal Long restaurantId, @PathVariable Long id){
-        return menuItemService.getMenuItemByRestaurantIdAndId(restaurantId, id);
+    @GetMapping("/{restaurantId}/{id}")
+    public ResponseEntity<ApiResponse<MenuItemDTO>> getMenuItemByRestaurantIdAndId(@PathVariable Long restaurantId, @PathVariable Long id){
+        return success(menuItemService.getMenuItemByRestaurantIdAndId(restaurantId, id));
     }
     @PostMapping("/validateImage")
     public ResponseEntity<String> validateImage(@RequestParam("image") String base64Image) {
@@ -58,25 +58,24 @@ public class MenuItemController {
         }
     }
 
-    @PostMapping
-    public MenuItem addMenuItem(@AuthenticationPrincipal Long restaurantId,@RequestBody MenuItemDTO menuItemDTO) {
-        return menuItemService.addMenuItem(restaurantId,menuItemDTO);
+    @PostMapping("/{restaurantCode}")
+    public ResponseEntity<ApiResponse<MenuItem>> addMenuItem(@PathVariable String restaurantCode, @RequestBody MenuItemDTO menuItemDTO) {
+        return success(menuItemService.addMenuItem(restaurantCode,menuItemDTO), "Created Menu Item Successfully");
     }
 
-    @PutMapping("/{id}")
-    public MenuItem updateMenuItem(@AuthenticationPrincipal Long restaurantId,@PathVariable Long id, @RequestBody MenuItemDTO updatedItem) {
-        return menuItemService.updateMenuItem(restaurantId,id, updatedItem);
+    @PutMapping("/{restaurantCode}/{id}")
+    public MenuItem updateMenuItem(@PathVariable String restaurantCode,@PathVariable Long id, @RequestBody MenuItemDTO updatedItem) {
+        return menuItemService.updateMenuItem(restaurantCode,id, updatedItem);
     }
 
-    @PatchMapping("/{id}")
-
-    public MenuItem patchUpdateMenuItem(@AuthenticationPrincipal Long restaurantId,@PathVariable Long id, @RequestBody PatchRequest<MenuItemDTO> payload) {
-        return menuItemService.patchUpdateMenuItem(restaurantId,id, payload.getDto(), payload.getPropertiesToBeUpdated());
+    @PatchMapping("/{restaurantCode}/{menuItemName}")
+    public ResponseEntity<ApiResponse<MenuItemDTO>> patchUpdateMenuItem(@PathVariable String restaurantCode,@PathVariable String menuItemName, @RequestBody PatchRequest<MenuItemDTO> payload) {
+        return success(menuItemService.patchUpdateMenuItem(restaurantCode,menuItemName, payload.getDto(), payload.getPropertiesToBeUpdated()));
     }
 
-    @DeleteMapping("/{id}")
-    public void deleteMenuItem(@PathVariable Long id) {
-        menuItemService.deleteMenuItem(id);
+    @DeleteMapping("/{restaurantCode}/{menuItemName}")
+    public void deleteMenuItem(@PathVariable String restaurantCode, @PathVariable String menuItemName) {
+        menuItemService.deleteMenuItem(restaurantCode, menuItemName);
     }
 }
 

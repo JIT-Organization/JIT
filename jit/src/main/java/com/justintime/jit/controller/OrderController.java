@@ -1,13 +1,12 @@
 package com.justintime.jit.controller;
 
+import com.justintime.jit.dto.ApiResponse;
 import com.justintime.jit.dto.OrderDTO;
 import com.justintime.jit.dto.PatchRequest;
 import com.justintime.jit.entity.Enums.OrderStatus;
-import com.justintime.jit.entity.OrderEntities.Order;
 import com.justintime.jit.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -16,52 +15,52 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/jit-api/orders")
-public class OrderController {
+public class OrderController extends BaseController {
 
     @Autowired
     private OrderService orderService;
 
-    @PostMapping("/{restaurantId}/{userId}")
-    public ResponseEntity<String> createOrder(@PathVariable Long restaurantId, @PathVariable Long userId, @RequestBody OrderDTO orderDTO) {
-        return orderService.createOrder(restaurantId, userId, orderDTO);
+    @PostMapping("/{restaurantCode}/{username}")
+    public ResponseEntity<String> createOrder(@PathVariable String restaurantCode, @PathVariable String username, @RequestBody OrderDTO orderDTO) {
+        return orderService.createOrder(restaurantCode, username, orderDTO);
     }
 
-    @GetMapping("/{restaurantId}")
-    public ResponseEntity<List<OrderDTO>> getAllOrders(@PathVariable Long restaurantId) {
-        List<OrderDTO> orderDTOs = orderService.getOrdersByRestaurantId(restaurantId);
-        return ResponseEntity.ok(orderDTOs);
+    @GetMapping("/{restaurantCode}")
+    public ResponseEntity<ApiResponse<List<OrderDTO>>> getAllOrders(@PathVariable String restaurantCode) {
+        List<OrderDTO> orderDTOs = orderService.getOrdersByRestaurantId(restaurantCode);
+        return success(orderDTOs, "Orders fetched successfully");
     }
 
-    @GetMapping("/{restaurantId}/{orderId}")
-    public ResponseEntity<OrderDTO> getOrderById(@PathVariable Long restaurantId, @PathVariable Long orderId) {
-        OrderDTO orderDTO = orderService.getOrderByRestaurantAndId(restaurantId, orderId);
+    @GetMapping("/{restaurantCode}/{orderId}")
+    public ResponseEntity<OrderDTO> getOrderById(@PathVariable String restaurantCode, @PathVariable Long orderId) {
+        OrderDTO orderDTO = orderService.getOrderByRestaurantAndId(restaurantCode, orderId);
         return ResponseEntity.ok(orderDTO);
     }
 
-    @PutMapping("/{restaurantId}/{orderId}/status")
+    @PutMapping("/{restaurantCode}/{orderId}/status")
     public ResponseEntity<OrderDTO> updateOrderStatus(
-            @PathVariable Long restaurantId,
+            @PathVariable String restaurantCode,
             @PathVariable Long orderId,
             @RequestParam OrderStatus status) {
-        OrderDTO updatedOrderDTO = orderService.updateOrderStatus(restaurantId, orderId, status);
+        OrderDTO updatedOrderDTO = orderService.updateOrderStatus(restaurantCode, orderId, status);
         return ResponseEntity.ok(updatedOrderDTO);
     }
 
-    @PatchMapping("/{restaurantId}/{orderId}")
+    @PatchMapping("/{restaurantCode}/{orderId}")
     public OrderDTO patchUpdateOrder(
-            @PathVariable Long restaurantId,
+            @PathVariable String restaurantCode,
             @PathVariable Long orderId,
             @RequestBody PatchRequest<OrderDTO> payload){
-        return orderService.patchUpdateOrder(restaurantId, orderId, payload.getDto(), payload.getPropertiesToBeUpdated());
+        return orderService.patchUpdateOrder(restaurantCode, orderId, payload.getDto(), payload.getPropertiesToBeUpdated());
     }
 
-    @DeleteMapping("/{restaurantId}/{orderId}")
-    public ResponseEntity<String> deleteOrder(@PathVariable Long restaurantId, @PathVariable Long orderId) {
-        orderService.deleteOrder(restaurantId,orderId);
+    @DeleteMapping("/{restaurantCode}/{orderId}")
+    public ResponseEntity<String> deleteOrder(@PathVariable String restaurantCode, @PathVariable Long orderId) {
+        orderService.deleteOrder(restaurantCode,orderId);
         return ResponseEntity.ok("Order deleted successfully.");
     }
 
-    @GetMapping("/{restaurantId}/users/{userId}/orders")
+    @GetMapping("/{restaurantCode}/users/{username}/orders")
     public ResponseEntity<List<OrderDTO>> getOrdersByRestaurantAndUserId(
             @PathVariable(required = false) Long restaurantId,
             @PathVariable(required = false) Long userId) {
@@ -73,8 +72,8 @@ public class OrderController {
         return ResponseEntity.ok(orderDTOs);
     }
 
-    @GetMapping("/{restaurantId}/revenue")
-    public ResponseEntity<BigDecimal> calculateTotalRevenue(@PathVariable Long restaurantId) {
-        BigDecimal totalRevenue = orderService.calculateTotalRevenue(restaurantId);
+    @GetMapping("/{restaurantCode}/revenue")
+    public ResponseEntity<BigDecimal> calculateTotalRevenue(@PathVariable String restaurantCode) {
+        BigDecimal totalRevenue = orderService.calculateTotalRevenue(restaurantCode);
         return ResponseEntity.ok(totalRevenue); }
 }
