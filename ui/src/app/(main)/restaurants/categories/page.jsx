@@ -21,6 +21,7 @@ const Categories = () => {
   const { data: menuItemsList } = useQuery(getMenuItemListOptions())
 
   const selectOptions = useMemo(() => {
+    console.log(menuItemsList)
     return getSelectOptions(menuItemsList || [])
   }, [menuItemsList])
 

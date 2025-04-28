@@ -18,7 +18,7 @@ public interface OrderRepository extends BaseRepository<Order, Long> {
     // Find all orders for a specific restaurant
     @Query(value = "SELECT o.* FROM orders o " +
             "JOIN restaurant r ON r.id = o.restaurant_id " +
-            "WHERE r.restaurant_code = :resCode ")
+            "WHERE r.restaurant_code = :resCode ",nativeQuery = true)
     List<Order> findByRestaurantCode(@Param("resCode") String restaurantCode);
 
     Optional<Order> findByRestaurantIdAndId(Long restaurantId, Long Id);
@@ -35,7 +35,7 @@ public interface OrderRepository extends BaseRepository<Order, Long> {
 
     @Query(value = "SELECT o.* FROM orders o " +
             "JOIN restaurant r ON r.id = o.restaurant_id " +
-            "WHERE r.restaurant_code = :resCode AND o.id = :id ")
+            "WHERE r.restaurant_code = :resCode AND o.id = :id ", nativeQuery = true)
     Order findByRestaurantCodeAndId(@Param("resCode") String restaurantCode,@Param("id") Long id);
 
     List<Order> findByRestaurantId(Long restaurantId);

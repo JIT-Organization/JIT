@@ -90,7 +90,7 @@ export const deleteMenuItem = (queryClient) => ({
 });
 
 
-export const getOrdersListOptions = (id) => ({
+export const getOrdersListOptions = () => ({
   queryKey: ["ordersList"],
   queryFn: () => getRequest(`${URLS.ordersList}/TGSR`, "Failed to fetch Orders List"),
   ...cacheConfig
@@ -104,7 +104,7 @@ export const deleteOrderItem = (queryClient) => ({
 
 export const getCategoriesListOptions = () => ({
   queryKey: ["categoriesList"],
-  queryFn: () => getRequest(`${URLS.categoriesList}/getAll`, "Failed to fetch Categories List"),
+  queryFn: () => getRequest(`${URLS.categoriesList}/getAll/TGSR`, "Failed to fetch Categories List"),
   ...cacheConfig
 });
 

@@ -2,11 +2,6 @@
 import * as React from "react";
 import { ChevronDown, ChevronUp, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 
 export const getOrderColumns = (handleEditClick, handleDeleteClick) => [
   {
@@ -55,7 +50,7 @@ export const getOrderColumns = (handleEditClick, handleDeleteClick) => [
       <div className="flex space-x-2 items-center justify-center">
         <Button
           variant="ghost"
-          onClick={() => handleEditClick(row.original.id)}
+          onClick={() => handleEditClick(row.original.orderNumber)}
         >
           <Pencil className="text-black h-50 w-50" />
         </Button>

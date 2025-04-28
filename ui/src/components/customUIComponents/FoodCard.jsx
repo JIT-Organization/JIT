@@ -9,7 +9,7 @@ const FoodCard = ({
   quantity = 0,
   handleUpdateQty,
   openCustomizeDialog,
-  mode = "create", 
+  mode, 
   status = "", 
   onActionClick, 
 }) => {
@@ -49,7 +49,7 @@ const FoodCard = ({
         <div className="relative h-32 w-full">
           <Image
             src={food.image || "https://images.pexels.com/photos/1860208/pexels-photo-1860208.jpeg?cs=srgb&dl=cooked-food-1860208.jpg&fm=jpg"}
-            alt={food.menuItemName}
+            alt={food.menuItemName ?? food.itemName}
             layout="fill"
             objectFit="cover"
             className="rounded-t-xl"
@@ -119,7 +119,7 @@ const FoodCard = ({
 
       <CardContent className="p-3 space-y-1" onClick={() => mode === "create" && setIsEditable(false)}>
         <div className="flex justify-between items-center">
-          <div className="font-bold text-sm">{food.menuItemName}</div>
+          <div className="font-bold text-sm">{food.menuItemName ?? food.itemName}</div>
           
           {mode === "order" ? (
             <Badge className={`text-white text-[10px] px-2 py-0.5 rounded-full shadow ${
@@ -153,10 +153,10 @@ const FoodCard = ({
                   ₹{food.price}
                 </span>
               )}
-              ₹{food.offerPrice || food.price}
+              ₹{food.offerPrice || food.price || food.totalPrice}
             </div>
           ) : (
-            <div className="text-sm font-semibold text-blue-700">
+            <div className="text-xs font-semibold text-blue-700">
               Quantity: {quantity}
             </div>
           )}

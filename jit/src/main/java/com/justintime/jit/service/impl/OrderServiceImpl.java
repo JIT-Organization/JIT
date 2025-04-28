@@ -70,7 +70,8 @@ public class OrderServiceImpl implements OrderService {
     public ResponseEntity<String> createOrder(String restaurantCode, String username, OrderDTO orderDTO) {
         GenericMapper<Order, OrderDTO> mapper = MapperFactory.getMapper(Order.class, OrderDTO.class);
         Order order = mapper.toEntity(orderDTO);
-        order.setRestaurant(restaurantRepository.findByRestaurantCode(restaurantCode));
+        order.setRestaurant(restaurantRepository.findByRestaurantCode(restaurantCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found")));
         order.setUser(userRepository.findByRestaurantCodeAndUsername(restaurantCode, username));
         order.setStatus(OrderStatus.PENDING);
         resolveRelationships(order, orderDTO);
@@ -116,7 +117,8 @@ public class OrderServiceImpl implements OrderService {
     public OrderDTO patchUpdateOrder(String restaurantCode, Long orderId, OrderDTO orderDTO, HashSet<String> propertiesToBeUpdated){
         Order existingOrder = orderRepository.findByRestaurantCodeAndId(restaurantCode, orderId);
         GenericMapper<Order, OrderDTO> mapper = MapperFactory.getMapper(Order.class, OrderDTO.class);
-        existingOrder.setRestaurant(restaurantRepository.findByRestaurantCode(restaurantCode));
+        existingOrder.setRestaurant(restaurantRepository.findByRestaurantCode(restaurantCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found")));
         Order patchedOrder = mapper.toEntity(orderDTO);
         String resCode = "TGSR";
         resolveRelationships(patchedOrder, orderDTO);
@@ -196,17 +198,6 @@ public class OrderServiceImpl implements OrderService {
                 )
                 .toList());
         return dto;
-    }
-
-    private void copySelectedProperties(Object source, Object target, List<String> propertiesToBeChanged) {
-        BeanWrapper srcWrapper = new BeanWrapperImpl(source);
-        BeanWrapper targetWrapper = new BeanWrapperImpl(target);
-
-        for (String property : propertiesToBeChanged) {
-            if (srcWrapper.isReadableProperty(property) && srcWrapper.getPropertyValue(property) != null) {
-                targetWrapper.setPropertyValue(property, srcWrapper.getPropertyValue(property));
-            }
-        }
     }
 
     private void saveEachOrderItem(OrderDTO orderDTO, String resCode, Order savedOrder) {

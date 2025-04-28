@@ -35,8 +35,8 @@ public class CategoryServiceImpl extends BaseServiceImpl<Category,Long> implemen
     @Autowired
     private CommonServiceImplUtil commonServiceImplUtil;
 
-    public List<CategoryDTO> getAllCategories(Long restaurantId) {
-        List<Category> categories= categoryRepository.findByRestaurantId(restaurantId);
+    public List<CategoryDTO> getAllCategories(String restaurantCode) {
+        List<Category> categories= categoryRepository.findByRestaurant_RestaurantCode(restaurantCode);
         GenericMapper<Category, CategoryDTO> mapper = MapperFactory.getMapper(Category.class, CategoryDTO.class);
         return categories.stream()
                 .map(category -> mapToDTO(category, mapper))

@@ -17,10 +17,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ChevronLeft, Filter } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { Separator } from "../ui/separator";
-import CustomPopup from "./CustomPopup";
+import DataTableHeader from "./DataTableHeader";
+import DataTablePagination from "./DataTablePagination";
 
 export function CustomDataTable({
   columns = [],
@@ -30,7 +28,10 @@ export function CustomDataTable({
   handleHeaderButtonClick = () => {},
   headerButtonName,
   headerDialogType,
-  categories,
+  categories = [],
+  expandableRowContent = () => {},
+  onSubmitClick,
+  selectOptions
 }) {
   const [sorting, setSorting] = React.useState([]);
   const [columnFilters, setColumnFilters] = React.useState([]);
@@ -74,6 +75,8 @@ export function CustomDataTable({
         activeCategory={activeCategory}
         setActiveCategory={setActiveCategory}
         setColumnFilters={setColumnFilters}
+        onSubmitClick={onSubmitClick}
+        selectOptions={selectOptions}
       />
 
       <div className="rounded-md border">
@@ -99,20 +102,28 @@ export function CustomDataTable({
           <TableBody>
             {table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  onClick={handleRowClick}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
+                <React.Fragment key={row.id}>
+                  <TableRow
+                    onClick={() => handleRowClick(row)}
+                    data-state={row.getIsSelected() && "selected"}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id} className="text-center">
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                  {row.getIsExpanded() && (
+                    <TableRow>
+                      <TableCell colSpan={row.getVisibleCells().length}>
+                        {expandableRowContent(row)}
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </React.Fragment>
               ))
             ) : (
               <TableRow>

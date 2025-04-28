@@ -1,5 +1,6 @@
 package com.justintime.jit.controller;
 
+import com.justintime.jit.dto.ApiResponse;
 import com.justintime.jit.dto.OrderDTO;
 import com.justintime.jit.dto.PatchRequest;
 import com.justintime.jit.entity.Enums.OrderStatus;
@@ -14,7 +15,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/jit-api/orders")
-public class OrderController {
+public class OrderController extends BaseController {
 
     @Autowired
     private OrderService orderService;
@@ -25,9 +26,9 @@ public class OrderController {
     }
 
     @GetMapping("/{restaurantCode}")
-    public ResponseEntity<List<OrderDTO>> getAllOrders(@PathVariable String restaurantCode) {
+    public ResponseEntity<ApiResponse<List<OrderDTO>>> getAllOrders(@PathVariable String restaurantCode) {
         List<OrderDTO> orderDTOs = orderService.getOrdersByRestaurantId(restaurantCode);
-        return ResponseEntity.ok(orderDTOs);
+        return success(orderDTOs, "Orders fetched successfully");
     }
 
     @GetMapping("/{restaurantCode}/{orderId}")

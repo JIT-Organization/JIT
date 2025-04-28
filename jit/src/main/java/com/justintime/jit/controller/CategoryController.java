@@ -21,9 +21,9 @@ public class CategoryController extends BaseController {
     @Autowired
     private CategoryService categoryService;
 
-    @GetMapping("/getAll")
-    public ResponseEntity<ApiResponse<List<CategoryDTO>>> getAllCategories(@AuthenticationPrincipal Long restaurantId) {
-        return success(categoryService.getAllCategories(restaurantId));
+    @GetMapping("/getAll/{restaurantCode}")
+    public ResponseEntity<ApiResponse<List<CategoryDTO>>> getAllCategories(@PathVariable String restaurantCode) {
+        return success(categoryService.getAllCategories(restaurantCode));
     }
 
     @GetMapping("/{restaurantId}/{id}")
