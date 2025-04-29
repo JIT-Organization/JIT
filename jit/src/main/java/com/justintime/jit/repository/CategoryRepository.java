@@ -22,6 +22,11 @@ public interface CategoryRepository extends BaseRepository<Category,Long> {
 
     Optional<Category> findByRestaurantIdAndId(Long restaurantId, Long Id);
 
+    List<Category> findByRestaurant_RestaurantCode(String restaurantCode);
+
+    Optional<Category> findByCategoryNameAndRestaurant_RestaurantCode(String categoryName, String restaurantCode);
+
+    Boolean existsByCategoryNameAndRestaurant_RestaurantCode(String categoryName,String restaurantCode);
     Boolean existsByCategoryNameAndRestaurantId(String categoryName,Long restaurantId);
 
     @Query(value = "SELECT c.* FROM category c " +
