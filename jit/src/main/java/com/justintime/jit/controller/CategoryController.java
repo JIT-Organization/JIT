@@ -35,25 +35,25 @@ public class CategoryController extends BaseController {
         return error("Category doesnot exisit", HttpStatus.NOT_FOUND);
     }
 
-    @PostMapping
-    public ResponseEntity<ApiResponse<Category>> createCategory(@AuthenticationPrincipal Long restaurantId,@RequestBody CategoryDTO categoryDTO) {
-        return success(categoryService.createCategory(restaurantId,categoryDTO), "Category Created Successfully");
+    @PostMapping("/{restaurantCode}")
+    public ResponseEntity<ApiResponse<Category>> createCategory(@PathVariable String restaurantCode,@RequestBody CategoryDTO categoryDTO) {
+        return success(categoryService.createCategory(restaurantCode, categoryDTO), "Category Created Successfully");
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Category> updateCategory(@AuthenticationPrincipal Long restaurantId,@PathVariable Long id, @RequestBody CategoryDTO categoryDTO) {
-        return ResponseEntity.ok(categoryService.updateCategory(restaurantId,id, categoryDTO));
+    @PutMapping("/{restaurantCode}/{categoryName}")
+    public ResponseEntity<ApiResponse<CategoryDTO>> updateCategory(@PathVariable String restaurantCode, @PathVariable String categoryName, @RequestBody CategoryDTO categoryDTO) {
+        return success(categoryService.updateCategory(restaurantCode, categoryName, categoryDTO));
     }
 
-    @PatchMapping("/{id}")
-    public ResponseEntity<ApiResponse<Category>> patchUpdateCategory(@AuthenticationPrincipal Long restaurantId,@PathVariable Long id, @RequestBody PatchRequest<CategoryDTO> payload) {
-        return success(categoryService.patchUpdateCategory(restaurantId,id, payload.getDto(), payload.getPropertiesToBeUpdated()));
+    @PatchMapping("/{restaurantCode}/{categoryName}")
+    public ResponseEntity<ApiResponse<CategoryDTO>> patchUpdateCategory(@PathVariable String restaurantCode,@PathVariable String categoryName, @RequestBody PatchRequest<CategoryDTO> payload) {
+        return success(categoryService.patchUpdateCategory(restaurantCode, categoryName, payload.getDto(), payload.getPropertiesToBeUpdated()));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteCategory(@PathVariable Long id) {
-        categoryService.deleteCategory(id);
-        return ResponseEntity.ok("Category deleted successfully");
+    @DeleteMapping("/{restaurantCode}/{categoryName}")
+    public ResponseEntity<ApiResponse<String>> deleteCategory(@PathVariable String restaurantCode, @PathVariable String categoryName) {
+        categoryService.deleteCategory(restaurantCode, categoryName);
+        return success(null, "Category Deleted successfully");
     }
 }
 

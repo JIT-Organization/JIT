@@ -317,7 +317,9 @@ export default function DialogForm({ type, data, onSubmit, selectOptions }) {
               Cancel
             </div>
           </DialogClose>
-          <Button type="submit">Submit</Button>
+          <DialogClose asChild>
+            <Button type="submit">Submit</Button>
+          </DialogClose>
         </div>
       </form>
     </Form>
