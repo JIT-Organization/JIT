@@ -1,29 +1,32 @@
 "use client";
 import React from "react";
+import { PieChart, Pie, Cell } from "recharts";
+
 import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+} from "@/components/ui/chart"; // adjust path as needed
 
 const COLORS = [
-  "#0088FE",
-  "#00C49F",
-  "#FFBB28",
-  "#FF8042",
-  "#a77ee6",
-  "#f26419",
+  "#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#a77ee6", "#f26419"
 ];
 
 const PieChartTemplate = ({ data }) => {
+  const config = data.reduce((acc, item, idx) => {
+    acc[item.name] = {
+      label: item.name,
+      color: COLORS[idx % COLORS.length],
+    };
+    return acc;
+  }, {});
+
   return (
-    <div className="w-full h-64">
-      <ResponsiveContainer width="100%" height="100%">
-        <PieChart>
-          <Pie
+    <ChartContainer config={config} className="w-full h-64">
+      <PieChart>
+      <Pie
             data={data}
             dataKey="quantity"
             nameKey="name"
@@ -73,17 +76,10 @@ const PieChartTemplate = ({ data }) => {
               />
             ))}
           </Pie>
-          <Tooltip />
-          <Legend
-            layout="horizontal"
-            align="center"
-            verticalAlign="bottom"
-            iconType="square"
-            wrapperStyle={{ fontSize: 12, color: "#444" }}
-          />
-        </PieChart>
-      </ResponsiveContainer>
-    </div>
+        <ChartTooltip content={<ChartTooltipContent />} />
+        <ChartLegend content={<ChartLegendContent />} />
+      </PieChart>
+    </ChartContainer>
   );
 };
 
