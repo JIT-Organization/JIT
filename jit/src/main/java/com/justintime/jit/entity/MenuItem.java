@@ -113,6 +113,10 @@ public class MenuItem extends BaseEntity implements FilterableItem {
     @OneToMany(mappedBy = "menuItem", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems = new ArrayList<>();
 
+    @ManyToOne
+    @JoinColumn(name = "kitchen_set_id")
+    private KitchenSet kitchenBatch;
+
     @Override
     public String getName() {
         return this.menuItemName;

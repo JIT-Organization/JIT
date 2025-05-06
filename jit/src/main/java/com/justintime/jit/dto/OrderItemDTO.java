@@ -15,4 +15,5 @@ public class OrderItemDTO {
     private Boolean isCombo;
     private Integer quantity;
     private String orderItemStatus;
+    private String orderNumber;
 }
