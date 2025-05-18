@@ -41,5 +41,8 @@ public class Cook extends BaseEntity{
 
     @ManyToMany(mappedBy = "cookSet")
     private Set<MenuItem> menuItemSet;
+
+    @OneToMany(mappedBy = "cook")
+    private Set<Batch> batches;
 }
 

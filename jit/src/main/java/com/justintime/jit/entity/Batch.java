@@ -1,62 +1,56 @@
-package com.justintime.jit.entity.OrderEntities;
+package com.justintime.jit.entity;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import com.justintime.jit.entity.*;
+import com.justintime.jit.entity.BaseEntity;
 import com.justintime.jit.entity.ComboEntities.Combo;
+import com.justintime.jit.entity.Enums.BatchStatus;
 import com.justintime.jit.entity.Enums.OrderStatus;
-import com.justintime.jit.util.CodeNumberGenerator;
+import com.justintime.jit.entity.MenuItem;
+import com.justintime.jit.entity.TimeInterval;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Getter
 @Setter
 @Entity
 @Audited
-@Table(name = "order_item")
+@Table(name = "batch")
 @NoArgsConstructor
-public class OrderItem extends BaseEntity {
+public class Batch extends BaseEntity {
 
-        @ManyToOne
-        @JoinColumn(name = "order_id", nullable = false)
-        private Order order;
+    @ManyToOne
+    @JoinColumn(name = "time_interval_id")
+    private TimeInterval timeInterval;
 
-        @ManyToOne
-        @JoinColumn(name = "menu_item_id")
-        private MenuItem menuItem;
+    @ManyToOne
+    @JoinColumn(name = "restaurant_id")
+    private Restaurant restaurant;
 
-        @ManyToOne
-        @JoinColumn(name = "combo_id")
-        private Combo combo;
+    @Column(name = "quantity", nullable = false)
+    private int quantity;
 
-        @Column(name = "quantity", nullable = false, columnDefinition = "int default 1")
-        private int quantity;
+    @Column(name = "batch_number", unique = true)
+    private String batchNumber;
 
-        @Column(name = "price", nullable = false, columnDefinition = "DECIMAL(10,2)")
-        private BigDecimal totalPrice;
+    @ManyToOne
+    @JoinColumn(name = "batch_config_id")
+    private BatchConfig batchConfig;
 
-        @Enumerated(EnumType.STRING)
-        private OrderStatus orderItemStatus;
+    @ManyToOne
+    @JoinColumn(name = "cook_id")
+    private Cook cook;
 
-        @ManyToOne
-        @JoinColumn(name = "time_interval_id")
-        private TimeInterval timeInterval;
+    @Column(name = "status", nullable = false)
+    private BatchStatus status;
 
-        @OneToMany(mappedBy = "orderItem")
-        private Set<BatchOrderItem> batchOrderItems = new HashSet<>();
+    @OneToMany(mappedBy = "batch")
+    private Set<BatchOrderItem> batchOrderItems = new HashSet<>();
 
 //        public OrderItem(OrderItem other) {
 //                this.id = null; // New instance should not have the same ID

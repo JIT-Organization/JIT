@@ -35,6 +35,6 @@ public class MenuItemDTO {
     private Set<String> categorySet;
     private Set<String> cookSet;
     private Set<TimeIntervalDTO> timeIntervalSet;
-    private String kitchenSetNumber;
+    private String batchConfigNumber;
 }
 

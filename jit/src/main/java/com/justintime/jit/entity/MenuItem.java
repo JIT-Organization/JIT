@@ -114,8 +114,8 @@ public class MenuItem extends BaseEntity implements FilterableItem {
     private List<OrderItem> orderItems = new ArrayList<>();
 
     @ManyToOne
-    @JoinColumn(name = "kitchen_set_id")
-    private KitchenSet kitchenBatch;
+    @JoinColumn(name = "batch_config_id")
+    private BatchConfig batchConfig;
 
     @Override
     public String getName() {

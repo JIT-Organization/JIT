@@ -29,4 +29,13 @@ public interface OrderItemRepository extends BaseRepository<OrderItem,Long> {
     List<Object[]> findCombosWithOrderCount(@Param("restaurantId") Long restaurantId, @Param("comboIds") List<Long> itemIds);
 //    List<Object[]> findMenuItemsWithOrderCount(@Param("startDate") LocalDateTime startDate,
 //                                               @Param("addressId") Long addressId);
+
+    @Query("SELECT oi FROM OrderItem oi WHERE oi.orderItemStatus = 'PENDING'")
+    List<OrderItem> findAllPending();
+    
+    @Query("SELECT oi FROM OrderItem oi JOIN oi.batchOrderItems boi WHERE boi.batch.id = :batchId")
+    List<OrderItem> findByBatchId(@Param("batchId") Long batchId);
+
+    @Query("SELECT DISTINCT oi FROM OrderItem oi LEFT JOIN oi.batchOrderItems boi WHERE boi IS NULL")
+    List<OrderItem> findUnassignedOrderItems();
 }
