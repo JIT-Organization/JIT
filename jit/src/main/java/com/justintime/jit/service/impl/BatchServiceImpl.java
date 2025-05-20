@@ -86,6 +86,15 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
             .min(Instant::compareTo)
             .get();
         long maxWait = Duration.between(earliestTime, now).toMinutes();
+        
+        // Calculate MAX_BOOKING_WINDOW based on preparation time and unaccepted batches
+        long preparationTime = batch.getBatchConfig().getPreparationTime() != null ? 
+            Long.parseLong(batch.getBatchConfig().getPreparationTime()) : 30; // default 30 minutes if not set
+        long unacceptedBatchesCount = batchRepository.countByBatchConfigAndStatus(
+            batch.getBatchConfig(), 
+            BatchStatus.NEW
+        );
+        final long MAX_BOOKING_WINDOW = preparationTime * unacceptedBatchesCount;
 
         Map<String, Integer> orderTypePriority = Map.of(
             "ONLINE_TAKEAWAY", 3,
@@ -99,8 +108,8 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
                 double waitScore = Duration.between(oi.getCreatedDttm().toInstant(), now).toMinutes() / (double) Math.max(maxWait, 1);
                 double qtyScore = 1 - (oi.getQuantity() / (double) maxQtyInList);
                 double orderTypeScore = orderTypePriority.getOrDefault(oi.getOrder().getOrderType().toString().toUpperCase(), 0) / 3.0;
-                double bookedTimeScore = 1 - (Duration.between(oi.getCreatedDttm().toInstant(), earliestTime).toMinutes() / (double) maxWait);
-
+                double bookedTimeScore = 1.0 - Math.min(1.0, Duration.between(now, oi.getOrder().getOrderDate().toInstant()).toMinutes() / (double) MAX_BOOKING_WINDOW);
+                
                 double totalScore = (waitScore * 0.30)
                                   + (qtyScore * 0.25)
                                   + (orderTypeScore * 0.20)
@@ -263,9 +272,9 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
                 batchDTO.setBatchConfigDTO(batchConfigDTO);
                 batchDTO.setStatus(batch.getStatus().toString());
                 
-                // Map order items to DTOs
-                List<OrderItemDTO> orderItemDTOs = batch.getOrderItems().stream()
-                        .map(orderItem -> {
+                List<OrderItemDTO> orderItemDTOs = batch.getBatchOrderItems().stream()
+                        .map(batchOrderItem -> {
+                            OrderItem orderItem = batchOrderItem.getOrderItem();
                             OrderItemDTO dto = orderItemMapper.toDto(orderItem);
                             dto.setItemName(orderItem.getMenuItem() != null ? 
                                     orderItem.getMenuItem().getMenuItemName() : 

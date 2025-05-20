@@ -11,7 +11,6 @@ import java.util.Set;
 
 @Repository
 public interface BatchRepository extends BaseRepository<Batch, Long> {
-    Set<Batch> findByMenuItemIdAndRestaurantId(Long menuItemId, Long restaurantId);
     
     @Query(value = "SELECT b.* FROM batch b " +
            "JOIN menu_item mi ON mi.batch_config_id = b.batch_config_id " +
@@ -28,4 +27,13 @@ public interface BatchRepository extends BaseRepository<Batch, Long> {
            "WHERE c.name = :cookName " +
            "AND b.status = :status", nativeQuery = true)
     List<Batch> findByCookNameAndStatus(@Param("cookName") String cookName, @Param("status") String status);
+
+    @Query("SELECT b FROM Batch b " +
+           "JOIN b.batchConfig bc " +
+           "JOIN bc.menuItems mi " +
+           "WHERE mi.id = :menuItemId " +
+           "AND b.restaurant.id = :restaurantId")
+    Set<Batch> findByMenuItemIdAndRestaurantId(
+            @Param("menuItemId") Long menuItemId,
+            @Param("restaurantId") Long restaurantId);
 }
