@@ -28,6 +28,17 @@ public interface BatchRepository extends BaseRepository<Batch, Long> {
            "AND b.status = :status", nativeQuery = true)
     List<Batch> findByCookNameAndStatus(@Param("cookName") String cookName, @Param("status") String status);
 
+    @Query(value = "SELECT b.* FROM batch b " +
+           "JOIN cook c ON b.cook_id = c.id " +
+           "JOIN batch_config bc ON b.batch_config_id = bc.id " +
+           "WHERE c.name = :cookName " +
+           "AND b.status = :status " +
+           "AND (:batchConfigNumber IS NULL OR bc.batch_number = :batchConfigNumber)", nativeQuery = true)
+    List<Batch> findByCookNameAndStatusAndBatchConfigNumber(
+            @Param("cookName") String cookName, 
+            @Param("status") String status,
+            @Param("batchConfigNumber") String batchConfigNumber);
+
     @Query("SELECT b FROM Batch b " +
            "JOIN b.batchConfig bc " +
            "JOIN bc.menuItems mi " +

@@ -58,6 +58,20 @@ public class OrderItem extends BaseEntity {
         @OneToMany(mappedBy = "orderItem")
         private Set<BatchOrderItem> batchOrderItems = new HashSet<>();
 
+        @Column(name = "max_time_limit_to_start")
+        private LocalDateTime maxTimeLimitToStart;
+
+        @PrePersist
+        @PreUpdate
+        public void calculateMaxTimeLimitToStart() {
+            if (order != null && order.getOrderDate() != null && menuItem != null && menuItem.getBatchConfig() != null) {
+                Integer prepTime = menuItem.getBatchConfig().getEstdBatchPrepTime();
+                if (prepTime != null) {
+                    this.maxTimeLimitToStart = order.getOrderDate().minusMinutes(prepTime);
+                }
+            }
+        }
+
 //        public OrderItem(OrderItem other) {
 //                this.id = null; // New instance should not have the same ID
 //                this.order = other.order != null ? new Order(other.order) : null; // Deep copy of Order

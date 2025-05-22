@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -108,12 +109,10 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
                 double waitScore = Duration.between(oi.getCreatedDttm().toInstant(), now).toMinutes() / (double) Math.max(maxWait, 1);
                 double qtyScore = 1 - (oi.getQuantity() / (double) maxQtyInList);
                 double orderTypeScore = orderTypePriority.getOrDefault(oi.getOrder().getOrderType().toString().toUpperCase(), 0) / 3.0;
-                double bookedTimeScore = 1.0 - Math.min(1.0, Duration.between(now, oi.getOrder().getOrderDate().toInstant()).toMinutes() / (double) MAX_BOOKING_WINDOW);
                 
-                double totalScore = (waitScore * 0.30)
-                                  + (qtyScore * 0.25)
-                                  + (orderTypeScore * 0.20)
-                                  + (bookedTimeScore * 0.15);
+                double totalScore = (waitScore * 0.40)
+                                  + (qtyScore * 0.35)
+                                  + (orderTypeScore * 0.25);
 
                 return new ScoredOrderItem(oi, totalScore);
             })
@@ -125,12 +124,12 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
 
         for (ScoredOrderItem scored : scoredList) {
             if (totalQty + scored.oi.getQuantity() > targetQty) continue;
-            OrderItem oi = scored.oi;
+            
             BatchOrderItem batchOrderItem = new BatchOrderItem();
             batchOrderItem.setBatch(batch);
-            batchOrderItem.setOrderItem(oi);
+            batchOrderItem.setOrderItem(scored.oi);
             batchOrderItems.add(batchOrderItem);
-            totalQty += oi.getQuantity();
+            totalQty += scored.oi.getQuantity();
         }
 
         batchOrderItemRepository.saveAll(batchOrderItems);
@@ -144,9 +143,10 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
         GenericMapper<BatchConfig, BatchConfigDTO> batchConfigMapper = MapperFactory.getMapper(BatchConfig.class, BatchConfigDTO.class);
         
         List<BatchDTO> result = new ArrayList<>();
+        LocalDateTime currentTime = LocalDateTime.now();
 
         // 3. Started Batches — LOCKED
-        List<Batch> startedBatches = batchRepository.findByCookNameAndStatus(cookName, "STARTED");
+        List<Batch> startedBatches = batchRepository.findByCookNameAndStatusAndBatchConfigNumber(cookName, "STARTED", null);
         for (Batch started : startedBatches) {
             List<OrderItem> items = orderItemRepository.findByBatchId(started.getId());
             List<OrderItemDTO> itemDTOs = items.stream()
@@ -164,7 +164,7 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
         }
 
         // 2. Assigned Batches — Editable count
-        List<Batch> assignedBatches = batchRepository.findByCookNameAndStatus(cookName, "ACCEPTED");
+        List<Batch> assignedBatches = batchRepository.findByCookNameAndStatusAndBatchConfigNumber(cookName, "ACCEPTED", null);
         for (Batch assigned : assignedBatches) {
             BatchDTO batchDTO = new BatchDTO(
                 batchConfigMapper.toDto(assigned.getBatchConfig()),
@@ -177,18 +177,21 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
         }
 
         // 1. Unassigned Batches — Derived from unassigned orderItems
-        List<OrderItem> unassignedItems = orderItemRepository.findUnassignedOrderItems().stream()
-            .filter(oi -> oi.getMenuItem().getCookSet().stream()
-                .anyMatch(cook -> cook.getName().equals(cookName)))
-            .collect(Collectors.toList());
+        List<OrderItem> unassignedItems = orderItemRepository.findUnassignedOrderItemsByBatchConfigAndStatus(
+            assignedBatches.stream()
+                .map(Batch::getBatchConfig)
+                .collect(Collectors.toList()),
+            "ACCEPTED",
+            cookName,
+            currentTime
+        );
 
-        // Group by MenuItem
-        Map<MenuItem, List<OrderItem>> unassignedGrouped = unassignedItems.stream()
-            .collect(Collectors.groupingBy(OrderItem::getMenuItem));
+        // Group by BatchConfig
+        Map<BatchConfig, List<OrderItem>> unassignedGrouped = unassignedItems.stream()
+            .collect(Collectors.groupingBy(oi -> oi.getMenuItem().getBatchConfig()));
 
-        for (Map.Entry<MenuItem, List<OrderItem>> entry : unassignedGrouped.entrySet()) {
-            MenuItem menuItem = entry.getKey();
-            BatchConfig batchConfig = menuItem.getBatchConfig();
+        for (Map.Entry<BatchConfig, List<OrderItem>> entry : unassignedGrouped.entrySet()) {
+            BatchConfig batchConfig = entry.getKey();
             
             int maxCount = batchConfig != null && batchConfig.getMaxCount() != null
                     ? Integer.parseInt(batchConfig.getMaxCount())
@@ -202,13 +205,22 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
                     .mapToInt(OrderItem::getQuantity)
                     .sum();
 
-            // Subtract sum of assigned batch counts for same menuItem
-            int assignedQty = assignedBatches.stream()
-                .filter(b -> b.getBatchConfig().getMenuItems().contains(menuItem))
-                .mapToInt(Batch::getQuantity)
-                .sum();
+            // Calculate available quantity based on time constraints
+            Long assignedBatchesCount = orderItemRepository.countAssignedBatchesForCook(batchConfig, "ACCEPTED", cookName);
+            Long unassignedBatchesCount = orderItemRepository.countUnassignedBatchesForBatchConfig(batchConfig, "ACCEPTED");
+            int cookCount = batchConfig.getCooks().size();
+            
+            int avgStartTime = (assignedBatchesCount.intValue() * batchConfig.getPreparationTime()) + 
+                             (unassignedBatchesCount.intValue() * batchConfig.getPreparationTime() / cookCount);
+            
+            int availableQty = unassignedQty;
+            for (OrderItem oi : entry.getValue()) {
+                if (oi.getMaxTimeLimitToStart() != null && 
+                    oi.getMaxTimeLimitToStart().isBefore(currentTime.plusMinutes(avgStartTime))) {
+                    availableQty -= oi.getQuantity();
+                }
+            }
 
-            int availableQty = unassignedQty - assignedQty;
             if (availableQty <= 0) continue;
 
             // Form virtual batches
