@@ -33,7 +33,6 @@ public class MenuItemDTO {
     private LocalDateTime createdDttm;
     private LocalDateTime updatedDttm;
     private Set<String> categorySet;
-    private Set<String> cookSet;
     private Set<TimeIntervalDTO> timeIntervalSet;
     private String batchConfigNumber;
 }

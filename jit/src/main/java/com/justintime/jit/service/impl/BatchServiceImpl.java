@@ -137,8 +137,21 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
         batchRepository.save(batch);
     }
 
-    public List<BatchDTO> getBatchesForCook(String cookName) {
-        List<OrderItem> allPending = orderItemRepository.findAllPending();
+    public List<BatchDTO> getBatchesForCook(String restaurantCode, String cookName) {
+        // First get the restaurant to validate and get its ID
+        Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode)
+            .orElseThrow(() -> new RuntimeException("Restaurant not found with code: " + restaurantCode));
+            
+        // Get cook for this restaurant
+        Cook cook = cookRepository.findByRestaurantIdAndName(restaurant.getId(), cookName)
+            .orElseThrow(() -> new RuntimeException("Cook not found for restaurant: " + restaurantCode));
+            
+        // Get all batch configs for this cook
+        Set<BatchConfig> cookBatchConfigs = cook.getBatchConfigs();
+        List<String> batchConfigNumbers = cookBatchConfigs.stream()
+            .map(BatchConfig::getBatchConfigNumber)
+            .collect(Collectors.toList());
+            
         GenericMapper<OrderItem, OrderItemDTO> orderItemMapper = MapperFactory.getMapper(OrderItem.class, OrderItemDTO.class);
         GenericMapper<BatchConfig, BatchConfigDTO> batchConfigMapper = MapperFactory.getMapper(BatchConfig.class, BatchConfigDTO.class);
         
@@ -146,7 +159,8 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
         LocalDateTime currentTime = LocalDateTime.now();
 
         // 3. Started Batches — LOCKED
-        List<Batch> startedBatches = batchRepository.findByCookNameAndStatusAndBatchConfigNumber(cookName, "STARTED", null);
+        List<Batch> startedBatches = batchRepository.findByCookIdAndStatusAndBatchConfigNumbersAndRestaurantId(
+            cook.getId(), "STARTED", batchConfigNumbers, restaurant.getId());
         for (Batch started : startedBatches) {
             List<OrderItem> items = orderItemRepository.findByBatchId(started.getId());
             List<OrderItemDTO> itemDTOs = items.stream()
@@ -164,7 +178,8 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
         }
 
         // 2. Assigned Batches — Editable count
-        List<Batch> assignedBatches = batchRepository.findByCookNameAndStatusAndBatchConfigNumber(cookName, "ACCEPTED", null);
+        List<Batch> assignedBatches = batchRepository.findByCookIdAndStatusAndBatchConfigNumbersAndRestaurantId(
+            cook.getId(), "ACCEPTED", batchConfigNumbers, restaurant.getId());
         for (Batch assigned : assignedBatches) {
             BatchDTO batchDTO = new BatchDTO(
                 batchConfigMapper.toDto(assigned.getBatchConfig()),
@@ -177,13 +192,14 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
         }
 
         // 1. Unassigned Batches — Derived from unassigned orderItems
-        List<OrderItem> unassignedItems = orderItemRepository.findUnassignedOrderItemsByBatchConfigAndStatus(
+        List<OrderItem> unassignedItems = orderItemRepository.findUnassignedOrderItemsByBatchConfigAndStatusAndRestaurantId(
             assignedBatches.stream()
                 .map(Batch::getBatchConfig)
                 .collect(Collectors.toList()),
-            "ACCEPTED",
-            cookName,
-            currentTime
+            "UNASSIGNED",
+            cook.getId(),
+            currentTime,
+            restaurant.getId()
         );
 
         // Group by BatchConfig
@@ -192,6 +208,12 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
 
         for (Map.Entry<BatchConfig, List<OrderItem>> entry : unassignedGrouped.entrySet()) {
             BatchConfig batchConfig = entry.getKey();
+            
+            // Skip if batch config doesn't belong to this restaurant or cook
+            if (!batchConfig.getRestaurant().getId().equals(restaurant.getId()) || 
+                !cookBatchConfigs.contains(batchConfig)) {
+                continue;
+            }
             
             int maxCount = batchConfig != null && batchConfig.getMaxCount() != null
                     ? Integer.parseInt(batchConfig.getMaxCount())
@@ -206,8 +228,8 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
                     .sum();
 
             // Calculate available quantity based on time constraints
-            Long assignedBatchesCount = orderItemRepository.countAssignedBatchesForCook(batchConfig, "ACCEPTED", cookName);
-            Long unassignedBatchesCount = orderItemRepository.countUnassignedBatchesForBatchConfig(batchConfig, "ACCEPTED");
+            Long assignedBatchesCount = orderItemRepository.countAssignedBatchesForCookAndRestaurant(batchConfig, "ACCEPTED", cook.getId(), restaurant.getId());
+            Long unassignedBatchesCount = orderItemRepository.countUnassignedBatchesForBatchConfigAndRestaurant(batchConfig, "UNASSIGNED", restaurant.getId());
             int cookCount = batchConfig.getCooks().size();
             
             int avgStartTime = (assignedBatchesCount.intValue() * batchConfig.getPreparationTime()) + 

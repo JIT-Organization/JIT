@@ -110,11 +110,6 @@ public class FilterItemsUtil {
                             .map(Category::getCategoryName)
                             .collect(Collectors.toSet())
             );
-            menuItemDTO.setCookSet(
-                    menuItem.getCookSet().stream()
-                            .map(Cook::getName)
-                            .collect(Collectors.toSet())
-            );
             menuItemDTO.setTimeIntervalSet(convertTimeIntervals(menuItem.getTimeIntervalSet())); // Add conversion
         }
         return dto;

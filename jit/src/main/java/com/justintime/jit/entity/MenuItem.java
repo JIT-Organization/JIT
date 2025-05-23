@@ -68,23 +68,12 @@ public class MenuItem extends BaseEntity implements FilterableItem {
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
-            name = "menu_item_cook", // Join table name
-            joinColumns = @JoinColumn(name = "menu_item_id"), // Foreign key for MenuItem
-            inverseJoinColumns = @JoinColumn(name = "cook_id")
-    )
-    private Set<Cook> cookSet = new HashSet<>();
-
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(
             name = "menu_item_time_interval",
             joinColumns = @JoinColumn(name = "menu_item_id"),
             inverseJoinColumns = @JoinColumn(name = "time_interval_id"),
             uniqueConstraints = @UniqueConstraint(columnNames = {"menu_item_id", "time_interval_id"})
     )
     private Set<TimeInterval> timeIntervalSet = new HashSet<>();
-
-    @Column(name = "preparation_time")
-    private Integer preparationTime;
 
     @Column(name = "accept_bulk_orders", length = 1)
     private Boolean acceptBulkOrders;

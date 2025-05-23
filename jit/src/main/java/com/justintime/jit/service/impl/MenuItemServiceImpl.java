@@ -27,7 +27,6 @@ public class MenuItemServiceImpl extends BaseServiceImpl<MenuItem, Long> impleme
 
     private final MenuItemRepository menuItemRepository;
     private final CategoryRepository categoryRepository;
-    private final CookRepository cookRepository;
     private final OrderItemRepository orderItemRepository;
     private final TimeIntervalRepository timeIntervalRepository;
     private final FilterItemsUtil filterItemsUtil;
@@ -38,18 +37,17 @@ public class MenuItemServiceImpl extends BaseServiceImpl<MenuItem, Long> impleme
 
     public MenuItemServiceImpl(MenuItemRepository menuItemRepository,
                                CategoryRepository categoryRepository,
-                               CookRepository cookRepository,
                                OrderItemRepository orderItemRepository,
                                TimeIntervalRepository timeIntervalRepository,
-                               FilterItemsUtil filterItemsUtil,RestaurantRepository restaurantRepository) {
+                               FilterItemsUtil filterItemsUtil,
+                               RestaurantRepository restaurantRepository) {
 
         this.menuItemRepository = menuItemRepository;
         this.categoryRepository = categoryRepository;
-        this.cookRepository = cookRepository;
         this.orderItemRepository = orderItemRepository;
         this.timeIntervalRepository = timeIntervalRepository;
         this.filterItemsUtil = filterItemsUtil;
-        this.restaurantRepository= restaurantRepository;
+        this.restaurantRepository = restaurantRepository;
     }
 
     @Override
@@ -108,7 +106,6 @@ public class MenuItemServiceImpl extends BaseServiceImpl<MenuItem, Long> impleme
     public void deleteMenuItem(String restaurantCode, String menuItemName) {
         MenuItem menuItem = menuItemRepository.findByRestaurantCodeAndMenuItemName(restaurantCode, menuItemName)
                 .orElseThrow(() -> new ResourceNotFoundException("Menu item not found"));
-        menuItem.getCookSet().clear();
         menuItem.getCategorySet().clear();
         menuItem.getTimeIntervalSet().clear();
         menuItemRepository.deleteByRestaurantCodeAndMenuItemName(restaurantCode, menuItemName);
@@ -127,9 +124,6 @@ public class MenuItemServiceImpl extends BaseServiceImpl<MenuItem, Long> impleme
         dto.setCategorySet(menuItem.getCategorySet().stream()
                 .map(Category::getCategoryName)
                 .collect(Collectors.toSet()));
-        dto.setCookSet(menuItem.getCookSet().stream()
-                .map(Cook::getName)
-                .collect(Collectors.toSet()));
         dto.setTimeIntervalSet(convertTimeIntervals(menuItem.getTimeIntervalSet()));
         return dto;
     }
@@ -139,11 +133,6 @@ public class MenuItemServiceImpl extends BaseServiceImpl<MenuItem, Long> impleme
             Set<Category> categories = categoryRepository.findByCategoryNamesAndRestaurantId(
                     menuItemDTO.getCategorySet(), menuItem.getRestaurant().getId());
             menuItem.setCategorySet(categories);
-        }
-        if (menuItemDTO.getCookSet() != null) {
-            Set<Cook> cooks = cookRepository.findByNameInAndRestaurantId(
-                    menuItemDTO.getCookSet(), menuItem.getRestaurant().getId());
-            menuItem.setCookSet(cooks);
         }
         if (menuItemDTO.getTimeIntervalSet() != null) {
             menuItem.setTimeIntervalSet(menuItemDTO.getTimeIntervalSet().stream()

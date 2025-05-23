@@ -41,41 +41,40 @@ public interface OrderItemRepository extends BaseRepository<OrderItem,Long> {
     @Query("SELECT DISTINCT oi FROM OrderItem oi LEFT JOIN oi.batchOrderItems boi WHERE boi IS NULL")
     List<OrderItem> findUnassignedOrderItems();
 
-    @Query("SELECT DISTINCT oi FROM OrderItem oi " +
-           "LEFT JOIN oi.batchOrderItems boi " +
-           "JOIN oi.menuItem mi " +
-           "JOIN mi.batchConfig bc " +
-           "WHERE boi IS NULL " +
-           "AND bc IN :batchConfigs " +
-           "AND NOT EXISTS (" +
-           "    SELECT b FROM Batch b " +
-           "    WHERE b.batchConfig = bc " +
-           "    AND b.status = :status) " +
-           "AND (oi.maxTimeLimitToStart IS NULL OR oi.maxTimeLimitToStart >= :currentTime) " +
-           "AND EXISTS (" +
-           "    SELECT 1 FROM BatchConfig bc2 " +
-           "    JOIN bc2.cooks c " +
-           "    WHERE bc2 = bc " +
-           "    AND c.name = :cookName)")
-    List<OrderItem> findUnassignedOrderItemsByBatchConfigAndStatus(
-            @Param("batchConfigs") List<BatchConfig> batchConfigs,
-            @Param("status") String status,
-            @Param("cookName") String cookName,
-            @Param("currentTime") LocalDateTime currentTime);
+    @Query("SELECT oi FROM OrderItem oi " +
+           "WHERE oi.menuItem.batchConfig IN :batchConfigs " +
+           "AND oi.orderItemStatus = :status " +
+           "AND oi.batchOrderItems IS EMPTY " +
+           "AND oi.menuItem.batchConfig.cooks.id = :cookId " +
+           "AND oi.createdDttm <= :currentTime " +
+           "AND oi.menuItem.restaurant.id = :restaurantId")
+    List<OrderItem> findUnassignedOrderItemsByBatchConfigAndStatusAndRestaurantId(
+        @Param("batchConfigs") List<BatchConfig> batchConfigs,
+        @Param("status") String status,
+        @Param("cookId") Long cookId,
+        @Param("currentTime") LocalDateTime currentTime,
+        @Param("restaurantId") Long restaurantId
+    );
 
     @Query("SELECT COUNT(b) FROM Batch b " +
            "WHERE b.batchConfig = :batchConfig " +
            "AND b.status = :status " +
-           "AND b.cook.name = :cookName")
-    Long countAssignedBatchesForCook(
-            @Param("batchConfig") BatchConfig batchConfig,
-            @Param("status") String status,
-            @Param("cookName") String cookName);
+           "AND b.cook.id = :cookId " +
+           "AND b.batchConfig.restaurant.id = :restaurantId")
+    Long countAssignedBatchesForCookAndRestaurant(
+        @Param("batchConfig") BatchConfig batchConfig,
+        @Param("status") String status,
+        @Param("cookId") Long cookId,
+        @Param("restaurantId") Long restaurantId
+    );
 
     @Query("SELECT COUNT(b) FROM Batch b " +
            "WHERE b.batchConfig = :batchConfig " +
-           "AND b.status = :status")
-    Long countUnassignedBatchesForBatchConfig(
-            @Param("batchConfig") BatchConfig batchConfig,
-            @Param("status") String status);
+           "AND b.status = :status " +
+           "AND b.batchConfig.restaurant.id = :restaurantId")
+    Long countUnassignedBatchesForBatchConfigAndRestaurant(
+        @Param("batchConfig") BatchConfig batchConfig,
+        @Param("status") String status,
+        @Param("restaurantId") Long restaurantId
+    );
 }

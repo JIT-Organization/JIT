@@ -47,4 +47,22 @@ public interface BatchRepository extends BaseRepository<Batch, Long> {
     Set<Batch> findByMenuItemIdAndRestaurantId(
             @Param("menuItemId") Long menuItemId,
             @Param("restaurantId") Long restaurantId);
+
+    @Query("SELECT b FROM Batch b WHERE b.cook.id = :cookId AND b.status = :status AND b.batchConfig.batchConfigNumber IN :batchConfigNumbers AND b.batchConfig.restaurant.id = :restaurantId")
+    List<Batch> findByCookIdAndStatusAndBatchConfigNumbersAndRestaurantId(
+        @Param("cookId") Long cookId,
+        @Param("status") String status,
+        @Param("batchConfigNumbers") List<String> batchConfigNumbers,
+        @Param("restaurantId") Long restaurantId
+    );
+
+    @Query("SELECT COUNT(b) FROM Batch b WHERE b.batchConfig = :batchConfig AND b.status = :status")
+    Long countByBatchConfigAndStatus(@Param("batchConfig") BatchConfig batchConfig, @Param("status") BatchStatus status);
+
+    @Query("SELECT b FROM Batch b WHERE b.menuItem.id = :menuItemId AND b.batchConfig.restaurant.id = :restaurantId AND b.status = :status")
+    Set<Batch> findByMenuItemIdAndRestaurantIdAndStatus(
+        @Param("menuItemId") Long menuItemId,
+        @Param("restaurantId") Long restaurantId,
+        @Param("status") BatchStatus status
+    );
 }
