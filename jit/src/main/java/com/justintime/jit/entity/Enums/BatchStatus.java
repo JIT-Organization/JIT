@@ -1,8 +1,8 @@
 package com.justintime.jit.entity.Enums;
 
 public enum BatchStatus {
-    NEW,
-    ACCEPTED,
+    UNASSIGNED,
+    ASSIGNED,
     STARTED,
     COMPLETED
 }

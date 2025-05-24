@@ -53,6 +53,9 @@ public class Order extends BaseEntity {
     @Column(name ="status")
     private OrderStatus status;
 
+    @Column(name = "order_type")
+    private OrderType orderType;
+
     @Column(name = "order_date", updatable = false)
     private LocalDateTime orderDate = LocalDateTime.now();
 

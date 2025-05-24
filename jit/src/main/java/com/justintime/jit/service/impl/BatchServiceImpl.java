@@ -15,6 +15,7 @@ import com.justintime.jit.service.BatchService;
 import com.justintime.jit.util.mapper.GenericMapper;
 import com.justintime.jit.util.mapper.MapperFactory;
 import jakarta.transaction.Transactional;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,16 +30,14 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
     
     private static class ScoredOrderItem {
         OrderItem oi;
+        @Getter
         double score;
         
         public ScoredOrderItem(OrderItem oi, double score) {
             this.oi = oi;
             this.score = score;
         }
-        
-        public double getScore() { 
-            return score; 
-        }
+
     }
 
     @Autowired
@@ -56,13 +55,87 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
     @Autowired
     private BatchOrderItemRepository batchOrderItemRepository;
 
+    private static final int BUFFER_TIME_MINUTES = 5;
+
+    private LocalDateTime computeMaxTimeLimitToStart(LocalDateTime orderDate, int prepTime) {
+        return orderDate.minusMinutes(prepTime);
+    }
+
+    private int computeAvgStartTime(int assignedBatches, int unassignedBatches, int prepTime, int cookCount) {
+        int assignedTime = assignedBatches * prepTime;
+        int unassignedTime;
+        
+        if (cookCount > 0) {
+            unassignedTime = (unassignedBatches * prepTime) / cookCount;
+        } else {
+            unassignedTime = Integer.MAX_VALUE; // No cooks available
+        }
+        
+        return assignedTime + unassignedTime;
+    }
+
+    private boolean canStartOrder(LocalDateTime orderDate, int prepTime, int assignedBatches, 
+                                int unassignedBatches, int cookCount, LocalDateTime currentTime) {
+        LocalDateTime maxStartTime = computeMaxTimeLimitToStart(orderDate, prepTime);
+        int avgStartTime = computeAvgStartTime(assignedBatches, unassignedBatches, prepTime, cookCount);
+
+        // Current time + avg workload gives the estimated start time
+        LocalDateTime estimatedStartTime = currentTime.plusMinutes(avgStartTime);
+
+        LocalDateTime earliestAllowedStart = maxStartTime.minusMinutes(BUFFER_TIME_MINUTES);
+
+        return !estimatedStartTime.isBefore(earliestAllowedStart) && 
+               !estimatedStartTime.isAfter(maxStartTime);
+    }
+
+    private void handleOrderAssignment(OrderItem orderItem, BatchConfig batchConfig, 
+                                     int assignedBatches, int unassignedBatches, 
+                                     int cookCount, LocalDateTime currentTime) {
+        int prepTime = batchConfig.getPreparationTime() != null ? batchConfig.getPreparationTime() : 30; // default 30 minutes
+
+        if (canStartOrder(orderItem.getOrder().getOrderDate(), prepTime, 
+                         assignedBatches, unassignedBatches, cookCount, currentTime)) {
+            if (unassignedBatches > 0) {
+                // Find an existing unassigned batch and assign to it
+                Batch unassignedBatch = batchRepository.findByCookIdAndStatusAndBatchConfigNumbersAndRestaurantId(
+                    orderItem.getMenuItem().getBatchConfig().getCooks().iterator().next().getId(),
+                    "UNASSIGNED",
+                    List.of(batchConfig.getBatchConfigNumber()),
+                    orderItem.getMenuItem().getRestaurant().getId()
+                ).stream().findFirst().orElse(null);
+
+                if (unassignedBatch != null) {
+                    BatchOrderItem batchOrderItem = new BatchOrderItem();
+                    batchOrderItem.setBatch(unassignedBatch);
+                    batchOrderItem.setOrderItem(orderItem);
+                    batchOrderItemRepository.save(batchOrderItem);
+                }
+            } else {
+                // Create new batch and assign
+                Batch newBatch = new Batch();
+                newBatch.setBatchConfig(batchConfig);
+                newBatch.setStatus(BatchStatus.UNASSIGNED);
+                newBatch.setQuantity(orderItem.getQuantity());
+                newBatch = batchRepository.save(newBatch);
+
+                BatchOrderItem batchOrderItem = new BatchOrderItem();
+                batchOrderItem.setBatch(newBatch);
+                batchOrderItem.setOrderItem(orderItem);
+                batchOrderItemRepository.save(batchOrderItem);
+            }
+        } else {
+            // Delay order assignment - just leave it as is
+            // The order will be picked up in the next batch assignment cycle
+        }
+    }
+
     @Transactional
     public void startAssignedBatch(String batchId) {
         Batch batch = batchRepository.findById(Long.parseLong(batchId))
             .orElseThrow(() -> new RuntimeException("Batch not found"));
 
-        if (!BatchStatus.ACCEPTED.equals(batch.getStatus())) {
-            throw new IllegalStateException("Only ACCEPTED batches can be started.");
+        if (!BatchStatus.ASSIGNED.equals(batch.getStatus())) {
+            throw new IllegalStateException("Only ASSIGNED batches can be started.");
         }
 
         BatchConfig batchConfig = batch.getBatchConfig();
@@ -91,16 +164,16 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
         // Calculate MAX_BOOKING_WINDOW based on preparation time and unaccepted batches
         long preparationTime = batch.getBatchConfig().getPreparationTime() != null ? 
             Long.parseLong(batch.getBatchConfig().getPreparationTime()) : 30; // default 30 minutes if not set
-        long unacceptedBatchesCount = batchRepository.countByBatchConfigAndStatus(
-            batch.getBatchConfig(), 
-            BatchStatus.NEW
+        long unassignedBatchesCount = batchRepository.countByBatchConfigAndStatus(
+            batch.getBatchConfig(),
+            BatchStatus.UNASSIGNED
         );
-        final long MAX_BOOKING_WINDOW = preparationTime * unacceptedBatchesCount;
+        final long MAX_BOOKING_WINDOW = preparationTime * unassignedBatchesCount;
 
-        Map<String, Integer> orderTypePriority = Map.of(
-            "ONLINE_TAKEAWAY", 3,
-            "ONLINE", 2,
-            "DINE_IN", 1
+        Map<OrderType, Integer> orderTypePriority = Map.of(
+            OrderType.ONLINE_TAKEAWAY, 3,
+            OrderType.ONLINE, 2,
+            OrderType.DINE_IN, 1
         );
 
         // Scoring
@@ -108,7 +181,8 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
             .map(oi -> {
                 double waitScore = Duration.between(oi.getCreatedDttm().toInstant(), now).toMinutes() / (double) Math.max(maxWait, 1);
                 double qtyScore = 1 - (oi.getQuantity() / (double) maxQtyInList);
-                double orderTypeScore = orderTypePriority.getOrDefault(oi.getOrder().getOrderType().toString().toUpperCase(), 0) / 3.0;
+                OrderType orderType = oi.getOrder().getOrderType();
+                double orderTypeScore = orderTypePriority.getOrDefault(orderType, 0) / 3.0;
                 
                 double totalScore = (waitScore * 0.40)
                                   + (qtyScore * 0.35)
@@ -179,7 +253,7 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
 
         // 2. Assigned Batches — Editable count
         List<Batch> assignedBatches = batchRepository.findByCookIdAndStatusAndBatchConfigNumbersAndRestaurantId(
-            cook.getId(), "ACCEPTED", batchConfigNumbers, restaurant.getId());
+            cook.getId(), "ASSIGNED", batchConfigNumbers, restaurant.getId());
         for (Batch assigned : assignedBatches) {
             BatchDTO batchDTO = new BatchDTO(
                 batchConfigMapper.toDto(assigned.getBatchConfig()),
@@ -228,25 +302,22 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
                     .sum();
 
             // Calculate available quantity based on time constraints
-            Long assignedBatchesCount = orderItemRepository.countAssignedBatchesForCookAndRestaurant(batchConfig, "ACCEPTED", cook.getId(), restaurant.getId());
-            Long unassignedBatchesCount = orderItemRepository.countUnassignedBatchesForBatchConfigAndRestaurant(batchConfig, "UNASSIGNED", restaurant.getId());
+            Long assignedBatchesCount = orderItemRepository.countAssignedBatchesForCookAndRestaurant(
+                batchConfig, "ASSIGNED", cook.getId(), restaurant.getId());
+            Long unassignedBatchesCount = orderItemRepository.countUnassignedBatchesForBatchConfigAndRestaurant(
+                batchConfig, "UNASSIGNED", restaurant.getId());
             int cookCount = batchConfig.getCooks().size();
-            
-            int avgStartTime = (assignedBatchesCount.intValue() * batchConfig.getPreparationTime()) + 
-                             (unassignedBatchesCount.intValue() * batchConfig.getPreparationTime() / cookCount);
-            
-            int availableQty = unassignedQty;
-            for (OrderItem oi : entry.getValue()) {
-                if (oi.getMaxTimeLimitToStart() != null && 
-                    oi.getMaxTimeLimitToStart().isBefore(currentTime.plusMinutes(avgStartTime))) {
-                    availableQty -= oi.getQuantity();
-                }
+
+            // Process each order item for assignment
+            for (OrderItem orderItem : entry.getValue()) {
+                handleOrderAssignment(orderItem, batchConfig, 
+                    assignedBatchesCount.intValue(), 
+                    unassignedBatchesCount.intValue(), 
+                    cookCount, currentTime);
             }
 
-            if (availableQty <= 0) continue;
-
-            // Form virtual batches
-            int count = availableQty;
+            // Form virtual batches for display
+            int count = unassignedQty;
             while (count > 0) {
                 int batchSize = Math.min(maxCount, count);
                 BatchDTO batchDTO = new BatchDTO(

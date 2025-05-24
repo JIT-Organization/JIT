@@ -49,6 +49,6 @@ public class BatchConfig extends BaseEntity {
     @Column(name = "preparation_time")
     private Integer preparationTime;
 
-    @Column(name = "batch_number")
-    private String batchNumber;
+    @Column(name = "batch_config_number")
+    private String batchConfigNumber;
 }
