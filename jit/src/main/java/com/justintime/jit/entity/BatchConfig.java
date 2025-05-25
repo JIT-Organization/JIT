@@ -6,11 +6,11 @@ import org.hibernate.envers.Audited;
 
 import java.util.List;
 import java.util.Set;
+import java.util.HashSet;
 
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Getter
 @Setter
 @Audited
@@ -33,15 +33,10 @@ public class BatchConfig extends BaseEntity {
         joinColumns = @JoinColumn(name = "batch_config_id"),
         inverseJoinColumns = @JoinColumn(name = "cook_id")
     )
-    private Set<Cook> cooks;
+    private Set<Cook> cooks = new HashSet<>();
 
-    @ManyToMany
-    @JoinTable(
-        name = "batch_config_menu_item",
-        joinColumns = @JoinColumn(name = "batch_config_id"),
-        inverseJoinColumns = @JoinColumn(name = "menu_item_id")
-    )
-    private Set<MenuItem> menuItems;
+    @OneToMany(mappedBy = "batchConfig")
+    private Set<MenuItem> menuItems = new HashSet<>();
 
     @OneToMany(mappedBy = "batchConfig", fetch = FetchType.LAZY)
     private List<Batch> batches;

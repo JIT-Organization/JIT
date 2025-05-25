@@ -1,9 +1,9 @@
 package com.justintime.jit.controller;
 
-
 import com.justintime.jit.entity.OrderEntities.OrderItem;
 import com.justintime.jit.service.OrderItemService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,28 +12,32 @@ import java.util.List;
 @RequestMapping("/jit-api/OrderItems")
 public class OrderItemController {
 
+    @Autowired
+    private OrderItemService orderItemService;
 
-        @Autowired
-        private OrderItemService orderItemService;
+    @GetMapping
+    public List<OrderItem> getAllOrderItems() {
+        return orderItemService.getAllOrderItems();
+    }
 
-        @GetMapping
-        public List<OrderItem> getAllOrderItems() {
-            return orderItemService.getAllOrderItems();
-        }
+    @GetMapping("/{id}")
+    public OrderItem getOrderItemById(@PathVariable Long id) {
+        return orderItemService.getOrderItemById(id);
+    }
 
-        @GetMapping("/{id}")
-        public OrderItem getOrderItemById(@PathVariable Long id) {
-            return orderItemService.getOrderItemById(id);
-        }
+    @PostMapping
+    public OrderItem createOrderItem(@RequestBody OrderItem orderItem) {
+        return orderItemService.saveOrderItem(orderItem);
+    }
 
-        @PostMapping
-        public OrderItem createOrderItem(@RequestBody OrderItem orderItem) {
-            return orderItemService.saveOrderItem(orderItem);
-        }
+    @DeleteMapping("/{id}")
+    public void deleteOrderItem(@PathVariable Long id) {
+        orderItemService.deleteOrderItem(id);
+    }
 
-        @DeleteMapping("/{id}")
-        public void deleteOrderItem(@PathVariable Long id) {
-            orderItemService.deleteOrderItem(id);
-        }
-
+    @GetMapping("/{restaurantCode}/{cookName}")
+    public ResponseEntity<List<OrderItem>> getOrderItemsForCookByNameAndRestaurant(@PathVariable String cookName, @PathVariable String restaurantCode) {
+        List<OrderItem> orderItems = orderItemService.getOrderItemsForCookByNameAndRestaurant(cookName, restaurantCode);
+        return ResponseEntity.ok(orderItems);
+    }
 }

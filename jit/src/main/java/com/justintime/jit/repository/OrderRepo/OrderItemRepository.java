@@ -42,10 +42,11 @@ public interface OrderItemRepository extends BaseRepository<OrderItem,Long> {
     List<OrderItem> findUnassignedOrderItems();
 
     @Query("SELECT oi FROM OrderItem oi " +
-           "WHERE oi.menuItem.batchConfig IN :batchConfigs " +
+           "WHERE oi.menuItem IS NOT NULL " +
+           "AND oi.menuItem.batchConfig IN :batchConfigs " +
            "AND oi.orderItemStatus = :status " +
            "AND oi.batchOrderItems IS EMPTY " +
-           "AND oi.menuItem.batchConfig.cooks.id = :cookId " +
+           "AND :cookId IN (SELECT c.id FROM oi.menuItem.batchConfig.cooks c) " +
            "AND oi.createdDttm <= :currentTime " +
            "AND oi.menuItem.restaurant.id = :restaurantId")
     List<OrderItem> findUnassignedOrderItemsByBatchConfigAndStatusAndRestaurantId(
@@ -77,4 +78,15 @@ public interface OrderItemRepository extends BaseRepository<OrderItem,Long> {
         @Param("status") String status,
         @Param("restaurantId") Long restaurantId
     );
+
+//    @Query("SELECT oi FROM OrderItem oi WHERE (oi.assignedCookId = :cookId) OR (oi.assignedCookId IS NULL AND (oi.order.orderDate IS NULL OR oi.order.orderDate - oi.preparationTime <= :now))")
+//    List<OrderItem> findOrderItemsForCook(@Param("cookId") Long cookId, @Param("now") LocalDateTime now);
+
+    @Query("SELECT oi FROM OrderItem oi " +
+           "WHERE (oi.cook.id = :cookId AND oi.orderItemStatus = 'ASSIGNED') " +
+           "OR (oi.cook IS NULL AND " +
+           "    ((oi.menuItem IS NOT NULL AND :cookId IN (SELECT c.id FROM oi.menuItem.cookSet c)) " +
+           "     OR (oi.menuItem IS NOT NULL AND oi.menuItem.batchConfig IS NOT NULL AND :cookId IN (SELECT c.id FROM oi.menuItem.batchConfig.cooks c)))) " +
+           "ORDER BY oi.createdDttm ASC")
+    List<OrderItem> findOrderItemsByCookIdAndUnassigned(@Param("cookId") Long cookId);
 }

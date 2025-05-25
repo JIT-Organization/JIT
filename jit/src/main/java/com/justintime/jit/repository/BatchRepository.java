@@ -1,6 +1,7 @@
 package com.justintime.jit.repository;
 
 import com.justintime.jit.entity.Batch;
+import com.justintime.jit.entity.BatchConfig;
 import com.justintime.jit.entity.Enums.BatchStatus;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -59,10 +60,10 @@ public interface BatchRepository extends BaseRepository<Batch, Long> {
     @Query("SELECT COUNT(b) FROM Batch b WHERE b.batchConfig = :batchConfig AND b.status = :status")
     Long countByBatchConfigAndStatus(@Param("batchConfig") BatchConfig batchConfig, @Param("status") BatchStatus status);
 
-    @Query("SELECT b FROM Batch b WHERE b.menuItem.id = :menuItemId AND b.batchConfig.restaurant.id = :restaurantId AND b.status = :status")
-    Set<Batch> findByMenuItemIdAndRestaurantIdAndStatus(
-        @Param("menuItemId") Long menuItemId,
-        @Param("restaurantId") Long restaurantId,
-        @Param("status") BatchStatus status
-    );
+//    @Query("SELECT b FROM Batch b WHERE b.menuItem.id = :menuItemId AND b.batchConfig.restaurant.id = :restaurantId AND b.status = :status")
+//    Set<Batch> findByMenuItemIdAndRestaurantIdAndStatus(
+//        @Param("menuItemId") Long menuItemId,
+//        @Param("restaurantId") Long restaurantId,
+//        @Param("status") BatchStatus status
+//    );
 }

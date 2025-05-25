@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.justintime.jit.entity.BaseEntity;
 import com.justintime.jit.entity.Enums.OrderStatus;
+import com.justintime.jit.entity.Enums.OrderType;
 import com.justintime.jit.entity.PaymentEntities.Payment;
 import com.justintime.jit.entity.Reservation;
 import com.justintime.jit.entity.Restaurant;

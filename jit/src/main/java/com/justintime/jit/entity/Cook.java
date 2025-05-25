@@ -3,6 +3,7 @@ package com.justintime.jit.entity;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.justintime.jit.entity.OrderEntities.OrderItem;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,9 +33,8 @@ public class Cook extends BaseEntity{
     private String phoneNumber;
 
     @Column(name = "specialty")
-    private String specialty; // e.g., Italian, Indian, etc.
-
-    // Many cooks can work for a single restaurant
+    private String specialty;
+    
     @ManyToOne
     @JoinColumn(name = "restaurant_id", nullable = false)
     private Restaurant restaurant;
@@ -44,5 +44,16 @@ public class Cook extends BaseEntity{
 
     @OneToMany(mappedBy = "cook")
     private Set<Batch> batches;
+
+    @ManyToMany
+    @JoinTable(
+        name = "batch_config_cook",
+        joinColumns = @JoinColumn(name = "cook_id"),
+        inverseJoinColumns = @JoinColumn(name = "batch_config_id")
+    )
+    private Set<BatchConfig> batchConfigs = new HashSet<>();
+
+    @OneToMany(mappedBy = "cook")
+    private List<OrderItem> orderItems = new ArrayList<>();
 }
 

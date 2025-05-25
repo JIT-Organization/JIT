@@ -5,8 +5,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.justintime.jit.entity.*;
 import com.justintime.jit.entity.ComboEntities.Combo;
+import com.justintime.jit.entity.Enums.OrderItemStatus;
 import com.justintime.jit.entity.Enums.OrderStatus;
 import com.justintime.jit.util.CodeNumberGenerator;
+import com.justintime.jit.entity.Cook;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -49,7 +51,7 @@ public class OrderItem extends BaseEntity {
         private BigDecimal totalPrice;
 
         @Enumerated(EnumType.STRING)
-        private OrderStatus orderItemStatus;
+        private OrderItemStatus orderItemStatus;
 
         @ManyToOne
         @JoinColumn(name = "time_interval_id")
@@ -61,11 +63,15 @@ public class OrderItem extends BaseEntity {
         @Column(name = "max_time_limit_to_start")
         private LocalDateTime maxTimeLimitToStart;
 
+        @ManyToOne
+        @JoinColumn(name = "assigned_cook_id")
+        private Cook cook;
+
         @PrePersist
         @PreUpdate
         public void calculateMaxTimeLimitToStart() {
             if (order != null && order.getOrderDate() != null && menuItem != null && menuItem.getBatchConfig() != null) {
-                Integer prepTime = menuItem.getBatchConfig().getEstdBatchPrepTime();
+                Integer prepTime = menuItem.getBatchConfig().getPreparationTime();
                 if (prepTime != null) {
                     this.maxTimeLimitToStart = order.getOrderDate().minusMinutes(prepTime);
                 }

@@ -9,4 +9,6 @@ public interface OrderItemService {
     OrderItem getOrderItemById(Long id);
     OrderItem saveOrderItem(OrderItem orderItem);
     void deleteOrderItem(Long id);
+    List<OrderItem> getOrderItemsForCook(Long cookId);
+    List<OrderItem> getOrderItemsForCookByNameAndRestaurant(String cookName, String restaurantCode);
 }

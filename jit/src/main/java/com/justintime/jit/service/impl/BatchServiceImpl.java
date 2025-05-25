@@ -5,6 +5,7 @@ import com.justintime.jit.dto.BatchDTO;
 import com.justintime.jit.dto.OrderItemDTO;
 import com.justintime.jit.entity.*;
 import com.justintime.jit.entity.Enums.BatchStatus;
+import com.justintime.jit.entity.Enums.OrderType;
 import com.justintime.jit.entity.OrderEntities.OrderItem;
 import com.justintime.jit.repository.BatchOrderItemRepository;
 import com.justintime.jit.repository.BatchRepository;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -156,14 +158,14 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
         Instant now = Instant.now();
         int maxQtyInList = eligibleItems.stream().mapToInt(OrderItem::getQuantity).max().orElse(1);
         Instant earliestTime = eligibleItems.stream()
-            .map(oi -> oi.getCreatedDttm().toInstant())
-            .min(Instant::compareTo)
-            .get();
+                .map(oi -> oi.getCreatedDttm().atZone(ZoneId.systemDefault()).toInstant())
+                .min(Instant::compareTo)
+                .orElse(Instant.now());
         long maxWait = Duration.between(earliestTime, now).toMinutes();
         
         // Calculate MAX_BOOKING_WINDOW based on preparation time and unaccepted batches
         long preparationTime = batch.getBatchConfig().getPreparationTime() != null ? 
-            Long.parseLong(batch.getBatchConfig().getPreparationTime()) : 30; // default 30 minutes if not set
+            batch.getBatchConfig().getPreparationTime() : 30; // default 30 minutes if not set
         long unassignedBatchesCount = batchRepository.countByBatchConfigAndStatus(
             batch.getBatchConfig(),
             BatchStatus.UNASSIGNED
@@ -179,7 +181,10 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
         // Scoring
         List<ScoredOrderItem> scoredList = eligibleItems.stream()
             .map(oi -> {
-                double waitScore = Duration.between(oi.getCreatedDttm().toInstant(), now).toMinutes() / (double) Math.max(maxWait, 1);
+                double waitScore = Duration.between(
+                        oi.getCreatedDttm().atZone(ZoneId.systemDefault()).toInstant(),
+                        now
+                ).toMinutes() / (double) Math.max(maxWait, 1);
                 double qtyScore = 1 - (oi.getQuantity() / (double) maxQtyInList);
                 OrderType orderType = oi.getOrder().getOrderType();
                 double orderTypeScore = orderTypePriority.getOrDefault(orderType, 0) / 3.0;
@@ -397,8 +402,8 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
     }
 
     public Set<Batch> findByMenuItemIdAndRestaurantId(Long menuItemId, Long restaurantId) {
-        Set<Batch> unassignedBatches = batchRepository.findByMenuItemIdAndRestaurantIdAndStatus(menuItemId, restaurantId, BatchStatus.NEW);
-        Set<Batch> assignedBatches = batchRepository.findByMenuItemIdAndRestaurantIdAndStatus(menuItemId, restaurantId, BatchStatus.ACCEPTED);
+        Set<Batch> unassignedBatches = batchRepository.findByMenuItemIdAndRestaurantIdAndStatus(menuItemId, restaurantId, BatchStatus.UNASSIGNED);
+        Set<Batch> assignedBatches = batchRepository.findByMenuItemIdAndRestaurantIdAndStatus(menuItemId, restaurantId, BatchStatus.ASSIGNED);
         Set<Batch> startedBatches = batchRepository.findByMenuItemIdAndRestaurantIdAndStatus(menuItemId, restaurantId, BatchStatus.STARTED);
         Set<Batch> allBatches = new HashSet<>();
         allBatches.addAll(unassignedBatches);
