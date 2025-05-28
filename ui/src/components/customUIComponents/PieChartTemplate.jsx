@@ -24,7 +24,7 @@ const PieChartTemplate = ({ data }) => {
   }, {});
 
   return (
-    <ChartContainer config={config} className="w-full h-64">
+    <ChartContainer config={config} className="w-full h-88">
       <PieChart>
       <Pie
             data={data}

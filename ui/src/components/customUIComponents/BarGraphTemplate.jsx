@@ -1,6 +1,6 @@
-'use client';
+'use client'
 
-import React from 'react';
+import React from 'react'
 import {
   BarChart,
   Bar,
@@ -8,7 +8,10 @@ import {
   YAxis,
   CartesianGrid,
   LabelList,
-} from 'recharts';
+  ResponsiveContainer,
+  Tooltip,
+  Legend,
+} from 'recharts'
 
 import {
   ChartContainer,
@@ -16,18 +19,23 @@ import {
   ChartTooltipContent,
   ChartLegend,
   ChartLegendContent,
-} from '@/components/ui/chart';
+} from '@/components/ui/chart'
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#a77ee6', '#f26419'];
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#a77ee6', '#f26419']
 
 const BarGraphTemplate = ({ data, xKey, barKeys, config = {} }) => {
   return (
     <ChartContainer config={config} className="w-full h-96">
-      <BarChart data={data} barCategoryGap={16}>
+      <BarChart
+        data={data}
+        barCategoryGap={16}
+        margin={{ top: 16, right: 16, bottom: 32, left: 16 }}
+      >
+        <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey={xKey} />
         <YAxis />
-        <ChartTooltip content={<ChartTooltipContent />} />
-        <ChartLegend content={<ChartLegendContent />} />
+        <Tooltip content={<ChartTooltipContent />} />
+        <Legend content={<ChartLegendContent />} />
         {barKeys.map((key, index) => (
           <Bar
             key={key}
@@ -47,7 +55,7 @@ const BarGraphTemplate = ({ data, xKey, barKeys, config = {} }) => {
         ))}
       </BarChart>
     </ChartContainer>
-  );
-};
+  )
+}
 
-export default BarGraphTemplate;
+export default BarGraphTemplate
