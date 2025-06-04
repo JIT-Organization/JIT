@@ -8,6 +8,8 @@ import { Card, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import FoodForm from "@/components/FoodForm";
 import FoodCard from "@/components/customUIComponents/FoodCard";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 import {
   createMenuItemFood,
@@ -18,13 +20,18 @@ import {
 
 const MenuFood = () => {
   const router = useRouter();
-  const { foodId } = useParams();
+  const { foodName } = useParams();
   const queryClient = useQueryClient();
   const formRef = useRef();
   const [formData, setFormData] = useState({});
-  const isEdit = foodId && !isNaN(Number(foodId));
+  const isEdit = foodName && foodName !== "add_food";
+  const isMobile = useIsMobile();
+  const [showPreview, setShowPreview] = useState(false);
 
-  const { data: existingData, isLoading } = useQuery(getMenuItemFood(foodId));
+  const { data: existingData, isLoading, error } = useQuery({
+    ...getMenuItemFood(foodName),
+    enabled: isEdit && !!foodName,
+  });
 
   useEffect(() => {
     if (existingData) {
@@ -53,18 +60,33 @@ const MenuFood = () => {
   const handleFinalSubmit = (data) => {
     const mutationFn = isEdit ? updateMutation : createMutation;
     mutationFn.mutate({
-      id: foodId,
+      id: foodName,
       fields: data,
     });
   };
 
   const handleDelete = () => {
-    deleteMutation.mutate({ id: foodId });
+    deleteMutation.mutate({ id: foodName });
   };
 
   const handleBackClick = () => {
     router.back();
   };
+
+  if (isEdit && error) {
+    return (
+      <Card>
+        <CardContent className="p-4">
+          <div className="text-red-500">
+            Error loading food item: {error.message}
+          </div>
+          <Button onClick={handleBackClick} className="mt-4">
+            Go Back
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -132,6 +154,43 @@ const MenuFood = () => {
           </div>
         </div>
       </CardContent>
+
+      {isMobile && (
+        <>
+          <Button
+            onClick={() => setShowPreview(true)}
+            className="fixed bottom-4 right-4 bg-yellow-500 hover:bg-yellow-600 text-black rounded-full p-4 shadow-lg z-50"
+          >
+            👁️
+          </Button>
+
+          {showPreview && (
+            <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+              <div className="bg-white w-11/12 max-w-md max-h-[90vh] rounded-lg p-4 relative flex flex-col">
+                <Button
+                  variant="ghost"
+                  className="absolute top-2 right-2 text-red-500 text-xl"
+                  onClick={() => setShowPreview(false)}
+                >
+                  ❌
+                </Button>
+                <h2 className="text-lg font-semibold text-gray-700 mb-4 text-center">
+                  Food preview
+                </h2>
+                <ScrollArea className="flex justify-center">
+                  <div className="p-4">
+                    <FoodCard food={formData} />
+                    <p className="text-sm text-gray-500 mt-4 text-center px-2">
+                      This is how your food will be displayed. <br />
+                      Prepare wisely.
+                    </p>
+                  </div>
+                </ScrollArea>
+              </div>
+            </div>
+          )}
+        </>
+      )}
     </Card>
   );
 };

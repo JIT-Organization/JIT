@@ -40,10 +40,10 @@ export const getMenuItemListOptions = () => ({
   ...cacheConfig
 });
 
-export const getMenuItemFood = (id) => ({
-  queryKey: ['menuItemFood', id],
-  queryFn: () => getRequest(`${URLS.menuItemList}/${id}`, 'Failed to fetch Menu Item'),
-  enabled: !isNaN(Number(id)),
+export const getMenuItemFood = (name) => ({
+  queryKey: ['menuItemFood', name],
+  queryFn: () => getRequest(`${URLS.menuItemList}/${name}`, 'Failed to fetch Menu Item'),
+  enabled: Boolean(name),
   ...cacheConfig,
 });
 
@@ -241,6 +241,37 @@ export const deleteTableItem = (queryClient) => ({
   },
 });
 
+export const validateField = (type, value) => {
+  const validationConfigs = {
+    menuItem: {
+      queryKey: ["validateMenuItemName", value],
+      url: `${URLS.menuItemList}/validate/${value}`,
+      errorMessage: "Failed to validate menu item name"
+    },
+    category: {
+      queryKey: ["validateCategoryName", value],
+      url: `${URLS.categoriesList}/validate/${value}`,
+      errorMessage: "Failed to validate category name"
+    },
+    table: {
+      queryKey: ["validateTableNumber", value],
+      url: `${URLS.tablesList}/validate/${value}`,
+      errorMessage: "Failed to validate table number"
+    }
+  };
+
+  const config = validationConfigs[type];
+  if (!config) {
+    throw new Error(`Invalid validation type: ${type}`);
+  }
+
+  return {
+    queryKey: config.queryKey,
+    queryFn: () => getRequest(config.url, config.errorMessage),
+    enabled: !!value,
+    ...cacheConfig
+  };
+};
 
 // export const getMenuItemListOptions = (id) => ({
 //   queryKey: ["menuItemList"],
