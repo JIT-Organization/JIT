@@ -23,9 +23,9 @@ const MenuList = () => {
     patchMutation.mutate({ menuItemName, fields: { active: value } });
   };
 
-  const handleEditClick = (id) => {
-    console.log("Edit clicked for id: ", id, pathName);
-    router.push(`${pathName}/${id}`)
+  const handleEditClick = (menuItemName) => {
+    console.log("Edit clicked for id: ", menuItemName, pathName);
+    router.push(`${pathName}/${menuItemName}`)
   };
 
   const handleDeleteClick = async (menuItemName) => {

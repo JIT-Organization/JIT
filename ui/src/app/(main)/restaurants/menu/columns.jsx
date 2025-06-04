@@ -110,7 +110,7 @@ export const getMenuListcolumns = (
     cell: ({ row }) => {
       return (
         <div className="flex justify-center">
-          <Button className="cursor-pointer hover:bg-gray-600/10 h-10 w-10 flex justify-center items-center rounded-md" variant="ghost" onClick={() => handleEditClick(row.original.id)}>
+          <Button className="cursor-pointer hover:bg-gray-600/10 h-10 w-10 flex justify-center items-center rounded-md" variant="ghost" onClick={() => handleEditClick(row.original.menuItemName)}>
             <Pencil className="text-black h-5" />
           </Button>
           <CustomPopup
