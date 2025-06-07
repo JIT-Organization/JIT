@@ -43,7 +43,7 @@ export const getMenuItemListOptions = () => ({
 export const getMenuItemFood = (name) => ({
   queryKey: ['menuItemFood', name],
   queryFn: () => getRequest(`${URLS.menuItemList}/${name}`, 'Failed to fetch Menu Item'),
-  enabled: Boolean(name),
+  enabled: name && name !== "add_food",
   ...cacheConfig,
 });
 

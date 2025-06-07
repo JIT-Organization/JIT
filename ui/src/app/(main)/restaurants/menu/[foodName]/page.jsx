@@ -60,13 +60,13 @@ const MenuFood = () => {
   const handleFinalSubmit = (data) => {
     const mutationFn = isEdit ? updateMutation : createMutation;
     mutationFn.mutate({
-      id: foodName,
+      name: foodName,
       fields: data,
     });
   };
 
   const handleDelete = () => {
-    deleteMutation.mutate({ id: foodName });
+    deleteMutation.mutate({ name: foodName });
   };
 
   const handleBackClick = () => {

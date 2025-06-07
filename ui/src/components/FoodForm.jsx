@@ -169,13 +169,13 @@ const FoodForm = forwardRef(
 
     const categoryOptions =
       categoriesList?.map((cat) => ({
-        value: cat.id,
+        value: cat.categoryName,
         label: cat.categoryName,
       })) ?? [];
 
     const cooksOptions =
       usersListData?.map((user) => ({
-        value: user.id,
+        value: user.name,
         label: user.name,
       })) ?? [];
 
@@ -197,6 +197,7 @@ const FoodForm = forwardRef(
           required: "Food name is required",
           validate: async (value) => {
             if (!value) return true;
+            return true
             const { data: isValid } = await validateField("menuItem", value).queryFn();
             return isValid || "This menu item name already exists";
           },
@@ -261,10 +262,10 @@ const FoodForm = forwardRef(
         fieldCol: "col-span-12 md:col-span-6",
         labelCol: "col-span-12",
         controlCol: "col-span-12",
-        rules: {
-          required: "At least one cook must be selected",
-          validate: (value) => value.length > 0 || "At least one cook must be selected",
-        },
+        // rules: {
+        //   required: "At least one cook must be selected",
+        //   validate: (value) => value.length > 0 || "At least one cook must be selected",
+        // },
       },
       {
         name: "availability",
