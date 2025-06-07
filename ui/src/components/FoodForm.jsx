@@ -175,8 +175,8 @@ const FoodForm = forwardRef(
 
     const cooksOptions =
       usersListData?.map((user) => ({
-        value: user.name,
-        label: user.name,
+        value: user.username,
+        label: user.username,
       })) ?? [];
 
     const form = useForm({
