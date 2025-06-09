@@ -66,9 +66,6 @@ public class CategoryServiceImpl extends BaseServiceImpl<Category,Long> implemen
 
     @Transactional
     public Category createCategory(String restaurantCode, CategoryDTO categoryDTO) {
-        if (categoryRepository.existsByCategoryNameAndRestaurant_RestaurantCode(categoryDTO.getCategoryName(), restaurantCode)) {
-            throw new RuntimeException("Category name already exists!");
-        }
         Category category = mapper.toEntity(categoryDTO);
         category.setRestaurant(restaurantRepository.findByRestaurantCode(restaurantCode).orElseThrow(() -> new RuntimeException("Restaurant not found")));
         resolveRelationships(category, categoryDTO);

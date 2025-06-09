@@ -21,9 +21,9 @@ public class CategoryController extends BaseController {
     @Autowired
     private CategoryService categoryService;
 
-    @GetMapping("/getAll")
-    public ResponseEntity<ApiResponse<List<CategoryDTO>>> getAllCategories(@AuthenticationPrincipal Long restaurantId) {
-        return success(categoryService.getAllCategories(restaurantId));
+    @GetMapping("/getAll/{restaurantCode}")
+    public ResponseEntity<ApiResponse<List<CategoryDTO>>> getAllCategories(@PathVariable String restaurantCode) {
+        return success(categoryService.getAllCategories(restaurantCode));
     }
 
     @GetMapping("/{restaurantId}/{id}")
@@ -37,16 +37,19 @@ public class CategoryController extends BaseController {
 
     @PostMapping("/{restaurantCode}")
     public ResponseEntity<ApiResponse<Category>> createCategory(@PathVariable String restaurantCode,@RequestBody CategoryDTO categoryDTO) {
+        validate(categoryDTO, null, restaurantCode);
         return success(categoryService.createCategory(restaurantCode, categoryDTO), "Category Created Successfully");
     }
 
     @PutMapping("/{restaurantCode}/{categoryName}")
     public ResponseEntity<ApiResponse<CategoryDTO>> updateCategory(@PathVariable String restaurantCode, @PathVariable String categoryName, @RequestBody CategoryDTO categoryDTO) {
+        validate(categoryDTO, null, restaurantCode);
         return success(categoryService.updateCategory(restaurantCode, categoryName, categoryDTO));
     }
 
     @PatchMapping("/{restaurantCode}/{categoryName}")
     public ResponseEntity<ApiResponse<CategoryDTO>> patchUpdateCategory(@PathVariable String restaurantCode,@PathVariable String categoryName, @RequestBody PatchRequest<CategoryDTO> payload) {
+        validate(payload.getDto(), payload.getPropertiesToBeUpdated(), restaurantCode);
         return success(categoryService.patchUpdateCategory(restaurantCode, categoryName, payload.getDto(), payload.getPropertiesToBeUpdated()));
     }
 
