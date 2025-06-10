@@ -42,7 +42,7 @@ export const getMenuItemListOptions = () => ({
 
 export const getMenuItemFood = (name) => ({
   queryKey: ['menuItemFood', name],
-  queryFn: () => getRequest(`${URLS.menuItemList}/${name}`, 'Failed to fetch Menu Item'),
+  queryFn: () => getRequest(`${URLS.menuItemList}/TGSR/${name}`, 'Failed to fetch Menu Item'),
   enabled: name && name !== "add_food",
   ...cacheConfig,
 });
@@ -66,7 +66,7 @@ export const patchUpdateMenuItemList = (queryClient) => ({
 
 export const createMenuItemFood = (queryClient) => ({
   mutationFn: async ({ id, fields }) => {
-    return await postRequest(URLS.menuItemList, {
+    return await postRequest(`${URLS.menuItemList}/TGSR`, {
       ...fields
     });
   },
