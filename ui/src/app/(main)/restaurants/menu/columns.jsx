@@ -3,6 +3,7 @@ import * as React from "react";
 import {
   Pencil,
   Trash2,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -13,7 +14,8 @@ import CustomPopup from "@/components/customUIComponents/CustomPopup";
 export const getMenuListcolumns = (
   handleSwitchToggle,
   handleEditClick,
-  handleDeleteClick
+  handleDeleteClick,
+  loadingStates = { isDeleting: () => false, isUpdating: () => false }
 ) => [
   {
     accessorKey: "image",
@@ -75,12 +77,21 @@ export const getMenuListcolumns = (
   {
     accessorKey: "active",
     header: "Active",
-    cell: ({ row }) => (
-      <Switch
-        checked={row.original.active}
-        onCheckedChange={(value) => handleSwitchToggle(row.index, value)}
-      />
-    ),
+    cell: ({ row }) => {
+      const menuItemName = row.original.menuItemName;
+      const isDeleting = loadingStates.isDeleting(menuItemName);
+      const isUpdating = loadingStates.isUpdating(menuItemName);
+      return (
+        <div className="flex items-center space-x-2">
+          <Switch
+            checked={row.original.active}
+            onCheckedChange={(value) => handleSwitchToggle(row.index, value)}
+            disabled={isUpdating || isDeleting}
+          />
+          {isUpdating && <Loader2 className="h-4 w-4 animate-spin" />}
+        </div>
+      );
+    },
   },
   {
     accessorKey: "categorySet",
@@ -108,19 +119,32 @@ export const getMenuListcolumns = (
     id: "actions",
     header: <div className="flex justify-center">Actions</div>,
     cell: ({ row }) => {
+      const menuItemName = row.original.menuItemName;
+      const isDeleting = loadingStates.isDeleting(menuItemName);
+      const isUpdating = loadingStates.isUpdating(menuItemName);
+
       return (
         <div className="flex justify-center">
-          <Button className="cursor-pointer hover:bg-gray-600/10 h-10 w-10 flex justify-center items-center rounded-md" variant="ghost" onClick={() => handleEditClick(row.original.menuItemName)}>
+          <Button
+            className="cursor-pointer hover:bg-gray-600/10 h-10 w-10 flex justify-center items-center rounded-md"
+            variant="ghost"
+            onClick={() => handleEditClick(menuItemName)}
+            disabled={isDeleting || isUpdating}
+          >
             <Pencil className="text-black h-5" />
           </Button>
           <CustomPopup
             type="delete"
             trigger={
-              <Button className="cursor-pointer hover:bg-gray-600/20 h-10 w-10 flex justify-center items-center rounded-md" variant="ghost">
-                <Trash2 className="text-black h-5" />
+              <Button
+                className="cursor-pointer hover:bg-gray-600/20 h-10 w-10 flex justify-center items-center rounded-md"
+                variant="ghost"
+                disabled={isDeleting || isUpdating}
+              >
+                {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="text-black h-5" />}
               </Button>
             }
-            onConfirm={() => handleDeleteClick(row.original.menuItemName)}
+            onConfirm={() => handleDeleteClick(menuItemName)}
           />
         </div>
       );

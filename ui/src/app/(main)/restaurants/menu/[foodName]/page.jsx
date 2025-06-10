@@ -10,6 +10,8 @@ import FoodForm from "@/components/FoodForm";
 import FoodCard from "@/components/customUIComponents/FoodCard";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 
 import {
   createMenuItemFood,
@@ -27,6 +29,7 @@ const MenuFood = () => {
   const isEdit = foodName && foodName !== "add_food";
   const isMobile = useIsMobile();
   const [showPreview, setShowPreview] = useState(false);
+  const { toast } = useToast();
 
   const { data: existingData, isLoading, error } = useQuery({
     ...getMenuItemFood(foodName),
@@ -53,9 +56,59 @@ const MenuFood = () => {
     formRef.current?.submitForm();
   };
 
-  const deleteMutation = useMutation(deleteMenuItem(queryClient));
-  const createMutation = useMutation(createMenuItemFood(queryClient));
-  const updateMutation = useMutation(patchUpdateMenuItemList(queryClient));
+  const deleteMutation = useMutation({
+    ...deleteMenuItem(queryClient),
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Food item deleted successfully",
+      });
+      router.back();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete food item",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const createMutation = useMutation({
+    ...createMenuItemFood(queryClient),
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Food item created successfully",
+      });
+      router.back();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create food item",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateMutation = useMutation({
+    ...patchUpdateMenuItemList(queryClient),
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Food item updated successfully",
+      });
+      router.back();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update food item",
+        variant: "destructive",
+      });
+    },
+  });
 
   const handleFinalSubmit = (data) => {
     const mutationFn = isEdit ? updateMutation : createMutation;
@@ -98,6 +151,7 @@ const MenuFood = () => {
               onClick={handleBackClick}
               className="flex items-center text-yellow pr-4"
               size="icon"
+              disabled={deleteMutation.isPending || createMutation.isPending || updateMutation.isPending}
             >
               <ChevronLeft />
             </Button>
@@ -111,15 +165,31 @@ const MenuFood = () => {
                 variant="destructive"
                 onClick={handleDelete}
                 className="px-4"
+                disabled={deleteMutation.isPending || createMutation.isPending || updateMutation.isPending}
               >
-                Delete
+                {deleteMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  "Delete"
+                )}
               </Button>
             )}
             <Button
               className="bg-yellow-500 hover:bg-yellow-600 text-black px-4"
               onClick={handleSubmit}
+              disabled={deleteMutation.isPending || createMutation.isPending || updateMutation.isPending}
             >
-              Submit
+              {createMutation.isPending || updateMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {isEdit ? "Updating..." : "Creating..."}
+                </>
+              ) : (
+                "Submit"
+              )}
             </Button>
           </div>
         </div>
