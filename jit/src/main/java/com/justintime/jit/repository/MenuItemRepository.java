@@ -24,7 +24,7 @@ public interface MenuItemRepository extends BaseRepository<MenuItem, Long> {
     Set<MenuItem> findByMenuItemNamesAndRestaurantId(@Param("formattedMenuItemNames") Set<String> formattedMenuItemNames,
                                                    @Param("restaurantId") Long restaurantId);
 
-    MenuItem findByRestaurantIdAndId(Long restaurantId, Long id);
+    MenuItem findByRestaurantIdAndMenuItemName(Long restaurantCode, String menuItemName);
     @Query(value = "SELECT mi.* FROM menu_item mi " +
             "JOIN restaurant r ON r.id = mi.restaurant_id " +
             "WHERE r.restaurant_code = :restaurantCode", nativeQuery = true)

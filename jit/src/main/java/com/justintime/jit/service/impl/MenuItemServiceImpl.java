@@ -69,9 +69,11 @@ public class MenuItemServiceImpl extends BaseServiceImpl<MenuItem, Long> impleme
     }
 
     @Override
-    public MenuItemDTO getMenuItemByRestaurantIdAndId(Long restaurantId, Long id){
+    public MenuItemDTO getMenuItemByRestaurantIdAndMenuItemName(String restaurantCode,String menuItemName){
+        Long restaurantId = restaurantRepository.findByRestaurantCode(restaurantCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found")).getId();
         GenericMapper<MenuItem, MenuItemDTO> mapper = MapperFactory.getMapper(MenuItem.class, MenuItemDTO.class);
-        MenuItem menuItem = menuItemRepository.findByRestaurantIdAndId(restaurantId, id);
+        MenuItem menuItem = menuItemRepository.findByRestaurantIdAndMenuItemName(restaurantId, menuItemName);
         return mapToDTO(menuItem, mapper);
     }
 
