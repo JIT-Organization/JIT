@@ -55,8 +55,19 @@ const MenuFood = () => {
     });
   };
 
-  const handleSubmit = () => {
+  const handleFormSubmit = () => {
     formRef.current?.submitForm();
+  };
+
+  const handleFormError = (errors) => {
+    const firstError = Object.values(errors)[0];
+    if (firstError?.message) {
+      toast({
+        variant: "destructive",
+        title: "Validation Error",
+        description: firstError.message,
+      });
+    }
   };
 
   const deleteMutation = useMutation({
@@ -130,7 +141,7 @@ const MenuFood = () => {
     }
   };
 
-  const handleFinalSubmit = (data) => {
+    const handleSubmit = async (data) => {
     isEdit ? handleUpdateSubmit(data) : handleCreateSubmit(data);
   };
 
@@ -198,7 +209,7 @@ const MenuFood = () => {
             )}
             <Button
               className="bg-yellow-500 hover:bg-yellow-600 text-black px-4"
-              onClick={handleSubmit}
+              onClick={handleFormSubmit}
               disabled={deleteMutation.isPending || createMutation.isPending || updateMutation.isPending}
             >
               {createMutation.isPending || updateMutation.isPending ? (
@@ -223,9 +234,10 @@ const MenuFood = () => {
             <FoodForm
               ref={formRef}
               onFormChange={handleFormChange}
-              onSubmit={handleFinalSubmit}
+              onSubmit={handleSubmit}
               defaultValues={formData}
               isLoading={isLoading}
+              onError={handleFormError}
             />
           </div>
 

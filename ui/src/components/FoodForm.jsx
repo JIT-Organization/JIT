@@ -161,7 +161,7 @@ const renderField = (fieldConfig, formField) => {
 };
 
 const FoodForm = forwardRef(
-  ({ onFormChange, onSubmit, defaultValues, isLoading }, ref) => {
+  ({ onFormChange, onSubmit, defaultValues, isLoading, onError }, ref) => {
     const { data: categoriesList, isLoading: isCategoryListLoading } = useQuery(
       getCategoriesListOptions()
     );
@@ -451,7 +451,12 @@ const FoodForm = forwardRef(
 
     useImperativeHandle(ref, () => ({
       submitForm: () => {
-          form.handleSubmit(onSubmit)();
+        form.handleSubmit(
+          onSubmit,
+          (errors) => {
+            onError?.(errors);
+          }
+        )();
       },
     }));
 
