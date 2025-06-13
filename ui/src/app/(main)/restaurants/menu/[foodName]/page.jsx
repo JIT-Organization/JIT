@@ -12,6 +12,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import LoadingState from "@/components/customUIComponents/LoadingState";
+import ErrorState from "@/components/customUIComponents/ErrorState";
 
 import {
   createMenuItemFood,
@@ -142,17 +144,20 @@ const MenuFood = () => {
 
   if (isEdit && error) {
     return (
-      <Card>
-        <CardContent className="p-4">
-          <div className="text-red-500">
-            Error loading food item: {error.message}
-          </div>
+      <ErrorState 
+        title={`Error loading ${foodName} details`} 
+        message={error.message}
+        action={
           <Button onClick={handleBackClick} className="mt-4">
             Go Back
           </Button>
-        </CardContent>
-      </Card>
+        }
+      />
     );
+  }
+
+  if (isEdit && isLoading) {
+    return <LoadingState message={`Loading ${foodName} details...`} />;
   }
 
   return (

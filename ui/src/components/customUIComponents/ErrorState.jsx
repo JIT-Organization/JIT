@@ -1,6 +1,6 @@
 import { AlertCircle } from "lucide-react";
 
-export default function ErrorState({ title = "Error", message }) {
+export default function ErrorState({ title, message, action }) {
   return (
     <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
       <AlertCircle className="h-8 w-8 text-destructive" />
@@ -8,6 +8,7 @@ export default function ErrorState({ title = "Error", message }) {
         <p className="text-lg font-medium text-destructive">{title}</p>
         <p className="text-sm text-muted-foreground">{message}</p>
       </div>
+      {action && <div className="mt-4">{action}</div>}
     </div>
   );
 } 

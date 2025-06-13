@@ -107,6 +107,7 @@ const renderField = (fieldConfig, formField) => {
           options={fieldConfig.options}
           placeholder={fieldConfig.placeholder}
           showAllOption={fieldConfig.showAllOption}
+          disabled={fieldConfig.disabled}
         />
       );
     case "toggleGroup":
@@ -268,7 +269,7 @@ const FoodForm = forwardRef(
         label: "Responsible Cooks",
         type: "multiSelect",
         options: cooksOptions,
-        placeholder: "Select cooks",
+        placeholder: isUserListLoading ? "Loading cooks..." : "Select cooks",
         fieldCol: "col-span-12 md:col-span-6",
         labelCol: "col-span-12",
         controlCol: "col-span-12",
@@ -276,7 +277,8 @@ const FoodForm = forwardRef(
           required: "At least one cook must be selected",
           validate: (value) => value.length > 0 || "At least one cook must be selected",
         },
-        showAllOption: true
+        showAllOption: true,
+        disabled: isUserListLoading
       },
       {
         name: "availability",
@@ -369,7 +371,7 @@ const FoodForm = forwardRef(
         label: "Categories",
         type: "multiSelect",
         options: categoryOptions,
-        placeholder: "Select categories",
+        placeholder: isCategoryListLoading ? "Loading categories..." : "Select categories",
         fieldCol: "col-span-12 md:col-span-6",
         labelCol: "col-span-12",
         controlCol: "col-span-12",
@@ -377,7 +379,8 @@ const FoodForm = forwardRef(
           required: "At least one category must be selected",
           validate: (value) => value.length > 0 || "At least one category must be selected",
         },
-        showAllOption: true
+        showAllOption: true,
+        disabled: isCategoryListLoading
       },
       {
         name: "acceptBulkOrders",
