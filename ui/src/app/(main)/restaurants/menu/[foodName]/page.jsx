@@ -126,7 +126,7 @@ const MenuFood = () => {
 
   const handleCreateSubmit = (data) => {
     createMutation.mutate({
-      name: foodName,
+      menuItemName: foodName,
       fields: data,
     });
   }
@@ -135,7 +135,7 @@ const MenuFood = () => {
     const formValues = getChangedFields(existingData, data);
     if (Object.keys(formValues).length !== 0) {
       updateMutation.mutate({
-        name: foodName,
+        menuItemName: foodName,
         fields: formValues,
       });
     }
@@ -146,7 +146,7 @@ const MenuFood = () => {
   };
 
   const handleDelete = () => {
-    deleteMutation.mutate({ name: foodName });
+    deleteMutation.mutate({ menuItemName: foodName });
   };
 
   const handleBackClick = () => {

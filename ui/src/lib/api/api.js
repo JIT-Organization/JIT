@@ -40,21 +40,21 @@ export const getMenuItemListOptions = () => ({
   ...cacheConfig
 });
 
-export const getMenuItemFood = (name) => ({
-  queryKey: ['menuItemFood', name],
-  queryFn: () => getRequest(`${URLS.menuItemList}/TGSR/${name}`, 'Failed to fetch Menu Item'),
-  enabled: name && name !== "add_food",
+export const getMenuItemFood = (menuItemName) => ({
+  queryKey: ['menuItemFood', menuItemName],
+  queryFn: () => getRequest(`${URLS.menuItemList}/TGSR/${menuItemName}`, 'Failed to fetch Menu Item'),
+  enabled: menuItemName && menuItemName !== "add_food",
   ...cacheConfig,
 });
 
 export const patchUpdateMenuItemList = (queryClient) => ({
-  mutationFn: async ({ name, fields }) => {
-    return await patchRequest(`${URLS.menuItemList}/TGSR/${name}`, {
+  mutationFn: async ({ menuItemName, fields }) => {
+    return await patchRequest(`${URLS.menuItemList}/TGSR/${menuItemName}`, {
       dto: { ...fields },
       propertiesToBeUpdated: Object.keys(fields),
     });
   },
-  onMutate: async ({ name, fields }) => handleMutate(queryClient, ["menuItemList"], name, fields, "menuItemName"),
+  onMutate: async ({ menuItemName, fields }) => handleMutate(queryClient, ["menuItemList"], menuItemName, fields, "menuItemName"),
   onError: (error, variables, context) => {
     console.error("Failed to update item:", error);
     handleError(queryClient, ["menuItemList"], context);

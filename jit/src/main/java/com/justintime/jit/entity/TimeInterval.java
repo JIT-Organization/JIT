@@ -12,6 +12,7 @@ import lombok.Setter;
 import org.hibernate.envers.Audited;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -35,8 +36,8 @@ public class TimeInterval extends BaseEntity{
     private List<OrderItem> orderItems;
 
     @Column(name = "start_time")
-    private LocalDateTime startTime;
+    private LocalTime startTime;
 
     @Column(name = "end_time")
-    private LocalDateTime endTime;
+    private LocalTime endTime;
 }

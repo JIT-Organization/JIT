@@ -77,7 +77,7 @@ const renderField = (fieldConfig, formField) => {
           placeholder={fieldConfig.placeholder}
           onBlur={fieldConfig.name === "menuItemName" ? async (e) => {
             const value = e.target.value;
-            if (value) {
+            if (value && !value) {
               const { data: isValid } = await validateField("menuItem", value).queryFn();
               if (!isValid) {
                 formField.onChange(value);
