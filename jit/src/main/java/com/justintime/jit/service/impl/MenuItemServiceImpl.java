@@ -108,9 +108,12 @@ public class MenuItemServiceImpl extends BaseServiceImpl<MenuItem, Long> impleme
     public void deleteMenuItem(String restaurantCode, String menuItemName) {
         MenuItem menuItem = menuItemRepository.findByRestaurantCodeAndMenuItemName(restaurantCode, menuItemName)
                 .orElseThrow(() -> new ResourceNotFoundException("Menu item not found"));
+        Long restaurantId = restaurantRepository.findByRestaurantCode(restaurantCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found")).getId();
         menuItem.getCategorySet().clear();
         menuItem.getTimeIntervalSet().clear();
-        menuItemRepository.deleteByRestaurantCodeAndMenuItemName(restaurantCode, menuItemName);
+
+        menuItemRepository.deleteByRestaurantIdAndMenuItemName(restaurantId, menuItemName);
     }
 
     @Override
