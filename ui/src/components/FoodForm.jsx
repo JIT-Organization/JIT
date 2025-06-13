@@ -241,10 +241,28 @@ const FoodForm = forwardRef(
         rules: {
           required: "Timings are required",
           validate: (value) => {
-            return value.every(interval => 
-              interval.startTime && interval.endTime && 
-              interval.startTime.trim() !== "" && interval.endTime.trim() !== ""
-            ) || "Available from and available to time cannot be empty";
+            if (!value || !Array.isArray(value)) {
+              return "Timings are required";
+            }
+            
+            for (const interval of value) {
+              if (!interval.startTime || interval.startTime.trim() === "") {
+                return "Available from time is required";
+              }
+              
+              if (!interval.endTime || interval.endTime.trim() === "") {
+                return "Available to time is required";
+              }
+              
+              const startTime = new Date(`2000-01-01T${interval.startTime}`);
+              const endTime = new Date(`2000-01-01T${interval.endTime}`);
+              
+              if (startTime >= endTime) {
+                return "Available from time must be earlier than available to time";
+              }
+            }
+            
+            return true;
           }
         }
       },
