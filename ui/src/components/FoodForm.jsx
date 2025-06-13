@@ -58,13 +58,13 @@ const defaultFormValues = {
 // ];
 
 const availabilityOptions = [
+  { value: "sunday", label: "Sunday" },
   { value: "monday", label: "Monday" },
   { value: "tuesday", label: "Tuesday" },
   { value: "wednesday", label: "Wednesday" },
   { value: "thursday", label: "Thursday" },
   { value: "friday", label: "Friday" },
   { value: "saturday", label: "Saturday" },
-  { value: "sunday", label: "Sunday" },
 ];
 
 const renderField = (fieldConfig, formField) => {
@@ -106,6 +106,7 @@ const renderField = (fieldConfig, formField) => {
           {...formField}
           options={fieldConfig.options}
           placeholder={fieldConfig.placeholder}
+          showAllOption={fieldConfig.showAllOption}
         />
       );
     case "toggleGroup":
@@ -236,6 +237,15 @@ const FoodForm = forwardRef(
         fieldCol: "col-span-12 md:col-span-8",
         labelCol: "col-span-12",
         controlCol: "col-span-12",
+        rules: {
+          required: "Timings are required",
+          validate: (value) => {
+            return value.every(interval => 
+              interval.startTime && interval.endTime && 
+              interval.startTime.trim() !== "" && interval.endTime.trim() !== ""
+            ) || "Available from and available to time cannot be empty";
+          }
+        }
       },
       {
         name: "count",
@@ -262,10 +272,11 @@ const FoodForm = forwardRef(
         fieldCol: "col-span-12 md:col-span-6",
         labelCol: "col-span-12",
         controlCol: "col-span-12",
-        // rules: {
-        //   required: "At least one cook must be selected",
-        //   validate: (value) => value.length > 0 || "At least one cook must be selected",
-        // },
+        rules: {
+          required: "At least one cook must be selected",
+          validate: (value) => value.length > 0 || "At least one cook must be selected",
+        },
+        showAllOption: true
       },
       {
         name: "availability",
@@ -280,6 +291,7 @@ const FoodForm = forwardRef(
           required: "At least one day must be selected",
           validate: (value) => value.length > 0 || "At least one day must be selected",
         },
+        showAllOption: true
       },
       {
         name: "offerPrice",
@@ -307,7 +319,12 @@ const FoodForm = forwardRef(
         rules: {
           validate: (value) => {
             if (!form.getValues("offerPrice")) return true;
-            return !!value || "Offer start date is required when offer price is set";
+            if (!value) return "Offer start date is required when offer price is set";
+            const offerTo = form.getValues("offerTo");
+            if (offerTo && new Date(value) >= new Date(offerTo)) {
+              return "Offer start date must be earlier than offer end date";
+            }
+            return true;
           },
         },
       },
@@ -322,7 +339,12 @@ const FoodForm = forwardRef(
         rules: {
           validate: (value) => {
             if (!form.getValues("offerPrice")) return true;
-            return !!value || "Offer end date is required when offer price is set";
+            if (!value) return "Offer end date is required when offer price is set";
+            const offerFrom = form.getValues("offerFrom");
+            if (offerFrom && new Date(value) <= new Date(offerFrom)) {
+              return "Offer end date must be later than offer start date";
+            }
+            return true;
           },
         },
       },
@@ -355,6 +377,7 @@ const FoodForm = forwardRef(
           required: "At least one category must be selected",
           validate: (value) => value.length > 0 || "At least one category must be selected",
         },
+        showAllOption: true
       },
       {
         name: "acceptBulkOrders",

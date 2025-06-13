@@ -9,15 +9,30 @@ export default function MultiSelect({
   value,
   onChange,
   placeholder = "Select options",
-  className = '', 
+  className = '',
+  showAllOption = false,
 }) {
   const toggleOption = (optionValue) => {
-    if (value.includes(optionValue)) {
-      onChange(value.filter((val) => val !== optionValue));
+    if (optionValue === "all") {
+      if (isAllSelected) {
+        onChange([]);
+      } else {
+        const allValues = options.map(opt => opt.value);
+        onChange(allValues);
+      }
     } else {
-      onChange([...value, optionValue]);
+      if (value.includes(optionValue)) {
+        onChange(value.filter((val) => val !== optionValue));
+      } else {
+        const newValue = [...value, optionValue];
+        if ((newValue.length === options.length - 1) && showAllOption) {
+          newValue.push("all");
+        }
+        onChange(newValue);
+      }
     }
   };
+  const isAllSelected = options.every(opt => value.includes(opt.value));
 
   return (
     <Popover>
@@ -43,6 +58,18 @@ export default function MultiSelect({
         <Command>
           <CommandInput placeholder="Search options..." />
           <CommandList>
+            {showAllOption && (
+              <CommandItem
+                key="all"
+                onSelect={() => toggleOption("all")}
+                className="cursor-pointer"
+              >
+                <span className="flex-1">All</span>
+                {isAllSelected && (
+                  <Check className="ml-auto h-4 w-4" />
+                )}
+              </CommandItem>
+            )}
             {options.map((option) =>
               option.value ? (
                 <CommandItem
