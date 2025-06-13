@@ -19,9 +19,52 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 import AppBar from "@/components/ui/custom/AppBar";
+
+function SidebarNavigation({ activePage, setActivePage, sidebarLinks }) {
+  const { open: isOpen } = useSidebar();
+
+  return (
+    <SidebarContent className="overflow-x-hidden">
+      <SidebarMenu>
+        {sidebarLinks.map(({ href, label, icon }, index) => (
+          <SidebarMenuItem key={index}>
+            <SidebarMenuButton asChild>
+              <Link
+                href={href}
+                className={`menu-item sidebar-link flex items-center text-xl transition-all duration-300 ease-in-out hover:bg-gray-200 hover:shadow-md rounded-lg ${
+                  activePage === href ? "bg-gray-400 shadow-md" : ""
+                }`}
+                aria-current={activePage === href ? "page" : undefined}
+                onClick={() => setActivePage(href)}
+              >
+                <div className={`flex justify-center items-center transition-all duration-300 ${
+                  isOpen ? 'w-10 h-12' : ''
+                }`}>
+                  <span className={`transition-all duration-300 ${
+                    isOpen ? 'text-xl' : 'text-2xl'
+                  }`}>{icon}</span>
+                </div>
+                { isOpen && <span className="ml-2 text-lg transition-all duration-300 text-lg" >{label}</span>}
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        ))}
+      </SidebarMenu>
+      <style jsx global>{`
+        .menu-item {
+          transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+        .menu-item:hover {
+          transform: scale(1.05);
+        }
+      `}</style>
+    </SidebarContent>
+  );
+}
 
 export default function RootLayout({ children }) {
   const [activePage, setActivePage] = useState("/dashboard");
@@ -42,40 +85,16 @@ export default function RootLayout({ children }) {
     []
   );
 
-  const handleLinkClick = (href) => {
-    setActivePage(href);
-  };
-
   return (
     <>
       <SidebarProvider>
         <AppBar />
-        <Sidebar className="pt-16"  collapsible="icon"  aria-label="Sidebar">
-          <SidebarContent>
-          <SidebarMenu>
-            {sidebarLinks.map(({ href, label, icon }, index) => (
-              <SidebarMenuItem key={index}>
-                <SidebarMenuButton asChild>
-                  <Link
-                    href={href}
-                    className={`sidebar-link flex items-center text-xl ${
-                      activePage === href ? "bg-gray-400" : ""
-                    }`}
-                    aria-current={activePage === href ? "page" : undefined}
-                    onClick={() => handleLinkClick(href)}
-                  >
-                    <div className="w-12 h-12 flex justify-center items-center">
-                      {icon}
-                    </div>
-                    <span className="ml-3">{label}</span>
-                  </Link>
-                </SidebarMenuButton>
-
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-
-          </SidebarContent>
+        <Sidebar className="pt-16 overflow-x-hidden" collapsible="icon" aria-label="Sidebar">
+          <SidebarNavigation 
+            activePage={activePage}
+            setActivePage={setActivePage}
+            sidebarLinks={sidebarLinks}
+          />
         </Sidebar>
 
         <main className="flex-1 flex flex-col pt-16">

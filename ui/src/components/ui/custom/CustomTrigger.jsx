@@ -4,7 +4,7 @@ export function CustomTrigger() {
   const { toggleSidebar } = useSidebar(); // This hook gives access to the toggle function
 
   return (
-    <button onClick={toggleSidebar} aria-label="Toggle sidebar">
+    <button onClick={toggleSidebar} className="text-xl" aria-label="Toggle sidebar">
       {"☰"}
     </button>
   );
