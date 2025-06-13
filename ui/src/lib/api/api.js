@@ -48,13 +48,13 @@ export const getMenuItemFood = (name) => ({
 });
 
 export const patchUpdateMenuItemList = (queryClient) => ({
-  mutationFn: async ({ menuItemName, fields }) => {
-    return await patchRequest(`${URLS.menuItemList}/TGSR/${menuItemName}`, {
+  mutationFn: async ({ name, fields }) => {
+    return await patchRequest(`${URLS.menuItemList}/TGSR/${name}`, {
       dto: { ...fields },
       propertiesToBeUpdated: Object.keys(fields),
     });
   },
-  onMutate: async ({ menuItemName, fields }) => handleMutate(queryClient, ["menuItemList"], menuItemName, fields, "menuItemName"),
+  onMutate: async ({ name, fields }) => handleMutate(queryClient, ["menuItemList"], name, fields, "menuItemName"),
   onError: (error, variables, context) => {
     console.error("Failed to update item:", error);
     handleError(queryClient, ["menuItemList"], context);

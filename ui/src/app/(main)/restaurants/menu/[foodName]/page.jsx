@@ -19,6 +19,7 @@ import {
   getMenuItemFood,
   deleteMenuItem,
 } from "@/lib/api/api";
+import { getChangedFields } from "@/lib/utils/helper";
 
 const MenuFood = () => {
   const router = useRouter();
@@ -110,12 +111,25 @@ const MenuFood = () => {
     },
   });
 
-  const handleFinalSubmit = (data) => {
-    const mutationFn = isEdit ? updateMutation : createMutation;
-    mutationFn.mutate({
+  const handleCreateSubmit = (data) => {
+    createMutation.mutate({
       name: foodName,
       fields: data,
     });
+  }
+
+  const handleUpdateSubmit = (data) => {
+    const formValues = getChangedFields(existingData, data);
+    if (Object.keys(formValues).length !== 0) {
+      updateMutation.mutate({
+        name: foodName,
+        fields: formValues,
+      });
+    }
+  };
+
+  const handleFinalSubmit = (data) => {
+    isEdit ? handleUpdateSubmit(data) : handleCreateSubmit(data);
   };
 
   const handleDelete = () => {

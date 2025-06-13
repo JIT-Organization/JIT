@@ -52,11 +52,9 @@ public class MenuItem extends BaseEntity implements FilterableItem {
     @Column(name = "offer_price", columnDefinition = "DECIMAL(10,2)")
     private BigDecimal offerPrice;
 
-    @UpdateTimestamp
     @Column(name = "offer_from")
     private LocalDateTime offerFrom;
 
-    @UpdateTimestamp
     @Column(name = "offer_to")
     private LocalDateTime offerTo;
 
