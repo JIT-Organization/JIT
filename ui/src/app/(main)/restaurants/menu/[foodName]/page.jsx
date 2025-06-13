@@ -74,6 +74,7 @@ const MenuFood = () => {
     ...deleteMenuItem(queryClient),
     onSuccess: () => {
       toast({
+        variant: "success",
         title: "Success",
         description: "Food item deleted successfully",
       });
@@ -92,6 +93,7 @@ const MenuFood = () => {
     ...createMenuItemFood(queryClient),
     onSuccess: () => {
       toast({
+        variant: "success",
         title: "Success",
         description: "Food item created successfully",
       });
@@ -110,6 +112,7 @@ const MenuFood = () => {
     ...patchUpdateMenuItemList(queryClient),
     onSuccess: () => {
       toast({
+        variant: "success",
         title: "Success",
         description: "Food item updated successfully",
       });

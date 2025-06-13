@@ -30,6 +30,7 @@ const MenuList = () => {
     },
     onSuccess: (_, { menuItemName }) => {
       toast({
+        variant: "success",
         title: "Success",
         description: "Menu item status updated successfully",
       });
@@ -52,6 +53,7 @@ const MenuList = () => {
     },
     onSuccess: (_, { menuItemName }) => {
       toast({
+        variant: "success",
         title: "Success",
         description: "Menu item deleted successfully",
       });
