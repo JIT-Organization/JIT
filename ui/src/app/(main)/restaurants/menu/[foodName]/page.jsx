@@ -249,7 +249,7 @@ const MenuFood = () => {
               Food preview
             </h2>
 
-            <FoodCard food={formData} />
+            <FoodCard food={formData} mode="create" />
 
             <p className="text-sm text-gray-500 mt-4 text-center px-2">
               This is how your food will be displayed. <br />
@@ -283,7 +283,7 @@ const MenuFood = () => {
                 </h2>
                 <ScrollArea className="flex justify-center">
                   <div className="p-4">
-                    <FoodCard food={formData} />
+                    <FoodCard food={formData} mode="create" />
                     <p className="text-sm text-gray-500 mt-4 text-center px-2">
                       This is how your food will be displayed. <br />
                       Prepare wisely.
