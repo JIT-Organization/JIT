@@ -1,8 +1,6 @@
 package com.justintime.jit.repository.ComboRepo;
 
-import com.justintime.jit.dto.ComboDTO;
 import com.justintime.jit.entity.ComboEntities.Combo;
-import com.justintime.jit.entity.MenuItem;
 import com.justintime.jit.repository.BaseRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

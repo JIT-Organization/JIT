@@ -1,8 +1,8 @@
 package com.justintime.jit.service.impl;
 
 import com.justintime.jit.service.BaseService;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 

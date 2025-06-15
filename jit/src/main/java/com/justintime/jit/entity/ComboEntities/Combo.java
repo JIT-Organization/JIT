@@ -7,8 +7,9 @@ import com.justintime.jit.entity.Restaurant;
 import com.justintime.jit.entity.TimeInterval;
 import com.justintime.jit.util.filter.FilterableItem;
 import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
 
