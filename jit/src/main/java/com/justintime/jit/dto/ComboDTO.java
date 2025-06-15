@@ -1,5 +1,6 @@
 package com.justintime.jit.dto;
 
+import com.justintime.jit.entity.ComboEntities.ComboItem;
 import lombok.Getter;
 import lombok.Setter;
 

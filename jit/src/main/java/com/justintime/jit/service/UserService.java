@@ -1,5 +1,6 @@
 package com.justintime.jit.service;
 
+import com.justintime.jit.dto.LoginRequestDto;
 import com.justintime.jit.dto.UserDTO;
 import com.justintime.jit.entity.Enums.Role;
 import com.justintime.jit.entity.User;

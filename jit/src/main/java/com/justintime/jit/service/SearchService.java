@@ -1,7 +1,6 @@
 package com.justintime.jit.service;
 
 import com.justintime.jit.dto.SearchResultDTO;
-
 import java.util.List;
 
 public interface SearchService {

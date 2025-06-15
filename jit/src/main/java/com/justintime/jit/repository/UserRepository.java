@@ -1,11 +1,11 @@
 package com.justintime.jit.repository;
 
 import com.justintime.jit.entity.Enums.Role;
-import com.justintime.jit.entity.MenuItem;
 import com.justintime.jit.entity.User;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import com.justintime.jit.entity.MenuItem;
 
 import java.util.List;
 import java.util.Set;

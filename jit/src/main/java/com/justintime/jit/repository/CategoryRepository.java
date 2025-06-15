@@ -1,6 +1,9 @@
 package com.justintime.jit.repository;
 
+import com.justintime.jit.dto.CategoryDTO;
+import com.justintime.jit.dto.MenuItemDTO;
 import com.justintime.jit.entity.Category;
+import com.justintime.jit.entity.MenuItem;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;

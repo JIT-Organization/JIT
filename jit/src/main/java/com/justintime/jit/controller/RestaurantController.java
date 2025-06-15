@@ -1,6 +1,7 @@
 package com.justintime.jit.controller;
 
 import com.justintime.jit.dto.ApiResponse;
+import com.justintime.jit.dto.MenuItemDTO;
 import com.justintime.jit.dto.PatchRequest;
 import com.justintime.jit.dto.RestaurantDTO;
 import com.justintime.jit.entity.Restaurant;
@@ -8,6 +9,8 @@ import com.justintime.jit.service.RestaurantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/jit-api/restaurants")

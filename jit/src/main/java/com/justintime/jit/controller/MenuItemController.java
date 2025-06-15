@@ -7,10 +7,11 @@ import com.justintime.jit.entity.Enums.Sort;
 import com.justintime.jit.entity.MenuItem;
 import com.justintime.jit.exception.ImageSizeLimitExceededException;
 import com.justintime.jit.service.JwtService;
-import com.justintime.jit.service.MenuItemService;
 import com.justintime.jit.util.ImageValidation;
+import com.justintime.jit.service.MenuItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

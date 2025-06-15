@@ -1,12 +1,18 @@
 package com.justintime.jit.entity;
 
+import com.justintime.jit.entity.BaseEntity;
+import com.justintime.jit.entity.ComboEntities.Combo;
 import com.justintime.jit.entity.Enums.BatchStatus;
+import com.justintime.jit.entity.Enums.OrderStatus;
+import com.justintime.jit.entity.MenuItem;
+import com.justintime.jit.entity.TimeInterval;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.envers.Audited;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
