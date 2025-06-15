@@ -4,19 +4,21 @@ import com.justintime.jit.dto.BatchConfigDTO;
 import com.justintime.jit.dto.BatchDTO;
 import com.justintime.jit.dto.OrderItemDTO;
 import com.justintime.jit.entity.*;
+import com.justintime.jit.entity.ComboEntities.Combo;
 import com.justintime.jit.entity.Enums.BatchStatus;
 import com.justintime.jit.entity.Enums.OrderType;
 import com.justintime.jit.entity.OrderEntities.OrderItem;
-import com.justintime.jit.repository.BatchOrderItemRepository;
-import com.justintime.jit.repository.BatchRepository;
-import com.justintime.jit.repository.CookRepository;
+import com.justintime.jit.exception.ResourceNotFoundException;
+import com.justintime.jit.repository.*;
+import com.justintime.jit.repository.ComboRepo.ComboRepository;
 import com.justintime.jit.repository.OrderRepo.OrderItemRepository;
-import com.justintime.jit.repository.RestaurantRepository;
 import com.justintime.jit.service.BatchService;
+import com.justintime.jit.util.CommonServiceImplUtil;
 import com.justintime.jit.util.mapper.GenericMapper;
 import com.justintime.jit.util.mapper.MapperFactory;
 import jakarta.transaction.Transactional;
 import lombok.Getter;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,6 +45,12 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
     }
 
     @Autowired
+    private ComboRepository comboRepository;
+
+    @Autowired
+    private BatchConfigRepository batchConfigRepository;
+
+    @Autowired
     private BatchRepository batchRepository;
 
     @Autowired
@@ -50,12 +58,18 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
 
     @Autowired
     private CookRepository cookRepository;
+
+    @Autowired
+    private TimeIntervalRepository timeIntervalRepository;
     
     @Autowired
     private OrderItemRepository orderItemRepository;
 
     @Autowired
-    private BatchOrderItemRepository batchOrderItemRepository;
+    private CommonServiceImplUtil commonServiceImplUtil;
+
+    @Autowired
+    private MenuItemRepository menuItemRepository;
 
     private static final int BUFFER_TIME_MINUTES = 5;
 
@@ -148,7 +162,7 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
         int targetQty = batch.getQuantity() != 0 ? batch.getQuantity() : maxQty;
 
         List<OrderItem> eligibleItems = orderItemRepository.findAllPending().stream()
-            .filter(oi -> oi.getBatchOrderItems().isEmpty())
+            .filter(oi -> oi.getOrderItems().isEmpty())
             .filter(oi -> batchConfig.equals(oi.getMenuItem().getBatchConfig()))
             .collect(Collectors.toList());
 
@@ -349,6 +363,27 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
         return dto;
     }
 
+    @Override
+    public List<Batch> getAllBatches(String restaurantCode) {
+        GenericMapper<Batch, BatchDTO> mapper = MapperFactory.getMapper(Batch.class, BatchDTO.class);
+        Long restaurantId= restaurantRepository.findByRestaurantCode(restaurantCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found")).getId();
+        List<Batch> batches = batchRepository.findByRestaurantId(restaurantId);
+        return batches.stream()
+                .map(batch -> mapToDTO(batch, mapper))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Batch addBatch(String restaurantCode, BatchDTO batchDTO) {
+        GenericMapper<Batch, BatchDTO> mapper = MapperFactory.getMapper(Batch.class, BatchDTO.class);
+        Batch batch = mapper.toEntity(batchDTO);
+        batch.setRestaurant(restaurantRepository.findByRestaurantCode(restaurantCode).orElseThrow(() -> new RuntimeException("Restaurant not found")));
+        resolveRelationships(batch,batchDTO);
+        batch.setUpdatedDttm(LocalDateTime.now());
+        return batchRepository.save(batch);
+    }
+
     public List<BatchDTO> getBatchesByRestaurantCodeAndCookName(String restaurantCode, String cookName) {
         Optional<Restaurant> restaurant = restaurantRepository.findByRestaurantCode(restaurantCode);
         Optional<Cook> cook = cookRepository.findByRestaurantIdAndName(restaurant.orElseThrow().getId(), cookName);
@@ -399,6 +434,85 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
             });
         }
         return batchDTOs;
+    }
+
+    @Override
+    public Batch updateBatch(String restaurantCode, Long id, BatchDTO batchDTO) {
+        Batch existingBatchItem = batchRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("MenuItem not found"));
+        GenericMapper<Batch,BatchDTO> menuItemMapper = MapperFactory.getMapper(Batch.class, BatchDTO.class);
+        Batch patchedItem = menuItemMapper.toEntity(batchDTO);
+        patchedItem.setRestaurant(restaurantRepository.findByRestaurantCode(restaurantCode).orElseThrow(() -> new RuntimeException("Restaurant not found")));
+        resolveRelationships(patchedItem, batchDTO);
+        BeanUtils.copyProperties(patchedItem, existingBatchItem, "id", "createdDttm");
+        existingBatchItem.setUpdatedDttm(LocalDateTime.now());
+        return batchRepository.save(existingBatchItem);
+    }
+
+    @Override
+    public Batch patchUpdateBatch(String restaurantCode, Long id, BatchDTO batchDTO, HashSet<String> propertiesToBeUpdated) {
+        Batch existingBatch = batchRepository.findByRestaurantCodeAndBatchNumber(restaurantCode, batchDTO.getBatchNumber());
+        if (existingBatch == null) {
+            throw new ResourceNotFoundException("Batch not found with restaurant code: " + restaurantCode + " and batch number: " + batchDTO.getBatchNumber());
+        }
+        GenericMapper<Batch,BatchDTO> batchMapper = MapperFactory.getMapper(Batch.class, BatchDTO.class);
+        Batch patchedBatch = batchMapper.toEntity(batchDTO);
+        patchedBatch.setRestaurant(restaurantRepository.findByRestaurantCode(restaurantCode).orElseThrow(() -> new RuntimeException("Restaurant not found")));
+        patchedBatch.setId(existingBatch.getId());
+        resolveRelationships(patchedBatch, batchDTO);
+        commonServiceImplUtil.copySelectedProperties(patchedBatch, existingBatch, propertiesToBeUpdated);
+        existingBatch.setUpdatedDttm(LocalDateTime.now());
+        batchRepository.save(existingBatch);
+        return mapToDTO(existingBatch, batchMapper);
+    }
+
+    private Batch mapToDTO(Batch batch, GenericMapper<Batch, BatchDTO> batchMapper) {
+        BatchDTO batchDTO = batchMapper.toDto(batch);
+        batchDTO.setOrderItemsDTO(batch.getBatchOrderItems().stream()
+                .map(batchOrderItem -> {
+                    OrderItem orderItem = batchOrderItem.getOrderItem();
+                    OrderItemDTO dto = new OrderItemDTO();
+                    BeanUtils.copyProperties(orderItem, dto);
+                    dto.setItemName(orderItem.getMenuItem() != null ?
+                            orderItem.getMenuItem().getMenuItemName() :
+                            orderItem.getCombo().getComboName());
+                    dto.setIsCombo(orderItem.getMenuItem() == null);
+                    return dto;
+                })
+                .collect(Collectors.toList()));
+//        batchDTO.setBatchConfigDTO(batch.getBatchConfig() != null ?
+//                batch.getBatchConfig().tobatchConfigDTO(): null);
+//        return dto;
+    }
+
+    @Override
+    public void deleteBatch(String restaurantCode, String batchNumber) {
+        Long restaurantId= restaurantRepository.findByRestaurantCode(restaurantCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found")).getId();
+        batchRepository.deleteByRestaurantIdAndBatchNumber(restaurantId, batchNumber);
+    }
+
+    private void resolveRelationships(Batch batch, BatchDTO batchDTO) {
+        if(batchDTO.getBatchConfigDTO() != null) {
+            BatchConfig batchConfig = batchConfigRepository.findBatchConfigByBatchConfigNumberAndRestaurantId(
+                    batchDTO.getBatchConfigDTO().getBatchConfigNumber(),
+                    batch.getRestaurant().getId());
+            batch.setBatchConfig(batchConfig);
+        }
+
+        if (batchDTO.getOrderItemsDTO() != null) {
+            batch.setOrderItemSet(batchDTO.getOrderItemsDTO().stream()
+                .map(orderItemDTO -> {
+                    OrderItem orderItem = new OrderItem();
+                    BeanUtils.copyProperties(orderItemDTO, orderItem);
+                    orderItem.setMenuItem(menuItemRepository.findByRestaurantIdAndMenuItemName(
+                        batch.getRestaurant().getId(), orderItemDTO.getMenuItemName()));
+                    orderItem.setCombo(comboRepository.findByRestaurantIdAndComboName(
+                        batch.getRestaurant().getId(), orderItemDTO.getItemName()));
+                    return orderItem;
+                })
+                .collect(Collectors.toSet()));
+        }
     }
 
     public Set<Batch> findByMenuItemIdAndRestaurantId(Long menuItemId, Long restaurantId) {

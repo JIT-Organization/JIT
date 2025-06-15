@@ -1,14 +1,13 @@
 package com.justintime.jit.controller;
 
 import com.justintime.jit.dto.ApiResponse;
-import com.justintime.jit.dto.CategoryDTO;
+import com.justintime.jit.dto.BatchDTO;
 import com.justintime.jit.dto.PatchRequest;
-import com.justintime.jit.entity.Category;
-import com.justintime.jit.service.CategoryService;
+import com.justintime.jit.entity.Batch;
+import com.justintime.jit.service.BatchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,40 +15,40 @@ import java.util.Optional;
 
 public class BatchController extends BaseController{
     @Autowired
-    private CategoryService categoryService;
+    private BatchService batchService;
 
     @GetMapping("/getAll/{restaurantCode}")
-    public ResponseEntity<ApiResponse<List<CategoryDTO>>> getAllCategories(@PathVariable String restaurantCode) {
-        return success(categoryService.getAllCategories(restaurantCode));
+    public ResponseEntity<ApiResponse<List<BatchDTO>>> getAllBatches(@PathVariable String restaurantCode) {
+        return success(batchService.getAllBatches(restaurantCode));
     }
 
-    @GetMapping("/{restaurantId}/{id}")
-    public ResponseEntity<ApiResponse<CategoryDTO>> getCategoryByRestaurantIdAndId(@PathVariable Long restaurantId, @PathVariable Long id) {
-        Optional<CategoryDTO> categoryDTO = categoryService.getCategoryByRestaurantIdAndId(restaurantId, id);
-        if(categoryDTO.isPresent()) {
-            return success(categoryDTO.get());
+    @GetMapping("/{restaurantCode}/{id}")
+    public ResponseEntity<ApiResponse<BatchDTO>> getBatchByRestaurantCodeAndId(@PathVariable String restaurantCode, @PathVariable Long id) {
+        Optional<BatchDTO> batchDTO = batchService.getBatchByRestaurantCodeAndId(restaurantCode, id);
+        if(batchDTO.isPresent()) {
+            return success(batchDTO.get());
         }
-        return error("Category doesnot exisit", HttpStatus.NOT_FOUND);
+        return error("Batch doesn't exist", HttpStatus.NOT_FOUND);
     }
 
-    @PostMapping
-    public ResponseEntity<ApiResponse<Category>> createCategory(@AuthenticationPrincipal Long restaurantId, @RequestBody CategoryDTO categoryDTO) {
-        return success(categoryService.createCategory(restaurantId,categoryDTO), "Category Created Successfully");
+    @PostMapping("/{restaurantCode}/{id}/")
+    public ResponseEntity<ApiResponse<Batch>> addBatch(@PathVariable String restaurantCode, @RequestBody BatchDTO batchDTO) {
+        return success(batchService.addBatch(restaurantCode,batchDTO), "Batch Created Successfully");
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Category> updateCategory(@AuthenticationPrincipal Long restaurantId,@PathVariable Long id, @RequestBody CategoryDTO categoryDTO) {
-        return ResponseEntity.ok(categoryService.updateCategory(restaurantId,id, categoryDTO));
+    @PutMapping("{restaurantCode}/{id}")
+    public ResponseEntity<Batch> updateBatch(@PathVariable String restaurantCode,@PathVariable Long id, @RequestBody BatchDTO batchDTO) {
+        return ResponseEntity.ok(batchService.updateBatch(restaurantCode,id, batchDTO));
     }
 
-    @PatchMapping("/{id}")
-    public ResponseEntity<ApiResponse<Category>> patchUpdateCategory(@AuthenticationPrincipal Long restaurantId,@PathVariable Long id, @RequestBody PatchRequest<CategoryDTO> payload) {
-        return success(categoryService.patchUpdateCategory(restaurantId,id, payload.getDto(), payload.getPropertiesToBeUpdated()));
+    @PatchMapping("{restaurantCode}/{id}")
+    public ResponseEntity<ApiResponse<Batch>> patchUpdateBatch(@PathVariable String restaurantCode,@PathVariable Long id, @RequestBody PatchRequest<BatchDTO> payload) {
+        return success(batchService.patchUpdateBatch(restaurantCode,id, payload.getDto(), payload.getPropertiesToBeUpdated()));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteCategory(@PathVariable Long id) {
-        categoryService.deleteCategory(id);
-        return ResponseEntity.ok("Category deleted successfully");
+    @DeleteMapping("/{restaurantCode}/{batchName}")
+    public ResponseEntity<String> deleteBatch(@PathVariable String restaurantCode,@PathVariable String batchName) {
+        batchService.deleteBatch(restaurantCode,batchName);
+        return ResponseEntity.ok("Batch deleted successfully");
     }
 }

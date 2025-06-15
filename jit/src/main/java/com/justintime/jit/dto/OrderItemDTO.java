@@ -18,4 +18,5 @@ public class OrderItemDTO {
     private String orderItemStatus;
     private String orderNumber;
     private List<String> batchNumber;
+    private String menuItemName;
 }

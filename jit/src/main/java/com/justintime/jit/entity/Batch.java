@@ -5,6 +5,7 @@ import com.justintime.jit.entity.ComboEntities.Combo;
 import com.justintime.jit.entity.Enums.BatchStatus;
 import com.justintime.jit.entity.Enums.OrderStatus;
 import com.justintime.jit.entity.MenuItem;
+import com.justintime.jit.entity.OrderEntities.OrderItem;
 import com.justintime.jit.entity.TimeInterval;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -49,8 +50,16 @@ public class Batch extends BaseEntity {
     @Column(name = "status", nullable = false)
     private BatchStatus status;
 
-    @OneToMany(mappedBy = "batch")
-    private Set<BatchOrderItem> batchOrderItems = new HashSet<>();
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "batch_order_item",
+            joinColumns = @JoinColumn(name = "batch_id"),
+            inverseJoinColumns = @JoinColumn(name = "order_item_id")
+    )
+    private Set<OrderItem> orderItemSet = new HashSet<>();
+
+//    @OneToMany(mappedBy = "batch")
+//    private Set<BatchOrderItem> batchOrderItems = new HashSet<>();
 
 //        public OrderItem(OrderItem other) {
 //                this.id = null; // New instance should not have the same ID

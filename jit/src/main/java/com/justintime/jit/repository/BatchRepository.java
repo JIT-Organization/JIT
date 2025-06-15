@@ -3,11 +3,13 @@ package com.justintime.jit.repository;
 import com.justintime.jit.entity.Batch;
 import com.justintime.jit.entity.BatchConfig;
 import com.justintime.jit.entity.Enums.BatchStatus;
+import org.hibernate.query.NativeQuery;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Repository
@@ -60,6 +62,15 @@ public interface BatchRepository extends BaseRepository<Batch, Long> {
     @Query("SELECT COUNT(b) FROM Batch b WHERE b.batchConfig = :batchConfig AND b.status = :status")
     Long countByBatchConfigAndStatus(@Param("batchConfig") BatchConfig batchConfig, @Param("status") BatchStatus status);
 
+    List<Batch> findByRestaurantId(Long restaurantId);
+
+    @Query(value = "SELECT b from Batch b join restaurant r on b.restaurant.id = r.id where r.restaurantCode = :restaurantCode and b.batchNumber = :batchNumber",nativeQuery = true)
+    Batch findByRestaurantCodeAndBatchNumber(String restaurantCode,String batchNumber);
+
+    void deleteByRestaurantIdAndBatchNumber(Long restaurantId,String batchNumber);
+
+    @Query(value = "SELECT b FROM Batch b WHERE b.batchConfig.batchConfigNumber = :batchConfigNumber AND b.batchConfig.restaurant.id = :id",nativeQuery = true)
+    Optional<Object> findBatchConfigByBatchConfigNumberAndRestaurantId(String batchConfigNumber, Long id);
 //    @Query("SELECT b FROM Batch b WHERE b.menuItem.id = :menuItemId AND b.batchConfig.restaurant.id = :restaurantId AND b.status = :status")
 //    Set<Batch> findByMenuItemIdAndRestaurantIdAndStatus(
 //        @Param("menuItemId") Long menuItemId,

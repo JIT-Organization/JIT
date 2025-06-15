@@ -35,5 +35,12 @@ public interface ComboRepository extends BaseRepository<Combo, Long> {
             "AND r.restaurant_code = :restaurantCode ",
             nativeQuery = true)
     Combo findComboByComboNamesAndRestaurantCode(@Param("comboName") String comboName, @Param("restaurantCode") String restaurantCode);
+
+    @Query(value = "SELECT c.* FROM combo c " +
+            "JOIN restaurant r ON c.restaurant_id = r.id " +
+            "WHERE c.combo_name = :comboName " +
+            "AND r.id = :restaurantId ",
+            nativeQuery = true)
+    Combo findByRestaurantIdAndComboName(Long id, String itemName);
 }
 

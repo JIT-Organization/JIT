@@ -57,8 +57,13 @@ public class OrderItem extends BaseEntity {
         @JoinColumn(name = "time_interval_id")
         private TimeInterval timeInterval;
 
-        @OneToMany(mappedBy = "orderItem")
-        private Set<BatchOrderItem> batchOrderItems = new HashSet<>();
+        @ManyToMany(cascade = CascadeType.ALL)
+        @JoinTable(
+                name = "batch_order_item",
+                joinColumns = @JoinColumn(name = "order_item_id"),
+                inverseJoinColumns = @JoinColumn(name = "batch_id")
+        )
+        private Set<Batch> batchSet = new HashSet<>();
 
         @Column(name = "max_time_limit_to_start")
         private LocalDateTime maxTimeLimitToStart;

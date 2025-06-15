@@ -14,6 +14,7 @@ import java.util.List;
 public class BatchConfigDTO {
     private Long id;
     private String batchConfigName;
+    private String batchConfigNumber;
     private String maxCount;
     private Integer estdBatchPrepTime;
     private List<String> menuItemNames;  // Store only the names of menu items
