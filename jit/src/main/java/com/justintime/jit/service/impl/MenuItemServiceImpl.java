@@ -122,9 +122,10 @@ public class MenuItemServiceImpl extends BaseServiceImpl<MenuItem, Long> impleme
 
     @Override
     public List<MenuItemDTO> getMenuItemsByRestaurantId(String restaurantCode, Sort sortBy, String priceRange, String category, Boolean onlyVeg, Boolean onlyForCombos) {
-        Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode)
-                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found with number: " + restaurantCode));
-        List<MenuItem> menuItems = menuItemRepository.findByRestaurantId(restaurant.getId());
+        List<MenuItem> menuItems = menuItemRepository.findByRestaurantCode(restaurantCode);
+        if (menuItems.isEmpty()) {
+            throw new ResourceNotFoundException("Restaurant not found with code: " + restaurantCode);
+        }
         GenericMapper<MenuItem, MenuItemDTO> mapper = MapperFactory.getMapper(MenuItem.class, MenuItemDTO.class);
 //        return FilterItemsUtil.filterAndSortItems(menuItems, restaurantId, sortBy, priceRange, category, onlyVeg, onlyForCombos, orderItemRepository, mapper, MenuItemDTO.class);
         return menuItems.stream().map(menuItem -> mapToDTO(menuItem, mapper)).toList();
