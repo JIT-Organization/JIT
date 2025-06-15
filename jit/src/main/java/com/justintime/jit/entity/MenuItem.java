@@ -51,8 +51,8 @@ public class MenuItem extends BaseEntity implements FilterableItem {
     @Column(name = "offer_to")
     private LocalDateTime offerTo;
 
-    @OneToMany(mappedBy = "menuItem", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<MenuItemAvailableDay> availability = new HashSet<>();
+    @Column(name = "availability")
+    private String availability;
 
     @Column(name = "stock", columnDefinition = "INT DEFAULT 0")
     private Integer stock = 0;
@@ -76,8 +76,6 @@ public class MenuItem extends BaseEntity implements FilterableItem {
             uniqueConstraints = @UniqueConstraint(columnNames = {"menu_item_id", "time_interval_id"})
     )
     private Set<TimeInterval> timeIntervalSet = new HashSet<>();
-
-
 
     @Column(name = "preparation_time")
     private Integer preparationTime;
@@ -127,6 +125,21 @@ public class MenuItem extends BaseEntity implements FilterableItem {
     @Override
     public Boolean isCombo() {
         return false;
+    }
+
+    public Set<String> getAvailability() {
+        if (this.availability == null || this.availability.isBlank()) {
+            return new HashSet<>();
+        }
+        return new HashSet<>(List.of(this.availability.split(",")));
+    }
+
+    public void setAvailability(Set<String> days) {
+        if (days == null || days.isEmpty()) {
+            this.availability = null;
+        } else {
+            this.availability = String.join(",", days);
+        }
     }
 
 //    // Copy Constructor
