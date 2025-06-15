@@ -33,7 +33,7 @@ public class BatchConfig extends BaseEntity {
         joinColumns = @JoinColumn(name = "batch_config_id"),
         inverseJoinColumns = @JoinColumn(name = "cook_id")
     )
-    private Set<Cook> cooks = new HashSet<>();
+    private Set<User> cooks = new HashSet<>();
 
     @OneToMany(mappedBy = "batchConfig")
     private Set<MenuItem> menuItems = new HashSet<>();

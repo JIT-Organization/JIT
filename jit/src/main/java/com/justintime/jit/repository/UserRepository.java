@@ -5,8 +5,10 @@ import com.justintime.jit.entity.User;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import com.justintime.jit.entity.MenuItem;
 
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface UserRepository extends BaseRepository<User, Long> {
@@ -17,19 +19,28 @@ public interface UserRepository extends BaseRepository<User, Long> {
     // Find a user by email
     User findByEmail(String email);
 
-    List<User> findByUsername(String userName);
+    List<User> findByUserName(String userName);
 
     @Query(value = "SELECT u.* FROM users u " +
             "JOIN user_restaurant ur ON u.id = ur.user_id " +
             "JOIN restaurant r ON ur.restaurant_id = r.id " +
-            "WHERE r.restaurant_code = :restaurantCode and u.user_name = :username", nativeQuery = true)
-    User findByRestaurantCodeAndUsername(@Param("restaurantCode") String restaurantCode, @Param("username") String userName);
+            "WHERE r.id = :restaurantId AND u.role = :role AND u.user_name = :userName", nativeQuery = true)
+    User findByRestaurantIdAndRoleAndUserName(
+            @Param("restaurantId") Long restaurantId,
+            @Param("role") Role role,
+            @Param("userName") String userName);
 
     @Query(value = "SELECT r.id FROM restaurant r " +
             "JOIN user_restaurant ur ON r.id = ur.restaurant_id " +
             "JOIN users u ON ur.user_id = u.id " +
             "WHERE u.email = :email", nativeQuery = true)
     List<Long> findRestaurantIdsByEmail(@Param("email") String email);
+
+    @Query("SELECT u FROM User u JOIN u.restaurants r " +
+            "WHERE r.id = :restaurantId AND u.role = :role AND u.userName IN :cookNames")
+    Set<User> findCooksByRestaurantIdAndRoleAndUserNames(@Param("restaurantId") Long restaurantId,
+                                                          @Param("role") Role role,
+                                                          @Param("cookNames") Set<String> cookNames);
 
     @Query(value = "SELECT r.restaurant_code FROM restaurant r " +
             "JOIN user_restaurant ur ON r.id = ur.restaurant_id " +
@@ -42,4 +53,14 @@ public interface UserRepository extends BaseRepository<User, Long> {
             "JOIN restaurant r ON ur.restaurant_id = r.id " +
             "WHERE r.restaurant_code = :restaurantCode", nativeQuery = true)
     List<User> findAllByRestaurantCode(@Param("restaurantCode") String restaurantCode);
+
+    @Query(value = "SELECT mi.* FROM menu_item mi " +
+           "JOIN menu_item_cook mic ON mi.id = mic.menu_item_id " +
+           "WHERE mic.cook_id = :cookId", nativeQuery = true)
+    Set<MenuItem> findMenuItemsByCookId(@Param("cookId") Long cookId);
+
+    @Query(value = "SELECT u.* FROM users u " +
+            "JOIN user_restaurant ur ON u.id = ur.user_id " +
+            "WHERE ur.restaurant_id = :restaurantId AND u.user_name = :userName", nativeQuery = true)
+    User findByRestaurantIdAndUserName(@Param("restaurantId") Long restaurantId, @Param("userName") String userName);
 }

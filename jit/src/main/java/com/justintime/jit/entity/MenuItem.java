@@ -1,9 +1,5 @@
 package com.justintime.jit.entity;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.justintime.jit.entity.ComboEntities.ComboItem;
 import com.justintime.jit.entity.OrderEntities.OrderItem;
 import com.justintime.jit.util.filter.FilterableItem;
@@ -11,9 +7,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
 
 import java.math.BigDecimal;
@@ -58,6 +51,9 @@ public class MenuItem extends BaseEntity implements FilterableItem {
     @Column(name = "offer_to")
     private LocalDateTime offerTo;
 
+    @OneToMany(mappedBy = "menuItem", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<MenuItemAvailableDay> availability = new HashSet<>();
+
     @Column(name = "stock", columnDefinition = "INT DEFAULT 0")
     private Integer stock = 0;
 
@@ -68,9 +64,9 @@ public class MenuItem extends BaseEntity implements FilterableItem {
     @JoinTable(
             name = "menu_item_cook",
             joinColumns = @JoinColumn(name = "menu_item_id"),
-            inverseJoinColumns = @JoinColumn(name = "cook_id")
+            inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private Set<Cook> cookSet = new HashSet<>();
+    private Set<User> cookSet = new HashSet<>();
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
@@ -80,6 +76,8 @@ public class MenuItem extends BaseEntity implements FilterableItem {
             uniqueConstraints = @UniqueConstraint(columnNames = {"menu_item_id", "time_interval_id"})
     )
     private Set<TimeInterval> timeIntervalSet = new HashSet<>();
+
+
 
     @Column(name = "preparation_time")
     private Integer preparationTime;

@@ -1,12 +1,12 @@
 package com.justintime.jit.dto;
 
 import com.justintime.jit.entity.Category;
-import com.justintime.jit.entity.Cook;
 import com.justintime.jit.entity.TimeInterval;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -34,6 +34,7 @@ public class MenuItemDTO {
     private LocalDateTime updatedDttm;
     private Set<String> categorySet;
     private Set<TimeIntervalDTO> timeIntervalSet;
+    private Set<DayOfWeek> availability;
     private String batchConfigNumber;
     private Set<String> cookSet;
 }

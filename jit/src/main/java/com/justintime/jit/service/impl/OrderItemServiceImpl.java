@@ -1,10 +1,13 @@
 package com.justintime.jit.service.impl;
 
 import com.justintime.jit.entity.BaseEntity;
+import com.justintime.jit.entity.Enums.Role;
 import com.justintime.jit.entity.OrderEntities.OrderItem;
+import com.justintime.jit.entity.User;
+import com.justintime.jit.exception.ResourceNotFoundException;
 import com.justintime.jit.repository.OrderRepo.OrderItemRepository;
+import com.justintime.jit.repository.UserRepository;
 import com.justintime.jit.service.OrderItemService;
-import com.justintime.jit.repository.CookRepository;
 import com.justintime.jit.repository.RestaurantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,7 +23,7 @@ public class OrderItemServiceImpl extends BaseServiceImpl<OrderItem,Long> implem
         private OrderItemRepository orderItemRepository;
 
         @Autowired
-        private CookRepository cookRepository;
+        private UserRepository userRepository;
 
         @Autowired
         private RestaurantRepository restaurantRepository;
@@ -52,10 +55,10 @@ public class OrderItemServiceImpl extends BaseServiceImpl<OrderItem,Long> implem
                     .map(BaseEntity::getId)
                     .orElseThrow(() -> new RuntimeException("Restaurant not found with code: " + restaurantCode));
                     
-            Long cookId = cookRepository.findByRestaurantIdAndName(restaurantId, cookName)
-                    .map(BaseEntity::getId)
-                    .orElseThrow(() -> new RuntimeException("Cook not found with name: " + cookName + " and restaurant code: " + restaurantCode));
-                    
-            return getOrderItemsForCook(cookId);
+            User cook = userRepository.findByRestaurantIdAndRoleAndUserName(restaurantId, Role.COOK,cookName);
+            if (null==cook){
+                throw new ResourceNotFoundException("Cook not found for restaurant " + restaurantCode);
+            }
+            return getOrderItemsForCook(cook.getId());
         }
 }

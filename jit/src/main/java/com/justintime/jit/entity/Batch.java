@@ -44,7 +44,7 @@ public class Batch extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "cook_id")
-    private Cook cook;
+    private User cook;
 
     @Column(name = "status", nullable = false)
     private BatchStatus status;

@@ -56,7 +56,7 @@ public class UserController extends BaseController {
     // GET: Search users by username (or other parameters)
     @GetMapping("/search")
     public ResponseEntity<List<User>> searchUsers(@RequestParam String userName) {
-        List<User> users = userService.findByUsername(userName);
+        List<User> users = userService.findByUserName(userName);
         return ResponseEntity.ok(users);
     }
 }

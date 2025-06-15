@@ -3,6 +3,7 @@ package com.justintime.jit.service.impl;
 import com.justintime.jit.dto.MenuItemDTO;
 import com.justintime.jit.dto.TimeIntervalDTO;
 import com.justintime.jit.entity.*;
+import com.justintime.jit.entity.Enums.Role;
 import com.justintime.jit.entity.Enums.Sort;
 import com.justintime.jit.exception.ResourceNotFoundException;
 import com.justintime.jit.repository.*;
@@ -28,6 +29,7 @@ public class MenuItemServiceImpl extends BaseServiceImpl<MenuItem, Long> impleme
     private final MenuItemRepository menuItemRepository;
     private final CategoryRepository categoryRepository;
     private final OrderItemRepository orderItemRepository;
+    private final UserRepository userRepository;
     private final TimeIntervalRepository timeIntervalRepository;
     private final FilterItemsUtil filterItemsUtil;
     private final RestaurantRepository restaurantRepository;
@@ -40,7 +42,8 @@ public class MenuItemServiceImpl extends BaseServiceImpl<MenuItem, Long> impleme
                                OrderItemRepository orderItemRepository,
                                TimeIntervalRepository timeIntervalRepository,
                                FilterItemsUtil filterItemsUtil,
-                               RestaurantRepository restaurantRepository) {
+                               RestaurantRepository restaurantRepository,
+                               UserRepository userRepository) {
 
         this.menuItemRepository = menuItemRepository;
         this.categoryRepository = categoryRepository;
@@ -48,6 +51,7 @@ public class MenuItemServiceImpl extends BaseServiceImpl<MenuItem, Long> impleme
         this.timeIntervalRepository = timeIntervalRepository;
         this.filterItemsUtil = filterItemsUtil;
         this.restaurantRepository = restaurantRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -92,11 +96,12 @@ public class MenuItemServiceImpl extends BaseServiceImpl<MenuItem, Long> impleme
 
     @Override
     public MenuItemDTO patchUpdateMenuItem(String restaurantCode, String menuItemName, MenuItemDTO menuItemDTO, HashSet<String> propertiesToBeUpdated) {
-        MenuItem existingItem = menuItemRepository.findByRestaurantCodeAndMenuItemName(restaurantCode, menuItemName)
-                .orElseThrow(() -> new RuntimeException("MenuItem not found"));
+        Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
+        MenuItem existingItem = menuItemRepository.findByRestaurantIdAndMenuItemName(restaurant.getId(), menuItemName);
         GenericMapper<MenuItem, MenuItemDTO> menuItemMapper = MapperFactory.getMapper(MenuItem.class, MenuItemDTO.class);
         MenuItem patchedItem = menuItemMapper.toEntity(menuItemDTO);
-        patchedItem.setRestaurant(restaurantRepository.findByRestaurantCode(restaurantCode).orElseThrow(() -> new RuntimeException("Restaurant not found")));
+        patchedItem.setRestaurant(restaurant);
         resolveRelationships(patchedItem, menuItemDTO);
         commonServiceImplUtil.copySelectedProperties(patchedItem, existingItem, propertiesToBeUpdated);
         existingItem.setUpdatedDttm(LocalDateTime.now());
@@ -106,12 +111,12 @@ public class MenuItemServiceImpl extends BaseServiceImpl<MenuItem, Long> impleme
 
     @Override
     public void deleteMenuItem(String restaurantCode, String menuItemName) {
-        MenuItem menuItem = menuItemRepository.findByRestaurantCodeAndMenuItemName(restaurantCode, menuItemName)
-                .orElseThrow(() -> new ResourceNotFoundException("Menu item not found"));
+//        MenuItem menuItem = menuItemRepository.findByRestaurantCodeAndMenuItemName(restaurantCode, menuItemName)
+//                .orElseThrow(() -> new ResourceNotFoundException("Menu item not found"));
         Long restaurantId = restaurantRepository.findByRestaurantCode(restaurantCode)
                 .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found")).getId();
-        menuItem.getCategorySet().clear();
-        menuItem.getTimeIntervalSet().clear();
+//        menuItem.getCategorySet().clear();
+//        menuItem.getTimeIntervalSet().clear();
 
         menuItemRepository.deleteByRestaurantIdAndMenuItemName(restaurantId, menuItemName);
     }
@@ -139,6 +144,10 @@ public class MenuItemServiceImpl extends BaseServiceImpl<MenuItem, Long> impleme
                     menuItemDTO.getCategorySet(), menuItem.getRestaurant().getId());
             menuItem.setCategorySet(categories);
         }
+        if (menuItemDTO.getCookSet()!=null){
+            Set<User> cooks = userRepository.findCooksByRestaurantIdAndRoleAndUserNames(menuItem.getRestaurant().getId(), Role.COOK ,menuItemDTO.getCookSet());
+            menuItem.setCookSet(cooks);
+        }
         if (menuItemDTO.getTimeIntervalSet() != null) {
             menuItem.setTimeIntervalSet(menuItemDTO.getTimeIntervalSet().stream()
                     .map(dto -> timeIntervalRepository.findByStartTimeAndEndTime(dto.getStartTime(), dto.getEndTime())
@@ -150,6 +159,24 @@ public class MenuItemServiceImpl extends BaseServiceImpl<MenuItem, Long> impleme
                             }))
                     .collect(Collectors.toSet()));
         }
+        if (menuItemDTO.getAvailability() != null) {
+            List<MenuItemAvailableDay> availableDayEntities = menuItemDTO.getAvailability().stream()
+                    .map(dayOfWeek -> {
+                        MenuItemAvailableDay availableDay = new MenuItemAvailableDay();
+                        availableDay.setDay(dayOfWeek); // Assuming `DayOfWeek` is the field type
+                        availableDay.setMenuItem(menuItem);
+                        return availableDay;
+                    })
+                    .toList();
+
+            if (menuItem.getAvailability() == null) {
+                menuItem.setAvailability(new HashSet<>());
+            } else {
+                menuItem.getAvailability().clear();
+            }
+            menuItem.getAvailability().addAll(availableDayEntities);
+        }
+
     }
 
     public static Set<TimeIntervalDTO> convertTimeIntervals(Set<TimeInterval> timeIntervalSet) {

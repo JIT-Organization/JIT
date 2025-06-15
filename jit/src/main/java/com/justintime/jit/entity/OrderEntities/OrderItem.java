@@ -8,7 +8,6 @@ import com.justintime.jit.entity.ComboEntities.Combo;
 import com.justintime.jit.entity.Enums.OrderItemStatus;
 import com.justintime.jit.entity.Enums.OrderStatus;
 import com.justintime.jit.util.CodeNumberGenerator;
-import com.justintime.jit.entity.Cook;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -65,7 +64,7 @@ public class OrderItem extends BaseEntity {
 
         @ManyToOne
         @JoinColumn(name = "assigned_cook_id")
-        private Cook cook;
+        private User cook;
 
         @PrePersist
         @PreUpdate

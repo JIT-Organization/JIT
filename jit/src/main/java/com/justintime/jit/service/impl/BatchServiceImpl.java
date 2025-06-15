@@ -6,12 +6,14 @@ import com.justintime.jit.dto.OrderItemDTO;
 import com.justintime.jit.entity.*;
 import com.justintime.jit.entity.Enums.BatchStatus;
 import com.justintime.jit.entity.Enums.OrderType;
+import com.justintime.jit.entity.Enums.Role;
 import com.justintime.jit.entity.OrderEntities.OrderItem;
+import com.justintime.jit.exception.ResourceNotFoundException;
 import com.justintime.jit.repository.BatchOrderItemRepository;
 import com.justintime.jit.repository.BatchRepository;
-import com.justintime.jit.repository.CookRepository;
 import com.justintime.jit.repository.OrderRepo.OrderItemRepository;
 import com.justintime.jit.repository.RestaurantRepository;
+import com.justintime.jit.repository.UserRepository;
 import com.justintime.jit.service.BatchService;
 import com.justintime.jit.util.mapper.GenericMapper;
 import com.justintime.jit.util.mapper.MapperFactory;
@@ -49,7 +51,7 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
     private RestaurantRepository restaurantRepository;
 
     @Autowired
-    private CookRepository cookRepository;
+    private UserRepository userRepository;
     
     @Autowired
     private OrderItemRepository orderItemRepository;
@@ -222,9 +224,11 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
             .orElseThrow(() -> new RuntimeException("Restaurant not found with code: " + restaurantCode));
             
         // Get cook for this restaurant
-        Cook cook = cookRepository.findByRestaurantIdAndName(restaurant.getId(), cookName)
-            .orElseThrow(() -> new RuntimeException("Cook not found for restaurant: " + restaurantCode));
-            
+        User cook = userRepository.findByRestaurantIdAndRoleAndUserName(restaurant.getId(), Role.COOK, cookName)
+;
+        if (null==cook){
+            throw new ResourceNotFoundException("Cook not found for restaurant " + restaurantCode);
+        }
         // Get all batch configs for this cook
         Set<BatchConfig> cookBatchConfigs = cook.getBatchConfigs();
         List<String> batchConfigNumbers = cookBatchConfigs.stream()
@@ -351,8 +355,11 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
 
     public List<BatchDTO> getBatchesByRestaurantCodeAndCookName(String restaurantCode, String cookName) {
         Optional<Restaurant> restaurant = restaurantRepository.findByRestaurantCode(restaurantCode);
-        Optional<Cook> cook = cookRepository.findByRestaurantIdAndName(restaurant.orElseThrow().getId(), cookName);
-        Set<MenuItem> menuItems = cookRepository.findMenuItemsByCookId(cook.orElseThrow().getId());
+        User cook = userRepository.findByRestaurantIdAndRoleAndUserName(restaurant.orElseThrow().getId(), Role.COOK, cookName);
+        if (null==cook){
+            throw new ResourceNotFoundException("Cook not found for restaurant " + restaurantCode);
+        }
+        Set<MenuItem> menuItems = userRepository.findMenuItemsByCookId(cook.getId());
         
         GenericMapper<Batch, BatchDTO> batchMapper = MapperFactory.getMapper(Batch.class, BatchDTO.class);
         GenericMapper<OrderItem, OrderItemDTO> orderItemMapper = MapperFactory.getMapper(OrderItem.class, OrderItemDTO.class);

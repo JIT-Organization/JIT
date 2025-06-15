@@ -4,7 +4,6 @@ import com.justintime.jit.dto.ComboDTO;
 import com.justintime.jit.dto.MenuItemDTO;
 import com.justintime.jit.dto.TimeIntervalDTO;
 import com.justintime.jit.entity.ComboEntities.Combo;
-import com.justintime.jit.entity.Cook;
 import com.justintime.jit.entity.Enums.Sort;
 import com.justintime.jit.entity.MenuItem;
 import com.justintime.jit.entity.Category;
