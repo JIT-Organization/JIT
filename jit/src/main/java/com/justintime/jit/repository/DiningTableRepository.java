@@ -2,7 +2,6 @@ package com.justintime.jit.repository;
 
 import com.justintime.jit.dto.DiningTableDTO;
 import com.justintime.jit.entity.DiningTable;
-import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

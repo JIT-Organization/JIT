@@ -5,7 +5,6 @@ import com.justintime.jit.dto.LoginRequestDto;
 import com.justintime.jit.entity.User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.security.core.userdetails.UserDetailsService;
 
 import javax.security.auth.login.LoginException;
 

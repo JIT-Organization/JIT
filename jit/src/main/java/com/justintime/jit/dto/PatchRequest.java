@@ -1,9 +1,9 @@
 package com.justintime.jit.dto;
+
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.HashSet;
-import java.util.List;
 
 @Getter
 @Setter

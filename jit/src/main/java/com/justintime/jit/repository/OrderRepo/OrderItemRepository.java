@@ -1,15 +1,13 @@
 package com.justintime.jit.repository.OrderRepo;
 
-import com.justintime.jit.entity.MenuItem;
-import com.justintime.jit.entity.OrderEntities.OrderItem;
 import com.justintime.jit.entity.BatchConfig;
+import com.justintime.jit.entity.OrderEntities.OrderItem;
 import com.justintime.jit.repository.BaseRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 
 @Repository

@@ -1,6 +1,5 @@
 package com.justintime.jit.service;
 
-import com.justintime.jit.entity.ComboEntities.Combo;
 import com.justintime.jit.entity.ComboEntities.ComboItem;
 
 import java.util.List;

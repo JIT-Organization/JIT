@@ -1,11 +1,8 @@
 package com.justintime.jit.service.impl;
 
 
-import com.justintime.jit.entity.Category;
-import com.justintime.jit.entity.ComboEntities.Combo;
 import com.justintime.jit.entity.ComboEntities.ComboItem;
 import com.justintime.jit.repository.ComboRepo.ComboItemRepository;
-import com.justintime.jit.repository.ComboRepo.ComboRepository;
 import com.justintime.jit.service.ComboItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

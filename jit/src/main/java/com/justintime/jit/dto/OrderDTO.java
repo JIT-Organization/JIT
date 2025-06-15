@@ -2,7 +2,6 @@ package com.justintime.jit.dto;
 
 import com.justintime.jit.entity.Enums.OrderStatus;
 import com.justintime.jit.entity.Enums.PaymentStatus;
-import com.justintime.jit.entity.OrderEntities.OrderItem;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

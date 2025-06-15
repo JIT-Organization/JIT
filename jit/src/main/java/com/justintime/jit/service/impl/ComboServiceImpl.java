@@ -2,18 +2,15 @@ package com.justintime.jit.service.impl;
 
 import com.justintime.jit.dto.ComboDTO;
 import com.justintime.jit.dto.ComboItemDTO;
-import com.justintime.jit.dto.MenuItemDTO;
+import com.justintime.jit.entity.Category;
 import com.justintime.jit.entity.ComboEntities.Combo;
 import com.justintime.jit.entity.Enums.Sort;
-import com.justintime.jit.entity.MenuItem;
 import com.justintime.jit.repository.ComboRepo.ComboRepository;
 import com.justintime.jit.repository.OrderRepo.OrderItemRepository;
 import com.justintime.jit.service.ComboService;
-import com.justintime.jit.entity.Category;
 import com.justintime.jit.util.filter.FilterItemsUtil;
 import com.justintime.jit.util.mapper.GenericMapper;
 import com.justintime.jit.util.mapper.MapperFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
