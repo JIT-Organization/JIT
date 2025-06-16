@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface BatchOrderItemRepository extends JpaRepository<BatchOrderItem, BatchOrderItemId> {
+public interface BatchOrderItemRepository extends BaseRepository<BatchOrderItem, BatchOrderItemId> {
 } 

@@ -66,9 +66,6 @@ public class Restaurant extends BaseEntity{
 
         @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
         private List<Combo> combos;
-//
-//        @OneToMany(mappedBy = "restaurant")
-//        private List<User> cooks;
 
         @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
         private List<Order> orders;

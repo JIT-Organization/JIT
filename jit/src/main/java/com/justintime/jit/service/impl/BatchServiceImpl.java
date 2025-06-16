@@ -9,12 +9,10 @@ import com.justintime.jit.entity.Enums.OrderType;
 import com.justintime.jit.entity.Enums.Role;
 import com.justintime.jit.entity.OrderEntities.OrderItem;
 import com.justintime.jit.exception.ResourceNotFoundException;
-import com.justintime.jit.repository.BatchOrderItemRepository;
-import com.justintime.jit.repository.BatchRepository;
+import com.justintime.jit.repository.*;
 import com.justintime.jit.repository.OrderRepo.OrderItemRepository;
-import com.justintime.jit.repository.RestaurantRepository;
-import com.justintime.jit.repository.UserRepository;
 import com.justintime.jit.service.BatchService;
+import com.justintime.jit.util.constants.JITConstants;
 import com.justintime.jit.util.mapper.GenericMapper;
 import com.justintime.jit.util.mapper.MapperFactory;
 import jakarta.transaction.Transactional;
@@ -57,6 +55,9 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
     private OrderItemRepository orderItemRepository;
 
     @Autowired
+    private BatchConfigRepository batchConfigRepository;
+
+    @Autowired
     private BatchOrderItemRepository batchOrderItemRepository;
 
     private static final int BUFFER_TIME_MINUTES = 5;
@@ -72,7 +73,7 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
         if (cookCount > 0) {
             unassignedTime = (unassignedBatches * prepTime) / cookCount;
         } else {
-            unassignedTime = Integer.MAX_VALUE; // No cooks available
+            unassignedTime = JITConstants.INT_MAX_VAL; // No cooks available
         }
         
         return assignedTime + unassignedTime;
@@ -313,7 +314,7 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
             // Calculate available quantity based on time constraints
             Long assignedBatchesCount = orderItemRepository.countAssignedBatchesForCookAndRestaurant(
                 batchConfig, "ASSIGNED", cook.getId(), restaurant.getId());
-            Long unassignedBatchesCount = orderItemRepository.countUnassignedBatchesForBatchConfigAndRestaurant(
+            Long unassignedBatchesCount = batchConfigRepository.countUnassignedBatchesForBatchConfigAndRestaurant(
                 batchConfig, "UNASSIGNED", restaurant.getId());
             int cookCount = batchConfig.getCooks().size();
 

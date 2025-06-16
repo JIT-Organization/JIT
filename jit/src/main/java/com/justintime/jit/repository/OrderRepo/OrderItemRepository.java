@@ -69,16 +69,6 @@ public interface OrderItemRepository extends BaseRepository<OrderItem,Long> {
         @Param("restaurantId") Long restaurantId
     );
 
-    @Query("SELECT COUNT(b) FROM Batch b " +
-           "WHERE b.batchConfig = :batchConfig " +
-           "AND b.status = :status " +
-           "AND b.batchConfig.restaurant.id = :restaurantId")
-    Long countUnassignedBatchesForBatchConfigAndRestaurant(
-        @Param("batchConfig") BatchConfig batchConfig,
-        @Param("status") String status,
-        @Param("restaurantId") Long restaurantId
-    );
-
 //    @Query("SELECT oi FROM OrderItem oi WHERE (oi.assignedCookId = :cookId) OR (oi.assignedCookId IS NULL AND (oi.order.orderDate IS NULL OR oi.order.orderDate - oi.preparationTime <= :now))")
 //    List<OrderItem> findOrderItemsForCook(@Param("cookId") Long cookId, @Param("now") LocalDateTime now);
 

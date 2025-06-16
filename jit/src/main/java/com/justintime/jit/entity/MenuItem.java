@@ -77,7 +77,7 @@ public class MenuItem extends BaseEntity implements FilterableItem {
     )
     private Set<TimeInterval> timeIntervalSet = new HashSet<>();
 
-    @Column(name = "preparation_time")
+    @Column(name = "preparation_time", nullable = false)
     private Integer preparationTime;
 
     @Column(name = "is_preparation_time_for_single_menu_item", length=1)
