@@ -38,7 +38,7 @@ const CustomizeDialog = ({ isOpen, item, onSave, onClose }) => {
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-4 space-y-4">
         <div className="flex justify-between items-center border-b pb-2">
-          <h3 className="text-lg font-semibold">Customize: {item.name}</h3>
+          <h3 className="text-lg font-semibold">Customize: {item.menuItemName}</h3>
           <button onClick={onClose} className="text-gray-500 text-xl">×</button>
         </div>
 
@@ -98,7 +98,7 @@ const CustomizeDialog = ({ isOpen, item, onSave, onClose }) => {
             Cancel
           </button>
           <button
-            onClick={() => !isQtyExceeded && onSave(item.id, noteGroups)}
+            onClick={() => !isQtyExceeded && onSave(item.menuItemName, noteGroups)}
             disabled={isQtyExceeded}
             className="px-3 py-1 bg-blue-600 text-white rounded text-sm disabled:opacity-50"
           >

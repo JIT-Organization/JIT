@@ -24,7 +24,7 @@ const FoodCard = ({
       return (
         <Button className="bg-green-500 w-full" onClick={(e) => {
           e.stopPropagation();
-          onActionClick?.(food.id, "start");
+          onActionClick?.(food.menuItemName, "start");
         }}>
           Start Cooking
         </Button>
@@ -34,7 +34,7 @@ const FoodCard = ({
       return (
         <Button className="bg-red-700 w-full" onClick={(e) => {
           e.stopPropagation();
-          onActionClick?.(food.id, "accept");
+          onActionClick?.(food.menuItemName, "accept");
         }}>
           Accept Order
         </Button>
@@ -45,11 +45,11 @@ const FoodCard = ({
 
   return (
     <Card className="w-full border-2 border-yellow-400 rounded-xl overflow-hidden shadow hover:shadow-md transition-all relative">
-      <CardHeader className="relative p-0" onClick={() => mode === "create" && setIsEditable(true)}>
+      <CardHeader className="relative p-0" onClick={() => mode === "create" && setIsEditable(false)}>
         <div className="relative h-32 w-full">
           <Image
             src={food.image || "https://images.pexels.com/photos/1860208/pexels-photo-1860208.jpeg?cs=srgb&dl=cooked-food-1860208.jpg&fm=jpg"}
-            alt={food.menuItemName ?? food.itemName}
+            alt={food.menuItemName ?? food.menuItemName}
             layout="fill"
             objectFit="cover"
             className="rounded-t-xl"
@@ -82,7 +82,7 @@ const FoodCard = ({
                   className="px-2 py-1"
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleUpdateQty(food.id, "decrement");
+                    handleUpdateQty(food.menuItemName, "decrement");
                   }}
                 >
                   –
@@ -94,7 +94,7 @@ const FoodCard = ({
                   className="px-2 py-1"
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleUpdateQty(food.id, "increment");
+                    handleUpdateQty(food.menuItemName, "increment");
                   }}
                 >
                   +
@@ -106,7 +106,7 @@ const FoodCard = ({
                 size="xs"
                 onClick={(e) => {
                   e.stopPropagation();
-                  openCustomizeDialog(food.id);
+                  openCustomizeDialog(food.menuItemName);
                 }}
                 className="mt-2 text-blue-600 hover:bg-blue-50 text-xs px-2 py-0.5 rounded-full shadow"
               >
@@ -117,9 +117,9 @@ const FoodCard = ({
         </div>
       </CardHeader>
 
-      <CardContent className="p-3 space-y-1" onClick={() => mode === "create" && setIsEditable(false)}>
+      <CardContent className="p-3 space-y-1" onClick={() => mode === "create" && setIsEditable(!isEditable)}>
         <div className="flex justify-between items-center">
-          <div className="font-bold text-sm">{food.menuItemName ?? food.itemName}</div>
+          <div className="font-bold text-sm">{food.menuItemName}</div>
           
           {mode === "order" ? (
             <Badge className={`text-white text-[10px] px-2 py-0.5 rounded-full shadow ${
@@ -135,7 +135,6 @@ const FoodCard = ({
               <div className={`w-2 h-2 ${food.onlyVeg ? "bg-green-700" : "bg-red-700"} rounded-[1px]`} />
             </div>
           )}
-
 
         </div>
 
@@ -153,7 +152,7 @@ const FoodCard = ({
                   ₹{food.price}
                 </span>
               )}
-              ₹{food.offerPrice || food.price || food.totalPrice}
+              ₹{food.offerPrice || food.price}
             </div>
           ) : (
             <div className="text-xs font-semibold text-blue-700">
@@ -162,7 +161,7 @@ const FoodCard = ({
           )}
 
           <div className="text-xs text-gray-500">
-            ⏱ {food.preparationTime || 20} mins
+            ⏱ {food.preparationTime || 0} mins
           </div>
         </div>
 

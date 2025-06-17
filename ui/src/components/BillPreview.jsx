@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Pencil, Trash2 } from "lucide-react";
 
 const BillPreview = ({ cartItems, handleUpdateQty, openCustomizeDialog }) => {
   return (
@@ -22,17 +23,17 @@ const BillPreview = ({ cartItems, handleUpdateQty, openCustomizeDialog }) => {
           <ul className="space-y-2">
             {cartItems.map((item) => (
               <li
-                key={item.id}
+                key={item.itemName}
                 className="flex justify-between border-b pb-2 text-sm"
               >
                 <div className="flex flex-col">
-                  <span className="text-xs font-medium">{item.name}</span>
+                  <span className="text-xs font-medium">{item.itemName} {`(₹${item.price})`}</span>
                   <div className="flex items-center gap-1 mt-1 text-xs">
                     <Button
                       variant="outline"
                       size="xs"
                       className="px-1 py-0.5 h-6"
-                      onClick={() => handleUpdateQty(item.id, "decrement")}
+                      onClick={() => handleUpdateQty(item.itemName, "decrement")}
                     >
                       -
                     </Button>
@@ -41,7 +42,7 @@ const BillPreview = ({ cartItems, handleUpdateQty, openCustomizeDialog }) => {
                       variant="outline"
                       size="xs"
                       className="px-1 py-0.5 h-6"
-                      onClick={() => handleUpdateQty(item.id, "increment")}
+                      onClick={() => handleUpdateQty(item.itemName, "increment")}
                     >
                       +
                     </Button>
@@ -54,16 +55,18 @@ const BillPreview = ({ cartItems, handleUpdateQty, openCustomizeDialog }) => {
                   </span>
                   <div className="flex gap-2 mt-1">
                     <button
-                      onClick={() => openCustomizeDialog(item.id)}
-                      className="text-blue-500 text-xs underline"
+                      onClick={() => openCustomizeDialog(item.itemName)}
+                      className="text-blue-500 text-xs underline flex items-center"
+                      title="Edit"
                     >
-                      Customize
+                      <Pencil size={16} />
                     </button>
                     <button
-                      onClick={() => handleUpdateQty(item.id, "remove")}
-                      className="text-red-500 text-xs underline"
+                      onClick={() => handleUpdateQty(item.itemName, "remove")}
+                      className="text-red-500 text-xs underline flex items-center"
+                      title="Delete"
                     >
-                      Remove
+                      <Trash2 size={16} />
                     </button>
                   </div>
                 </div>

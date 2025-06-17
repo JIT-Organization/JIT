@@ -1,9 +1,9 @@
 "use client";
-import React, { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import React, { useState, useMemo, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter, useParams } from "next/navigation";
 
-import { getMenuItemListOptions } from "@/lib/api/api";
+import { getMenuItemsListForOrder, saveOrder, updateOrder } from "@/lib/api/api";
 import { getDistinctCategories } from "@/lib/utils/helper";
 import FoodCard from "@/components/customUIComponents/FoodCard";
 import DataTableHeader from "@/components/customUIComponents/DataTableHeader";
@@ -13,20 +13,48 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import CustomizeDialog from "@/components/customUIComponents/CustomizeDialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import LoadingState from "@/components/customUIComponents/LoadingState";
+import ErrorState from "@/components/customUIComponents/ErrorState";
+import { useToast } from "@/hooks/use-toast";
 
-const CreateOrder = () => {
+const CreateOrder = ({ isNew = true }) => {
   const router = useRouter();
+  const { orderNumber } = useParams();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
   const isMobile = useIsMobile();
   const [showPopup, setShowPopup] = useState(false);
 
   const {
     data: menuItems = [],
-    isLoading,
-    error,
-  } = useQuery(getMenuItemListOptions());
+    isLoading: isMenuLoading,
+    error: menuError,
+  } = useQuery(getMenuItemsListForOrder());
+
+  // const {
+  //   data: existingOrder,
+  //   isLoading: isOrderLoading,
+  //   error: orderError,
+  // } = useQuery({
+  //   ...getOrderbyNumber(orderNumber),
+  //   enabled: !isNew && !!orderNumber,
+  // });
+
   const [globalFilter, setGlobalFilter] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const [cartItems, setCartItems] = useState([]);
+
+  // useEffect(() => {
+  //   if (!isNew && existingOrder) {
+  //     const transformedItems = existingOrder.items.map(item => ({
+  //       ...item,
+  //       itemName: item.menuItemName,
+  //       price: item.offerPrice || item.price,
+  //       qty: item.quantity
+  //     }));
+  //     setCartItems(transformedItems);
+  //   }
+  // }, [isNew, existingOrder]);
 
   const filteredMenuItems = useMemo(() => {
     return menuItems.filter((item) => {
@@ -42,9 +70,14 @@ const CreateOrder = () => {
 
   const handleAddToCart = (food) => {
     setCartItems((prevCart) => {
-      const index = prevCart.findIndex((item) => item.id === food.id);
+      const index = prevCart.findIndex((item) => item.itemName === food.menuItemName);
       if (index === -1) {
-        return [...prevCart, { ...food, qty: 1 }];
+        return [...prevCart, {
+          ...food,
+          itemName: food.menuItemName,
+          price: food.offerPrice || food.price,
+          qty: 1
+        }];
       }
       return [...prevCart];
     });
@@ -53,8 +86,8 @@ const CreateOrder = () => {
   const [customizeItemData, setCustomizeItemData] = useState(null);
   const [showCustomizeDialog, setShowCustomizeDialog] = useState(false);
 
-  const openCustomizeDialog = (id) => {
-    setCustomizeItemData(cartItems.find((x) => x.id == id));
+  const openCustomizeDialog = (itemName) => {
+    setCustomizeItemData(cartItems.find((x) => x.itemName === itemName));
     setShowCustomizeDialog(true);
   };
 
@@ -62,24 +95,24 @@ const CreateOrder = () => {
     setShowCustomizeDialog(false);
   };
 
-  const handleSaveCustomizeDialog = (id, notes) => {
+  const handleSaveCustomizeDialog = (itemName, notes) => {
     setCartItems((prev) =>
       prev.map((item) =>
-        item.id === id ? { ...item, customNotes: notes } : item
+        item.itemName === itemName ? { ...item, customNotes: notes } : item
       )
     );
     setShowCustomizeDialog(false);
   };
 
-  const getCartQuantityById = (id) => {
-    return cartItems ? cartItems.find((item) => item.id === id)?.qty || 0 : 0;
+  const getCartQuantityById = (itemName) => {
+    return cartItems ? cartItems.find((item) => item.itemName === itemName)?.qty || 0 : 0;
   };
 
-  const handleUpdateQty = (id, type) => {
+  const handleUpdateQty = (itemName, type) => {
     setCartItems((prevCart) =>
       prevCart
         .map((item) => {
-          if (item.id === id) {
+          if (item.itemName === itemName) {
             if (type === "increment") {
               return { ...item, qty: item.qty + 1 };
             } else if (type === "decrement") {
@@ -96,14 +129,99 @@ const CreateOrder = () => {
 
   const categories = getDistinctCategories(menuItems);
 
-  if (isLoading) return <p>Loading menu...</p>;
-  if (error) return <p>Error loading menu: {error.message}</p>;
+  const createOrderMutation = useMutation({
+    mutationFn: (data) => saveOrder(data),
+    onSuccess: () => {
+      toast({
+        variant: "success",
+        title: "Success",
+        description: "Order created successfully",
+      });
+      router.back();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create order",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateOrderMutation = useMutation({
+    mutationFn: (data) => updateOrder(data),
+    onSuccess: () => {
+      toast({
+        variant: "success",
+        title: "Success",
+        description: "Order updated successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update order",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handlePlaceOrder = () => {
+    if (cartItems.length === 0) {
+      toast({
+        title: "Validation Error",
+        description: "Please select at least one food item to place order",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const orderItemsDTO = cartItems.map(item => ({
+      ...item,
+      itemName: item.itemName,
+      quantity: item.qty
+    }));
+
+    const totalAmount = cartItems.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+    const orderDTO = {
+      amount: totalAmount,
+      orderItemsDTO
+    };
+
+    if (isNew) {
+      createOrderMutation.mutate(orderDTO);
+    } else {
+      updateOrderMutation.mutate({
+        orderNumber,
+        ...orderDTO
+      });
+    }
+  };
+
+  if (isMenuLoading) {
+    return <LoadingState message="Loading menu items..." />;
+  }
+
+  if (menuError || (!isNew && orderError)) {
+    return (
+      <ErrorState
+        title="Error loading data"
+        message={menuError?.message || orderError?.message}
+        action={
+          <Button onClick={() => router.refresh()} className="mt-4">
+            Try Again
+          </Button>
+        }
+      />
+    );
+  }
 
   return (
     <Card>
       <CardTitle className="sticky top-16 z-20 shadow bg-white">
         <DataTableHeader
-          tabName="Create Order"
+          tabName={isNew ? "Create Order" : "Edit Order"}
           globalFilter={globalFilter}
           setGlobalFilter={setGlobalFilter}
           categories={categories}
@@ -111,7 +229,8 @@ const CreateOrder = () => {
           setActiveCategory={setActiveCategory}
           setColumnFilters={() => {}}
           headerButtonName="Place Order"
-          headerButtonClick={() => console.log(cartItems)}
+          headerButtonClick={handlePlaceOrder}
+          disabled={isNew ? createOrderMutation.isPending : updateOrderMutation.isPending}
         />
       </CardTitle>
 
@@ -124,20 +243,17 @@ const CreateOrder = () => {
             <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
               {filteredMenuItems.map((food) => (
                 <div
-                  key={food.id}
+                  key={food.menuItemName}
                   onClick={() =>
-                    handleAddToCart({
-                      id: food.id,
-                      name: food.menuItemName,
-                      price: food.price,
-                    })
+                    handleAddToCart(food)
                   }
                   className="cursor-pointer w-full"
                 >
                   <FoodCard
                     food={food}
                     handleUpdateQty={handleUpdateQty}
-                    quantity={getCartQuantityById(food.id)}
+                    quantity={getCartQuantityById(food.menuItemName)}
+                    mode='create'
                     openCustomizeDialog={openCustomizeDialog}
                   />
                 </div>

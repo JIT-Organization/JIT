@@ -27,7 +27,7 @@ export const getMenuItemListOptions = () => ({
   queryFn: () => getRequest(`${URLS.menuItemList}/TGSR`, "Failed to fetch Menu Item List"),
   // queryFn: () => getRequest("/api/menu-items", "Failed to fetch Menu Item List"),
   select: (data) =>
-    data.map(({ image, menuItemName, cookSet, price, offerPrice, active, categorySet, id }) => ({
+    data.map(({ image, menuItemName, cookSet, price, offerPrice, active, categorySet,  }) => ({
       image,
       menuItemName,
       cookSet,
@@ -35,8 +35,13 @@ export const getMenuItemListOptions = () => ({
       offerPrice,
       active,
       categorySet,
-      id,
     })),
+  ...cacheConfig
+});
+
+export const getMenuItemsListForOrder = () => ({
+  queryKey: ["menuItemList"],
+  queryFn: () => getRequest(`${URLS.menuItemList}/TGSR`, "Failed to fetch Menu Item List"),
   ...cacheConfig
 });
 
