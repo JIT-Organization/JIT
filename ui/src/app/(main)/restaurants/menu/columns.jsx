@@ -65,11 +65,14 @@ export const getMenuListcolumns = (
     accessorKey: "offerPrice",
     header: () => <div className="text-right">Offer Price</div>,
     cell: ({ row }) => {
-      const offerPrice = parseFloat(row.getValue("offerPrice"));
+      const offerPrice = row.getValue("offerPrice");
+      if (offerPrice === null || offerPrice === undefined) {
+      return <div className="text-center font-medium">--</div>;
+      }
       const formatted = new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "INR",
-      }).format(offerPrice);
+      }).format(parseFloat(offerPrice));
 
       return <div className="text-right font-medium">{formatted}</div>;
     },
