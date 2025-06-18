@@ -92,6 +92,7 @@ public class User extends BaseEntity{
         @OneToMany(mappedBy = "cook")
         private List<OrderItem> orderItems = new ArrayList<>();
 
+
 //        // Copy Constructor
 //        public User(User other) {
 //                this.id = other.id;

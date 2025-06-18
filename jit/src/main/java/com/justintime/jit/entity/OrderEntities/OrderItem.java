@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @Getter
@@ -69,9 +70,9 @@ public class OrderItem extends BaseEntity {
         @PrePersist
         @PreUpdate
         public void calculateMaxTimeLimitToStart() {
-            if (order != null && order.getOrderDate() != null && menuItem != null && menuItem.getBatchConfig() != null) {
+            if (Objects.nonNull(order) && Objects.nonNull(order.getOrderDate())&& Objects.nonNull(menuItem)  && Objects.nonNull( menuItem.getBatchConfig())) {
                 Integer prepTime = menuItem.getBatchConfig().getPreparationTime();
-                if (prepTime != null) {
+                if (Objects.nonNull(prepTime)) {
                     this.maxTimeLimitToStart = order.getOrderDate().minusMinutes(prepTime);
                 }
             }
