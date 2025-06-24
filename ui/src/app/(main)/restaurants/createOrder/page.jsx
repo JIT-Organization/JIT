@@ -310,6 +310,32 @@ const CreateOrder = ({ isNew = true }) => {
     },
   ];
 
+  const handleAddAgain = (food) => {
+    setCartItems((prevCart) => {
+      const baseName = food.menuItemName;
+      const regex = new RegExp(`^${baseName}(#\\d+)?$`);
+      const suffixes = prevCart
+        .filter(item => regex.test(item.itemName))
+        .map(item => {
+          const match = item.itemName.match(/^.+#(\d+)$/);
+          return match ? parseInt(match[1], 10) : 0;
+        });
+      const maxSuffix = suffixes.length > 0 ? Math.max(...suffixes) : 0;
+      const uniqueName = maxSuffix === 0
+        ? `${baseName}#1`
+        : `${baseName}#${maxSuffix + 1}`;
+      return [
+        ...prevCart,
+        {
+          ...food,
+          itemName: uniqueName,
+          price: food.offerPrice || food.price,
+          qty: 1,
+        }
+      ];
+    });
+  };
+
   if (isMenuLoading) {
     return <LoadingState message="Loading menu items..." />;
   }
@@ -366,6 +392,7 @@ const CreateOrder = ({ isNew = true }) => {
                     quantity={getCartQuantityById(food.menuItemName)}
                     mode='create'
                     openCustomizeDialog={openCustomizeDialog}
+                    onAddAgain={handleAddAgain}
                   />
                 </div>
               ))}
@@ -378,6 +405,7 @@ const CreateOrder = ({ isNew = true }) => {
               handleUpdateQty={handleUpdateQty}
               openCustomizeDialog={openCustomizeDialog}
               onOpenCustomerDialog={() => setIsCustomerDialogOpen(true)}
+              handleCopyItem={handleAddAgain}
             />
           </div>
         </div>

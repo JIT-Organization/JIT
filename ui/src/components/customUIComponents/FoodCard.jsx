@@ -12,6 +12,7 @@ const FoodCard = ({
   mode, 
   status = "", 
   onActionClick, 
+  onAddAgain,
 }) => {
   const [isEditable, setIsEditable] = useState(false);
   food.image = food.images?.length ? food.images[0].preview : food.images;
@@ -111,6 +112,17 @@ const FoodCard = ({
                 className="mt-2 text-blue-600 hover:bg-blue-50 text-xs px-2 py-0.5 rounded-full shadow"
               >
                 Customize
+              </Button>
+              <Button
+                variant="outline"
+                size="xs"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAddAgain(food);
+                }}
+                className="mt-1 text-green-600 hover:bg-green-50 text-xs px-2 py-0.5 rounded-full shadow"
+              >
+                Add Again
               </Button>
             </div>
           )}
