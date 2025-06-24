@@ -7,10 +7,10 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Pencil, Trash2, User } from "lucide-react";
+import { Pencil, Trash2, User, Copy } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const BillPreview = ({ cartItems, handleUpdateQty, openCustomizeDialog, onOpenCustomerDialog, isDialog = false }) => {
+const BillPreview = ({ cartItems, handleUpdateQty, openCustomizeDialog, onOpenCustomerDialog, handleCopyItem, isDialog = false }) => {
   return (
     <Card className="w-full flex flex-col h-full overflow-hidden">
       <CardHeader className="p-4 border-b flex-shrink-0">
@@ -66,6 +66,13 @@ const BillPreview = ({ cartItems, handleUpdateQty, openCustomizeDialog, onOpenCu
                       title="Edit"
                     >
                       <Pencil size={16} />
+                    </button>
+                    <button
+                      onClick={() => handleCopyItem(item)}
+                      className="text-green-500 text-xs underline flex items-center"
+                      title="Copy"
+                    >
+                      <Copy size={16} />
                     </button>
                     <button
                       onClick={() => handleUpdateQty(item.itemName, "remove")}
