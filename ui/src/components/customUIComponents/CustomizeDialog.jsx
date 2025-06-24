@@ -1,5 +1,8 @@
 'use client';
+import { Input } from "@/components/ui/input";
 import React, { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 
 const CustomizeDialog = ({ isOpen, item, onSave, onClose }) => {
   if (!isOpen || !item) return null;
@@ -36,10 +39,12 @@ const CustomizeDialog = ({ isOpen, item, onSave, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-4 space-y-4">
+      <div className="bg-background rounded-lg shadow-lg w-full max-w-md p-4 space-y-4">
         <div className="flex justify-between items-center border-b pb-2">
           <h3 className="text-lg font-semibold">Customize: {item.menuItemName}</h3>
-          <button onClick={onClose} className="text-gray-500 text-xl">×</button>
+          <Button variant="ghost" size="icon" onClick={onClose} className="text-xl">
+            ×
+          </Button>
         </div>
 
         <div>
@@ -47,63 +52,66 @@ const CustomizeDialog = ({ isOpen, item, onSave, onClose }) => {
           {noteGroups.map((group, i) => (
             <div key={i} className="flex items-end gap-2 mb-2">
               <div className="flex-1">
-                <label className="text-sm block mb-1">Note</label>
-                <input
+                <Label className="text-sm mb-1">Note</Label>
+                <Input
                   type="text"
                   value={group.note}
                   onChange={(e) => handleChange(i, 'note', e.target.value)}
-                  className="w-full border p-2 rounded"
                 />
               </div>
               <div style={{ width: 80 }}>
-                <label className="text-sm block mb-1">Qty</label>
-                <input
+                <Label className="text-sm mb-1">Qty</Label>
+                <Input
                   type="number"
                   min={1}
                   max={item.qty}
                   value={group.qty}
                   onChange={(e) => handleChange(i, 'qty', e.target.value)}
-                  className="w-full border p-2 rounded text-center"
+                  className="text-center"
                 />
               </div>
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => removeNoteGroup(i)}
                 className="text-red-500 text-xl pb-1"
                 title="Remove"
               >
                 ×
-              </button>
+              </Button>
             </div>
           ))}
           {totalQty < item.qty && (
-            <button
+            <Button
               onClick={addNoteGroup}
-              className="mt-2 px-3 py-1 bg-orange-500 text-white rounded-full"
+              variant="secondary"
+              className="mt-2 px-3 py-1 rounded-full"
             >
               + Add Note
-            </button>
+            </Button>
           )}
           {isQtyExceeded && (
-            <p className="text-red-500 text-sm mt-1">
+            <p className="text-destructive text-sm mt-1">
               Total quantity exceeds available ({item.qty}).
             </p>
           )}
         </div>
 
         <div className="flex justify-end gap-2 pt-2 border-t">
-          <button
+          <Button
+            variant="outline"
             onClick={onClose}
-            className="px-3 py-1 border rounded text-sm text-gray-600"
+            className="text-sm"
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => !isQtyExceeded && onSave(item.menuItemName, noteGroups)}
             disabled={isQtyExceeded}
-            className="px-3 py-1 bg-blue-600 text-white rounded text-sm disabled:opacity-50"
+            className="text-sm"
           >
             Save
-          </button>
+          </Button>
         </div>
       </div>
     </div>

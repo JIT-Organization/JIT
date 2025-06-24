@@ -2,8 +2,9 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, useParams } from "next/navigation";
+import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
-import { getMenuItemsListForOrder, saveOrder, updateOrder } from "@/lib/api/api";
+import { getMenuItemsListForOrder, saveOrder, updateOrder, getTablesListOptions } from "@/lib/api/api";
 import { getDistinctCategories } from "@/lib/utils/helper";
 import FoodCard from "@/components/customUIComponents/FoodCard";
 import DataTableHeader from "@/components/customUIComponents/DataTableHeader";
@@ -16,6 +17,28 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import LoadingState from "@/components/customUIComponents/LoadingState";
 import ErrorState from "@/components/customUIComponents/ErrorState";
 import { useToast } from "@/hooks/use-toast";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import MultiSelect from "@/components/customUIComponents/MultiSelect";
+import CommonForm from "@/components/CommonForm";
+
+const customerFormSchema = z.object({
+  tables: z.array(z.string()),
+  customerName: z.string().optional(),
+  customerNumber: z.string().optional(),
+  takeaway: z.boolean().default(false),
+}).superRefine((data, ctx) => {
+  if (!data.takeaway && (!data.tables || data.tables.length === 0)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Please select at least one table unless it's takeaway.",
+      path: ["tables"],
+    });
+  }
+});
 
 const CreateOrder = ({ isNew = true }) => {
   const router = useRouter();
@@ -24,6 +47,23 @@ const CreateOrder = ({ isNew = true }) => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const [showPopup, setShowPopup] = useState(false);
+  const [isCustomerDialogOpen, setIsCustomerDialogOpen] = useState(false);
+
+  const form = useForm({
+    resolver: zodResolver(customerFormSchema),
+    defaultValues: {
+      tables: [],
+      customerName: "",
+      customerNumber: "",
+      takeaway: false,
+    },
+  });
+
+  useEffect(() => {
+    if (isNew) {
+      setIsCustomerDialogOpen(true);
+    }
+  }, [isNew]);
 
   const {
     data: menuItems = [],
@@ -166,7 +206,7 @@ const CreateOrder = ({ isNew = true }) => {
     },
   });
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (cartItems.length === 0) {
       toast({
         title: "Validation Error",
@@ -175,6 +215,14 @@ const CreateOrder = ({ isNew = true }) => {
       });
       return;
     }
+
+    const isValid = await form.trigger();
+    if (!isValid) {
+      setIsCustomerDialogOpen(true);
+      return;
+    }
+
+    const customerData = form.getValues();
 
     const orderItemsDTO = cartItems.map(item => ({
       ...item,
@@ -186,7 +234,9 @@ const CreateOrder = ({ isNew = true }) => {
 
     const orderDTO = {
       amount: totalAmount,
-      orderItemsDTO
+      orderItemsDTO,
+      customerIds: customerData.customers,
+      notes: customerData.notes,
     };
 
     if (isNew) {
@@ -198,6 +248,67 @@ const CreateOrder = ({ isNew = true }) => {
       });
     }
   };
+
+  const { data: tablesList = [], isLoading: isTablesLoading } = useQuery(getTablesListOptions("TGSR"));
+  const tableOptions = (tablesList || []).map((t) => ({ label: t.tableNumber, value: t.tableNumber }));
+
+  const orderFormFields = [
+    {
+      name: "takeaway",
+      label: "Takeaway",
+      type: "toggleGroup",
+      options: ["yes", "no"],
+      fieldCol: "col-span-12",
+      labelCol: "col-span-3",
+      controlCol: "col-span-9",
+    },
+    {
+      name: "tables",
+      label: "Tables",
+      type: "multiSelect",
+      options: tableOptions,
+      placeholder: isTablesLoading ? "Loading tables..." : "Select tables...",
+      disabled: form.watch("takeaway"),
+      fieldCol: "col-span-12",
+      labelCol: "col-span-3",
+      controlCol: "col-span-9",
+      rules: {
+        validate: (value) => {
+          if (!form.watch("takeaway") && (!value || value.length === 0)) {
+            return "Please select at least one table unless it's takeaway.";
+          }
+          return true;
+        },
+      },
+    },
+    {
+      name: "customerName",
+      label: "Customer Name",
+      type: "input",
+      placeholder: "Enter customer name...",
+      fieldCol: "col-span-12",
+      labelCol: "col-span-3",
+      controlCol: "col-span-9",
+    },
+    {
+      name: "customerNumber",
+      label: "Customer Number",
+      type: "input",
+      inputType: "number",
+      placeholder: "Enter customer number...",
+      fieldCol: "col-span-12",
+      labelCol: "col-span-3",
+      controlCol: "col-span-9",
+       rules: {
+        validate: (value) => {
+          if (value && isNaN(Number(value))) {
+            return "Customer number must be a valid mobile number.";
+          }
+          return true;
+        },
+      },
+    },
+  ];
 
   if (isMenuLoading) {
     return <LoadingState message="Loading menu items..." />;
@@ -261,47 +372,44 @@ const CreateOrder = ({ isNew = true }) => {
             </div>
           </div>
 
-          <div className="hidden lg:block w-[300px] border-l px-2 py-0 sticky top-0 overflow-y-auto">
+          <div className="hidden lg:block w-[300px] border-l px-2 py-0">
             <BillPreview
               cartItems={cartItems}
               handleUpdateQty={handleUpdateQty}
               openCustomizeDialog={openCustomizeDialog}
+              onOpenCustomerDialog={() => setIsCustomerDialogOpen(true)}
             />
           </div>
         </div>
       </CardContent>
 
       {isMobile && (
-        <>
-          <Button
-            onClick={() => setShowPopup(true)}
-            className="fixed bottom-4 right-4 bg-blue-600 text-white rounded-full p-4 shadow-lg z-50"
-          >
-            🧾
-          </Button>
-
-          {showPopup && (
-            <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
-              <div className="bg-white w-11/12 max-w-md max-h-[90vh] rounded-lg p-4 relative flex flex-col">
-                <Button
-                  variant="ghost"
-                  className="absolute top-2 right-2 text-red-500 text-xl"
-                  onClick={() => setShowPopup(false)}
-                >
-                  ❌
-                </Button>
-                <ScrollArea className="flex justify-center">
-                  <BillPreview
-                    cartItems={cartItems}
-                    handleUpdateQty={handleUpdateQty}
-                    openCustomizeDialog={openCustomizeDialog}
-                  />
-                </ScrollArea>
-              </div>
-            </div>
-          )}
-        </>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button
+              className="fixed bottom-4 right-4 bg-yellow-600 text-white rounded-full p-4 shadow-lg z-50"
+            >
+              🧾
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="w-11/12 max-w-md h-[90vh] p-0 flex flex-col">
+            <BillPreview
+                cartItems={cartItems}
+                handleUpdateQty={handleUpdateQty}
+                openCustomizeDialog={openCustomizeDialog}
+                onOpenCustomerDialog={() => setIsCustomerDialogOpen(true)}
+                isDialog={true}
+              />
+          </DialogContent>
+        </Dialog>
       )}
+
+      <Dialog open={isCustomerDialogOpen} onOpenChange={setIsCustomerDialogOpen}>
+        <DialogContent>
+          <DialogTitle className="col-span-12 block w-full text-center">Customer Details</DialogTitle>
+          <CommonForm form={form} formFields={orderFormFields} />
+        </DialogContent>
+      </Dialog>
 
       <CustomizeDialog
         isOpen={showCustomizeDialog}

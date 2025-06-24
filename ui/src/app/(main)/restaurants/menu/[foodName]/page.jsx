@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import LoadingState from "@/components/customUIComponents/LoadingState";
 import ErrorState from "@/components/customUIComponents/ErrorState";
+import { Dialog, DialogTrigger, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 import {
   createMenuItemFood,
@@ -31,7 +32,6 @@ const MenuFood = () => {
   const [formData, setFormData] = useState({});
   const isEdit = foodName && foodName !== "add_food";
   const isMobile = useIsMobile();
-  const [showPreview, setShowPreview] = useState(false);
   const { toast } = useToast();
 
   const { data: existingData, isLoading, error } = useQuery({
@@ -260,40 +260,29 @@ const MenuFood = () => {
       </CardContent>
 
       {isMobile && (
-        <>
-          <Button
-            onClick={() => setShowPreview(true)}
-            className="fixed bottom-4 right-4 bg-yellow-500 hover:bg-yellow-600 text-black rounded-full p-4 shadow-lg z-50"
-          >
-            👁️
-          </Button>
-
-          {showPreview && (
-            <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
-              <div className="bg-white w-11/12 max-w-md max-h-[90vh] rounded-lg p-4 relative flex flex-col">
-                <Button
-                  variant="ghost"
-                  className="absolute top-2 right-2 text-red-500 text-xl"
-                  onClick={() => setShowPreview(false)}
-                >
-                  ❌
-                </Button>
-                <h2 className="text-lg font-semibold text-gray-700 mb-4 text-center">
-                  Food preview
-                </h2>
-                <ScrollArea className="flex justify-center">
-                  <div className="p-4">
-                    <FoodCard food={formData} mode="create" />
-                    <p className="text-sm text-gray-500 mt-4 text-center px-2">
-                      This is how your food will be displayed. <br />
-                      Prepare wisely.
-                    </p>
-                  </div>
-                </ScrollArea>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button
+              className="fixed bottom-4 right-4 bg-yellow-500 hover:bg-yellow-600 text-black rounded-full p-4 shadow-lg z-50"
+            >
+              👁️
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="w-11/12 max-w-md max-h-[90vh] p-4 flex flex-col items-center justify-center">
+            <DialogTitle className="text-lg font-semibold text-gray-700 mb-4 text-center w-full">
+              Food preview
+            </DialogTitle>
+            <ScrollArea className="flex justify-center w-full">
+              <div className="p-4">
+                <FoodCard food={formData} mode="create" />
+                <p className="text-sm text-gray-500 mt-4 text-center px-2">
+                  This is how your food will be displayed. <br />
+                  Prepare wisely.
+                </p>
               </div>
-            </div>
-          )}
-        </>
+            </ScrollArea>
+          </DialogContent>
+        </Dialog>
       )}
     </Card>
   );

@@ -7,13 +7,19 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, User } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-const BillPreview = ({ cartItems, handleUpdateQty, openCustomizeDialog }) => {
+const BillPreview = ({ cartItems, handleUpdateQty, openCustomizeDialog, onOpenCustomerDialog, isDialog = false }) => {
   return (
-    <Card className="w-full max-w-xs flex flex-col h-full">
-      <CardHeader className="p-4 border-b">
-        <CardTitle className="text-lg">Order Summary</CardTitle>
+    <Card className="w-full flex flex-col h-full overflow-hidden">
+      <CardHeader className="p-4 border-b flex-shrink-0">
+        <div className={cn("flex justify-between items-center", isDialog && "pr-8")}>
+          <CardTitle className="text-lg">Order Summary</CardTitle>
+          <Button variant="ghost" size="icon" onClick={onOpenCustomerDialog}>
+            <User className="h-5 w-5" />
+          </Button>
+        </div>
       </CardHeader>
 
       <ScrollArea className="flex-1 p-4">
@@ -76,7 +82,7 @@ const BillPreview = ({ cartItems, handleUpdateQty, openCustomizeDialog }) => {
         )}
       </ScrollArea>
 
-      <CardFooter className="p-4 border-t font-bold flex justify-between">
+      <CardFooter className="p-4 border-t font-bold flex justify-between flex-shrink-0">
         <span>Total:</span>
         <span>
           ₹

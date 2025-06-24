@@ -19,6 +19,7 @@ import { DateTimePicker } from "@/components/customUIComponents/CustomeDateTimeP
 import { useQuery } from "@tanstack/react-query";
 import { getCategoriesListOptions, getUsersListOptions, validateField } from "@/lib/api/api";
 import { Textarea } from "@/components/ui/textarea";
+import CommonForm from "./CommonForm";
 
 const defaultFormValues = {
   menuItemName: "",
@@ -67,98 +68,94 @@ const availabilityOptions = [
   { value: "SATURDAY", label: "Saturday" },
 ];
 
-const renderField = (fieldConfig, formField) => {
-  switch (fieldConfig.type) {
-    case "input":
-      return (
-        <Input
-          className="border p-2 w-full rounded bg-yellow-50"
-          {...formField}
-          placeholder={fieldConfig.placeholder}
-          onBlur={fieldConfig.name === "menuItemName" ? async (e) => {
-            const value = e.target.value;
-            if (value && !value) {
-              const { data: isValid } = await validateField("menuItem", value).queryFn();
-              if (!isValid) {
-                formField.onChange(value);
-                formField.onBlur();
-                form.setError("menuItemName", {
-                  type: "manual",
-                  message: "This menu item name already exists",
-                });
-              }
-            }
-          } : formField.onBlur}
-        />
-      );
-    case "textarea":
-      return (
-        <Textarea
-          {...formField}
-          placeholder={fieldConfig.placeholder}
-          className="w-full bg-yellow-50"
-        />
-      );
-    case "multiSelect":
-      return (
-        <MultiSelect
-          className="border p-2 w-full rounded bg-yellow-50"
-          {...formField}
-          options={fieldConfig.options}
-          placeholder={fieldConfig.placeholder}
-          showAllOption={fieldConfig.showAllOption}
-          disabled={fieldConfig.disabled}
-        />
-      );
-    case "toggleGroup":
-      return (
-        <ToggleGroup
-          variant="outline"
-          type="single"
-          value={
-            formField.value ? fieldConfig.options[0] : fieldConfig.options[1]
-          }
-          onValueChange={(val) =>
-            formField.onChange(val === fieldConfig.options[0])
-          }
-        >
-          {fieldConfig.options.map((opt) => (
-            <ToggleGroupItem
-              className={`
-                border p-2 w-full rounded
-                hover:bg-yellow-50
-                data-[state=on]:bg-yellow-50
-                transition-colors duration-200
-              `}
-              key={opt}
-              value={opt}
-            >
-              {opt.charAt(0).toUpperCase() + opt.slice(1)}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
-      );
-    case "dateTimePicker":
-      return (
-        <DateTimePicker
-          className="border p-2 w-full rounded bg-yellow-50"
-          {...formField}
-        />
-      );
-    case "imageUploader":
-      return <ImageUploader {...formField} multiple />;
-    case "custom":
-      const CustomComponent = fieldConfig.Component;
-      return (
-        <CustomComponent
-          value={formField.value}
-          onChange={formField.onChange}
-        />
-      );
-    default:
-      return null;
-  }
-};
+//  const renderField = (fieldConfig, formField, form) => {
+//   switch (fieldConfig.type) {
+//     case "input":
+//       return (
+//         <Input
+//           className="border p-2 w-full rounded bg-yellow-50"
+//           {...formField}
+//           placeholder={fieldConfig.placeholder}
+//           onBlur={fieldConfig.name === "menuItemName" ? async (e) => {
+//             const value = e.target.value;
+//             if (value && !value) {
+//               const { data: isValid } = await validateField("menuItem", value).queryFn();
+//               if (!isValid) {
+//                 formField.onChange(value);
+//                 formField.onBlur();
+//                 form.setError("menuItemName", {
+//                   type: "manual",
+//                   message: "This menu item name already exists",
+//                 });
+//               }
+//             }
+//           } : formField.onBlur}
+//         />
+//       );
+//     case "textarea":
+//       return (
+//         <Textarea
+//           {...formField}
+//           placeholder={fieldConfig.placeholder}
+//           className="w-full bg-yellow-50"
+//         />
+//       );
+//     case "multiSelect":
+//       return (
+//         <MultiSelect
+//           className="border p-2 w-full rounded bg-yellow-50"
+//           {...formField}
+//           options={fieldConfig.options}
+//           placeholder={fieldConfig.placeholder}
+//           showAllOption={fieldConfig.showAllOption}
+//           disabled={fieldConfig.disabled}
+//         />
+//       );
+//     case "toggleGroup":
+//       return (
+//         <ToggleGroup
+//           variant="outline"
+//           type="single"
+//           value={fieldConfig.value !== undefined ? fieldConfig.value : (formField.value ? fieldConfig.options[0] : fieldConfig.options[1])}
+//           onValueChange={fieldConfig.onValueChange || ((val) => formField.onChange(val === fieldConfig.options[0]))}
+//         >
+//           {fieldConfig.options.map((opt) => (
+//             <ToggleGroupItem
+//               className={`
+//                 border p-2 w-full rounded
+//                 hover:bg-yellow-50
+//                 data-[state=on]:bg-yellow-50
+//                 transition-colors duration-200
+//               `}
+//               key={opt}
+//               value={opt}
+//             >
+//               {opt.charAt(0).toUpperCase() + opt.slice(1)}
+//             </ToggleGroupItem>
+//           ))}
+//         </ToggleGroup>
+//       );
+//     case "dateTimePicker":
+//       return (
+//         <DateTimePicker
+//           className="border p-2 w-full rounded bg-yellow-50"
+//           {...formField}
+//         />
+//       );
+//     case "imageUploader":
+//       return <ImageUploader {...formField} multiple />;
+//     case "custom":
+//       const CustomComponent = fieldConfig.Component;
+//       return (
+//         <CustomComponent
+//           value={formField.value}
+//           onChange={formField.onChange}
+//         />
+//       );
+//     default:
+//       return null;
+//   }
+// };
 
 const FoodForm = forwardRef(
   ({ onFormChange, onSubmit, defaultValues, isLoading, onError }, ref) => {
@@ -203,6 +200,20 @@ const FoodForm = forwardRef(
             const { data: isValid } = await validateField("menuItem", value).queryFn();
             return isValid || "This menu item name already exists";
           },
+        },
+        onBlur: async (e) => {
+          const value = e.target.value;
+          if (value && !value) {
+            const { data: isValid } = await validateField("menuItem", value).queryFn();
+            if (!isValid) {
+              form.setValue("menuItemName", value);
+              form.trigger("menuItemName");
+              form.setError("menuItemName", {
+                type: "manual",
+                message: "This menu item name already exists",
+              });
+            }
+          }
         },
       },
       {
@@ -480,41 +491,7 @@ const FoodForm = forwardRef(
 
     return (
       <div className="grid grid-cols-12">
-        <Form {...form}>
-          {formFields.map((fieldConfig) => (
-            !fieldConfig.hidden && (
-              <FormField
-                key={fieldConfig.name}
-                control={form.control}
-                name={fieldConfig.name}
-                rules={fieldConfig.rules}
-                render={({ field }) => (
-                  <FormItem
-                    className={`mb-4 mr-4 ${
-                      fieldConfig.fieldCol ?? "col-span-12"
-                    }`}
-                  >
-                    <div className="grid grid-cols-12 gap-2 items-start sm:items-center">
-                      <FormLabel
-                        className={`${fieldConfig.labelCol ?? "col-span-3"}`}
-                      >
-                        {fieldConfig.label}
-                      </FormLabel>
-                      <FormControl
-                        className={`${
-                          fieldConfig.controlCol ?? "col-span-9"
-                        } w-full`}
-                      >
-                        {renderField(fieldConfig, field)}
-                      </FormControl>
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )
-          ))}
-        </Form>
+        <CommonForm form={form} formFields={formFields} />
       </div>
     );
   }
