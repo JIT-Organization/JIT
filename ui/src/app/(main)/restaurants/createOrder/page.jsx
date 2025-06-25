@@ -123,11 +123,17 @@ const CreateOrder = ({ isNew = true }) => {
     });
   };
 
-  const [customizeItemData, setCustomizeItemData] = useState(null);
+  const [customizeItems, setCustomizeItems] = useState([]);
   const [showCustomizeDialog, setShowCustomizeDialog] = useState(false);
 
-  const openCustomizeDialog = (itemName) => {
-    setCustomizeItemData(cartItems.find((x) => x.itemName === itemName));
+  const openCustomizeDialog = (itemName, getAll = false) => {
+    if (getAll) {
+      const baseName = itemName.split('#')[0];
+      const regex = new RegExp(`^${baseName}(#\\d+)?$`);
+      setCustomizeItems(cartItems.filter(x => regex.test(x.itemName)));
+    } else {
+      setCustomizeItems(cartItems.filter(x => x.itemName === itemName));
+    }
     setShowCustomizeDialog(true);
   };
 
@@ -135,17 +141,23 @@ const CreateOrder = ({ isNew = true }) => {
     setShowCustomizeDialog(false);
   };
 
-  const handleSaveCustomizeDialog = (itemName, notes) => {
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item.itemName === itemName ? { ...item, customNotes: notes } : item
-      )
+  const handleSaveCustomizeDialog = (updatedItems) => {
+    setCartItems(prev =>
+      prev.map(item => {
+        const updated = updatedItems.find(u => u.itemName === item.itemName);
+        return updated ? { ...item, customNotes: updated.customNotes } : item;
+      })
     );
     setShowCustomizeDialog(false);
   };
 
-  const getCartQuantityById = (itemName) => {
-    return cartItems ? cartItems.find((item) => item.itemName === itemName)?.qty || 0 : 0;
+  const getCartQuantityByName = (itemName) => {
+    if (!cartItems) return 0;
+    const baseName = itemName.split('#')[0];
+    const regex = new RegExp(`^${baseName}(#\\d+)?$`);
+    return cartItems
+      .filter(item => regex.test(item.itemName))
+      .reduce((sum, item) => sum + (item.qty || 0), 0);
   };
 
   const handleUpdateQty = (itemName, type) => {
@@ -227,18 +239,21 @@ const CreateOrder = ({ isNew = true }) => {
     const orderItemsDTO = cartItems.map(item => ({
       ...item,
       itemName: item.itemName,
-      quantity: item.qty
+      quantity: item.qty,
+      totalPrice: item.qty * item.price
     }));
 
     const totalAmount = cartItems.reduce((sum, item) => sum + (item.price * item.qty), 0);
 
     const orderDTO = {
       amount: totalAmount,
-      orderItemsDTO,
-      customerIds: customerData.customers,
-      notes: customerData.notes,
+      orderItems: orderItemsDTO,
+      diningTables: customerData.tables,
+      orderedBy: customerData.customerName,
+      orderedNumber: customerData.customerNumber,
+      takeAway: customerData.takeaway
     };
-
+console.log(orderDTO)
     if (isNew) {
       createOrderMutation.mutate(orderDTO);
     } else {
@@ -389,7 +404,7 @@ const CreateOrder = ({ isNew = true }) => {
                   <FoodCard
                     food={food}
                     handleUpdateQty={handleUpdateQty}
-                    quantity={getCartQuantityById(food.menuItemName)}
+                    quantity={getCartQuantityByName(food.menuItemName)}
                     mode='create'
                     openCustomizeDialog={openCustomizeDialog}
                     onAddAgain={handleAddAgain}
@@ -442,7 +457,7 @@ const CreateOrder = ({ isNew = true }) => {
       <CustomizeDialog
         isOpen={showCustomizeDialog}
         onSave={handleSaveCustomizeDialog}
-        item={customizeItemData}
+        items={customizeItems}
         onClose={closeCustomizeDialog}
       />
     </Card>
