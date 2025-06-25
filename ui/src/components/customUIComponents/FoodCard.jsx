@@ -107,7 +107,7 @@ const FoodCard = ({
                 size="xs"
                 onClick={(e) => {
                   e.stopPropagation();
-                  openCustomizeDialog(food.menuItemName);
+                  openCustomizeDialog(food.menuItemName, true);
                 }}
                 className="mt-2 text-blue-600 hover:bg-blue-50 text-xs px-2 py-0.5 rounded-full shadow"
               >

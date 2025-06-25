@@ -61,7 +61,7 @@ const BillPreview = ({ cartItems, handleUpdateQty, openCustomizeDialog, onOpenCu
                   </span>
                   <div className="flex gap-2 mt-1">
                     <button
-                      onClick={() => openCustomizeDialog(item.itemName)}
+                      onClick={() => openCustomizeDialog(item.itemName, false)}
                       className="text-blue-500 text-xs underline flex items-center"
                       title="Edit"
                     >
