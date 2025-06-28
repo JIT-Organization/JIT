@@ -33,7 +33,7 @@ public interface MenuItemRepository extends BaseRepository<MenuItem, Long> {
     @Query(value = "SELECT mi.* FROM menu_item mi " +
             "JOIN restaurant r ON r.id = mi.restaurant_id " +
             "WHERE r.restaurant_code = :restaurantCode and mi.menu_item_name = :menuItemName", nativeQuery = true)
-    Optional<MenuItem> findByRestaurantCodeAndMenuItemName(String restaurantCode, String menuItemName);
+    MenuItem findByRestaurantCodeAndMenuItemName(String restaurantCode, String menuItemName);
 
     //@Modifying
     void deleteByRestaurantIdAndMenuItemName(@Param("restaurantId") Long restaurantId, @Param("menuItemName") String menuItemName);

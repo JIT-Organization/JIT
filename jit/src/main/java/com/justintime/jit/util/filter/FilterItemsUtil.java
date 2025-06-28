@@ -26,7 +26,7 @@ public class FilterItemsUtil {
 
     public static <T extends FilterableItem, DTO> List<DTO> filterAndSortItems(
             List<T> items,
-            Long restaurantId,
+            String restaurantCode,
             Sort sortBy,
             String priceRange,
             String category,
@@ -64,9 +64,9 @@ public class FilterItemsUtil {
 
             List<Object[]> result = new ArrayList<>();
             if (dtoClass.equals(MenuItemDTO.class)) {
-                result = orderItemRepository.findMenuItemsWithOrderCount(restaurantId, itemIds);
+                result = orderItemRepository.findMenuItemsWithOrderCount(restaurantCode, itemIds);
             } else if (dtoClass.equals(ComboDTO.class)) {
-                result = orderItemRepository.findCombosWithOrderCount(restaurantId, itemIds);
+                result = orderItemRepository.findCombosWithOrderCount(restaurantCode, itemIds);
             }
 
             final var idToCountMap = result.stream()

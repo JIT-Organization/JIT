@@ -25,7 +25,7 @@ public class BatchConfig extends BaseEntity {
     private Restaurant restaurant;
 
     @Column(name = "max_count")
-    private String maxCount;
+    private Integer maxCount;
 
     @ManyToMany
     @JoinTable(
@@ -35,10 +35,10 @@ public class BatchConfig extends BaseEntity {
     )
     private Set<User> cooks = new HashSet<>();
 
-    @OneToMany(mappedBy = "batchConfig")
+    @OneToMany(mappedBy = "batchConfig", cascade = CascadeType.ALL)
     private Set<MenuItem> menuItems = new HashSet<>();
 
-    @OneToMany(mappedBy = "batchConfig", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "batchConfig", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<Batch> batches;
 
     @Column(name = "preparation_time")

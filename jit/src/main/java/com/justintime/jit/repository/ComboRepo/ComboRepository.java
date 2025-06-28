@@ -14,6 +14,11 @@ import java.util.Set;
 @Repository
 public interface ComboRepository extends BaseRepository<Combo, Long> {
 
+    @Query(value = "SELECT c.* FROM combo c " +
+            "JOIN restaurant r ON c.restaurant_id = r.id " +
+            "WHERE r.restaurant_code = :restaurantCode", nativeQuery = true)
+    List<Combo> findByRestaurantCode(@Param("restaurantCode") String restaurantCode);
+
     List<Combo> findByRestaurantId(Long restaurantId);
     @Query(value = "SELECT c.* FROM combo c " +
             "WHERE c.combo_name IN (:formattedComboNames) " +

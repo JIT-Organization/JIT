@@ -8,6 +8,7 @@ import com.justintime.jit.entity.Enums.BatchStatus;
 import com.justintime.jit.entity.Enums.OrderType;
 import com.justintime.jit.entity.Enums.Role;
 import com.justintime.jit.entity.OrderEntities.OrderItem;
+import com.justintime.jit.exception.IllegalBatchStateException;
 import com.justintime.jit.exception.ResourceNotFoundException;
 import com.justintime.jit.repository.*;
 import com.justintime.jit.repository.OrderRepo.OrderItemRepository;
@@ -140,13 +141,14 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
             .orElseThrow(() -> new RuntimeException("Batch not found"));
 
         if (!BatchStatus.ASSIGNED.equals(batch.getStatus())) {
-            throw new IllegalStateException("Only ASSIGNED batches can be started.");
+            throw new IllegalBatchStateException("Only ASSIGNED batches can be started.");
         }
 
         BatchConfig batchConfig = batch.getBatchConfig();
-        int maxQty = batchConfig != null && batchConfig.getMaxCount() != null
-            ? Integer.parseInt(batchConfig.getMaxCount())
-            : Integer.MAX_VALUE;
+        if (batchConfig==null){
+            throw new ResourceNotFoundException("No batch configurations found for this batch");
+        }
+        int maxQty = batchConfig.getMaxCount();
 
         int targetQty = batch.getQuantity() != 0 ? batch.getQuantity() : maxQty;
 
@@ -298,10 +300,7 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
                 !cookBatchConfigs.contains(batchConfig)) {
                 continue;
             }
-            
-            int maxCount = batchConfig != null && batchConfig.getMaxCount() != null
-                    ? Integer.parseInt(batchConfig.getMaxCount())
-                    : Integer.MAX_VALUE;
+            int maxCount = batchConfig.getMaxCount();
 
             List<OrderItemDTO> itemDTOs = entry.getValue().stream()
                     .map(item -> mapOrderItemToDTO(item, orderItemMapper))
