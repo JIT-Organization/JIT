@@ -22,12 +22,15 @@ public interface BatchRepository extends BaseRepository<Batch, Long> {
             @Param("menuItemId") Long menuItemId,
             @Param("restaurantId") Long restaurantId,
             @Param("status") BatchStatus status);
-            
+
     @Query(value = "SELECT b.* FROM batch b " +
-           "JOIN cook c ON b.cook_id = c.id " +
-           "WHERE c.name = :cookName " +
-           "AND b.status = :status", nativeQuery = true)
-    List<Batch> findByCookNameAndStatus(@Param("cookName") String cookName, @Param("status") String status);
+            "JOIN users u ON b.cook_id = u.id " +
+            "WHERE u.user_name = :cookName " +
+            "AND b.status = :status",
+            nativeQuery = true)
+    List<Batch> findByCookNameAndStatus(
+            @Param("cookName") String cookName,
+            @Param("status") String status);
 
     @Query(value = "SELECT b.* FROM batch b " +
            "JOIN cook c ON b.cook_id = c.id " +

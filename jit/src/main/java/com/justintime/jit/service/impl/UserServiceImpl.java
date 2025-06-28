@@ -76,9 +76,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
 
     @Override
     public UserDTO patchUpdateUser(String restaurantCode, String username, UserDTO dto, HashSet<String> propertiesToBeUpdated) {
-        Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode)
-                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
-        User existingUser = userRepository.findByRestaurantIdAndUserName(restaurant.getId(), username);
+        User existingUser = userRepository.findByRestaurantCodeAndUserName(restaurantCode, username);
         GenericMapper<User, UserDTO> userMapper = MapperFactory.getMapper(User.class, UserDTO.class);
         User patchedUser = userMapper.toEntity(dto);
         // TODO write a validation where the username should be unique if they are updating it

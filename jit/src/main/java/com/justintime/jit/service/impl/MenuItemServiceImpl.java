@@ -75,10 +75,8 @@ public class MenuItemServiceImpl extends BaseServiceImpl<MenuItem, Long> impleme
 
     @Override
     public MenuItemDTO getMenuItemByRestaurantIdAndMenuItemName(String restaurantCode,String menuItemName){
-        Long restaurantId = restaurantRepository.findByRestaurantCode(restaurantCode)
-                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found")).getId();
         GenericMapper<MenuItem, MenuItemDTO> mapper = MapperFactory.getMapper(MenuItem.class, MenuItemDTO.class);
-        MenuItem menuItem = menuItemRepository.findByRestaurantIdAndMenuItemName(restaurantId, menuItemName);
+        MenuItem menuItem = menuItemRepository.findByRestaurantCodeAndMenuItemName(restaurantCode, menuItemName);
         return mapToDTO(menuItem, mapper);
     }
 
@@ -99,7 +97,7 @@ public class MenuItemServiceImpl extends BaseServiceImpl<MenuItem, Long> impleme
     public MenuItemDTO patchUpdateMenuItem(String restaurantCode, String menuItemName, MenuItemDTO menuItemDTO, HashSet<String> propertiesToBeUpdated) {
         Restaurant restaurant= restaurantRepository.findByRestaurantCode(restaurantCode)
                 .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found with code: " + restaurantCode));
-        MenuItem existingItem = menuItemRepository.findByRestaurantIdAndMenuItemName(restaurant.getId(), menuItemName);
+        MenuItem existingItem = menuItemRepository.findByRestaurantCodeAndMenuItemName(restaurantCode, menuItemName);
         GenericMapper<MenuItem, MenuItemDTO> menuItemMapper = MapperFactory.getMapper(MenuItem.class, MenuItemDTO.class);
         MenuItem patchedItem = menuItemMapper.toEntity(menuItemDTO);
         if (null != patchedItem.getCategorySet()) patchedItem.getCategorySet().clear();
@@ -115,9 +113,9 @@ public class MenuItemServiceImpl extends BaseServiceImpl<MenuItem, Long> impleme
 
     @Override
     public void deleteMenuItem(String restaurantCode, String menuItemName) {
-        Long restaurantId = restaurantRepository.findByRestaurantCode(restaurantCode)
-                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found")).getId();
-        menuItemRepository.deleteByRestaurantIdAndMenuItemName(restaurantId, menuItemName);
+        Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found with code: " + restaurantCode));
+        menuItemRepository.deleteByRestaurantIdAndMenuItemName(restaurant.getId(), menuItemName);
     }
 
     @Override

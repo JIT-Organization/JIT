@@ -71,10 +71,10 @@ public class ComboServiceImpl extends BaseServiceImpl<Combo,Long> implements Com
                 .collect(Collectors.toList());
     }
 ///////////////////////////////////////////////////////////////////////
-    public List<ComboDTO> getCombosByRestaurantId(Long restaurantId, Sort sortBy, String priceRange, String category, Boolean onlyVeg, Boolean onlyForCombos) {
-        List<Combo> combos = comboRepository.findByRestaurantId(restaurantId);
+    public List<ComboDTO> getCombosByRestaurantId(String restaurantCode, Sort sortBy, String priceRange, String category, Boolean onlyVeg, Boolean onlyForCombos) {
+        List<Combo> combos = comboRepository.findByRestaurantCode(restaurantCode);
         GenericMapper<Combo, ComboDTO> comboMapper = MapperFactory.getMapper(Combo.class, ComboDTO.class);
-        return FilterItemsUtil.filterAndSortItems(combos, restaurantId, sortBy, priceRange, category, onlyVeg, onlyForCombos, orderItemRepository, comboMapper, ComboDTO.class);
+        return FilterItemsUtil.filterAndSortItems(combos, restaurantCode, sortBy, priceRange, category, onlyVeg, onlyForCombos, orderItemRepository, comboMapper, ComboDTO.class);
     }
 //////////////////////////////////////////////////////////////////////////
     public Optional<Combo> getComboById(Long id) {

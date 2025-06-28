@@ -51,11 +51,7 @@ public class OrderItemServiceImpl extends BaseServiceImpl<OrderItem,Long> implem
 
         @Override
         public List<OrderItem> getOrderItemsForCookByNameAndRestaurant(String cookName, String restaurantCode) {
-            Long restaurantId = restaurantRepository.findByRestaurantCode(restaurantCode)
-                    .map(BaseEntity::getId)
-                    .orElseThrow(() -> new RuntimeException("Restaurant not found with code: " + restaurantCode));
-                    
-            User cook = userRepository.findByRestaurantIdAndRoleAndUserName(restaurantId, Role.COOK,cookName);
+            User cook = userRepository.findByRestaurantCodeAndRoleAndUserName(restaurantCode, Role.COOK, cookName);
             if (null==cook){
                 throw new ResourceNotFoundException("Cook not found for restaurant " + restaurantCode);
             }

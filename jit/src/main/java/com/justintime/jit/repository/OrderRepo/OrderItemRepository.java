@@ -1,5 +1,6 @@
 package com.justintime.jit.repository.OrderRepo;
 
+import com.justintime.jit.entity.ComboEntities.Combo;
 import com.justintime.jit.entity.MenuItem;
 import com.justintime.jit.entity.OrderEntities.OrderItem;
 import com.justintime.jit.entity.BatchConfig;
@@ -14,23 +15,30 @@ import java.util.List;
 
 @Repository
 public interface OrderItemRepository extends BaseRepository<OrderItem,Long> {
-    @Query("SELECT oi.menuItem, COUNT(oi) AS orderCount " +
-            "FROM OrderItem oi " +
-            "WHERE oi.menuItem.restaurant.id = :restaurantId " +
-            "AND oi.menuItem.id IN :menuItemIds " +
-            "GROUP BY oi.menuItem " +
-            "ORDER BY orderCount DESC")
-    List<Object[]> findMenuItemsWithOrderCount(@Param("restaurantId") Long restaurantId, @Param("menuItemIds") List<Long> menuItemIds);
+    @Query(value = "SELECT oi.menu_item_id, COUNT(oi.id) AS order_count " +
+            "FROM order_item oi " +
+            "JOIN restaurant r ON oi.restaurant_id = r.id " +
+            "WHERE r.restaurant_code = :restaurantCode " +
+            "AND oi.menu_item_id IN (:menuItemIds) " +
+            "GROUP BY oi.menu_item_id " +
+            "ORDER BY order_count DESC",
+            nativeQuery = true)
+    List<Object[]> findMenuItemsWithOrderCount(
+            @Param("restaurantCode") String restaurantCode,
+            @Param("menuItemIds") List<Long> menuItemIds);
 
-    @Query("SELECT oi.combo, COUNT(oi) AS orderCount " +
-            "FROM OrderItem oi " +
-            "WHERE oi.combo.restaurant.id = :restaurantId " +
-            "AND oi.combo.id IN :comboIds " +
-            "GROUP BY oi.combo " +
-            "ORDER BY orderCount DESC")
-    List<Object[]> findCombosWithOrderCount(@Param("restaurantId") Long restaurantId, @Param("comboIds") List<Long> itemIds);
-//    List<Object[]> findMenuItemsWithOrderCount(@Param("startDate") LocalDateTime startDate,
-//                                               @Param("addressId") Long addressId);
+    @Query(value = "SELECT oi.combo_id, COUNT(oi.id) AS order_count " +
+            "FROM order_item oi " +
+            "JOIN combo c ON oi.combo_id = c.id " +
+            "JOIN restaurant r ON oi.restaurant_id = r.id " +
+            "WHERE r.restaurant_code = :restaurantCode " +
+            "AND c.id IN (:comboIds) " +
+            "GROUP BY oi.combo_id " +
+            "ORDER BY order_count DESC",
+            nativeQuery = true)
+    List<Object[]> findCombosWithOrderCount(
+            @Param("restaurantCode") String restaurantCode,
+            @Param("comboIds") List<Long> comboIds);
 
     @Query("SELECT oi FROM OrderItem oi WHERE oi.orderItemStatus = 'PENDING'")
     List<OrderItem> findAllPending();
