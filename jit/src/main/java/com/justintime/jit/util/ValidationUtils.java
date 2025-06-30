@@ -1,8 +1,18 @@
 package com.justintime.jit.util;
 
 import com.justintime.jit.exception.ImageSizeLimitExceededException;
+import jakarta.annotation.Nullable;
 
-public class ImageValidation {
+import java.util.Set;
+
+public class ValidationUtils {
+
+    /**
+     * Helper method to determine if a field should be validated.
+     */
+    public static boolean shouldValidate(String fieldName, @Nullable Set<String> fieldsToValidate) {
+        return fieldsToValidate == null || fieldsToValidate.contains(fieldName);
+    }
 
     // Helper method to calculate padding length for base64 string
     private static int countPadding(String encodedData) {

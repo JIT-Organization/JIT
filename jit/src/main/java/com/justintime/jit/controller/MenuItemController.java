@@ -7,11 +7,10 @@ import com.justintime.jit.entity.Enums.Sort;
 import com.justintime.jit.entity.MenuItem;
 import com.justintime.jit.exception.ImageSizeLimitExceededException;
 import com.justintime.jit.service.JwtService;
-import com.justintime.jit.util.ImageValidation;
+import com.justintime.jit.util.ValidationUtils;
 import com.justintime.jit.service.MenuItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -46,12 +45,14 @@ public class MenuItemController extends BaseController {
     public ResponseEntity<ApiResponse<MenuItemDTO>> getMenuItemByRestaurantIdAndId(@PathVariable Long restaurantId, @PathVariable Long id){
         return success(menuItemService.getMenuItemByRestaurantIdAndId(restaurantId, id));
     }
+
+    @Deprecated
     @PostMapping("/validateImage")
     public ResponseEntity<String> validateImage(@RequestParam("image") String base64Image) {
         long maxSizeInBytes = 3 * 1024 * 1024;  // Example: 3 MB limit for image size
 
         try {
-            ImageValidation.validateImageSize(base64Image, maxSizeInBytes);
+            ValidationUtils.validateImageSize(base64Image, maxSizeInBytes);
             return ResponseEntity.ok("Image is valid.");
         } catch (ImageSizeLimitExceededException e) {
             return ResponseEntity.status(400).body(e.getMessage());
@@ -60,16 +61,19 @@ public class MenuItemController extends BaseController {
 
     @PostMapping("/{restaurantCode}")
     public ResponseEntity<ApiResponse<MenuItem>> addMenuItem(@PathVariable String restaurantCode, @RequestBody MenuItemDTO menuItemDTO) {
+        validate(menuItemDTO, null, restaurantCode);
         return success(menuItemService.addMenuItem(restaurantCode,menuItemDTO), "Created Menu Item Successfully");
     }
 
     @PutMapping("/{restaurantCode}/{id}")
     public MenuItem updateMenuItem(@PathVariable String restaurantCode,@PathVariable Long id, @RequestBody MenuItemDTO updatedItem) {
+        validate(updatedItem, null, restaurantCode);
         return menuItemService.updateMenuItem(restaurantCode,id, updatedItem);
     }
 
     @PatchMapping("/{restaurantCode}/{menuItemName}")
     public ResponseEntity<ApiResponse<MenuItemDTO>> patchUpdateMenuItem(@PathVariable String restaurantCode,@PathVariable String menuItemName, @RequestBody PatchRequest<MenuItemDTO> payload) {
+        validate(payload.getDto(), payload.getPropertiesToBeUpdated(), restaurantCode);
         return success(menuItemService.patchUpdateMenuItem(restaurantCode,menuItemName, payload.getDto(), payload.getPropertiesToBeUpdated()));
     }
 
