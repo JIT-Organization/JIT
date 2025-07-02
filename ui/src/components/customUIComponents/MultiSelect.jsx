@@ -12,9 +12,18 @@ export default function MultiSelect({
   className = '',
   showAllOption = false,
   disabled = false,
+  isSingleSelect = false,
 }) {
   const toggleOption = (optionValue) => {
     if (disabled) return;
+    if (isSingleSelect) {
+      if (value.includes(optionValue)) {
+        onChange([]);
+      } else {
+        onChange([optionValue]);
+      }
+      return;
+    }
     if (optionValue === "all") {
       if (isAllSelected) {
         onChange([]);
@@ -51,9 +60,9 @@ export default function MultiSelect({
           <span className={value.length ? "truncate" : "text-muted-foreground"}>
             {value.length
               ? options
-                  .filter((opt) => value.includes(opt.value))
-                  .map((opt) => opt.label)
-                  .join(", ")
+                .filter((opt) => value.includes(opt.value))
+                .map((opt) => opt.label)
+                .join(isSingleSelect ? "" : ", ")
               : placeholder}
           </span>
         </Button>
@@ -63,7 +72,7 @@ export default function MultiSelect({
           <Command>
             <CommandInput placeholder="Search options..." />
             <CommandList>
-              {showAllOption && (
+              {!isSingleSelect && showAllOption && (
                 <CommandItem
                   key="all"
                   onSelect={() => toggleOption("all")}

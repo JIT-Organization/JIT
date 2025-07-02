@@ -24,6 +24,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import MultiSelect from "@/components/customUIComponents/MultiSelect";
 import CommonForm from "@/components/CommonForm";
+import FoodCustomizeStepperDialog from "@/components/customUIComponents/FoodCustomizeStepperDialog";
 
 const customerFormSchema = z.object({
   tables: z.array(z.string()),
@@ -115,7 +116,7 @@ const CreateOrder = ({ isNew = true }) => {
         return [...prevCart, {
           ...food,
           itemName: food.menuItemName,
-          price: food.offerPrice || food.price,
+          itemPrice: food.offerPrice || food.price,
           qty: 1
         }];
       }
@@ -240,10 +241,10 @@ const CreateOrder = ({ isNew = true }) => {
       ...item,
       itemName: item.itemName,
       quantity: item.qty,
-      totalPrice: item.qty * item.price
+      totalPrice: item.qty * item.itemPrice
     }));
 
-    const totalAmount = cartItems.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    const totalAmount = cartItems.reduce((sum, item) => sum + (item.itemPrice * item.qty), 0);
 
     const orderDTO = {
       amount: totalAmount,
@@ -344,7 +345,7 @@ console.log(orderDTO)
         {
           ...food,
           itemName: uniqueName,
-          price: food.offerPrice || food.price,
+          itemPrice: food.offerPrice || food.price,
           qty: 1,
         }
       ];
@@ -454,7 +455,7 @@ console.log(orderDTO)
         </DialogContent>
       </Dialog>
 
-      <CustomizeDialog
+      <FoodCustomizeStepperDialog
         isOpen={showCustomizeDialog}
         onSave={handleSaveCustomizeDialog}
         items={customizeItems}

@@ -80,6 +80,19 @@ const renderField = (fieldConfig, formField, form) => {
           onChange={formField.onChange}
         />
       );
+    case "select":
+      return (
+        <select
+          className={fieldConfig.inputClassName || "border p-2 w-full rounded bg-yellow-50"}
+          {...formField}
+          disabled={fieldConfig.disabled}
+        >
+          {/* <option value="" disabled>{fieldConfig.placeholder || "Select an option"}</option> */}
+          {fieldConfig.options && fieldConfig.options.map((opt) => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
+      );
     default:
       return null;
   }
@@ -96,12 +109,10 @@ const CommonForm = ({ form, formFields }) => (
           rules={fieldConfig.rules}
           render={({ field }) => (
             <FormItem className={`mb-4 mr-4 ${fieldConfig.fieldCol ?? "col-span-12"}`}>
-              <div className="grid grid-cols-12 gap-2 items-start sm:items-center">
                 <FormLabel className={`${fieldConfig.labelCol ?? "col-span-3"}`}>{fieldConfig.label}</FormLabel>
                 <FormControl className={`${fieldConfig.controlCol ?? "col-span-9"} w-full`}>
                   {renderField(fieldConfig, field, form)}
                 </FormControl>
-              </div>
               <FormMessage />
             </FormItem>
           )}
