@@ -3,6 +3,9 @@ import PieChartTemplate from "@/components/customUIComponents/PieChartTemplate";
 import BarGraphTemplate from "@/components/customUIComponents/BarGraphTemplate";
 import LineGraphTemplate from "@/components/customUIComponents/LineGraphTemplate";
 import CustomCard from "@/components/customUIComponents/CustomCard";
+import { FaShoppingCart, FaUserFriends, FaTable, FaUsers, FaRupeeSign } from "react-icons/fa";
+import { useState } from "react";
+
 const sampleData = [
   { name: "Pizza", quantity: 4 },
   { name: "Burger", quantity: 2 },
@@ -29,21 +32,89 @@ const incomeData = [
 ];
 
 const sample =[
-  { label: "Cash", value: "1,233" },
-          { label: "Online", value: "12,222" },
-          { label: "Wallet", value: "333,333" },
+  { label: "New", value: "26" },
+  { label: "Ongoing", value: "36" },
+  { label: "Completed", value: "48" },
 ]
 
 const sample2 =[
-  { label: "Available", value: "15" },
-          { label: "Used", value: "12" },
+  { label: "Manager", value: "1" },
+  { label: "Server", value: "4" },
+  { label: "Cook", value: "2" },
+]
+const sample3 =[
+  { label: "Table seats", value: "48" },
+  { label: "Open seats", value: "6" },
 ]
 
+const sample4 =[
+  { label: "Dine in", value: "78" },
+  { label: "Take away", value: "15" },
+  { label: "Delivery", value: "6" },
+]
+const sample5 =[
+  { label: "Cash", value: "1,75,486" },
+  { label: "Online", value: "10,68,320" },
+  { label: "Wallet", value: "31,872" },
+]
+
+const cardData = [
+  {
+    title: "Orders",
+    value: "100",
+    data: sample,
+    icon: <FaShoppingCart className="text-3xl text-yellow-500" />,
+    color: "text-yellow-500",
+  },
+  {
+    title: "Active users",
+    value: "7",
+    data: sample2,
+    icon: <FaUserFriends className="text-3xl text-blue-500" />,
+    color: "text-blue-500",
+  },
+  {
+    title: "Available Tables",
+    value: "12",
+    data: sample3,
+    icon: <FaTable className="text-3xl text-green-500" />,
+    color: "text-green-500",
+  },
+  {
+    title: "Total Customers",
+    value: "99",
+    data: sample4,
+    icon: <FaUsers className="text-3xl text-purple-500" />,
+    color: "text-purple-500",
+  },
+  {
+    title: "Total Revenue",
+    value: "12,75,678",
+    data: sample5,
+    icon: <FaRupeeSign className="text-3xl text-orange-500" />,
+    color: "text-orange-500",
+  },
+];
+
 export default function DashboardPage() {
+  const [expandedIdx, setExpandedIdx] = useState(0); // Default: first card expanded
   return (
     <div className="p-4">
-      <CustomCard title="Total Revenue" value="1233" data={sample} />
-      <CustomCard title="Total Tables" value="27" data={sample2} />
+      <div className="flex flex-wrap gap-4">
+        {cardData.map((card, idx) => (
+          <CustomCard
+            key={card.title}
+            title={card.title}
+            value={card.value}
+            data={card.data}
+            icon={card.icon}
+            color={card.color}
+            showBreakdown={expandedIdx === idx}
+            className="p-2"
+            onMouseEnter={() => setExpandedIdx(idx)}
+          />
+        ))}
+      </div>
       <h1 className="text-xl font-semibold mb-4">Food Quantity Distribution</h1>
       {/* 2x2 grid for charts */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4">
