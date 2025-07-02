@@ -380,11 +380,7 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
                 batchConfigDTO.setMenuItemNames(batchConfig.getMenuItems().stream()
                         .map(MenuItem::getMenuItemName)
                         .collect(Collectors.toList()));
-                
-                // Set batch numbers
-                batchConfigDTO.setBatchNumbers(batchConfig.getBatches().stream()
-                        .map(Batch::getBatchNumber)
-                        .collect(Collectors.toList()));
+
                 
                 batchDTO.setBatchConfigDTO(batchConfigDTO);
                 batchDTO.setStatus(batch.getStatus().toString());

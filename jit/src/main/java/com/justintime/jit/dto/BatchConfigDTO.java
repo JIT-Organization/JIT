@@ -17,5 +17,4 @@ public class BatchConfigDTO {
     private String maxCount;
     private Integer estdBatchPrepTime;
     private List<String> menuItemNames;  // Store only the names of menu items
-    private List<String> batchNumbers; 
 }

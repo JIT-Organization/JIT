@@ -39,4 +39,6 @@ public interface OrderRepository extends BaseRepository<Order, Long> {
     Order findByRestaurantCodeAndId(@Param("resCode") String restaurantCode,@Param("id") Long id);
 
     List<Order> findByRestaurantId(Long restaurantId);
+
+    Optional<Order> findByOrderNumber(String orderNumber);
 }

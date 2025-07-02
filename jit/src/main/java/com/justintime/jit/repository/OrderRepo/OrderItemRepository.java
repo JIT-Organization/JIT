@@ -1,6 +1,5 @@
 package com.justintime.jit.repository.OrderRepo;
 
-import com.justintime.jit.entity.ComboEntities.Combo;
 import com.justintime.jit.entity.MenuItem;
 import com.justintime.jit.entity.OrderEntities.OrderItem;
 import com.justintime.jit.entity.BatchConfig;
@@ -39,6 +38,13 @@ public interface OrderItemRepository extends BaseRepository<OrderItem,Long> {
     List<Object[]> findCombosWithOrderCount(
             @Param("restaurantCode") String restaurantCode,
             @Param("comboIds") List<Long> comboIds);
+    @Query(value="SELECT oi FROM OrderItem oi join restaurant r on "+
+            "oi.restaurant_id=r.id join order o on" +
+            " oi.order_id=o.id " +
+            "where r.restaurant_code = :restaurantCode "+
+            "AND o.order_number=:orderNumber",nativeQuery = true)
+    List<OrderItem> findByRestaurantCodeAndOrderNumber(@Param("restaurantCode") String restaurantCode,@Param("orderNumber") String orderNumber);
+
 
     @Query("SELECT oi FROM OrderItem oi WHERE oi.orderItemStatus = 'PENDING'")
     List<OrderItem> findAllPending();
@@ -76,6 +82,19 @@ public interface OrderItemRepository extends BaseRepository<OrderItem,Long> {
         @Param("cookId") Long cookId,
         @Param("restaurantId") Long restaurantId
     );
+
+      @Query(value="SELECT oi from OrderItem oi JOIN restaurant r on" +
+              " oi.restaurant_id = r.id  join order o on " +
+              " oi.order_id = o.id " +
+              "WHERE r.restaurant_code = :restaurantCode " +
+              "AND o.order_number = :orderNumber " +
+              "AND oi.menuItem.name = :itemName " ,nativeQuery = true)
+     OrderItem findByRestaurantCodeAndItemNameAndOrderNumber( @Param("restaurantCode") String restaurantCode, @Param("itemName") String itemName,@Param("orderNumber") String orderNumber);
+
+
+      void deleteByOrderIdAndMenuItemId(
+              Long orderId,
+              Long menuItemId);
 
 //    @Query("SELECT oi FROM OrderItem oi WHERE (oi.assignedCookId = :cookId) OR (oi.assignedCookId IS NULL AND (oi.order.orderDate IS NULL OR oi.order.orderDate - oi.preparationTime <= :now))")
 //    List<OrderItem> findOrderItemsForCook(@Param("cookId") Long cookId, @Param("now") LocalDateTime now);
