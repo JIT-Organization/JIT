@@ -20,9 +20,12 @@ import { useQuery } from "@tanstack/react-query";
 import { getCategoriesListOptions, getUsersListOptions, validateField } from "@/lib/api/api";
 import { Textarea } from "@/components/ui/textarea";
 import CommonForm from "./CommonForm";
+import AddOnInput from "./AddOnInput";
+import ComboItemsInput from "./ComboItemsInput";
 
 const defaultFormValues = {
   menuItemName: "",
+  foodType: "Food",
   price: "",
   description: "",
   cookSet: [],
@@ -40,6 +43,7 @@ const defaultFormValues = {
   hotelSpecial: false,
   categorySet: [],
   images: [],
+  addOns: [],
 };
 
 // const categoryOptions = [
@@ -158,7 +162,7 @@ const availabilityOptions = [
 // };
 
 const FoodForm = forwardRef(
-  ({ onFormChange, onSubmit, defaultValues, isLoading, onError }, ref) => {
+  ({ onFormChange, onSubmit, defaultValues, isLoading, onError, isEdit}, ref) => {
     const { data: categoriesList, isLoading: isCategoryListLoading } = useQuery(
       getCategoriesListOptions()
     );
@@ -182,6 +186,7 @@ const FoodForm = forwardRef(
       defaultValues: defaultFormValues,
     });
     const offerPrice = form.watch("offerPrice");
+    const foodType = form.watch("foodType");
     
     const formFields = [
       {
@@ -215,6 +220,47 @@ const FoodForm = forwardRef(
             }
           }
         },
+      },
+      {
+        name: "foodType",
+        label: "Food Type",
+        type: "select",
+        options: [
+          { value: "Food", label: "Food" },
+          { value: "Combo", label: "Combo" },
+          // { value: "Variant", label: "Variant" },
+        ],
+        placeholder: "Select food type",
+        fieldCol: "col-span-12 md:col-span-6",
+        labelCol: "col-span-12",
+        controlCol: "col-span-12",
+        rules: {
+          required: "Food type is required",
+        },
+        disabled: isEdit,
+      },
+      {
+        name: "comboItems",
+        label: "Combo Items",
+        type: "custom",
+        Component: ComboItemsInput,
+        fieldCol: "col-span-12 md:col-span-6",
+        labelCol: "col-span-12",
+        controlCol: "col-span-12",
+        hidden: foodType !== "Combo",
+        rules: {
+          validate: (value) => {
+            if (foodType !== "Combo") return true;
+            if (!value || !Array.isArray(value) || value.length === 0) {
+              return "At least one combo item is required";
+            }
+            for (const row of value) {
+              if (!row.item) return "Each combo item must have a menu item selected";
+              if (!row.qty || isNaN(row.qty) || Number(row.qty) < 1) return "Each combo item must have a valid quantity";
+            }
+            return true;
+          }
+        }
       },
       {
         name: "price",
@@ -461,6 +507,15 @@ const FoodForm = forwardRef(
         type: "imageUploader",
         fieldCol: "col-span-12 md:col-span-12",
         labelCol: "col-span-0",
+        controlCol: "col-span-12",
+      },
+      {
+        name: "addOns",
+        label: "Add Ons",
+        type: "custom",
+        Component: AddOnInput,
+        fieldCol: "col-span-12 md:col-span-12",
+        labelCol: "col-span-6",
         controlCol: "col-span-12",
       },
     ];

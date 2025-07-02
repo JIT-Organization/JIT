@@ -241,6 +241,7 @@ const MenuFood = () => {
               defaultValues={formData}
               isLoading={isLoading}
               onError={handleFormError}
+              isEdit={isEdit}
             />
           </div>
 

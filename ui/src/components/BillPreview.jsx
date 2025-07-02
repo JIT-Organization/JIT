@@ -33,7 +33,7 @@ const BillPreview = ({ cartItems, handleUpdateQty, openCustomizeDialog, onOpenCu
                 className="flex justify-between border-b pb-2 text-sm"
               >
                 <div className="flex flex-col">
-                  <span className="text-xs font-medium">{item.itemName} {`(₹${item.price})`}</span>
+                  <span className="text-xs font-medium">{item.itemName} {`(₹${item.itemPrice})`}</span>
                   <div className="flex items-center gap-1 mt-1 text-xs">
                     <Button
                       variant="outline"
@@ -57,7 +57,7 @@ const BillPreview = ({ cartItems, handleUpdateQty, openCustomizeDialog, onOpenCu
 
                 <div className="flex flex-col items-end">
                   <span className="text-sm font-semibold">
-                    ₹ {(item.price * item.qty).toFixed(2)}
+                    ₹ {(item.itemPrice * item.qty).toFixed(2)}
                   </span>
                   <div className="flex gap-2 mt-1">
                     <button
@@ -94,7 +94,7 @@ const BillPreview = ({ cartItems, handleUpdateQty, openCustomizeDialog, onOpenCu
         <span>
           ₹
           {cartItems
-            .reduce((total, item) => total + item.price * item.qty, 0)
+            .reduce((total, item) => total + item.itemPrice * item.qty, 0)
             .toFixed(2)}
         </span>
       </CardFooter>
