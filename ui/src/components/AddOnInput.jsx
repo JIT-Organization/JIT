@@ -108,7 +108,7 @@ function AddOnSingleInput({ value, onChange, onRemove, showRemove = true, readOn
                 onChange={e => handleOptionChange(optIdx, "price", e.target.value)}
                 disabled={readOnly}
               />
-              {showRemove && !readOnly && (
+              {!readOnly && (
                 <Button
                   type="button"
                   variant="outline"
