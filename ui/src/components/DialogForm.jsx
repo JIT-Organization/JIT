@@ -23,6 +23,7 @@ import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
 import MultiSelect from "./customUIComponents/MultiSelect";
 import { X } from "lucide-react";
 import { Switch } from "./ui/switch";
+import { AddOnSingleInput } from "./AddOnInput";
 
 export default function DialogForm({ type, data, onSubmit, selectOptions }) {
   const getDefaultValues = (type) => {
@@ -49,6 +50,13 @@ export default function DialogForm({ type, data, onSubmit, selectOptions }) {
           tableNumber: "",
           seatingCapacity: "",
           isAvailable: "yes",
+        };
+
+      case "add-on":
+        return {
+          label: "",
+          price: "",
+          options: [],
         };
 
       default:
@@ -286,6 +294,34 @@ export default function DialogForm({ type, data, onSubmit, selectOptions }) {
     defaultValues: data || getDefaultValues(type),
     mode: "onBlur",
   });
+
+  if (type === "add-on") {
+    return (
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-4"
+        >
+          <AddOnSingleInput
+            value={form.watch()}
+            onChange={(val) => {
+              form.reset(val);
+            }}
+            showRemove={false}
+            highlight={false}
+          />
+          <div className="flex space-x-4 items-center">
+            <DialogClose>
+              <div className="hover:bg-gray-600/10 py-2 px-4 rounded-lg">
+                Cancel
+              </div>
+            </DialogClose>
+            <Button type="submit">Submit</Button>
+          </div>
+        </form>
+      </Form>
+    );
+  }
 
   return (
     <Form {...form}>
