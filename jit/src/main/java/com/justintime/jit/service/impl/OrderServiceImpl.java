@@ -5,6 +5,7 @@ import com.justintime.jit.dto.OrderItemDTO;
 import com.justintime.jit.entity.*;
 import com.justintime.jit.entity.ComboEntities.Combo;
 import com.justintime.jit.entity.Enums.OrderStatus;
+import com.justintime.jit.entity.Enums.Role;
 import com.justintime.jit.entity.OrderEntities.Order;
 import com.justintime.jit.entity.OrderEntities.OrderItem;
 import com.justintime.jit.entity.PaymentEntities.Payment;
@@ -68,11 +69,12 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public ResponseEntity<String> createOrder(String restaurantCode, String username, OrderDTO orderDTO) {
+        Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
         GenericMapper<Order, OrderDTO> mapper = MapperFactory.getMapper(Order.class, OrderDTO.class);
         Order order = mapper.toEntity(orderDTO);
-        order.setRestaurant(restaurantRepository.findByRestaurantCode(restaurantCode)
-                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found")));
-        order.setUser(userRepository.findByRestaurantCodeAndUsername(restaurantCode, username));
+        order.setRestaurant(restaurant);
+        order.setUser(userRepository.findByRestaurantIdAndRoleAndUserName(restaurant.getId(), Role.COOK, username));
         order.setStatus(OrderStatus.PENDING);
         resolveRelationships(order, orderDTO);
         Order savedOrder = orderRepository.save(order);

@@ -1,9 +1,5 @@
 package com.justintime.jit.entity;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.justintime.jit.entity.ComboEntities.ComboItem;
 import com.justintime.jit.entity.OrderEntities.OrderItem;
 import com.justintime.jit.util.filter.FilterableItem;
@@ -11,9 +7,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
 
 import java.math.BigDecimal;
@@ -52,11 +45,9 @@ public class MenuItem extends BaseEntity implements FilterableItem {
     @Column(name = "offer_price", columnDefinition = "DECIMAL(10,2)")
     private BigDecimal offerPrice;
 
-    @UpdateTimestamp
     @Column(name = "offer_from")
     private LocalDateTime offerFrom;
 
-    @UpdateTimestamp
     @Column(name = "offer_to")
     private LocalDateTime offerTo;
 
@@ -68,11 +59,11 @@ public class MenuItem extends BaseEntity implements FilterableItem {
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
-            name = "menu_item_cook", // Join table name
-            joinColumns = @JoinColumn(name = "menu_item_id"), // Foreign key for MenuItem
+            name = "menu_item_cook",
+            joinColumns = @JoinColumn(name = "menu_item_id"),
             inverseJoinColumns = @JoinColumn(name = "cook_id")
     )
-    private Set<Cook> cookSet = new HashSet<>();
+    private Set<User> cookSet = new HashSet<>();
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
@@ -85,6 +76,12 @@ public class MenuItem extends BaseEntity implements FilterableItem {
 
     @Column(name = "preparation_time")
     private Integer preparationTime;
+
+    @Column(name = "is_preparation_time_for_single_menu_item", length=1)
+    private Boolean isPreparationTimeForSingleMenuItem = true;
+
+    @Column(name = "max_clubbed_menu_items")
+    private Integer maxClubbedMenuItems = 1;
 
     @Column(name = "accept_bulk_orders", length = 1)
     private Boolean acceptBulkOrders;
@@ -114,8 +111,8 @@ public class MenuItem extends BaseEntity implements FilterableItem {
     private List<OrderItem> orderItems = new ArrayList<>();
 
     @ManyToOne
-    @JoinColumn(name = "kitchen_set_id")
-    private KitchenSet kitchenBatch;
+    @JoinColumn(name = "batch_config_id")
+    private BatchConfig batchConfig;
 
     @Override
     public String getName() {

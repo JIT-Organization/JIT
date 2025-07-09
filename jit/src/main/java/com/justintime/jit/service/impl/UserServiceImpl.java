@@ -2,8 +2,11 @@ package com.justintime.jit.service.impl;
 
 import com.justintime.jit.dto.UserDTO;
 import com.justintime.jit.entity.Enums.Role;
+import com.justintime.jit.entity.Restaurant;
 import com.justintime.jit.entity.User;
 import com.justintime.jit.entity.UserPrincipal;
+import com.justintime.jit.exception.ResourceNotFoundException;
+import com.justintime.jit.repository.RestaurantRepository;
 import com.justintime.jit.repository.UserRepository;
 import com.justintime.jit.service.UserService;
 import com.justintime.jit.util.CommonServiceImplUtil;
@@ -23,17 +26,20 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
 
     private final UserRepository userRepository;
 
+    private final RestaurantRepository restaurantRepository;
+
     private final CommonServiceImplUtil commonServiceImplUtil;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, CommonServiceImplUtil commonServiceImplUtil) {
+    public UserServiceImpl(UserRepository userRepository, RestaurantRepository restaurantRepository, CommonServiceImplUtil commonServiceImplUtil) {
         this.userRepository = userRepository;
+        this.restaurantRepository = restaurantRepository;
         this.commonServiceImplUtil = commonServiceImplUtil;
     }
 
     @Override
-    public List<User> findByUsername(String username) {
-        return userRepository.findByUsername(username);
+    public List<User> findByUserName(String userName) {
+        return userRepository.findByUserName(userName);
     }
 
     @Override
@@ -51,7 +57,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
             existingUser.setLastName(updatedUser.getLastName());
             existingUser.setProfilePictureUrl(updatedUser.getProfilePictureUrl());
             existingUser.setIsActive(updatedUser.getIsActive());
-            existingUser.setUsername(updatedUser.getUsername());
+            existingUser.setUserName(updatedUser.getUserName());
             existingUser.setEmail(updatedUser.getEmail());
             existingUser.setPhoneNumber(updatedUser.getPhoneNumber());
             existingUser.setPasswordHash(updatedUser.getPasswordHash());
@@ -70,7 +76,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
 
     @Override
     public UserDTO patchUpdateUser(String restaurantCode, String username, UserDTO dto, HashSet<String> propertiesToBeUpdated) {
-        User existingUser = userRepository.findByRestaurantCodeAndUsername(restaurantCode, username);
+        User existingUser = userRepository.findByRestaurantCodeAndUserName(restaurantCode, username);
         GenericMapper<User, UserDTO> userMapper = MapperFactory.getMapper(User.class, UserDTO.class);
         User patchedUser = userMapper.toEntity(dto);
         // TODO write a validation where the username should be unique if they are updating it

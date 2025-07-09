@@ -42,9 +42,9 @@ public class MenuItemController extends BaseController {
         return success(menuItemService.getMenuItemsByRestaurantId(restaurantCode, sortBy, priceRange, category, onlyVeg, onlyForCombos));
     }
 
-    @GetMapping("/{restaurantId}/{id}")
-    public ResponseEntity<ApiResponse<MenuItemDTO>> getMenuItemByRestaurantIdAndId(@PathVariable Long restaurantId, @PathVariable Long id){
-        return success(menuItemService.getMenuItemByRestaurantIdAndId(restaurantId, id));
+    @GetMapping("/{restaurantCode}/{menuItemName}")
+    public ResponseEntity<ApiResponse<MenuItemDTO>> getMenuItemByRestaurantIdAndMenuItemName(@PathVariable String restaurantCode, @PathVariable String menuItemName) {
+        return success(menuItemService.getMenuItemByRestaurantIdAndMenuItemName(restaurantCode, menuItemName));
     }
     @PostMapping("/validateImage")
     public ResponseEntity<String> validateImage(@RequestParam("image") String base64Image) {

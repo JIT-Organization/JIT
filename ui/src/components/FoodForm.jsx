@@ -17,7 +17,7 @@ import ImageUploader from "./ImageUploader";
 import TimeIntervalSetInput from "@/components/TimeIntervalSetInput";
 import { DateTimePicker } from "@/components/customUIComponents/CustomeDateTimePicker";
 import { useQuery } from "@tanstack/react-query";
-import { getCategoriesListOptions, getUsersListOptions } from "@/lib/api/api";
+import { getCategoriesListOptions, getUsersListOptions, validateField } from "@/lib/api/api";
 import { Textarea } from "@/components/ui/textarea";
 
 const defaultFormValues = {
@@ -58,13 +58,13 @@ const defaultFormValues = {
 // ];
 
 const availabilityOptions = [
-  { value: "monday", label: "Monday" },
-  { value: "tuesday", label: "Tuesday" },
-  { value: "wednesday", label: "Wednesday" },
-  { value: "thursday", label: "Thursday" },
-  { value: "friday", label: "Friday" },
-  { value: "saturday", label: "Saturday" },
-  { value: "sunday", label: "Sunday" },
+  { value: "SUNDAY", label: "Sunday" },
+  { value: "MONDAY", label: "Monday" },
+  { value: "TUESDAY", label: "Tuesday" },
+  { value: "WEDNESDAY", label: "Wednesday" },
+  { value: "THURSDAY", label: "Thursday" },
+  { value: "FRIDAY", label: "Friday" },
+  { value: "SATURDAY", label: "Saturday" },
 ];
 
 const renderField = (fieldConfig, formField) => {
@@ -75,6 +75,20 @@ const renderField = (fieldConfig, formField) => {
           className="border p-2 w-full rounded bg-yellow-50"
           {...formField}
           placeholder={fieldConfig.placeholder}
+          onBlur={fieldConfig.name === "menuItemName" ? async (e) => {
+            const value = e.target.value;
+            if (value && !value) {
+              const { data: isValid } = await validateField("menuItem", value).queryFn();
+              if (!isValid) {
+                formField.onChange(value);
+                formField.onBlur();
+                form.setError("menuItemName", {
+                  type: "manual",
+                  message: "This menu item name already exists",
+                });
+              }
+            }
+          } : formField.onBlur}
         />
       );
     case "textarea":
@@ -92,6 +106,8 @@ const renderField = (fieldConfig, formField) => {
           {...formField}
           options={fieldConfig.options}
           placeholder={fieldConfig.placeholder}
+          showAllOption={fieldConfig.showAllOption}
+          disabled={fieldConfig.disabled}
         />
       );
     case "toggleGroup":
@@ -145,7 +161,7 @@ const renderField = (fieldConfig, formField) => {
 };
 
 const FoodForm = forwardRef(
-  ({ onFormChange, onSubmit, defaultValues, isLoading }, ref) => {
+  ({ onFormChange, onSubmit, defaultValues, isLoading, onError }, ref) => {
     const { data: categoriesList, isLoading: isCategoryListLoading } = useQuery(
       getCategoriesListOptions()
     );
@@ -155,16 +171,21 @@ const FoodForm = forwardRef(
 
     const categoryOptions =
       categoriesList?.map((cat) => ({
-        value: cat.id,
+        value: cat.categoryName,
         label: cat.categoryName,
       })) ?? [];
 
     const cooksOptions =
       usersListData?.map((user) => ({
-        value: user.id,
-        label: user.name,
+        value: user.username,
+        label: user.username,
       })) ?? [];
 
+    const form = useForm({
+      defaultValues: defaultFormValues,
+    });
+    const offerPrice = form.watch("offerPrice");
+    
     const formFields = [
       {
         name: "menuItemName",
@@ -174,6 +195,15 @@ const FoodForm = forwardRef(
         fieldCol: "col-span-12 md:col-span-6",
         labelCol: "col-span-12",
         controlCol: "col-span-12",
+        rules: {
+          required: "Food name is required",
+          validate: async (value) => {
+            if (!value) return true;
+            return true
+            const { data: isValid } = await validateField("menuItem", value).queryFn();
+            return isValid || "This menu item name already exists";
+          },
+        },
       },
       {
         name: "price",
@@ -183,6 +213,13 @@ const FoodForm = forwardRef(
         fieldCol: "col-span-12 md:col-span-6",
         labelCol: "col-span-12",
         controlCol: "col-span-12",
+        rules: {
+          required: "Price is required",
+          pattern: {
+            value: /^\d+(\.\d{1,2})?$/,
+            message: "Please enter a valid price (e.g. 10.99)",
+          },
+        },
       },
       {
         name: "description",
@@ -201,6 +238,33 @@ const FoodForm = forwardRef(
         fieldCol: "col-span-12 md:col-span-8",
         labelCol: "col-span-12",
         controlCol: "col-span-12",
+        rules: {
+          required: "Timings are required",
+          validate: (value) => {
+            if (!value || !Array.isArray(value)) {
+              return "Timings are required";
+            }
+            
+            for (const interval of value) {
+              if (!interval.startTime || interval.startTime.trim() === "") {
+                return "Available from time is required";
+              }
+              
+              if (!interval.endTime || interval.endTime.trim() === "") {
+                return "Available to time is required";
+              }
+              
+              const startTime = new Date(`2000-01-01T${interval.startTime}`);
+              const endTime = new Date(`2000-01-01T${interval.endTime}`);
+              
+              if (startTime >= endTime) {
+                return "Available from time must be earlier than available to time";
+              }
+            }
+            
+            return true;
+          }
+        }
       },
       {
         name: "count",
@@ -210,16 +274,29 @@ const FoodForm = forwardRef(
         fieldCol: "col-span-12 md:col-span-4",
         labelCol: "col-span-12",
         controlCol: "col-span-12",
+        rules: {
+          required: "Count is required",
+          pattern: {
+            value: /^\d+$/,
+            message: "Please enter a valid number",
+          },
+        },
       },
       {
         name: "cookSet",
         label: "Responsible Cooks",
         type: "multiSelect",
         options: cooksOptions,
-        placeholder: "Select cooks",
+        placeholder: isUserListLoading ? "Loading cooks..." : "Select cooks",
         fieldCol: "col-span-12 md:col-span-6",
         labelCol: "col-span-12",
         controlCol: "col-span-12",
+        rules: {
+          required: "At least one cook must be selected",
+          validate: (value) => value.length > 0 || "At least one cook must be selected",
+        },
+        showAllOption: true,
+        disabled: isUserListLoading
       },
       {
         name: "availability",
@@ -230,6 +307,11 @@ const FoodForm = forwardRef(
         fieldCol: "col-span-12 md:col-span-6",
         labelCol: "col-span-12",
         controlCol: "col-span-12",
+        rules: {
+          required: "At least one day must be selected",
+          validate: (value) => value.length > 0 || "At least one day must be selected",
+        },
+        showAllOption: true
       },
       {
         name: "offerPrice",
@@ -239,6 +321,12 @@ const FoodForm = forwardRef(
         fieldCol: "col-span-12 md:col-span-6",
         labelCol: "col-span-12",
         controlCol: "col-span-12",
+        rules: {
+          validate: (value) => {
+            if (!value) return true;
+            return /^\d+(\.\d{1,2})?$/.test(value) || "Please enter a valid offer price";
+          },
+        },
       },
       {
         name: "offerFrom",
@@ -247,6 +335,18 @@ const FoodForm = forwardRef(
         fieldCol: "col-span-12 md:col-span-6",
         labelCol: "col-span-12",
         controlCol: "col-span-12",
+        hidden: !offerPrice,
+        rules: {
+          validate: (value) => {
+            if (!form.getValues("offerPrice")) return true;
+            if (!value) return "Offer start date is required when offer price is set";
+            const offerTo = form.getValues("offerTo");
+            if (offerTo && new Date(value) >= new Date(offerTo)) {
+              return "Offer start date must be earlier than offer end date";
+            }
+            return true;
+          },
+        },
       },
       {
         name: "offerTo",
@@ -255,6 +355,18 @@ const FoodForm = forwardRef(
         fieldCol: "col-span-12 md:col-span-6",
         labelCol: "col-span-12",
         controlCol: "col-span-12",
+        hidden: !offerPrice,
+        rules: {
+          validate: (value) => {
+            if (!form.getValues("offerPrice")) return true;
+            if (!value) return "Offer end date is required when offer price is set";
+            const offerFrom = form.getValues("offerFrom");
+            if (offerFrom && new Date(value) <= new Date(offerFrom)) {
+              return "Offer end date must be later than offer start date";
+            }
+            return true;
+          },
+        },
       },
       {
         name: "preparationTime",
@@ -264,16 +376,29 @@ const FoodForm = forwardRef(
         fieldCol: "col-span-12 md:col-span-6",
         labelCol: "col-span-12",
         controlCol: "col-span-12",
+        rules: {
+          required: "Preparation time is required",
+          pattern: {
+            value: /^\d+$/,
+            message: "Please enter a valid number",
+          },
+        },
       },
       {
         name: "categorySet",
         label: "Categories",
         type: "multiSelect",
         options: categoryOptions,
-        placeholder: "Select categories",
+        placeholder: isCategoryListLoading ? "Loading categories..." : "Select categories",
         fieldCol: "col-span-12 md:col-span-6",
         labelCol: "col-span-12",
         controlCol: "col-span-12",
+        rules: {
+          required: "At least one category must be selected",
+          validate: (value) => value.length > 0 || "At least one category must be selected",
+        },
+        showAllOption: true,
+        disabled: isCategoryListLoading
       },
       {
         name: "acceptBulkOrders",
@@ -329,9 +454,6 @@ const FoodForm = forwardRef(
       },
     ];
 
-    const form = useForm({
-      defaultValues: defaultFormValues,
-    });
     useEffect(() => {
       if (defaultValues && !isLoading) {
         form.reset({ ...defaultFormValues, ...defaultValues });
@@ -347,7 +469,12 @@ const FoodForm = forwardRef(
 
     useImperativeHandle(ref, () => ({
       submitForm: () => {
-        form.handleSubmit(onSubmit)();
+        form.handleSubmit(
+          onSubmit,
+          (errors) => {
+            onError?.(errors);
+          }
+        )();
       },
     }));
 
@@ -355,34 +482,37 @@ const FoodForm = forwardRef(
       <div className="grid grid-cols-12">
         <Form {...form}>
           {formFields.map((fieldConfig) => (
-            <FormField
-              key={fieldConfig.name}
-              control={form.control}
-              name={fieldConfig.name}
-              render={({ field }) => (
-                <FormItem
-                  className={`mb-4 mr-4 ${
-                    fieldConfig.fieldCol ?? "col-span-12"
-                  }`}
-                >
-                  <div className="grid grid-cols-12 gap-2 items-start sm:items-center">
-                    <FormLabel
-                      className={`${fieldConfig.labelCol ?? "col-span-3"}`}
-                    >
-                      {fieldConfig.label}
-                    </FormLabel>
-                    <FormControl
-                      className={`${
-                        fieldConfig.controlCol ?? "col-span-9"
-                      } w-full`}
-                    >
-                      {renderField(fieldConfig, field)}
-                    </FormControl>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            !fieldConfig.hidden && (
+              <FormField
+                key={fieldConfig.name}
+                control={form.control}
+                name={fieldConfig.name}
+                rules={fieldConfig.rules}
+                render={({ field }) => (
+                  <FormItem
+                    className={`mb-4 mr-4 ${
+                      fieldConfig.fieldCol ?? "col-span-12"
+                    }`}
+                  >
+                    <div className="grid grid-cols-12 gap-2 items-start sm:items-center">
+                      <FormLabel
+                        className={`${fieldConfig.labelCol ?? "col-span-3"}`}
+                      >
+                        {fieldConfig.label}
+                      </FormLabel>
+                      <FormControl
+                        className={`${
+                          fieldConfig.controlCol ?? "col-span-9"
+                        } w-full`}
+                      >
+                        {renderField(fieldConfig, field)}
+                      </FormControl>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )
           ))}
         </Form>
       </div>

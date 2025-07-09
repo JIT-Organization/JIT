@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.justintime.jit.entity.Enums.Role;
 import com.justintime.jit.entity.OrderEntities.Order;
+import com.justintime.jit.entity.OrderEntities.OrderItem;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,6 +16,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -40,7 +43,7 @@ public class User extends BaseEntity{
         private Boolean isActive;
 
         @Column(name = "user_name", nullable = false)
-        private String username;
+        private String userName;
 
         @Column(name = "email", nullable = false)
         private String email;
@@ -71,6 +74,24 @@ public class User extends BaseEntity{
                 inverseJoinColumns = @JoinColumn(name = "restaurant_id")
         )
         private Set<Restaurant> restaurants;
+
+        @ManyToMany(mappedBy = "cookSet")
+        private Set<MenuItem> menuItemSet;
+
+        @OneToMany(mappedBy = "cook")
+        private Set<Batch> batches;
+
+        @ManyToMany
+        @JoinTable(
+                name = "batch_config_cook",
+                joinColumns = @JoinColumn(name = "user_id"),
+                inverseJoinColumns = @JoinColumn(name = "batch_config_id")
+        )
+        private Set<BatchConfig> batchConfigs = new HashSet<>();
+
+        @OneToMany(mappedBy = "cook")
+        private List<OrderItem> orderItems = new ArrayList<>();
+
 
 //        // Copy Constructor
 //        public User(User other) {

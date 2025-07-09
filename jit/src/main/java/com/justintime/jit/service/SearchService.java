@@ -5,4 +5,5 @@ import java.util.List;
 
 public interface SearchService {
     List<SearchResultDTO> searchByName(String query);
+    void checkMenuItemExistsInRestaurant(String restaurantCode, String menuItemName);
 }

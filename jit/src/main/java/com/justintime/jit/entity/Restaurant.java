@@ -67,9 +67,6 @@ public class Restaurant extends BaseEntity{
         @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
         private List<Combo> combos;
 
-        @OneToMany(mappedBy = "restaurant")
-        private List<Cook> cooks;
-
         @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
         private List<Order> orders;
 
@@ -94,7 +91,7 @@ public class Restaurant extends BaseEntity{
         private List<Category> categories;
 
         @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
-        private List<KitchenSet> batches;
+        private List<BatchConfig> batchConfigs;
 
 //        // Copy Constructor
 //        public Restaurant(Restaurant other) {

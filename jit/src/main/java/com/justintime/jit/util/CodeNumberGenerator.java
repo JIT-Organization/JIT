@@ -9,7 +9,8 @@ public class CodeNumberGenerator {
             case "reservation" -> "RSV-" + generateUUID();
             case "order"       -> "ORD-" + generateUUID();
             case "payment"     -> "PAY-" + generateUUID();
-            case "kitchenSet"  -> "KST-" + generateUUID();
+            case "batchConfig"  -> "KST-" + generateUUID();
+            case "batch"       -> "BAT-" + generateUUID();
             default            -> "You must specify a valid Entity name";
         };
     }

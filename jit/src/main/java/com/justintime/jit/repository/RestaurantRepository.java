@@ -1,13 +1,14 @@
 package com.justintime.jit.repository;
 
 import com.justintime.jit.entity.Restaurant;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface RestaurantRepository extends BaseRepository<Restaurant, Long> {
+public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
 
     // Find a restaurant by name
 //    Restaurant findByName(String name);

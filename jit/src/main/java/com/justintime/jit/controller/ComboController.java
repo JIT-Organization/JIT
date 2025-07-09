@@ -32,15 +32,15 @@ public class ComboController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/restaurant/{restaurantId}")
+    @GetMapping("/restaurant/{restaurantCode}")
     public List<ComboDTO> getCombosByRestaurant(
-            @PathVariable Long restaurantId,
+            @PathVariable String restaurantCode,
             @RequestParam(required = false) Sort sortBy,
             @RequestParam(required = false) String priceRange,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) Boolean onlyVeg,
             @RequestParam(required = false, defaultValue = "false") Boolean onlyForCombos) {
-        return comboService.getCombosByRestaurantId(restaurantId, sortBy, priceRange, category, onlyVeg, onlyForCombos);
+        return comboService.getCombosByRestaurantId(restaurantCode, sortBy, priceRange, category, onlyVeg, onlyForCombos);
     }
 
     @PostMapping

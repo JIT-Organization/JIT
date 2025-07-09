@@ -3,10 +3,11 @@ package com.justintime.jit.entity.OrderEntities;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import com.justintime.jit.entity.BaseEntity;
+import com.justintime.jit.entity.*;
 import com.justintime.jit.entity.ComboEntities.Combo;
+import com.justintime.jit.entity.Enums.OrderItemStatus;
 import com.justintime.jit.entity.Enums.OrderStatus;
-import com.justintime.jit.entity.MenuItem;
+import com.justintime.jit.util.CodeNumberGenerator;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,6 +19,10 @@ import org.hibernate.envers.Audited;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -46,7 +51,32 @@ public class OrderItem extends BaseEntity {
         private BigDecimal totalPrice;
 
         @Enumerated(EnumType.STRING)
-        private OrderStatus orderItemStatus;
+        private OrderItemStatus orderItemStatus;
+
+        @ManyToOne
+        @JoinColumn(name = "time_interval_id")
+        private TimeInterval timeInterval;
+
+        @OneToMany(mappedBy = "orderItem")
+        private Set<BatchOrderItem> batchOrderItems = new HashSet<>();
+
+        @Column(name = "max_time_limit_to_start")
+        private LocalDateTime maxTimeLimitToStart;
+
+        @ManyToOne
+        @JoinColumn(name = "assigned_cook_id")
+        private User cook;
+
+        @PrePersist
+        @PreUpdate
+        public void calculateMaxTimeLimitToStart() {
+            if (Objects.nonNull(order) && Objects.nonNull(order.getOrderDate())&& Objects.nonNull(menuItem)  && Objects.nonNull( menuItem.getBatchConfig())) {
+                Integer prepTime = menuItem.getBatchConfig().getPreparationTime();
+                if (Objects.nonNull(prepTime)) {
+                    this.maxTimeLimitToStart = order.getOrderDate().minusMinutes(prepTime);
+                }
+            }
+        }
 
 //        public OrderItem(OrderItem other) {
 //                this.id = null; // New instance should not have the same ID

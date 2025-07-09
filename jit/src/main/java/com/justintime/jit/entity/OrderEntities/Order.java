@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.justintime.jit.entity.BaseEntity;
 import com.justintime.jit.entity.Enums.OrderStatus;
+import com.justintime.jit.entity.Enums.OrderType;
 import com.justintime.jit.entity.PaymentEntities.Payment;
 import com.justintime.jit.entity.Reservation;
 import com.justintime.jit.entity.Restaurant;
@@ -52,6 +53,9 @@ public class Order extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name ="status")
     private OrderStatus status;
+
+    @Column(name = "order_type")
+    private OrderType orderType;
 
     @Column(name = "order_date", updatable = false)
     private LocalDateTime orderDate = LocalDateTime.now();

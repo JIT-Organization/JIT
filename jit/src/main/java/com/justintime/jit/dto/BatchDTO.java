@@ -1,7 +1,5 @@
 package com.justintime.jit.dto;
 
-import com.justintime.jit.entity.KitchenSet;
-import com.justintime.jit.entity.OrderEntities.OrderItem;
 import lombok.*;
 
 import java.util.List;
@@ -15,7 +13,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BatchDTO {
-    KitchenSet kitchenSet;
-    List<OrderItem> orderItems;
-    String status;
+    private BatchConfigDTO batchConfigDTO;
+    private List<OrderItemDTO> orderItemsDTO;
+    private String status;
+    private String batchNumber;
+    private Integer currentCount;
 }
