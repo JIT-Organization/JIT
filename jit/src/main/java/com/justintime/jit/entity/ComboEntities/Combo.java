@@ -1,10 +1,7 @@
 package com.justintime.jit.entity.ComboEntities;
 
-import com.justintime.jit.entity.BaseEntity;
-import com.justintime.jit.entity.Category;
+import com.justintime.jit.entity.*;
 import com.justintime.jit.entity.OrderEntities.OrderItem;
-import com.justintime.jit.entity.Restaurant;
-import com.justintime.jit.entity.TimeInterval;
 import com.justintime.jit.util.filter.FilterableItem;
 import jakarta.persistence.*;
 import lombok.*;
@@ -79,6 +76,9 @@ public class Combo extends BaseEntity implements FilterableItem {
             inverseJoinColumns = @JoinColumn(name = "time_interval_id")
     )
     private Set<TimeInterval> timeIntervalSet = new HashSet<>();
+
+    @ManyToMany(mappedBy = "comboSet", cascade = {CascadeType.MERGE})
+    private Set<AddOn> addOnSet = new HashSet<>();
 
     @Column(name = "preparation_time", nullable = false)
     private Integer preparationTime;

@@ -57,6 +57,9 @@ public class OrderItem extends BaseEntity {
         @JoinColumn(name = "time_interval_id")
         private TimeInterval timeInterval;
 
+        @ManyToMany(mappedBy = "orderItemSet", cascade = {CascadeType.MERGE})
+        private Set<AddOn> addOnSet = new HashSet<>();
+
         @OneToMany(mappedBy = "orderItem")
         private Set<BatchOrderItem> batchOrderItems = new HashSet<>();
 

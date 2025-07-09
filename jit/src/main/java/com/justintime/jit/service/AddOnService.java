@@ -12,9 +12,10 @@ import java.util.List;
 public interface AddOnService extends BaseService<AddOn, Long> {
     List<AddOnDTO> getAllAddOnsForRestaurant(String restaurantCode);
     List<AddOnDTO> getAllAddOnsForMenuItem(String restaurantCode, String menuItemName);
+    List<AddOnDTO> getAllAddOnsForCombo(String restaurantCode, String comboName);
     List<AddOnDTO> getAllAddOnsForOrderItem(String restaurantCode, String orderNumber, String itemName);
-    void addAddOn(String restaurantCode, AddOnDTO addOnDTO);
-    void updateAddOn(String restaurantCode,Long id, AddOnDTO addOnDTO);
+    void createAddOn(String restaurantCode, AddOnDTO addOnDTO);
+    AddOnDTO updateAddOn(String restaurantCode, AddOnDTO addOnDTO);
     AddOnDTO patchAddOn(String restaurantCode, AddOnDTO addOnDTO, HashSet<String> propertiesToBeUpdated);
     void deleteAddOn(String restaurantCode, String label);
 }

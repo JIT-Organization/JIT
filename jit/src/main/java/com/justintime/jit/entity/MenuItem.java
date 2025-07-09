@@ -1,5 +1,6 @@
 package com.justintime.jit.entity;
 
+import com.justintime.jit.entity.ComboEntities.Combo;
 import com.justintime.jit.entity.ComboEntities.ComboItem;
 import com.justintime.jit.entity.OrderEntities.OrderItem;
 import com.justintime.jit.util.filter.FilterableItem;
@@ -73,6 +74,9 @@ public class MenuItem extends BaseEntity implements FilterableItem {
             uniqueConstraints = @UniqueConstraint(columnNames = {"menu_item_id", "time_interval_id"})
     )
     private Set<TimeInterval> timeIntervalSet = new HashSet<>();
+
+    @ManyToMany(mappedBy = "menuItemSet", cascade = {CascadeType.MERGE})
+    private Set<AddOn> addOnSet = new HashSet<>();
 
     @Column(name = "preparation_time")
     private Integer preparationTime;

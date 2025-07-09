@@ -16,4 +16,5 @@ public class AddOnDTO {
     private List<AddOnOption> options;
     private BigDecimal price;
     private Set<String> menuItemNames;
+    private Set<String> comboNames;
 }
