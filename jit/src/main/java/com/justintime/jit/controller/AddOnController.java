@@ -2,18 +2,11 @@ package com.justintime.jit.controller;
 
 import com.justintime.jit.dto.AddOnDTO;
 import com.justintime.jit.dto.ApiResponse;
-import com.justintime.jit.dto.MenuItemDTO;
 import com.justintime.jit.dto.PatchRequest;
-import com.justintime.jit.entity.Enums.Sort;
-import com.justintime.jit.entity.MenuItem;
-import com.justintime.jit.exception.ImageSizeLimitExceededException;
 import com.justintime.jit.service.AddOnService;
 import com.justintime.jit.service.JwtService;
-import com.justintime.jit.service.MenuItemService;
-import com.justintime.jit.util.ImageValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

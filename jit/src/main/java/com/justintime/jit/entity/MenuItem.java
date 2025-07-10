@@ -43,6 +43,9 @@ public class MenuItem extends BaseEntity implements FilterableItem {
     @Column(name = "price", columnDefinition = "DECIMAL(10,2)")
     private BigDecimal price;
 
+    @Column(name = "food_type")
+    private String foodType; // MenuItem, Variant
+
     @Column(name = "offer_price", columnDefinition = "DECIMAL(10,2)")
     private BigDecimal offerPrice;
 
