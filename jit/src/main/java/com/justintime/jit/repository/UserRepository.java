@@ -21,12 +21,23 @@ public interface UserRepository extends BaseRepository<User, Long> {
 
     List<User> findByUserName(String userName);
 
+    // Do not delete
     @Query(value = "SELECT u.* FROM users u " +
             "JOIN user_restaurant ur ON u.id = ur.user_id " +
             "JOIN restaurant r ON ur.restaurant_id = r.id " +
             "WHERE r.id = :restaurantId AND u.role = :role AND u.user_name = :userName", nativeQuery = true)
     User findByRestaurantIdAndRoleAndUserName(
             @Param("restaurantId") Long restaurantId,
+            @Param("role") Role role,
+            @Param("userName") String userName);
+
+    @Query(value = "SELECT u.* FROM users u " +
+            "JOIN user_restaurant ur ON u.id = ur.user_id " +
+            "JOIN restaurant r ON ur.restaurant_id = r.id " +
+            "WHERE r.restaurant_code = :restaurantCode AND u.role = :role AND u.user_name = :userName",
+            nativeQuery = true)
+    User findByRestaurantCodeAndRoleAndUserName(
+            @Param("restaurantCode") String restaurantCode,
             @Param("role") Role role,
             @Param("userName") String userName);
 
@@ -41,6 +52,16 @@ public interface UserRepository extends BaseRepository<User, Long> {
     Set<User> findCooksByRestaurantIdAndRoleAndUserNames(@Param("restaurantId") Long restaurantId,
                                                           @Param("role") Role role,
                                                           @Param("cookNames") Set<String> cookNames);
+//    DO NOT DELETE
+//    @Query("SELECT u FROM User u " +
+//            "JOIN u.restaurants r " +
+//            "WHERE r.restaurantCode = :restaurantCode " +
+//            "AND u.role = :role " +
+//            "AND u.userName IN :cookNames")
+//    Set<User> findCooksByRestaurantCodeAndRoleAndUserNames(
+//            @Param("restaurantCode") String restaurantCode,
+//            @Param("role") Role role,
+//            @Param("cookNames") Set<String> cookNames);
 
     @Query(value = "SELECT r.restaurant_code FROM restaurant r " +
             "JOIN user_restaurant ur ON r.id = ur.restaurant_id " +
@@ -63,4 +84,14 @@ public interface UserRepository extends BaseRepository<User, Long> {
             "JOIN user_restaurant ur ON u.id = ur.user_id " +
             "WHERE ur.restaurant_id = :restaurantId AND u.user_name = :userName", nativeQuery = true)
     User findByRestaurantIdAndUserName(@Param("restaurantId") Long restaurantId, @Param("userName") String userName);
+
+    @Query(value = "SELECT u.* FROM users u " +
+            "JOIN user_restaurant ur ON u.id = ur.user_id " +
+            "JOIN restaurant r ON ur.restaurant_id = r.id " +
+            "WHERE r.restaurant_code = :restaurantCode AND u.user_name = :userName",
+            nativeQuery = true)
+    User findByRestaurantCodeAndUserName(
+            @Param("restaurantCode") String restaurantCode,
+            @Param("userName") String userName);
+
 }

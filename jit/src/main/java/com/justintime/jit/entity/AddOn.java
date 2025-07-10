@@ -47,6 +47,14 @@ public class AddOn extends BaseEntity {
     )
     private Set<MenuItem> menuItemSet = new HashSet<>();
 
+    @ManyToMany(cascade = {CascadeType.MERGE})
+    @JoinTable(
+            name = "combo_add_on",
+            joinColumns = @JoinColumn(name = "add_on_id"),
+            inverseJoinColumns = @JoinColumn(name = "combo_id")
+    )
+    private Set<Combo> comboSet = new HashSet<>();
+
     @ManyToMany
     @JoinTable(
             name = "order_item_add_on",

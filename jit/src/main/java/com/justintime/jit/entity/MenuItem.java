@@ -1,5 +1,6 @@
 package com.justintime.jit.entity;
 
+import com.justintime.jit.entity.ComboEntities.Combo;
 import com.justintime.jit.entity.ComboEntities.ComboItem;
 import com.justintime.jit.entity.OrderEntities.OrderItem;
 import com.justintime.jit.util.filter.FilterableItem;
@@ -42,6 +43,9 @@ public class MenuItem extends BaseEntity implements FilterableItem {
     @Column(name = "price", columnDefinition = "DECIMAL(10,2)")
     private BigDecimal price;
 
+    @Column(name = "food_type")
+    private String foodType; // MenuItem, Variant
+
     @Column(name = "offer_price", columnDefinition = "DECIMAL(10,2)")
     private BigDecimal offerPrice;
 
@@ -50,9 +54,6 @@ public class MenuItem extends BaseEntity implements FilterableItem {
 
     @Column(name = "offer_to")
     private LocalDateTime offerTo;
-
-    @Column(name = "availability")
-    private String availability;
 
     @Column(name = "stock", columnDefinition = "INT DEFAULT 0")
     private Integer stock = 0;
@@ -64,7 +65,7 @@ public class MenuItem extends BaseEntity implements FilterableItem {
     @JoinTable(
             name = "menu_item_cook",
             joinColumns = @JoinColumn(name = "menu_item_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
+            inverseJoinColumns = @JoinColumn(name = "cook_id")
     )
     private Set<User> cookSet = new HashSet<>();
 
@@ -77,7 +78,10 @@ public class MenuItem extends BaseEntity implements FilterableItem {
     )
     private Set<TimeInterval> timeIntervalSet = new HashSet<>();
 
-    @Column(name = "preparation_time", nullable = false)
+    @ManyToMany(mappedBy = "menuItemSet", cascade = {CascadeType.MERGE})
+    private Set<AddOn> addOnSet = new HashSet<>();
+
+    @Column(name = "preparation_time")
     private Integer preparationTime;
 
     @Column(name = "is_preparation_time_for_single_menu_item", length=1)
@@ -125,21 +129,6 @@ public class MenuItem extends BaseEntity implements FilterableItem {
     @Override
     public Boolean isCombo() {
         return false;
-    }
-
-    public Set<String> getAvailability() {
-        if (this.availability == null || this.availability.isBlank()) {
-            return new HashSet<>();
-        }
-        return new HashSet<>(List.of(this.availability.split(",")));
-    }
-
-    public void setAvailability(Set<String> days) {
-        if (days == null || days.isEmpty()) {
-            this.availability = null;
-        } else {
-            this.availability = String.join(",", days);
-        }
     }
 
 //    // Copy Constructor

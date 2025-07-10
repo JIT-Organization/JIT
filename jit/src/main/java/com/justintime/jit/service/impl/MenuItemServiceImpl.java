@@ -75,10 +75,8 @@ public class MenuItemServiceImpl extends BaseServiceImpl<MenuItem, Long> impleme
 
     @Override
     public MenuItemDTO getMenuItemByRestaurantIdAndMenuItemName(String restaurantCode,String menuItemName){
-        Long restaurantId = restaurantRepository.findByRestaurantCode(restaurantCode)
-                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found")).getId();
         GenericMapper<MenuItem, MenuItemDTO> mapper = MapperFactory.getMapper(MenuItem.class, MenuItemDTO.class);
-        MenuItem menuItem = menuItemRepository.findByRestaurantIdAndMenuItemName(restaurantId, menuItemName);
+        MenuItem menuItem = menuItemRepository.findByRestaurantCodeAndMenuItemName(restaurantCode, menuItemName);
         return mapToDTO(menuItem, mapper);
     }
 
@@ -99,7 +97,7 @@ public class MenuItemServiceImpl extends BaseServiceImpl<MenuItem, Long> impleme
     public MenuItemDTO patchUpdateMenuItem(String restaurantCode, String menuItemName, MenuItemDTO menuItemDTO, HashSet<String> propertiesToBeUpdated) {
         Restaurant restaurant= restaurantRepository.findByRestaurantCode(restaurantCode)
                 .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found with code: " + restaurantCode));
-        MenuItem existingItem = menuItemRepository.findByRestaurantIdAndMenuItemName(restaurant.getId(), menuItemName);
+        MenuItem existingItem = menuItemRepository.findByRestaurantCodeAndMenuItemName(restaurantCode, menuItemName);
         GenericMapper<MenuItem, MenuItemDTO> menuItemMapper = MapperFactory.getMapper(MenuItem.class, MenuItemDTO.class);
         MenuItem patchedItem = menuItemMapper.toEntity(menuItemDTO);
         if (null != patchedItem.getCategorySet()) patchedItem.getCategorySet().clear();
@@ -115,9 +113,9 @@ public class MenuItemServiceImpl extends BaseServiceImpl<MenuItem, Long> impleme
 
     @Override
     public void deleteMenuItem(String restaurantCode, String menuItemName) {
-        Long restaurantId = restaurantRepository.findByRestaurantCode(restaurantCode)
-                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found")).getId();
-        menuItemRepository.deleteByRestaurantIdAndMenuItemName(restaurantId, menuItemName);
+        Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found with code: " + restaurantCode));
+        menuItemRepository.deleteByRestaurantIdAndMenuItemName(restaurant.getId(), menuItemName);
     }
 
     @Override
@@ -143,36 +141,53 @@ public class MenuItemServiceImpl extends BaseServiceImpl<MenuItem, Long> impleme
         return dto;
     }
 
-    private void resolveRelationships(MenuItem menuItem, MenuItemDTO menuItemDTO, Set<String> propertiesToBeUpdated, Boolean isPatch) {
-        if (!isPatch || propertiesToBeUpdated.contains("categorySet")) {
-            if (menuItemDTO.getCategorySet() != null) {
-                Set<Category> categories = categoryRepository.findByCategoryNamesAndRestaurantId(
-                        menuItemDTO.getCategorySet(), menuItem.getRestaurant().getId());
-                menuItem.setCategorySet(categories);
-            }
-        }
-        if (!isPatch || propertiesToBeUpdated.contains("cookSet")) {
-            if (menuItemDTO.getCookSet() != null) {
-                Set<User> cooks = userRepository.findCooksByRestaurantIdAndRoleAndUserNames(
-                        menuItem.getRestaurant().getId(), Role.COOK, menuItemDTO.getCookSet());
-                menuItem.setCookSet(cooks);
-            }
-        }
-        if (!isPatch || propertiesToBeUpdated.contains("timeIntervalSet")) {
-            if (menuItemDTO.getTimeIntervalSet() != null) {
-                menuItem.setTimeIntervalSet(menuItemDTO.getTimeIntervalSet().stream()
-                        .map(dto -> timeIntervalRepository.findByStartTimeAndEndTime(dto.getStartTime(), dto.getEndTime())
-                                .orElseGet(() -> {
-                                    TimeInterval newInterval = new TimeInterval();
-                                    newInterval.setStartTime(dto.getStartTime());
-                                    newInterval.setEndTime(dto.getEndTime());
-                                    return timeIntervalRepository.save(newInterval);
-                                }))
-                        .collect(Collectors.toSet()));
+    // Define an enum for property types
+    public enum PropertyType {
+        CATEGORY_SET,
+        COOK_SET,
+        TIME_INTERVAL_SET
+    }
+
+    private void resolveRelationships(MenuItem menuItem, MenuItemDTO menuItemDTO, Set<String> propertiesToBeUpdated, boolean isPatch) {
+        for (PropertyType propertyType : PropertyType.values()) {
+            if (!isPatch || propertiesToBeUpdated.contains(propertyType.name().toLowerCase())) {
+                switch (propertyType) {
+                    case CATEGORY_SET:
+                        if (menuItemDTO.getCategorySet() != null) {
+                            Set<Category> categories = categoryRepository.findByCategoryNamesAndRestaurantId(
+                                    menuItemDTO.getCategorySet(), menuItem.getRestaurant().getId());
+                            menuItem.setCategorySet(categories);
+                        }
+                        break;
+
+                    case COOK_SET:
+                        if (menuItemDTO.getCookSet() != null) {
+                            Set<User> cooks = userRepository.findCooksByRestaurantIdAndRoleAndUserNames(
+                                    menuItem.getRestaurant().getId(), Role.COOK, menuItemDTO.getCookSet());
+                            menuItem.setCookSet(cooks);
+                        }
+                        break;
+
+                    case TIME_INTERVAL_SET:
+                        if (menuItemDTO.getTimeIntervalSet() != null) {
+                            menuItem.setTimeIntervalSet(menuItemDTO.getTimeIntervalSet().stream()
+                                    .map(dto -> timeIntervalRepository.findByStartTimeAndEndTime(dto.getStartTime(), dto.getEndTime())
+                                            .orElseGet(() -> {
+                                                TimeInterval newInterval = new TimeInterval();
+                                                newInterval.setStartTime(dto.getStartTime());
+                                                newInterval.setEndTime(dto.getEndTime());
+                                                return timeIntervalRepository.save(newInterval);
+                                            }))
+                                    .collect(Collectors.toSet()));
+                        }
+                        break;
+
+                    default:
+                        throw new IllegalArgumentException("Unsupported property type: " + propertyType);
+                }
             }
         }
     }
-
 
     public static Set<TimeIntervalDTO> convertTimeIntervals(Set<TimeInterval> timeIntervalSet) {
         if (timeIntervalSet == null) return Collections.emptySet();
