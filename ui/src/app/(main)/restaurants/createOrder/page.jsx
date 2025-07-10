@@ -431,7 +431,7 @@ console.log(orderDTO)
         <Dialog>
           <DialogTrigger asChild>
             <Button
-              className="fixed bottom-4 right-4 bg-yellow-600 text-white rounded-full p-4 shadow-lg z-50"
+              className="fixed bottom-4 right-4 text-white rounded-full p-4 shadow-lg z-50"
             >
               🧾
             </Button>

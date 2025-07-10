@@ -37,7 +37,7 @@ export default function DataTableHeader({
   return (
     <>
       <div className="flex items-center justify-between py-4">
-        <Button variant="ghost" onClick={handlePreviousClick}>
+        <Button variant="ghost" onClick={handlePreviousClick} colorVariant="none">
           <ChevronLeft />
           {tabName}
         </Button>
@@ -48,7 +48,7 @@ export default function DataTableHeader({
             onChange={(e) => setGlobalFilter(e.target.value)}
             className="max-w-md w-96"
           />
-          <Button variant="ghost">
+          <Button variant="ghost" colorVariant="none">
             <Filter />
           </Button>
           {headerDialogType && headerButtonName ? (

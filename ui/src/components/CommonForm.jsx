@@ -13,7 +13,7 @@ const renderField = (fieldConfig, formField, form) => {
     case "input":
       return (
         <Input
-          className={fieldConfig.inputClassName || "border p-2 w-full rounded bg-yellow-50"}
+          className={fieldConfig.inputClassName || "border p-2 w-full rounded input"}
           {...formField}
           placeholder={fieldConfig.placeholder}
           type={fieldConfig.inputType || "text"}
@@ -25,13 +25,13 @@ const renderField = (fieldConfig, formField, form) => {
         <Textarea
           {...formField}
           placeholder={fieldConfig.placeholder}
-          className={fieldConfig.inputClassName || "w-full bg-yellow-50"}
+          className={fieldConfig.inputClassName || "w-full input"}
         />
       );
     case "multiSelect":
       return (
         <MultiSelect
-          className={fieldConfig.inputClassName || "border p-2 w-full rounded bg-yellow-50"}
+          className={fieldConfig.inputClassName || "border p-2 w-full rounded input"}
           {...formField}
           options={fieldConfig.options}
           placeholder={fieldConfig.placeholder}
@@ -51,8 +51,8 @@ const renderField = (fieldConfig, formField, form) => {
             <ToggleGroupItem
               className={`
                 border p-2 w-full rounded
-                hover:bg-yellow-50
-                data-[state=on]:bg-yellow-50
+                hover:bg-[var(--button-bg)] hover:text-[var(--button-text)]
+                data-[state=on]:bg-[var(--button-bg)] data-[state=on]:text-[var(--button-text)]
                 transition-colors duration-200
               `}
               key={opt}
@@ -66,7 +66,7 @@ const renderField = (fieldConfig, formField, form) => {
     case "dateTimePicker":
       return (
         <DateTimePicker
-          className={fieldConfig.inputClassName || "border p-2 w-full rounded bg-yellow-50"}
+          className={fieldConfig.inputClassName || "border p-2 w-full rounded input"}
           {...formField}
         />
       );
@@ -83,7 +83,7 @@ const renderField = (fieldConfig, formField, form) => {
     case "select":
       return (
         <select
-          className={fieldConfig.inputClassName || "border p-2 w-full rounded bg-yellow-50"}
+          className={fieldConfig.inputClassName || "border p-2 w-full rounded input"}
           {...formField}
           disabled={fieldConfig.disabled}
         >

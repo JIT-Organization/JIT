@@ -131,10 +131,11 @@ export const getMenuListcolumns = (
           <Button
             className="cursor-pointer hover:bg-gray-600/10 h-10 w-10 flex justify-center items-center rounded-md"
             variant="ghost"
+            colorVariant="none"
             onClick={() => handleEditClick(menuItemName)}
             disabled={isDeleting || isUpdating}
           >
-            <Pencil className="text-black h-5" />
+            <Pencil className="h-5" />
           </Button>
           <CustomPopup
             type="delete"
@@ -142,9 +143,10 @@ export const getMenuListcolumns = (
               <Button
                 className="cursor-pointer hover:bg-gray-600/20 h-10 w-10 flex justify-center items-center rounded-md"
                 variant="ghost"
+                colorVariant="none"
                 disabled={isDeleting || isUpdating}
               >
-                {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="text-black h-5" />}
+                {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="text-red-600 h-5" />}
               </Button>
             }
             onConfirm={() => handleDeleteClick(menuItemName)}

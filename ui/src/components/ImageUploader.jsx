@@ -87,8 +87,7 @@ const ImageUploader = ({
               {multiple && (
                 <Button
                   onClick={() => selectMain(index)}
-                  variant={index === mainIndex ? 'success' : 'secondary'}
-                  className="absolute top-2 left-2 text-xs px-2 py-1"
+                  className={`absolute top-2 left-2 text-xs px-2 py-1 ${index === mainIndex ? "button-primary" : "button button-white"}`}
                 >
                   {index === mainIndex ? 'Main' : 'Set Main'}
                 </Button>
@@ -97,7 +96,7 @@ const ImageUploader = ({
                 onClick={() => removeImage(index)}
                 size="icon"
                 variant="destructive"
-                className="absolute top-2 right-2 w-6 h-6 rounded-full p-0 opacity-80 group-hover:opacity-100"
+                className="absolute top-2 right-2 w-6 h-6 rounded-full p-0 opacity-80 group-hover:opacity-100 button-remove"
               >
                 <X className="w-4 h-4" />
               </Button>

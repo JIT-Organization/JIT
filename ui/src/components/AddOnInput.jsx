@@ -48,7 +48,7 @@ function AddOnSingleInput({ value, onChange, onRemove, showRemove = true, readOn
   };
 
   return (
-    <div className={`border rounded p-4 mb-2 ${highlight ? "bg-yellow-50" : ""}`}> 
+    <div className={`border rounded p-4 mb-2 ${highlight ? "bg-gray-100" : ""}`}> 
       <div className="flex gap-2 items-center mb-2">
         <Input
           className="w-1/3"
@@ -73,6 +73,7 @@ function AddOnSingleInput({ value, onChange, onRemove, showRemove = true, readOn
             variant="outline"
             size="sm"
             onClick={onRemove}
+            className="button-remove"
           >
             Remove
           </Button>
@@ -114,6 +115,7 @@ function AddOnSingleInput({ value, onChange, onRemove, showRemove = true, readOn
                   variant="outline"
                   size="sm"
                   onClick={() => handleRemoveOption(optIdx)}
+                  className="button-remove"
                 >
                   Remove
                 </Button>
@@ -182,6 +184,7 @@ function AddOnInput({ value = [], onChange, availableAddOns }) {
         value={selectedAddOnLabels}
         onChange={setSelectedAddOnLabels}
         placeholder="Select add-ons"
+        className="input"
       />
       <div className="grid grid-cols-12 gap-4">
         {/* Show selected add-ons as read-only */}

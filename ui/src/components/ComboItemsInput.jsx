@@ -41,7 +41,7 @@ const ComboItemsInput = ({ value = [], onChange, className }) => {
               value={row.item ? [row.item] : []}
               onChange={arr => handleChange(index, "item", arr[0] || "")}
               placeholder="Select item"
-              className="bg-yellow-50"
+              className="input"
               isSingleSelect={true}
             />
           </div>
@@ -60,7 +60,7 @@ const ComboItemsInput = ({ value = [], onChange, className }) => {
               onClick={() => removeRow(index)}
               variant="ghost"
               size="icon"
-              className="text-red-500 text-xl pb-1"
+              className="button-remove text-xl pb-1"
               title="Remove this item"
             >
               &times;
