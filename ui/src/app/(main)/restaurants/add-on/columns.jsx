@@ -38,11 +38,11 @@ export const getAddOnColumns = (
     header: "Actions",
     cell: ({ row }) => (
       <div className="flex space-x-2">
-        <CustomPopup
+                <CustomPopup
           type="add-on"
           trigger={
-            <Button variant="ghost">
-              <Pencil className="text-black h-50 w-50" />
+            <Button variant="ghost" colorVariant="none">
+              <Pencil className="h-50 w-50" />
             </Button>
           }
           dialogDescription={"Edit Add-On"}
@@ -50,10 +50,11 @@ export const getAddOnColumns = (
           onSubmit={onSubmit(row.original)}
         />
         <Button
-          variant="ghost"
+          variant="ghost" 
+          colorVariant="none"
           onClick={() => handleDeleteClick(row.original.label)}
         >
-          <Trash2 className="text-black h-50 w-50" />
+          <Trash2 className="text-red-600 h-50 w-50" />
         </Button>
       </div>
     ),

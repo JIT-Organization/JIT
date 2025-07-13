@@ -48,17 +48,19 @@ export const getOrderColumns = (handleEditClick, handleDeleteClick) => [
     header: "Actions",
     cell: ({ row }) => (
       <div className="flex space-x-2 items-center justify-center">
-        <Button
+        <Button 
           variant="ghost"
+          colorVariant="none"
           onClick={() => handleEditClick(row.original.orderNumber)}
         >
-          <Pencil className="text-black h-50 w-50" />
+          <Pencil className="h-5" />
         </Button>
         <Button
           variant="ghost"
+          colorVariant="none"
           onClick={() => handleDeleteClick(row.original.id)}
         >
-          <Trash2 className="text-black h-50 w-50" />
+          <Trash2 className="text-red-600 h-5" />
         </Button>
         {row.getIsExpanded() ? <ChevronUp className="opacity-40"/> : <ChevronDown className="opacity-40"/>}
       </div>

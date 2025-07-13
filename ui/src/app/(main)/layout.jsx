@@ -33,9 +33,7 @@ function SidebarNavigation({ activePage, setActivePage, sidebarLinks }) {
             <SidebarMenuButton asChild>
               <Link
                 href={href}
-                className={`menu-item sidebar-link flex items-center text-xl transition-all duration-300 ease-in-out hover:bg-gray-200 hover:shadow-md rounded-lg ${
-                  activePage === href ? "bg-gray-400 shadow-md" : ""
-                }`}
+                className={`menu-item sidebar-item flex items-center text-xl transition-all duration-300 ease-in-out rounded-lg ${activePage === href ? "active" : ""}`}
                 aria-current={activePage === href ? "page" : undefined}
                 onClick={() => setActivePage(href)}
               >
@@ -88,7 +86,7 @@ export default function RootLayout({ children }) {
     <>
       <SidebarProvider>
         <AppBar />
-        <Sidebar className="pt-16 overflow-x-hidden" collapsible="icon" aria-label="Sidebar">
+        <Sidebar className="pt-16 overflow-x-hidden sidebar-theme" collapsible="icon" aria-label="Sidebar">
           <SidebarNavigation 
             activePage={activePage}
             setActivePage={setActivePage}

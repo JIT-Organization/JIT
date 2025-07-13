@@ -184,6 +184,7 @@ const MenuFood = () => {
               onClick={handleBackClick}
               className="flex items-center text-yellow pr-4"
               size="icon"
+              colorVariant="none"
               disabled={deleteMutation.isPending || createMutation.isPending || updateMutation.isPending}
             >
               <ChevronLeft />
@@ -197,7 +198,7 @@ const MenuFood = () => {
               <Button
                 variant="destructive"
                 onClick={handleDelete}
-                className="px-4"
+                className="px-4 button-remove"
                 disabled={deleteMutation.isPending || createMutation.isPending || updateMutation.isPending}
               >
                 {deleteMutation.isPending ? (
@@ -211,7 +212,7 @@ const MenuFood = () => {
               </Button>
             )}
             <Button
-              className="bg-yellow-500 hover:bg-yellow-600 text-black px-4"
+              className="px-4 border border-black rounded"
               onClick={handleFormSubmit}
               disabled={deleteMutation.isPending || createMutation.isPending || updateMutation.isPending}
             >
@@ -264,7 +265,7 @@ const MenuFood = () => {
         <Dialog>
           <DialogTrigger asChild>
             <Button
-              className="fixed bottom-4 right-4 bg-yellow-500 hover:bg-yellow-600 text-black rounded-full p-4 shadow-lg z-50"
+              className="fixed bottom-4 right-4 rounded-full p-4 shadow-lg z-50"
             >
               👁️
             </Button>
