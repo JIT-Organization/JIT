@@ -81,4 +81,11 @@ public class RestaurantServiceImpl extends BaseServiceImpl<Restaurant,Long> impl
         existingItem.setUpdatedDttm(LocalDateTime.now());
         restaurantRepository.save(existingItem);
     }
+
+    @Override
+    public String getUpiIdByRestaurantCode(String restaurantCode) {
+        Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
+        return restaurant.getUpiId();
+    }
 }

@@ -13,7 +13,7 @@ public interface RestaurantService {
     void updateRestaurant(String code, Restaurant restaurant);
     void deleteRestaurant(String restaurantCode);
     RestaurantDTO getRestaurantByRestaurantCode(String restaurantCode);
-
+    String getUpiIdByRestaurantCode(String restaurantCode);
     void patchUpdateRestaurant(String restaurantCode, RestaurantDTO dto, HashSet<String> propertiesToBeUpdated);
 
 //    List<String> findSimilarNames(String name);
