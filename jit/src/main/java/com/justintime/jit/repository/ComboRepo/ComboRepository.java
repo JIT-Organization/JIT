@@ -40,5 +40,9 @@ public interface ComboRepository extends BaseRepository<Combo, Long> {
             "AND r.restaurant_code = :restaurantCode ",
             nativeQuery = true)
     Combo findComboByComboNamesAndRestaurantCode(@Param("comboName") String comboName, @Param("restaurantCode") String restaurantCode);
+
+    Combo findByRestaurantIdAndComboName(Long restaurantId, String comboName);
+
+    long countByRestaurantId(Long restaurantId);
 }
 

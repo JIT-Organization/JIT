@@ -1,0 +1,18 @@
+package com.justintime.jit.service;
+
+import com.justintime.jit.dto.ItemDTO;
+import com.justintime.jit.entity.Enums.FoodType;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+public interface ItemService {
+    List<ItemDTO> getAllItemsForRestaurant(String restaurantCode);
+    List<ItemDTO> getAllItemsForRestaurantAndFoodType(String restaurantCode, FoodType foodType);
+    ItemDTO getItemByRestaurantAndNameAndFoodType(String restaurantCode, String itemName, FoodType foodType);
+    ItemDTO createItem(String restaurantCode, ItemDTO itemDTO);
+    ItemDTO updateItem(String restaurantCode, ItemDTO itemDTO);
+    ItemDTO patchItem(String restaurantCode, ItemDTO itemDTO, HashSet<String> propertiesToBeUpdated);
+    void deleteItem(String restaurantCode, String itemName, FoodType foodType);
+}

@@ -94,4 +94,12 @@ public interface UserRepository extends BaseRepository<User, Long> {
             @Param("restaurantCode") String restaurantCode,
             @Param("userName") String userName);
 
+    @Query(
+            value = "SELECT COUNT(u.id) FROM users u " +
+                    "JOIN user_restaurant ur ON u.id = ur.user_id " +
+                    "JOIN restaurant r ON ur.restaurant_id = r.id " +
+                    "WHERE r.id = :restaurantId AND u.role = :role",
+            nativeQuery = true
+    )
+    long countByRestaurantIdAndRole(Long restaurantId, Role role);
 }

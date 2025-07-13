@@ -55,6 +55,12 @@ public class Restaurant extends BaseEntity{
         @Column(name = "country", nullable = false, length = 100)
         private String country;
 
+        @Column(name = "upi_id", length = 50)
+        private String upiId;
+
+        @Column(name = "theme", length = 50)
+        private String theme;
+
         @Column(name = "latitude", nullable = false)
         private Double latitude;
 

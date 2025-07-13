@@ -47,4 +47,6 @@ public interface AddOnRepository extends BaseRepository<AddOn, Long> {
             @Param("orderItemName") String orderItemName
     );
 
+    long countByRestaurantId(Long restaurantId);
+
 }

@@ -1,6 +1,7 @@
 package com.justintime.jit.entity.ComboEntities;
 
 import com.justintime.jit.entity.*;
+import com.justintime.jit.entity.Enums.FoodType;
 import com.justintime.jit.entity.OrderEntities.OrderItem;
 import com.justintime.jit.util.filter.FilterableItem;
 import jakarta.persistence.*;
@@ -115,8 +116,8 @@ public class Combo extends BaseEntity implements FilterableItem {
     }
 
     @Override
-    public Boolean isCombo() {
-        return true;
+    public FoodType getFoodType() {
+        return FoodType.COMBO;
     }
 
 //    public Set<ComboItem> getComboItemSet() {

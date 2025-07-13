@@ -41,4 +41,10 @@ public interface OrderRepository extends BaseRepository<Order, Long> {
     List<Order> findByRestaurantId(Long restaurantId);
 
     Optional<Order> findByOrderNumber(String orderNumber);
+
+    long countByRestaurantId(Long restaurantId);
+
+    @Query(value = "SELECT SUM(o.amount) FROM orders o " +
+            "WHERE o.restaurant_id = :restaurantId", nativeQuery = true)
+    double calculateTotalRevenueByRestaurantId(Long restaurantId);
 }

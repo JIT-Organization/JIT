@@ -2,6 +2,7 @@ package com.justintime.jit.entity;
 
 import com.justintime.jit.entity.ComboEntities.Combo;
 import com.justintime.jit.entity.ComboEntities.ComboItem;
+import com.justintime.jit.entity.Enums.FoodType;
 import com.justintime.jit.entity.OrderEntities.OrderItem;
 import com.justintime.jit.util.filter.FilterableItem;
 import jakarta.persistence.*;
@@ -44,7 +45,7 @@ public class MenuItem extends BaseEntity implements FilterableItem {
     private BigDecimal price;
 
     @Column(name = "food_type")
-    private String foodType; // MenuItem, Variant
+    private FoodType foodType; // MenuItem, Variant
 
     @Column(name = "offer_price", columnDefinition = "DECIMAL(10,2)")
     private BigDecimal offerPrice;
@@ -126,10 +127,6 @@ public class MenuItem extends BaseEntity implements FilterableItem {
         return this.menuItemName;
     }
 
-    @Override
-    public Boolean isCombo() {
-        return false;
-    }
 
 //    // Copy Constructor
 //    public MenuItem(MenuItem other) {
