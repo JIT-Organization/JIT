@@ -14,6 +14,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import static com.justintime.jit.util.ValidationUtils.runValidation;
+import static com.justintime.jit.util.ValidationUtils.shouldValidate;
+
 @Component
 public class CategoryRequestValidator implements RequestValidator<CategoryDTO> {
 
@@ -24,15 +27,17 @@ public class CategoryRequestValidator implements RequestValidator<CategoryDTO> {
     public void validate(CategoryDTO dto, @Nullable Set<String> fieldsToValidate, @Nullable String restaurantCode) throws ValidationException {
         List<ErrorMessage> errors = new ArrayList<>();
 
-        if(Objects.isNull(fieldsToValidate) || fieldsToValidate.contains("categoryName")) {
-            if (SanitizationUtils.isBlank(dto.getCategoryName())) {
-                errors.add(new ErrorMessage("Category name cannot be blank or invalid."));
-            }
+        List<ValidationRule> allRules = List.of(
+                new ValidationRule("categoryName", () -> {
+                    if (SanitizationUtils.isBlank(dto.getCategoryName())) {
+                        errors.add(new ErrorMessage("Category name cannot be blank or invalid."));
+                    } else if(categoryRepository.existsByCategoryNameAndRestaurant_RestaurantCode(dto.getCategoryName(), restaurantCode)) {
+                        errors.add(new ErrorMessage("Category exists with this name."));
+                    }
+                })
+        );
 
-            if(categoryRepository.existsByCategoryNameAndRestaurant_RestaurantCode(dto.getCategoryName(), restaurantCode)) {
-                errors.add(new ErrorMessage("Category exists with this name."));
-            }
-        }
+        runValidation(allRules, fieldsToValidate);
 
         if (!errors.isEmpty()) {
             throw new ValidationException(errors);

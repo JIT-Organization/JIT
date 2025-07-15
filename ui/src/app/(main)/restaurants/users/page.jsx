@@ -1,7 +1,7 @@
 "use client";
 import { getStaffMemberColumns } from "./columns";
 import { CustomDataTable } from "@/components/customUIComponents/CustomDataTable";
-import { createUser, deleteUserItem, getUsersListOptions, patchUpdateUserItemList } from "@/lib/api/api";
+import { deleteUserItem, getUsersListOptions, patchUpdateUserItemList, sendInviteToUser } from "@/lib/api/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const Users = () => {
@@ -9,7 +9,7 @@ const Users = () => {
   const { data: usersListData, isLoading, error } = useQuery(getUsersListOptions("TGSR"));
   const patchMutation = useMutation(patchUpdateUserItemList(queryClient));
   const deleteMutation = useMutation(deleteUserItem(queryClient));
-  const postMutation = useMutation(createUser(queryClient));
+  const postMutation = useMutation(sendInviteToUser());
 
   if (isLoading) return <p>Loading Users...</p>;
   if (error) return <p>Error loading users: {error.message}</p>;
@@ -20,25 +20,31 @@ const Users = () => {
 
   const handleEditClick = (data) => {
     const obj = {
-      name: data.firstName + " " + data.lastName,
+      firstName: data.firstName,
+      lastName: data.lastName,
       email: data.email,
       phoneNumber: data.phoneNumber,
       role: data.role,
       shift: data?.shift,
       username: data?.username,
+      isActive: data?.isActive,
+      permissionCodes: data?.permissionCodes,
       onToggle: handleToggle
     }
+    console.log(obj);
     return obj
   }
 
-  
   const handleDeleteClick = (id) => {
     console.log("Delete clicked for id: ", id);
     deleteMutation.mutate({ id });
   }
 
   const onUpdateSubmit = (row) => (values) => {
-    const formValues = { ...values };
+    let formValues = { ...values };
+    formValues = Object.fromEntries(
+      Object.entries(formValues).filter(([_, v]) => typeof v !== "function")
+    );
     const username = row.username;
     const formValueKeys = Object.keys(formValues);
     formValueKeys.forEach((key) => {
@@ -56,9 +62,8 @@ const Users = () => {
   };
 
   const onAddSubmit = (values) => {
-    // postMutation.mutate({ fields: values });
-    console.log(values)
-    // TODO create a user along with sending the user email and password from the mail server
+    const userData = values;
+    postMutation.mutate(userData);
   };
 
   const columns = getStaffMemberColumns(handleToggle, handleEditClick, handleDeleteClick, onUpdateSubmit);
@@ -72,6 +77,7 @@ const Users = () => {
         headerButtonName="Add User"
         headerDialogType="user"
         onSubmitClick={onAddSubmit}
+        permissionIdentifier="users"
       />
     </div>
   );

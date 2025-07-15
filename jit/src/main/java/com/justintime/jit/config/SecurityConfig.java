@@ -1,17 +1,21 @@
 package com.justintime.jit.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.justintime.jit.security.CustomPermissionEvaluator;
+import com.justintime.jit.security.JwtAuthenticationFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
+import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -34,6 +38,7 @@ import java.util.Map;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Autowired
@@ -41,6 +46,9 @@ public class SecurityConfig {
 
     @Autowired
     private JwtAuthenticationFilter jwtFilter;
+
+    @Autowired
+    private CustomPermissionEvaluator permissionEvaluator;
 
     @Value("${login.page.url}")
     private String loginPageUrl;
@@ -50,7 +58,7 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("register", "login", "refresh").permitAll()
+                        .requestMatchers("/register", "/login", "/refresh").permitAll()
                         .anyRequest().authenticated())
                 .httpBasic(httpBasic -> httpBasic.authenticationEntryPoint(authenticationEntryPoint()))
 //                .formLogin(form -> form
@@ -138,5 +146,12 @@ public class SecurityConfig {
     private boolean isApiRequest(HttpServletRequest request) {
         String acceptHeader = request.getHeader("Accept");
         return acceptHeader != null && acceptHeader.contains("application/json");
+    }
+
+    @Bean
+    public MethodSecurityExpressionHandler methodSecurityExpressionHandler() {
+        DefaultMethodSecurityExpressionHandler handler = new DefaultMethodSecurityExpressionHandler();
+        handler.setPermissionEvaluator(permissionEvaluator);
+        return handler;
     }
 }

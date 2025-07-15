@@ -34,12 +34,17 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-mail:3.5.0'
 
 	// Hibernate Envers (Ensure compatibility with Spring Boot version)
 	implementation 'org.hibernate:hibernate-envers:6.3.1.Final'
 
 	// Development Tools
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+	// Retry & AOP
+	implementation 'org.springframework.retry:spring-retry'
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
 
 	// Lombok
 	compileOnly 'org.projectlombok:lombok'

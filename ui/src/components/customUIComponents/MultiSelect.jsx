@@ -9,7 +9,8 @@ export default function MultiSelect({
   value,
   onChange,
   placeholder = "Select options",
-  className = '', 
+  className = '',
+  disabled
 }) {
   const toggleOption = (optionValue) => {
     if (value.includes(optionValue)) {
@@ -21,7 +22,7 @@ export default function MultiSelect({
 
   return (
     <Popover>
-      <PopoverTrigger asChild>
+      <PopoverTrigger asChild disabled={disabled}>
         <Button
           variant="outline"
           className={cn(
