@@ -37,10 +37,12 @@ export default function DataTableHeader({
   return (
     <>
       <div className="flex items-center justify-between py-4">
-        <Button variant="ghost" onClick={handlePreviousClick} colorVariant="none">
-          <ChevronLeft />
-          {tabName}
-        </Button>
+        <div className="flex items-center ml-2 space-x-3">
+          <Button variant="ghost" onClick={handlePreviousClick} >
+            <ChevronLeft />
+          </Button>
+          <span className="ml-3 text-2xl font-semibold">{tabName}</span>
+        </div>
         <div className="flex space-x-2 items-center">
           <Input
             placeholder="Search across all columns..."

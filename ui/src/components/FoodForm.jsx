@@ -25,7 +25,7 @@ import ComboItemsInput from "./ComboItemsInput";
 
 const defaultFormValues = {
   menuItemName: "",
-  foodType: "Food",
+  foodType: "MENU_ITEM",
   price: "",
   description: "",
   cookSet: [],
@@ -226,8 +226,8 @@ const FoodForm = forwardRef(
         label: "Food Type",
         type: "select",
         options: [
-          { value: "Food", label: "Food" },
-          { value: "Combo", label: "Combo" },
+          { value: "MENU_ITEM", label: "Food" },
+          { value: "COMBO", label: "Combo" },
           // { value: "Variant", label: "Variant" },
         ],
         placeholder: "Select food type",
@@ -240,17 +240,17 @@ const FoodForm = forwardRef(
         disabled: isEdit,
       },
       {
-        name: "comboItems",
+        name: "comboItemSet",
         label: "Combo Items",
         type: "custom",
         Component: ComboItemsInput,
         fieldCol: "col-span-12 md:col-span-6",
         labelCol: "col-span-12",
         controlCol: "col-span-12",
-        hidden: foodType !== "Combo",
+        hidden: foodType !== "COMBO",
         rules: {
           validate: (value) => {
-            if (foodType !== "Combo") return true;
+            if (foodType !== "COMBO") return true;
             if (!value || !Array.isArray(value) || value.length === 0) {
               return "At least one combo item is required";
             }

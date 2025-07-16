@@ -8,13 +8,13 @@ body {
 
 @layer base {
   :root {
-    --primary-color: #0074D9;
+    --primary-color: #233a48;
     --primary-text-color: #fff;
-    --sidebar-color: #0074D9;
+    --sidebar-color: #233a48;
     --sidebar-text-color: #fff;
-    --sidebar-active-bg: #005fa3;
+    --sidebar-active-bg: #babdbf;
     --sidebar-active-text: #fff;
-    --button-bg: #0074D9;
+    --button-bg: #233a48;
     --button-text: #fff;
     --input-bg: #e3f2fd;
     --input-text-color: #222;

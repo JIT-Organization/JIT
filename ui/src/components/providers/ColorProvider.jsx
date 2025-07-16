@@ -7,7 +7,7 @@ const ColorContext = createContext();
 
 export const ColorProvider = ({ children }) => {
   // Default: blue
-  const [primaryColor, setPrimaryColor] = useState("#0074D9"); // blue
+  const [primaryColor, setPrimaryColor] = useState("#233a48"); // blue
 
   React.useEffect(() => {
     // Primary color variables

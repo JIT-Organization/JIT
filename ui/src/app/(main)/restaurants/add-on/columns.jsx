@@ -8,7 +8,8 @@ import CustomPopup from "@/components/customUIComponents/CustomPopup";
 export const getAddOnColumns = (
   handleEditClick,
   handleDeleteClick,
-  onSubmit
+  onSubmit,
+  loadingItems
 ) => [
   {
     accessorKey: "label",
@@ -38,7 +39,7 @@ export const getAddOnColumns = (
     header: "Actions",
     cell: ({ row }) => (
       <div className="flex space-x-2">
-                <CustomPopup
+        <CustomPopup
           type="add-on"
           trigger={
             <Button variant="ghost" colorVariant="none">
@@ -47,7 +48,10 @@ export const getAddOnColumns = (
           }
           dialogDescription={"Edit Add-On"}
           data={handleEditClick(row.original)}
-          onSubmit={onSubmit(row.original)}
+          onSubmit={async (fields, closeDialog) => {
+            await onSubmit(row.original)(fields, closeDialog);
+          }}
+          isLoading={loadingItems[row.original.label] === "updating"}
         />
         <Button
           variant="ghost" 

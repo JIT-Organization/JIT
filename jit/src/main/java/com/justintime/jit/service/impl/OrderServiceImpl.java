@@ -75,7 +75,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = mapper.toEntity(orderDTO);
         order.setRestaurant(restaurant);
         order.setUser(userRepository.findByRestaurantIdAndRoleAndUserName(restaurant.getId(), Role.COOK, username));
-        order.setStatus(OrderStatus.PENDING);
+        order.setStatus(OrderStatus.NEW);
         resolveRelationships(order, orderDTO);
         Order savedOrder = orderRepository.save(order);
         saveEachOrderItem(orderDTO, restaurantCode, savedOrder);

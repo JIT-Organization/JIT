@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import MultiSelect from "@/components/customUIComponents/MultiSelect";
-import { data as defaultAddOnList } from "@/app/(main)/restaurants/add-on/data";
+import { useQuery } from "@tanstack/react-query";
+import { getAddOnsListOptions } from "@/lib/api/api";
 
 // Single Add-On input (label, price, options)
 function AddOnSingleInput({ value, onChange, onRemove, showRemove = true, readOnly = false, highlight = true }) {
@@ -140,8 +141,9 @@ function AddOnSingleInput({ value, onChange, onRemove, showRemove = true, readOn
 
 // Array manager for add-ons, now supports selection from a list and adding new
 function AddOnInput({ value = [], onChange, availableAddOns }) {
-  // Use default data if availableAddOns is not provided
-  const addOnList = availableAddOns || defaultAddOnList;
+  // Fetch add-ons from backend
+  const { data: addOnOptions, isLoading } = useQuery(getAddOnsListOptions());
+  const addOnList = addOnOptions || availableAddOns || [];
   // Derive initial state from value prop
   const [selectedAddOnLabels, setSelectedAddOnLabels] = useState([]);
   const [newAddOns, setNewAddOns] = useState([]);
@@ -176,51 +178,57 @@ function AddOnInput({ value = [], onChange, availableAddOns }) {
 
   return (
     <div className="space-y-4">
-      <MultiSelect
-        options={addOnList.map(addon => ({
-          value: addon.label,
-          label: addon.label,
-        }))}
-        value={selectedAddOnLabels}
-        onChange={setSelectedAddOnLabels}
-        placeholder="Select add-ons"
-        className="input"
-      />
-      <div className="grid grid-cols-12 gap-4">
-        {/* Show selected add-ons as read-only */}
-        {addOnList.filter(addon => selectedAddOnLabels.includes(addon.label)).map((addOn, idx) => (
-          <div key={"selected-" + addOn.label} className="col-span-12 md:col-span-6">
-            <AddOnSingleInput
-              value={addOn}
-              readOnly={true}
-              showRemove={false}
-              highlight={true}
-            />
+      {isLoading ? (
+        <div>Loading add-ons...</div>
+      ) : (
+        <>
+          <MultiSelect
+            options={addOnList.map(addon => ({
+              value: addon.label,
+              label: addon.label,
+            }))}
+            value={selectedAddOnLabels}
+            onChange={setSelectedAddOnLabels}
+            placeholder="Select add-ons"
+            className="input"
+          />
+          <div className="grid grid-cols-12 gap-4">
+            {/* Show selected add-ons as read-only */}
+            {addOnList.filter(addon => selectedAddOnLabels.includes(addon.label)).map((addOn, idx) => (
+              <div key={"selected-" + addOn.label} className="col-span-12 md:col-span-6">
+                <AddOnSingleInput
+                  value={addOn}
+                  readOnly={true}
+                  showRemove={false}
+                  highlight={true}
+                />
+              </div>
+            ))}
+            {/* Show new add-ons as editable */}
+            {newAddOns.map((addOn, idx) => (
+              <div key={"new-" + idx} className="col-span-12 md:col-span-6">
+                <AddOnSingleInput
+                  value={addOn}
+                  onChange={newAddOn => {
+                    const updated = [...newAddOns];
+                    updated[idx] = newAddOn;
+                    setNewAddOns(updated);
+                  }}
+                  onRemove={() => setNewAddOns(newAddOns.filter((_, i) => i !== idx))}
+                  showRemove={true}
+                  readOnly={false}
+                  highlight={true}
+                />
+              </div>
+            ))}
+            <div className="col-span-12 md:col-span-6">
+              <Button type="button" onClick={() => setNewAddOns([...newAddOns, { label: "", options: [], price: null }])} variant="default">
+                Add New Add-On
+              </Button>
+            </div>
           </div>
-        ))}
-        {/* Show new add-ons as editable */}
-        {newAddOns.map((addOn, idx) => (
-          <div key={"new-" + idx} className="col-span-12 md:col-span-6">
-            <AddOnSingleInput
-              value={addOn}
-              onChange={newAddOn => {
-                const updated = [...newAddOns];
-                updated[idx] = newAddOn;
-                setNewAddOns(updated);
-              }}
-              onRemove={() => setNewAddOns(newAddOns.filter((_, i) => i !== idx))}
-              showRemove={true}
-              readOnly={false}
-              highlight={true}
-            />
-          </div>
-        ))}
-        <div className="col-span-12 md:col-span-6">
-          <Button type="button" onClick={() => setNewAddOns([...newAddOns, { label: "", options: [], price: null }])} variant="default">
-            Add New Add-On
-          </Button>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 }

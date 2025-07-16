@@ -246,6 +246,52 @@ export const deleteTableItem = (queryClient) => ({
   },
 });
 
+export const getAddOnsListOptions = () => ({
+  queryKey: ["addOnsList"],
+  queryFn: () => getRequest(`${URLS.addOns}/TGSR`, "Failed to fetch Add-Ons List"),
+  ...cacheConfig
+});
+
+export const createAddOn = (queryClient) => ({
+  mutationFn: async ({ fields }) => {
+    return await postRequest(`${URLS.addOns}/TGSR`, fields);
+  },
+  onMutate: async ({ fields }) => handleMutate(queryClient, ["addOnsList"], null, fields, "create"),
+  onError: (error, variables, context) => {
+    console.error("Failed to create add-on:", error);
+    handleError(queryClient, ["addOnsList"], context);
+  },
+  onSettled: () => {
+    queryClient.invalidateQueries(["addOnsList"]);
+  },
+});
+
+export const patchUpdateAddOn = (queryClient) => ({
+  mutationFn: async ({ label, fields }) => {
+    return await patchRequest(`${URLS.addOns}/TGSR`, {
+      dto: { ...fields },
+      propertiesToBeUpdated: Object.keys(fields),
+    });
+  },
+  onMutate: async ({ label, fields }) => handleMutate(queryClient, ["addOnsList"], label, fields, "label"),
+  onError: (error, variables, context) => {
+    console.error("Failed to update add-on:", error);
+    handleError(queryClient, ["addOnsList"], context);
+  },
+  onSettled: () => {
+    queryClient.invalidateQueries(["addOnsList"]);
+  },
+});
+
+export const deleteAddOn = (queryClient) => ({
+  mutationFn: async ({ label }) => deleteRequest(`${URLS.addOns}/TGSR/${label}`),
+  onMutate: async ({ label }) => handleMutate(queryClient, ["addOnsList"], label, null, "label", "delete"),
+  onError: (err, variables, context) => handleError(queryClient, ["addOnsList"], context),
+  onSettled: () => {
+    queryClient.invalidateQueries(["addOnsList"]);
+  },
+});
+
 export const validateField = (type, value) => {
   const validationConfigs = {
     menuItem: {
@@ -277,6 +323,20 @@ export const validateField = (type, value) => {
     ...cacheConfig
   };
 };
+
+export const createOrder = (queryClient) => ({
+  mutationFn: async ({ orderDTO }) => {
+    return await postRequest(`${URLS.ordersList}/TGSR`, orderDTO);
+  },
+  onMutate: async ({ orderDTO }) => handleMutate(queryClient, ["ordersList"], null, orderDTO, "create"),
+  onError: (error, variables, context) => {
+    console.error("Failed to create order:", error);
+    handleError(queryClient, ["ordersList"], context);
+  },
+  onSettled: () => {
+    queryClient.invalidateQueries(["ordersList"]);
+  },
+});
 
 // export const getMenuItemListOptions = (id) => ({
 //   queryKey: ["menuItemList"],

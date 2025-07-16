@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, useParams } from "next/navigation";
 import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
-import { getMenuItemsListForOrder, saveOrder, updateOrder, getTablesListOptions } from "@/lib/api/api";
+import { getMenuItemsListForOrder, saveOrder, updateOrder, getTablesListOptions, createOrder } from "@/lib/api/api";
 import { getDistinctCategories } from "@/lib/utils/helper";
 import FoodCard from "@/components/customUIComponents/FoodCard";
 import DataTableHeader from "@/components/customUIComponents/DataTableHeader";
@@ -183,21 +183,15 @@ const CreateOrder = ({ isNew = true }) => {
   const categories = getDistinctCategories(menuItems);
 
   const createOrderMutation = useMutation({
-    mutationFn: (data) => saveOrder(data),
+    ...createOrder(queryClient),
     onSuccess: () => {
       toast({
         variant: "success",
         title: "Success",
         description: "Order created successfully",
       });
-      router.back();
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to create order",
-        variant: "destructive",
-      });
+      form.reset();
+      setCartItems([]);
     },
   });
 
@@ -238,10 +232,15 @@ const CreateOrder = ({ isNew = true }) => {
     const customerData = form.getValues();
 
     const orderItemsDTO = cartItems.map(item => ({
-      ...item,
+      // ...item,
+      foodType: item.foodType,
+      menuItemName: item.menuItemName,
       itemName: item.itemName,
-      quantity: item.qty,
-      totalPrice: item.qty * item.itemPrice
+      quantity: item.qty, // 3
+      price: item.itemPrice, // include addon price (vada 20, chutney- 5 ) itemPrive = 25 
+      totalPrice: item.qty * item.itemPrice, // 75
+      selectedAddOns: item.selectedAddOns || [],
+      customNotes: item.customNotes || "",
     }));
 
     const totalAmount = cartItems.reduce((sum, item) => sum + (item.itemPrice * item.qty), 0);
@@ -254,9 +253,9 @@ const CreateOrder = ({ isNew = true }) => {
       orderedNumber: customerData.customerNumber,
       takeAway: customerData.takeaway
     };
-console.log(orderDTO)
     if (isNew) {
-      createOrderMutation.mutate(orderDTO);
+      console.log(orderDTO)
+      createOrderMutation.mutate({ orderDTO });
     } else {
       updateOrderMutation.mutate({
         orderNumber,

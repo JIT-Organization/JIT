@@ -182,16 +182,13 @@ const MenuFood = () => {
             <Button
               variant="ghost"
               onClick={handleBackClick}
-              className="flex items-center text-yellow pr-4"
-              size="icon"
-              colorVariant="none"
               disabled={deleteMutation.isPending || createMutation.isPending || updateMutation.isPending}
             >
               <ChevronLeft />
             </Button>
-            <h1 className="text-2xl font-bold">
+            <span className="ml-3 text-2xl font-bold">
               {isEdit ? "Edit Food" : "Add Food"}
-            </h1>
+            </span>
           </div>
           <div className="space-x-2 flex">
             {isEdit && (
