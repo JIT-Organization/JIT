@@ -83,15 +83,15 @@ const MenuList = () => {
 
   const handleToggle = (index, value) => {
     const menuItemName = menuItems[index].menuItemName;
-    patchMutation.mutate({ menuItemName, fields: { active: value } });
+    patchMutation.mutate({ menuItemName, foodType, fields: { active: value } });
   };
 
-  const handleEditClick = (menuItemName) => {
-    router.push(`${pathName}/${menuItemName}`);
+  const handleEditClick = (menuItemName, foodType) => {
+    router.push(`${pathName}/${foodType}/${menuItemName}`);
   };
 
-  const handleDeleteClick = async (menuItemName) => {
-    deleteMutation.mutate({ menuItemName });
+  const handleDeleteClick = async (menuItemName, foodType) => {
+    deleteMutation.mutate({ menuItemName, foodType });
   };
 
   const columns = getMenuListcolumns(

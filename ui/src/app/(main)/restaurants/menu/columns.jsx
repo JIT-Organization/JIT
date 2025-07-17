@@ -123,6 +123,7 @@ export const getMenuListcolumns = (
     header: <div className="flex justify-center">Actions</div>,
     cell: ({ row }) => {
       const menuItemName = row.original.menuItemName;
+      const foodType = row.original.foodType;
       const isDeleting = loadingStates.isDeleting(menuItemName);
       const isUpdating = loadingStates.isUpdating(menuItemName);
 
@@ -132,7 +133,7 @@ export const getMenuListcolumns = (
             className="cursor-pointer hover:bg-gray-600/10 h-10 w-10 flex justify-center items-center rounded-md"
             variant="ghost"
             colorVariant="none"
-            onClick={() => handleEditClick(menuItemName)}
+            onClick={() => handleEditClick(menuItemName,foodType)}
             disabled={isDeleting || isUpdating}
           >
             <Pencil className="h-5" />
@@ -149,7 +150,7 @@ export const getMenuListcolumns = (
                 {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="text-red-600 h-5" />}
               </Button>
             }
-            onConfirm={() => handleDeleteClick(menuItemName)}
+            onConfirm={() => handleDeleteClick(menuItemName, foodType)}
           />
         </div>
       );

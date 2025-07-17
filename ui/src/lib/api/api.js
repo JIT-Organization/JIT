@@ -45,16 +45,16 @@ export const getMenuItemsListForOrder = () => ({
   ...cacheConfig
 });
 
-export const getMenuItemFood = (menuItemName) => ({
+export const getMenuItemFood = (menuItemName, foodType) => ({
   queryKey: ['menuItemFood', menuItemName],
-  queryFn: () => getRequest(`${URLS.menuItemList}/TGSR/${menuItemName}`, 'Failed to fetch Menu Item'),
+  queryFn: () => getRequest(`${URLS.menuItemList}/TGSR/${menuItemName}/${foodType}`, 'Failed to fetch Menu Item'),
   enabled: menuItemName && menuItemName !== "add_food",
   ...cacheConfig,
 });
 
 export const patchUpdateMenuItemList = (queryClient) => ({
-  mutationFn: async ({ menuItemName, fields }) => {
-    return await patchRequest(`${URLS.menuItemList}/TGSR/${menuItemName}`, {
+  mutationFn: async ({ menuItemName, foodType, fields }) => {
+    return await patchRequest(`${URLS.menuItemList}/TGSR/${menuItemName}/${foodType}`, {
       dto: { ...fields },
       propertiesToBeUpdated: Object.keys(fields),
     });
@@ -70,8 +70,8 @@ export const patchUpdateMenuItemList = (queryClient) => ({
 });
 
 export const createMenuItemFood = (queryClient) => ({
-  mutationFn: async ({ id, fields }) => {
-    return await postRequest(`${URLS.menuItemList}/TGSR`, {
+  mutationFn: async ({ id, foodType, fields }) => {
+    return await postRequest(`${URLS.menuItemList}/TGSR/${foodType}`, {
       ...fields
     });
   },
@@ -86,7 +86,7 @@ export const createMenuItemFood = (queryClient) => ({
 });
 
 export const deleteMenuItem = (queryClient) => ({
-  mutationFn: async ({ menuItemName }) => deleteRequest(`${URLS.menuItemList}/TGSR/${menuItemName}`),
+  mutationFn: async ({ menuItemName, foodType }) => deleteRequest(`${URLS.menuItemList}/TGSR/${menuItemName}/${foodType}`),
   onMutate: async ({ menuItemName }) => handleMutate(queryClient, ["menuItemList"], menuItemName, null, "menuItemName", "delete"),
   onError: (err, variables, context) => handleError(queryClient, ["menuItemList"], context),
   onSettled: () => {

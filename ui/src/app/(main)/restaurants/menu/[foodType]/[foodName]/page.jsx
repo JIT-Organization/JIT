@@ -26,7 +26,7 @@ import { getChangedFields } from "@/lib/utils/helper";
 
 const MenuFood = () => {
   const router = useRouter();
-  const { foodName } = useParams();
+  const { foodType, foodName } = useParams();
   const queryClient = useQueryClient();
   const formRef = useRef();
   const [formData, setFormData] = useState({});
@@ -35,7 +35,7 @@ const MenuFood = () => {
   const { toast } = useToast();
 
   const { data: existingData, isLoading, error } = useQuery({
-    ...getMenuItemFood(foodName),
+    ...getMenuItemFood(foodName, foodType),
     enabled: isEdit && !!foodName,
   });
 
@@ -130,6 +130,7 @@ const MenuFood = () => {
   const handleCreateSubmit = (data) => {
     createMutation.mutate({
       menuItemName: foodName,
+      foodType: foodType,
       fields: data,
     });
   }
@@ -139,6 +140,7 @@ const MenuFood = () => {
     if (Object.keys(formValues).length !== 0) {
       updateMutation.mutate({
         menuItemName: foodName,
+        foodType: foodType,
         fields: formValues,
       });
     }
@@ -149,7 +151,7 @@ const MenuFood = () => {
   };
 
   const handleDelete = () => {
-    deleteMutation.mutate({ menuItemName: foodName });
+    deleteMutation.mutate({ menuItemName: foodName, foodType });
   };
 
   const handleBackClick = () => {
