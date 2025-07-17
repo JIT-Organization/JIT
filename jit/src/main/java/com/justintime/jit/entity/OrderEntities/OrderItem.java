@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.justintime.jit.entity.*;
 import com.justintime.jit.entity.ComboEntities.Combo;
+import com.justintime.jit.entity.Enums.FoodType;
 import com.justintime.jit.entity.Enums.OrderItemStatus;
 import com.justintime.jit.entity.Enums.OrderStatus;
 import com.justintime.jit.util.CodeNumberGenerator;
@@ -48,10 +49,19 @@ public class OrderItem extends BaseEntity {
         private int quantity;
 
         @Column(name = "price", nullable = false, columnDefinition = "DECIMAL(10,2)")
+        private BigDecimal price;
+
+        @Column(name = "total_price", nullable = false, columnDefinition = "DECIMAL(10,2)")
         private BigDecimal totalPrice;
+
+        @Column(name = "food_type", nullable = false)
+        private FoodType foodType;
 
         @Enumerated(EnumType.STRING)
         private OrderItemStatus orderItemStatus;
+
+        @Column(name = "custom_notes", length = 500)
+        private String customNotes;
 
         @ManyToOne
         @JoinColumn(name = "time_interval_id")

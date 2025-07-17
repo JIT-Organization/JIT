@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface OrderService {
-    ResponseEntity<String> createOrder(String restaurantCode, String username, OrderDTO orderDTO);
+    ResponseEntity<String> createOrder(String restaurantCode, OrderDTO orderDTO);
     List<OrderDTO> getOrdersByRestaurantId(String restaurantCode);
     OrderDTO getOrderByRestaurantAndId(String restaurantCode, Long id);
     OrderDTO updateOrderStatus(String restaurantCode, Long id, OrderStatus status);

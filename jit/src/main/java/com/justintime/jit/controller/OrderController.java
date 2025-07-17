@@ -20,9 +20,9 @@ public class OrderController extends BaseController {
     @Autowired
     private OrderService orderService;
 
-    @PostMapping("/{restaurantCode}/{username}")
-    public ResponseEntity<String> createOrder(@PathVariable String restaurantCode, @PathVariable String username, @RequestBody OrderDTO orderDTO) {
-        return orderService.createOrder(restaurantCode, username, orderDTO);
+    @PostMapping("/{restaurantCode}")
+    public ResponseEntity<String> createOrder(@PathVariable String restaurantCode, @RequestBody OrderDTO orderDTO) {
+        return orderService.createOrder(restaurantCode, orderDTO);
     }
 
     @GetMapping("/{restaurantCode}")

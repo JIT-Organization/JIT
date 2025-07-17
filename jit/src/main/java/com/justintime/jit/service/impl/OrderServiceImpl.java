@@ -4,6 +4,7 @@ import com.justintime.jit.dto.OrderDTO;
 import com.justintime.jit.dto.OrderItemDTO;
 import com.justintime.jit.entity.*;
 import com.justintime.jit.entity.ComboEntities.Combo;
+import com.justintime.jit.entity.Enums.FoodType;
 import com.justintime.jit.entity.Enums.OrderStatus;
 import com.justintime.jit.entity.Enums.Role;
 import com.justintime.jit.entity.OrderEntities.Order;
@@ -68,13 +69,15 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
-    public ResponseEntity<String> createOrder(String restaurantCode, String username, OrderDTO orderDTO) {
+    public ResponseEntity<String> createOrder(String restaurantCode, OrderDTO orderDTO) {
         Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode)
                 .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
         GenericMapper<Order, OrderDTO> mapper = MapperFactory.getMapper(Order.class, OrderDTO.class);
         Order order = mapper.toEntity(orderDTO);
         order.setRestaurant(restaurant);
-        order.setUser(userRepository.findByRestaurantIdAndRoleAndUserName(restaurant.getId(), Role.COOK, username));
+
+        // need to check this is correct
+        order.setUser(userRepository.findByRestaurantIdAndRoleAndUserName(restaurant.getId(), Role.COOK, orderDTO.getOrderedBy()));
         order.setStatus(OrderStatus.NEW);
         resolveRelationships(order, orderDTO);
         Order savedOrder = orderRepository.save(order);
@@ -190,10 +193,10 @@ public class OrderServiceImpl implements OrderService {
         dto.setOrderItems(order.getOrderItems().stream()
                 .map(
                         orderItem -> OrderItemDTO.builder()
-                                    .orderItemStatus(orderItem.getOrderItemStatus().name())
+                                    .orderItemStatus(orderItem.getOrderItemStatus())
                                     .itemName(Objects.nonNull(orderItem.getMenuItem()) ?
                                             orderItem.getMenuItem().getMenuItemName() : orderItem.getCombo().getComboName())
-                                    .isCombo(Objects.nonNull(orderItem.getCombo()))
+//                                    .isCombo(Objects.nonNull(orderItem.getCombo()))
                                     .quantity(orderItem.getQuantity())
                                     .totalPrice(orderItem.getTotalPrice())
                                     .build()
@@ -209,7 +212,7 @@ public class OrderServiceImpl implements OrderService {
         Set<String> menuItemNames = new HashSet<>();
 
         for (OrderItemDTO dto : orderItemDTOList) {
-            if (Boolean.TRUE.equals(dto.getIsCombo())) {
+            if (FoodType.COMBO.equals(dto.getFoodType())) {
                 comboItemNames.add(dto.getItemName());
             } else {
                 menuItemNames.add(dto.getItemName());
@@ -229,7 +232,7 @@ public class OrderServiceImpl implements OrderService {
         for (OrderItemDTO dto : orderItemDTOList) {
             OrderItem orderItem = orderItemMapper.toEntity(dto);
 
-            if (Boolean.TRUE.equals(dto.getIsCombo())) {
+            if (FoodType.COMBO.equals(dto.getFoodType())) {
                 orderItem.setCombo(comboMap.get(dto.getItemName()));
             } else {
                 orderItem.setMenuItem(menuItemMap.get(dto.getItemName()));

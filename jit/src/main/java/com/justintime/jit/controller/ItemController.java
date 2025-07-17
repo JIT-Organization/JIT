@@ -1,10 +1,12 @@
 package com.justintime.jit.controller;
 
+import com.justintime.jit.dto.ApiResponse;
 import com.justintime.jit.dto.ItemDTO;
 import com.justintime.jit.dto.PatchRequest;
 import com.justintime.jit.entity.Enums.FoodType;
 import com.justintime.jit.service.ItemService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,42 +19,42 @@ public class ItemController extends BaseController{
     private ItemService itemService;
 
     @GetMapping("/{restaurantCode}")
-    public List<ItemDTO> getItemsByRestaurantAndFoodType(
+    public ResponseEntity<ApiResponse<List<ItemDTO>>> getItemsByRestaurantAndFoodType(
             @PathVariable String restaurantCode,
             @RequestParam(required = false) FoodType foodType) {
         if (foodType != null) {
-            return itemService.getAllItemsForRestaurantAndFoodType(restaurantCode, foodType);
+            return success(itemService.getAllItemsForRestaurantAndFoodType(restaurantCode, foodType));
         } else {
-            return itemService.getAllItemsForRestaurant(restaurantCode);
+            return success(itemService.getAllItemsForRestaurant(restaurantCode));
         }
     }
 
     @GetMapping("/{restaurantCode}/{itemName}")
-    public ItemDTO getItemByRestaurantAndName(
+    public ResponseEntity<ApiResponse<ItemDTO>> getItemByRestaurantAndName(
             @PathVariable String restaurantCode,
             @PathVariable String itemName,
             @RequestParam FoodType foodType) {
-        return itemService.getItemByRestaurantAndNameAndFoodType(restaurantCode, itemName, foodType);
+        return success(itemService.getItemByRestaurantAndNameAndFoodType(restaurantCode, itemName, foodType));
     }
     @PostMapping("/{restaurantCode}")
-    public ItemDTO createItem(
+    public ResponseEntity<ApiResponse<ItemDTO>> createItem(
             @PathVariable String restaurantCode,
             @RequestBody ItemDTO itemDTO) {
-        return itemService.createItem(restaurantCode, itemDTO);
+        return success(itemService.createItem(restaurantCode, itemDTO));
     }
 
     @PutMapping("/{restaurantCode}/{itemName}")
-    public ItemDTO updateItem(
+    public ResponseEntity<ApiResponse<ItemDTO>> updateItem(
             @PathVariable String restaurantCode,
             @RequestBody ItemDTO itemDTO) {
-        return itemService.updateItem(restaurantCode, itemDTO);
+        return success(itemService.updateItem(restaurantCode, itemDTO));
     }
 
     @PatchMapping("/{restaurantCode}/{itemName}")
-    public ItemDTO patchItem(
+    public ResponseEntity<ApiResponse<ItemDTO>> patchItem(
             @PathVariable String restaurantCode,
             @RequestBody PatchRequest<ItemDTO> payload) {
-        return itemService.patchItem(restaurantCode, payload.getDto(), payload.getPropertiesToBeUpdated());
+        return success(itemService.patchItem(restaurantCode, payload.getDto(), payload.getPropertiesToBeUpdated()));
     }
 
     @DeleteMapping("/{restaurantCode}/{itemName}")

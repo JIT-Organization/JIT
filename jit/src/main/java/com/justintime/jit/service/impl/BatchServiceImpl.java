@@ -5,6 +5,7 @@ import com.justintime.jit.dto.BatchDTO;
 import com.justintime.jit.dto.OrderItemDTO;
 import com.justintime.jit.entity.*;
 import com.justintime.jit.entity.Enums.BatchStatus;
+import com.justintime.jit.entity.Enums.FoodType;
 import com.justintime.jit.entity.Enums.OrderType;
 import com.justintime.jit.entity.Enums.Role;
 import com.justintime.jit.entity.OrderEntities.OrderItem;
@@ -349,7 +350,7 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
         dto.setItemName(orderItem.getMenuItem() != null ? 
                 orderItem.getMenuItem().getMenuItemName() : 
                 orderItem.getCombo().getComboName());
-        dto.setIsCombo(orderItem.getMenuItem() == null);
+        dto.setFoodType(orderItem.getMenuItem() == null ? FoodType.COMBO.toString() : orderItem.getMenuItem().getFoodType().toString());
         return dto;
     }
 
@@ -392,7 +393,7 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
                             dto.setItemName(orderItem.getMenuItem() != null ? 
                                     orderItem.getMenuItem().getMenuItemName() : 
                                     orderItem.getCombo().getComboName());
-                            dto.setIsCombo(orderItem.getMenuItem() == null);
+                            dto.setFoodType(orderItem.getMenuItem() == null ? FoodType.COMBO.toString() : orderItem.getMenuItem().getFoodType().toString());
                             return dto;
                         })
                         .collect(Collectors.toList());
