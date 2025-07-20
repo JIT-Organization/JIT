@@ -6,6 +6,7 @@ import com.justintime.jit.entity.Enums.Role;
 import com.justintime.jit.entity.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
+import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.util.HashSet;
 import java.util.List;
@@ -27,5 +28,5 @@ public interface UserService extends BaseService<User, Long>, UserDetailsService
 
     UserDTO addUser(UserDTO addUserRequest);
 
-    void sendInviteToUser(UserDTO inviteUserDTO);
+    void sendInviteToUser(UserDTO inviteUserDTO) throws IOException;
 }

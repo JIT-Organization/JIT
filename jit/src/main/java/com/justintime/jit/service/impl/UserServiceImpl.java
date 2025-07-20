@@ -14,15 +14,19 @@ import com.justintime.jit.service.UserService;
 import com.justintime.jit.util.CommonServiceImplUtil;
 import com.justintime.jit.util.mapper.GenericMapper;
 import com.justintime.jit.util.mapper.MapperFactory;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
@@ -52,7 +56,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
     @Value("${register.invite.url}")
     private String registrationUrl;
 
-    @Autowired
+    @SuppressFBWarnings(value = "EI2", justification = "User Service Impl is a Spring-managed bean and is not exposed.")
     public UserServiceImpl(UserRepository userRepository, CommonServiceImplUtil commonServiceImplUtil, PermissionsService permissionsService, UserInvitationRepository userInvitationRepository, RestaurantRepository restaurantRepository, RestaurantRepository restaurantRepository1) {
         this.userRepository = userRepository;
         this.commonServiceImplUtil = commonServiceImplUtil;
@@ -156,7 +160,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
     // TODO get all possible details of the user in this itself, in link just pass the email so that the user can note that email and set the password alone
     @Override
     @Transactional
-    public void sendInviteToUser(UserDTO inviteUserDTO) {
+    public void sendInviteToUser(UserDTO inviteUserDTO) throws IOException {
         User user = userMapper.toEntity(inviteUserDTO);
         user.setIsActive(false);
         Set<Restaurant> restaurants = restaurantRepository.findByRestaurantCodeIn(inviteUserDTO.getRestaurantCodes()).orElseThrow(() -> new ResourceNotFoundException("Restaurants Not Found for given codes"));
@@ -185,33 +189,10 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
         publishToInvitationEventListener(toEmail, subject, link);
     }
 
-    private void publishToInvitationEventListener(String toEmail, String subject, String link) {
-        String body = """
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <meta charset="UTF-8">
-              <title>You're Invited to Join</title>
-            </head>
-            <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
-              <table align="center" width="100%%" style="max-width: 600px; background-color: #ffffff; padding: 20px; border-radius: 8px;">
-                <tr>
-                  <td style="text-align: center;">
-                    <h2 style="color: #333;">You're Invited to Join Just In Time!</h2>
-                    <p style="color: #555;">Click the button below to complete your registration and join our platform.</p>
-                    <a href="%s" style="display: inline-block; padding: 12px 20px; margin: 20px 0; font-size: 16px; background-color: #007bff; color: #ffffff; text-decoration: none; border-radius: 5px;">
-                      Complete Registration
-                    </a>
-                    <p style="color: #888;">Or copy and paste this link into your browser:</p>
-                    <p style="color: #007bff;">%s</p>
-                    <br/>
-                    <p style="color: #aaa; font-size: 12px;">This link will expire in 24 hours for security reasons.</p>
-                  </td>
-                </tr>
-              </table>
-            </body>
-            </html>
-        """.formatted(link, link);
+    private void publishToInvitationEventListener(String toEmail, String subject, String link) throws IOException {
+        Resource resource = new ClassPathResource("templates/inviteLink.html");
+        String body = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8)
+                .replace("${link}", link);
         eventPublisher.publishEvent(new UserInvitationEvent(this, toEmail, subject, body));
     }
 

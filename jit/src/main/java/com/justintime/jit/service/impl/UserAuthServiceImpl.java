@@ -20,6 +20,7 @@ import com.justintime.jit.service.RefreshTokenService;
 import com.justintime.jit.service.UserAuthService;
 import com.justintime.jit.util.mapper.GenericMapper;
 import com.justintime.jit.util.mapper.MapperFactory;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.micrometer.common.util.StringUtils;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
@@ -61,7 +62,7 @@ public class UserAuthServiceImpl extends BaseServiceImpl<User, Long> implements 
 
     private final UserInvitationRepository userInvitationRepository;
 
-    @Autowired
+    @SuppressFBWarnings(value = "EI2", justification = "User Auth Service Impl is a Spring-managed bean and is not exposed.")
     public UserAuthServiceImpl(PasswordEncoder passwordEncoder, JwtService jwtService,
                                RefreshTokenService refreshTokenService,
                                AuthenticationManager authenticationManager, UserRepository userRepository, PermissionsService permissionsService, RestaurantRepository restaurantRepository, UserInvitationRepository userInvitationRepository) {
@@ -144,7 +145,7 @@ public class UserAuthServiceImpl extends BaseServiceImpl<User, Long> implements 
 //                return accessToken;
             }
         } catch (Exception e) {
-            throw new LoginException("Try Again");
+            throw new LoginException("Try Again " + e.getMessage());
         }
     }
 

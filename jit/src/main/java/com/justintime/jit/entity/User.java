@@ -71,47 +71,4 @@ public class User extends BaseEntity {
                 inverseJoinColumns = @JoinColumn(name = "restaurant_id")
         )
         private Set<Restaurant> restaurants;
-
-//        // Copy Constructor
-//        public User(User other) {
-//                this.id = other.id;
-//                this.firstName = other.firstName;
-//                this.lastName = other.lastName;
-//                this.profilePictureUrl = other.profilePictureUrl;
-//                this.isActive = other.isActive;
-//                this.userName = other.userName;
-//                this.email = other.email;
-//                this.phoneNumber = other.phoneNumber;
-//                this.passwordHash = other.passwordHash;
-//                this.role = other.role;
-//                this.createdDttm = other.createdDttm;
-//                this.updatedDttm = other.updatedDttm;
-//                this.orders = other.orders != null ? other.orders.stream().map(Order::new).collect(Collectors.toList()) : null; // Deep copy of orders
-//                this.reservations = other.reservations != null ? other.reservations.stream().map(Reservation::new).collect(Collectors.toList()) : null; // Deep copy of reservations
-//                this.admins = other.admins != null ? other.admins.stream().map(Admin::new).collect(Collectors.toList()) : null; // Deep copy of admins
-//        }
-//
-//        public List<Order> getOrders() {
-//                return orders != null ? orders.stream().map(Order::new).collect(Collectors.toList()) : null; // Defensive copy
-//        }
-//
-//        public void setOrders(List<Order> orders) {
-//                this.orders = orders != null ? orders.stream().map(Order::new).collect(Collectors.toList()) : null; // Defensive copy
-//        }
-//
-//        public List<Reservation> getReservations() {
-//                return reservations != null ? reservations.stream().map(Reservation::new).collect(Collectors.toList()) : null; // Defensive copy
-//        }
-//
-//        public void setReservations(List<Reservation> reservations) {
-//                this.reservations = reservations != null ? reservations.stream().map(Reservation::new).collect(Collectors.toList()) : null; // Defensive copy
-//        }
-//
-//        public List<Admin> getAdmins() {
-//                return admins != null ? admins.stream().map(Admin::new).collect(Collectors.toList()) : null; // Defensive copy
-//        }
-//
-//        public void setAdmins(List<Admin> admins) {
-//                this.admins = admins != null ? admins.stream().map(Admin::new).collect(Collectors.toList()) : null; // Defensive copy
-//        }
 }

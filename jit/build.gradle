@@ -49,6 +49,7 @@ dependencies {
 	// Lombok
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+	implementation 'com.github.spotbugs:spotbugs-annotations'
 
 	// Testing Dependencies
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'

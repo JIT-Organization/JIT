@@ -1,6 +1,7 @@
 package com.justintime.jit.security;
 
 import com.justintime.jit.service.PermissionsService;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -12,6 +13,7 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
 
     private final PermissionsService permissionService;
 
+    @SuppressFBWarnings(value = "EI2", justification = "PermissionsService is a Spring-managed bean and is not exposed.")
     public CustomPermissionEvaluator(PermissionsService permissionService) {
         this.permissionService = permissionService;
     }

@@ -2,6 +2,7 @@ package com.justintime.jit.util;
 
 import com.justintime.jit.exception.ImageSizeLimitExceededException;
 import com.justintime.jit.validators.ValidationRule;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import jakarta.annotation.Nullable;
 
 import java.util.List;
@@ -46,6 +47,7 @@ public class ValidationUtils {
         }
     }
 
+    @SuppressFBWarnings(value = "UC", justification = "Used for runtime validation of DTO fields")
     public static void runValidation(List<ValidationRule> allRules, @Nullable Set<String> fieldsToValidate) {
         for (ValidationRule rule : allRules) {
             if (shouldValidate(rule.fieldName(), fieldsToValidate)) {
