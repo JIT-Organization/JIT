@@ -66,7 +66,7 @@ public class MenuItem extends BaseEntity implements FilterableItem {
     @JoinTable(
             name = "menu_item_cook",
             joinColumns = @JoinColumn(name = "menu_item_id"),
-            inverseJoinColumns = @JoinColumn(name = "cook_id")
+            inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private Set<User> cookSet = new HashSet<>();
 

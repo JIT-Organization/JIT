@@ -35,9 +35,9 @@ public class TimeInterval extends BaseEntity{
     @OneToMany(mappedBy = "timeInterval", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems;
 
-    @Column(name = "start_time")
+    @Column(name = "start_time", columnDefinition = "TIME")
     private LocalTime startTime;
 
-    @Column(name = "end_time")
+    @Column(name = "end_time", columnDefinition = "TIME")
     private LocalTime endTime;
 }

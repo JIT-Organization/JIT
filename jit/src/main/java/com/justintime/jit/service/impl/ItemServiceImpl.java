@@ -20,11 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
+        import java.util.stream.Collectors;
 
 import static com.justintime.jit.service.impl.MenuItemServiceImpl.convertTimeIntervals;
 
@@ -62,14 +59,16 @@ public class ItemServiceImpl implements ItemService {
         List<Combo> combos = comboRepository.findByRestaurantCode(restaurantCode);
         GenericMapper<MenuItem, ItemDTO> menuItemMapper = MapperFactory.getMapper(MenuItem.class, ItemDTO.class);
         GenericMapper<Combo, ItemDTO> comboMapper = MapperFactory.getMapper(Combo.class, ItemDTO.class);
-        List<ItemDTO> menuItemDTOs = menuItems.stream()
-                .map(menuItem -> mapMenuItemToItemDTO(menuItem, menuItemMapper))
-                .toList();
-        List<ItemDTO> comboDTOs = combos.stream()
-                .map(combo -> mapComboToItemDTO(combo, comboMapper))
-                .toList();
-        itemDTOs.addAll(menuItemDTOs);
-        itemDTOs.addAll(comboDTOs);
+        if (menuItems != null) {
+            itemDTOs.addAll(menuItems.stream()
+                    .map(menuItem -> mapMenuItemToItemDTO(menuItem, menuItemMapper))
+                    .toList());
+        }
+        if (combos != null) {
+            itemDTOs.addAll(combos.stream()
+                    .map(combo -> mapComboToItemDTO(combo, comboMapper))
+                    .toList());
+        }
         return itemDTOs;
     }
 
@@ -79,21 +78,22 @@ public class ItemServiceImpl implements ItemService {
         if (foodType == FoodType.MENU_ITEM) {
             List<MenuItem> menuItems = menuItemRepository.findByRestaurantCode(restaurantCode);
             GenericMapper<MenuItem, ItemDTO> menuItemMapper = MapperFactory.getMapper(MenuItem.class, ItemDTO.class);
-            itemDTOs.addAll(menuItems.stream()
-                    .map(menuItem -> mapMenuItemToItemDTO(menuItem, menuItemMapper))
-                    .toList());
-        }
-        else if (foodType == FoodType.COMBO) {
+            if (menuItems != null) {
+                itemDTOs.addAll(menuItems.stream()
+                        .map(menuItem -> mapMenuItemToItemDTO(menuItem, menuItemMapper))
+                        .toList());
+            }
+        } else if (foodType == FoodType.COMBO) {
             List<Combo> combos = comboRepository.findByRestaurantCode(restaurantCode);
             GenericMapper<Combo, ItemDTO> comboMapper = MapperFactory.getMapper(Combo.class, ItemDTO.class);
-            itemDTOs.addAll(combos.stream()
-                    .map(combo -> mapComboToItemDTO(combo, comboMapper))
-                    .toList());
-        }
-        else if (foodType == FoodType.VARIANT){
+            if (combos != null) {
+                itemDTOs.addAll(combos.stream()
+                        .map(combo -> mapComboToItemDTO(combo, comboMapper))
+                        .toList());
+            }
+        } else if (foodType == FoodType.VARIANT){
             throw new UnsupportedOperationException("Variant type is not supported yet.");
-        }
-        else{
+        } else {
             throw new ResourceNotFoundException("Invalid food type: " + foodType);
         }
         return itemDTOs;
@@ -101,8 +101,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDTO getItemByRestaurantAndNameAndFoodType(String restaurantCode, String itemName, FoodType foodType) {
-        Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode).orElseThrow(()->
-                new ResourceNotFoundException("Restaurant not found with code: " + restaurantCode));
+        Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found with code: " + restaurantCode));
         if (foodType == FoodType.MENU_ITEM) {
             MenuItem menuItem = menuItemRepository.findByRestaurantIdAndMenuItemName(restaurant.getId(), itemName);
             if (menuItem == null) {
@@ -125,103 +125,115 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDTO createItem(String restaurantCode, ItemDTO itemDTO) {
-        Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode).orElseThrow(()->
-                new ResourceNotFoundException("Restaurant not found with code: " + restaurantCode));
-        if (itemDTO.getFoodType() == FoodType.MENU_ITEM) {
+    public ItemDTO createItem(String restaurantCode, FoodType foodType, ItemDTO itemDTO) {
+        Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found with code: " + restaurantCode));
+        if (foodType == FoodType.MENU_ITEM) {
             GenericMapper<MenuItem, ItemDTO> menuItemMapper = MapperFactory.getMapper(MenuItem.class, ItemDTO.class);
             MenuItem menuItem = menuItemMapper.toEntity(itemDTO);
-            menuItem.setRestaurant(restaurant);
-            mapItemDTOToMenuItem(itemDTO, menuItem, menuItemMapper, Set.of("categorySet", "cookSet", "timeIntervalSet"), false);
-            return mapMenuItemToItemDTO(menuItemRepository.save(menuItem), menuItemMapper);
-        } else if (itemDTO.getFoodType() == FoodType.COMBO) {
+            if (menuItem != null) {
+                menuItem.setMenuItemName(itemDTO.getItemName());
+                menuItem.setRestaurant(restaurant);
+                mapItemDTOToMenuItem(itemDTO, menuItem, menuItemMapper, Set.of("categorySet", "cookSet", "timeIntervalSet"), false);
+                return mapMenuItemToItemDTO(menuItemRepository.save(menuItem), menuItemMapper);
+            }
+        } else if (foodType == FoodType.COMBO) {
             GenericMapper<Combo, ItemDTO> comboMapper = MapperFactory.getMapper(Combo.class, ItemDTO.class);
             Combo combo = comboMapper.toEntity(itemDTO);
-            combo.setRestaurant(restaurant);
-            mapItemDTOToCombo(itemDTO, combo, comboMapper, Set.of("categorySet", "comboItemSet", "timeIntervalSet"), false);
-            return mapComboToItemDTO(comboRepository.save(combo), comboMapper);
-        } else {
-            throw new ResourceNotFoundException("Invalid food type: " + itemDTO.getFoodType());
+            if (combo != null) {
+                combo.setComboName(itemDTO.getItemName());
+                combo.setRestaurant(restaurant);
+                mapItemDTOToCombo(itemDTO, combo, comboMapper, Set.of("categorySet", "comboItemSet", "timeIntervalSet"), false);
+                return mapComboToItemDTO(comboRepository.save(combo), comboMapper);
+            }
         }
+        throw new ResourceNotFoundException("Invalid food type: " + foodType);
     }
 
     @Override
-    public ItemDTO updateItem(String restaurantCode, ItemDTO itemDTO) {
-        Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode).orElseThrow(()->
-                new ResourceNotFoundException("Restaurant not found with code: " + restaurantCode));
-        if (itemDTO.getFoodType() == FoodType.MENU_ITEM) {
-            MenuItem menuItem = menuItemRepository.findByRestaurantIdAndMenuItemName(restaurant.getId(), itemDTO.getItemName()) ;
+    public ItemDTO updateItem(String restaurantCode, FoodType foodType, ItemDTO itemDTO) {
+        Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found with code: " + restaurantCode));
+        if (foodType == FoodType.MENU_ITEM) {
+            MenuItem menuItem = menuItemRepository.findByRestaurantIdAndMenuItemName(restaurant.getId(), itemDTO.getItemName());
             if (menuItem == null) {
                 throw new ResourceNotFoundException("MenuItem not found with name: " + itemDTO.getItemName());
             }
+            menuItem.setMenuItemName(itemDTO.getItemName());
             menuItem.setRestaurant(restaurant);
             GenericMapper<MenuItem, ItemDTO> menuItemMapper = MapperFactory.getMapper(MenuItem.class, ItemDTO.class);
             mapItemDTOToMenuItem(itemDTO, menuItem, menuItemMapper, new HashSet<>(), false);
             return mapMenuItemToItemDTO(menuItemRepository.save(menuItem), menuItemMapper);
-        } else if (itemDTO.getFoodType() == FoodType.COMBO) {
+        } else if (foodType == FoodType.COMBO) {
             Combo combo = comboRepository.findByRestaurantIdAndComboName(restaurant.getId(), itemDTO.getItemName());
             if (combo == null) {
                 throw new ResourceNotFoundException("Combo not found with name: " + itemDTO.getItemName());
             }
+            combo.setComboName(itemDTO.getItemName());
+            combo.setRestaurant(restaurant);
             GenericMapper<Combo, ItemDTO> comboMapper = MapperFactory.getMapper(Combo.class, ItemDTO.class);
             mapItemDTOToCombo(itemDTO, combo, comboMapper, Set.of("categorySet", "comboItemSet", "timeIntervalSet"), false);
             return mapComboToItemDTO(comboRepository.save(combo), comboMapper);
-        }
-        else if (itemDTO.getFoodType() == FoodType.VARIANT) {
+        } else if (foodType == FoodType.VARIANT) {
             throw new UnsupportedOperationException("Variant type is not supported yet.");
-        }
-        else {
-            throw new ResourceNotFoundException("Invalid food type: " + itemDTO.getFoodType());
+        } else {
+            throw new ResourceNotFoundException("Invalid food type: " + foodType);
         }
     }
-
     @Override
-    public ItemDTO patchItem(String restaurantCode, ItemDTO itemDTO, HashSet<String> propertiesToBeUpdated) {
-        Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode).orElseThrow(()->
-                new ResourceNotFoundException("Restaurant not found with code: " + restaurantCode));
-        if (itemDTO.getFoodType() == FoodType.MENU_ITEM) {
+    public ItemDTO patchItem(String restaurantCode, FoodType foodType, ItemDTO itemDTO, HashSet<String> propertiesToBeUpdated) {
+        Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found with code: " + restaurantCode));
+        if (foodType == FoodType.MENU_ITEM) {
             MenuItem existingMenuItem = menuItemRepository.findByRestaurantIdAndMenuItemName(restaurant.getId(), itemDTO.getItemName());
             if (existingMenuItem == null) {
                 throw new ResourceNotFoundException("MenuItem not found with name: " + itemDTO.getItemName());
             }
             GenericMapper<MenuItem, ItemDTO> menuItemMapper = MapperFactory.getMapper(MenuItem.class, ItemDTO.class);
             MenuItem patchedMenuItem = menuItemMapper.toEntity(itemDTO);
-            if (null != patchedMenuItem.getCategorySet()) patchedMenuItem.getCategorySet().clear();
-            if (null != patchedMenuItem.getCookSet()) patchedMenuItem.getCookSet().clear();
-            if (null != patchedMenuItem.getTimeIntervalSet()) patchedMenuItem.getTimeIntervalSet().clear();
-            if (null != patchedMenuItem.getAddOnSet()) patchedMenuItem.getAddOnSet().clear();
-            patchedMenuItem.setRestaurant(restaurant);
-            mapItemDTOToMenuItem(itemDTO, patchedMenuItem, menuItemMapper, propertiesToBeUpdated, true);
-            commonServiceImplUtil.copySelectedProperties(patchedMenuItem, existingMenuItem, propertiesToBeUpdated);
-            existingMenuItem.setUpdatedDttm(LocalDateTime.now());
-            return mapMenuItemToItemDTO(menuItemRepository.save(existingMenuItem), menuItemMapper);
-        } else if (itemDTO.getFoodType() == FoodType.COMBO) {
+            if (patchedMenuItem != null) {
+                patchedMenuItem.setMenuItemName(itemDTO.getItemName());
+                if (patchedMenuItem.getCategorySet() != null) patchedMenuItem.getCategorySet().clear();
+                if (patchedMenuItem.getCookSet() != null) patchedMenuItem.getCookSet().clear();
+                if (patchedMenuItem.getTimeIntervalSet() != null) patchedMenuItem.getTimeIntervalSet().clear();
+                if (patchedMenuItem.getAddOnSet() != null) patchedMenuItem.getAddOnSet().clear();
+                patchedMenuItem.setRestaurant(restaurant);
+                mapItemDTOToMenuItem(itemDTO, patchedMenuItem, menuItemMapper, propertiesToBeUpdated, true);
+                commonServiceImplUtil.copySelectedProperties(patchedMenuItem, existingMenuItem, propertiesToBeUpdated);
+                existingMenuItem.setUpdatedDttm(LocalDateTime.now());
+                return mapMenuItemToItemDTO(menuItemRepository.save(existingMenuItem), menuItemMapper);
+            }
+        } else if (foodType == FoodType.COMBO) {
             Combo existingCombo = comboRepository.findByRestaurantIdAndComboName(restaurant.getId(), itemDTO.getItemName());
             if (existingCombo == null) {
                 throw new ResourceNotFoundException("Combo not found with name: " + itemDTO.getItemName());
             }
             GenericMapper<Combo, ItemDTO> comboMapper = MapperFactory.getMapper(Combo.class, ItemDTO.class);
             Combo patchedCombo = comboMapper.toEntity(itemDTO);
-            if (null != patchedCombo.getCategorySet()) patchedCombo.getCategorySet().clear();
-            if (null != patchedCombo.getComboItemSet()) patchedCombo.getComboItemSet().clear();
-            if (null != patchedCombo.getTimeIntervalSet()) patchedCombo.getTimeIntervalSet().clear();
-            if (null != patchedCombo.getAddOnSet()) patchedCombo.getAddOnSet().clear();
-            patchedCombo.setRestaurant(restaurant);
-            mapItemDTOToCombo(itemDTO, existingCombo, comboMapper, propertiesToBeUpdated, true);
-            commonServiceImplUtil.copySelectedProperties(patchedCombo, existingCombo, propertiesToBeUpdated);
-            existingCombo.setUpdatedDttm(LocalDateTime.now());
-            return mapComboToItemDTO(comboRepository.save(existingCombo), comboMapper);
-        } else if (itemDTO.getFoodType() == FoodType.VARIANT) {
+            if (patchedCombo != null) {
+                patchedCombo.setComboName(itemDTO.getItemName());
+                if (patchedCombo.getCategorySet() != null) patchedCombo.getCategorySet().clear();
+                if (patchedCombo.getComboItemSet() != null) patchedCombo.getComboItemSet().clear();
+                if (patchedCombo.getTimeIntervalSet() != null) patchedCombo.getTimeIntervalSet().clear();
+                if (patchedCombo.getAddOnSet() != null) patchedCombo.getAddOnSet().clear();
+                patchedCombo.setRestaurant(restaurant);
+                mapItemDTOToCombo(itemDTO, existingCombo, comboMapper, propertiesToBeUpdated, true);
+                commonServiceImplUtil.copySelectedProperties(patchedCombo, existingCombo, propertiesToBeUpdated);
+                existingCombo.setUpdatedDttm(LocalDateTime.now());
+                return mapComboToItemDTO(comboRepository.save(existingCombo), comboMapper);
+            }
+        } else if (foodType == FoodType.VARIANT) {
             throw new UnsupportedOperationException("Variant type is not supported yet.");
         } else {
-            throw new ResourceNotFoundException("Invalid food type: " + itemDTO.getFoodType());
+            throw new ResourceNotFoundException("Invalid food type: " + foodType);
         }
+        return null;
     }
 
     @Override
     public void deleteItem(String restaurantCode, String itemName, FoodType foodType) {
-        Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode).orElseThrow(()->
-                new ResourceNotFoundException("Restaurant not found with code: " + restaurantCode));
+        Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found with code: " + restaurantCode));
         if (foodType == FoodType.MENU_ITEM) {
             MenuItem menuItem = menuItemRepository.findByRestaurantIdAndMenuItemName(restaurant.getId(), itemName);
             if (menuItem == null) {
@@ -241,27 +253,30 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
-
     private ItemDTO mapMenuItemToItemDTO(MenuItem menuItem, GenericMapper<MenuItem, ItemDTO> mapper) {
         ItemDTO itemDTO = mapper.toDto(menuItem);
         itemDTO.setItemName(menuItem.getMenuItemName());
-        itemDTO.setCategorySet(menuItem.getCategorySet().stream()
-                .map(Category::getCategoryName)
-                .collect(Collectors.toSet()));
-        itemDTO.setCookSet(menuItem.getCookSet().stream()
-                .map(User::getUserName)
-                .collect(Collectors.toSet()));
-        itemDTO.setAddOnSet(
-                menuItem.getAddOnSet().stream()
-                        .map(addOn -> {
-                            AddOnDTO dto = new AddOnDTO();
-                            dto.setLabel(addOn.getLabel());
-                            dto.setPrice(addOn.getPrice());
-                            dto.setOptions(addOn.getOptions());
-                            return dto;
-                        })
-                        .collect(Collectors.toSet())
-        );
+        if (menuItem.getCategorySet() != null) {
+            itemDTO.setCategorySet(menuItem.getCategorySet().stream()
+                    .map(Category::getCategoryName)
+                    .collect(Collectors.toSet()));
+        }
+        if (menuItem.getCookSet() != null) {
+            itemDTO.setCookSet(menuItem.getCookSet().stream()
+                    .map(User::getUserName)
+                    .collect(Collectors.toSet()));
+        }
+        if (menuItem.getAddOnSet() != null) {
+            itemDTO.setAddOnSet(menuItem.getAddOnSet().stream()
+                    .map(addOn -> {
+                        AddOnDTO dto = new AddOnDTO();
+                        dto.setLabel(addOn.getLabel());
+                        dto.setPrice(addOn.getPrice());
+                        dto.setOptions(addOn.getOptions());
+                        return dto;
+                    })
+                    .collect(Collectors.toSet()));
+        }
         itemDTO.setTimeIntervalSet(convertTimeIntervals(menuItem.getTimeIntervalSet()));
         return itemDTO;
     }
@@ -269,29 +284,33 @@ public class ItemServiceImpl implements ItemService {
     private ItemDTO mapComboToItemDTO(Combo combo, GenericMapper<Combo, ItemDTO> mapper) {
         ItemDTO itemDTO = mapper.toDto(combo);
         itemDTO.setItemName(combo.getComboName());
-        itemDTO.setCategorySet(combo.getCategorySet().stream()
-                .map(Category::getCategoryName)
-                .collect(Collectors.toSet()));
-        itemDTO.setComboItemSet(
-                combo.getComboItemSet().stream()
-                        .map(comboItem -> {
-                            ComboItemDTO comboItemDTO = new ComboItemDTO();
+        if (combo.getCategorySet() != null) {
+            itemDTO.setCategorySet(combo.getCategorySet().stream()
+                    .map(Category::getCategoryName)
+                    .collect(Collectors.toSet()));
+        }
+        if (combo.getComboItemSet() != null) {
+            itemDTO.setComboItemSet(combo.getComboItemSet().stream()
+                    .map(comboItem -> {
+                        ComboItemDTO comboItemDTO = new ComboItemDTO();
+                        if (comboItem.getMenuItem() != null) {
                             comboItemDTO.setComboItemName(comboItem.getMenuItem().getMenuItemName());
-                            return comboItemDTO;
-                        })
-                        .collect(Collectors.toSet()
-                        ));
-        itemDTO.setAddOnSet(
-                combo.getAddOnSet().stream()
-                        .map(addOn -> {
-                            AddOnDTO dto = new AddOnDTO();
-                            dto.setLabel(addOn.getLabel());
-                            dto.setPrice(addOn.getPrice());
-                            dto.setOptions(addOn.getOptions());
-                            return dto;
-                        })
-                        .collect(Collectors.toSet())
-        );
+                        }
+                        return comboItemDTO;
+                    })
+                    .collect(Collectors.toSet()));
+        }
+        if (combo.getAddOnSet() != null) {
+            itemDTO.setAddOnSet(combo.getAddOnSet().stream()
+                    .map(addOn -> {
+                        AddOnDTO dto = new AddOnDTO();
+                        dto.setLabel(addOn.getLabel());
+                        dto.setPrice(addOn.getPrice());
+                        dto.setOptions(addOn.getOptions());
+                        return dto;
+                    })
+                    .collect(Collectors.toSet()));
+        }
         itemDTO.setTimeIntervalSet(convertTimeIntervals(combo.getTimeIntervalSet()));
         return itemDTO;
     }
@@ -340,8 +359,7 @@ public class ItemServiceImpl implements ItemService {
                         combo.getRestaurant().getId(),
                         itemDTO.getComboItemSet().stream()
                                 .map(ComboItemDTO::getComboItemName)
-                                .collect(Collectors.toSet())
-                );
+                                .collect(Collectors.toSet()));
                 combo.setComboItemSet(comboItems);
             }
         }

@@ -154,6 +154,7 @@ const CreateOrder = ({ isNew = true }) => {
 
   const getCartQuantityByName = (itemName) => {
     if (!cartItems) return 0;
+    if (!itemName) return 0;
     const baseName = itemName.split('#')[0];
     const regex = new RegExp(`^${baseName}(#\\d+)?$`);
     return cartItems

@@ -130,7 +130,7 @@ const MenuFood = () => {
   const handleCreateSubmit = (data) => {
     createMutation.mutate({
       menuItemName: foodName,
-      foodType: foodType,
+      foodType: data.foodType,
       fields: data,
     });
   }

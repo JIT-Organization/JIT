@@ -50,13 +50,13 @@ public class Combo extends BaseEntity implements FilterableItem {
     @Column(name = "price", nullable = false, columnDefinition = "DECIMAL(10,2)")
     private BigDecimal price;
 
-    @Column(name = "stock", nullable = false, columnDefinition = "INT DEFAULT 0")
-    private Integer stock = 0;
+    @Column(name = "stock")
+    private Integer stock;
 
-    @Column(name="description", nullable = false, columnDefinition = "TEXT")
+    @Column(name="description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "offer_price", nullable = false, columnDefinition = "DECIMAL(10,2)")
+    @Column(name = "offer_price", columnDefinition = "DECIMAL(10,2)")
     private BigDecimal offerPrice;
 
     @UpdateTimestamp
@@ -99,7 +99,7 @@ public class Combo extends BaseEntity implements FilterableItem {
     @Column(name = "image", columnDefinition = "TEXT")
     private String base64Image;
 
-    @Column(name = "rating", nullable = false, columnDefinition = "DECIMAL(10,1)")
+    @Column(name = "rating", columnDefinition = "DECIMAL(10,1)")
     private BigDecimal rating;
 
     @OneToMany(mappedBy = "combo", cascade = CascadeType.ALL)

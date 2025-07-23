@@ -1,5 +1,6 @@
 package com.justintime.jit.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.justintime.jit.entity.Enums.FoodType;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,6 +14,7 @@ import java.util.Set;
 @Getter
 @Setter
 public class ItemDTO {
+    @JsonProperty("menuItemName")
     private String itemName;
     private String description;
     private FoodType foodType;

@@ -105,7 +105,7 @@ const MenuList = () => {
   );
 
   const handleAddFoodClick = () => {
-    router.push(`${pathName}/add_food`);
+    router.push(`${pathName}/MENU_ITEM/add_food`);
   };
 
   const categories = getDistinctCategories(menuItems);
