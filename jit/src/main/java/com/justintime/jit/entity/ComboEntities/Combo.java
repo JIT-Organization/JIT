@@ -11,10 +11,13 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
 
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Audited
@@ -93,6 +96,9 @@ public class Combo extends BaseEntity implements FilterableItem {
     @Column(name = "active", nullable = false, length = 1)
     private Boolean active;
 
+    @Column(name = "availability")
+    private String availability;
+
     @Column(name = "hotel_special", nullable = false, length = 1)
     private Boolean hotelSpecial;
 
@@ -119,6 +125,27 @@ public class Combo extends BaseEntity implements FilterableItem {
     public FoodType getFoodType() {
         return FoodType.COMBO;
     }
+
+    public Set<DayOfWeek> getAvailability() {
+        if (this.availability == null || this.availability.isBlank()) {
+            return new HashSet<>();
+        }
+        return Arrays.stream(this.availability.split(","))
+                .map(String::trim)
+                .map(DayOfWeek::valueOf)
+                .collect(Collectors.toSet());
+    }
+
+    public void setAvailability(Set<DayOfWeek> days) {
+        if (days == null || days.isEmpty()) {
+            this.availability = null;
+        } else {
+            this.availability = days.stream()
+                    .map(DayOfWeek::name)
+                    .collect(Collectors.joining(","));
+        }
+    }
+
 
 //    public Set<ComboItem> getComboItemSet() {
 //        return Collections.unmodifiableSet(comboItemSet);

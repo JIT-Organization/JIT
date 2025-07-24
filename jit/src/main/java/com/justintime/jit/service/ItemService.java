@@ -12,7 +12,7 @@ public interface ItemService {
     List<ItemDTO> getAllItemsForRestaurantAndFoodType(String restaurantCode, FoodType foodType);
     ItemDTO getItemByRestaurantAndNameAndFoodType(String restaurantCode, String itemName, FoodType foodType);
     ItemDTO createItem(String restaurantCode, FoodType foodType, ItemDTO itemDTO);
-    ItemDTO updateItem(String restaurantCode, FoodType foodType, ItemDTO itemDTO);
-    ItemDTO patchItem(String restaurantCode, FoodType foodType, ItemDTO itemDTO, HashSet<String> propertiesToBeUpdated);
+    ItemDTO updateItem(String restaurantCode, String ItemName, FoodType foodType, ItemDTO itemDTO);
+    ItemDTO patchItem(String restaurantCode, String ItemName, FoodType foodType, ItemDTO itemDTO, HashSet<String> propertiesToBeUpdated);
     void deleteItem(String restaurantCode, String itemName, FoodType foodType);
 }

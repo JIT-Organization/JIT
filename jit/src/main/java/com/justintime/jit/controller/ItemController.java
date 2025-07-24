@@ -47,17 +47,19 @@ public class ItemController extends BaseController{
     @PutMapping("/{restaurantCode}/{itemName}")
     public ResponseEntity<ApiResponse<ItemDTO>> updateItem(
             @PathVariable String restaurantCode,
+            @PathVariable String itemName,
             @RequestParam FoodType foodType,
             @RequestBody ItemDTO itemDTO) {
-        return success(itemService.updateItem(restaurantCode, foodType, itemDTO));
+        return success(itemService.updateItem(restaurantCode, itemName, foodType, itemDTO));
     }
 
     @PatchMapping("/{restaurantCode}/{itemName}")
     public ResponseEntity<ApiResponse<ItemDTO>> patchItem(
             @PathVariable String restaurantCode,
+            @PathVariable String itemName,
             @RequestParam FoodType foodType,
             @RequestBody PatchRequest<ItemDTO> payload) {
-        return success(itemService.patchItem(restaurantCode, foodType, payload.getDto(), payload.getPropertiesToBeUpdated()));
+        return success(itemService.patchItem(restaurantCode, itemName, foodType, payload.getDto(), payload.getPropertiesToBeUpdated()));
     }
 
     @DeleteMapping("/{restaurantCode}/{itemName}")

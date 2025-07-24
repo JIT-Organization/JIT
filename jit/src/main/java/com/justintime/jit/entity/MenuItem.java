@@ -12,8 +12,10 @@ import lombok.Setter;
 import org.hibernate.envers.Audited;
 
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Audited
@@ -55,6 +57,9 @@ public class MenuItem extends BaseEntity implements FilterableItem {
 
     @Column(name = "offer_to")
     private LocalDateTime offerTo;
+
+    @Column(name = "availability")
+    private String availability;
 
     @Column(name = "stock", columnDefinition = "INT DEFAULT 0")
     private Integer stock = 0;
@@ -125,6 +130,26 @@ public class MenuItem extends BaseEntity implements FilterableItem {
     @Override
     public String getName() {
         return this.menuItemName;
+    }
+
+    public Set<DayOfWeek> getAvailability() {
+        if (this.availability == null || this.availability.isBlank()) {
+            return new HashSet<>();
+        }
+        return Arrays.stream(this.availability.split(","))
+                .map(String::trim)
+                .map(DayOfWeek::valueOf)
+                .collect(Collectors.toSet());
+    }
+
+    public void setAvailability(Set<DayOfWeek> days) {
+        if (days == null || days.isEmpty()) {
+            this.availability = null;
+        } else {
+            this.availability = days.stream()
+                    .map(DayOfWeek::name)
+                    .collect(Collectors.joining(","));
+        }
     }
 
 
