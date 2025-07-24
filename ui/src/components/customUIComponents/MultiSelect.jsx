@@ -16,8 +16,10 @@ export default function MultiSelect({
 }) {
   const toggleOption = (optionValue) => {
     if (disabled) return;
+    const currentValue = value || [];
+    
     if (isSingleSelect) {
-      if (value.includes(optionValue)) {
+      if (currentValue.includes(optionValue)) {
         onChange([]);
       } else {
         onChange([optionValue]);
@@ -32,10 +34,10 @@ export default function MultiSelect({
         onChange(allValues);
       }
     } else {
-      if (value.includes(optionValue)) {
-        onChange(value.filter((val) => val !== optionValue));
+      if (currentValue.includes(optionValue)) {
+        onChange(currentValue.filter((val) => val !== optionValue));
       } else {
-        const newValue = [...value, optionValue];
+        const newValue = [...currentValue, optionValue];
         if ((newValue.length === options.length - 1) && showAllOption) {
           newValue.push("all");
         }
@@ -43,7 +45,7 @@ export default function MultiSelect({
       }
     }
   };
-  const isAllSelected = options.every(opt => value.includes(opt.value));
+  const isAllSelected = options && options.length > 0 && (value || []).length > 0 && options.every(opt => (value || []).includes(opt.value));
 
   return (
     <Popover>
@@ -57,10 +59,10 @@ export default function MultiSelect({
           )}
           disabled={disabled}
         >
-          <span className={value.length ? "truncate" : "text-muted-foreground"}>
-            {value.length
+          <span className={(value || []).length ? "truncate" : "text-muted-foreground"}>
+            {(value || []).length
               ? options
-                .filter((opt) => value.includes(opt.value))
+                .filter((opt) => (value || []).includes(opt.value))
                 .map((opt) => opt.label)
                 .join(isSingleSelect ? "" : ", ")
               : placeholder}
@@ -92,7 +94,7 @@ export default function MultiSelect({
                     className="cursor-pointer"
                   >
                     <span className="flex-1">{option.label}</span>
-                    {value.includes(option.value) && (
+                    {(value || []).includes(option.value) && (
                       <Check className="ml-auto h-4 w-4" />
                     )}
                   </CommandItem>

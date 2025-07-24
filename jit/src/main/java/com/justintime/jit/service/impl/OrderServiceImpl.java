@@ -15,6 +15,7 @@ import com.justintime.jit.exception.ResourceNotFoundException;
 import com.justintime.jit.repository.ComboRepo.ComboRepository;
 import com.justintime.jit.repository.MenuItemRepository;
 import com.justintime.jit.repository.OrderRepo.OrderRepository;
+import com.justintime.jit.repository.OrderRepo.OrderItemRepository;
 import com.justintime.jit.repository.PaymentRepo.PaymentRepository;
 import com.justintime.jit.repository.ReservationRepository;
 import com.justintime.jit.repository.RestaurantRepository;
@@ -23,7 +24,10 @@ import com.justintime.jit.service.OrderService;
 import com.justintime.jit.util.CommonServiceImplUtil;
 import com.justintime.jit.util.mapper.GenericMapper;
 import com.justintime.jit.util.mapper.MapperFactory;
-import jakarta.transaction.Transactional;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +47,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private OrderRepository orderRepository;
+
+    @Autowired
+    private OrderItemRepository orderItemRepository;
 
     @Autowired
     private CommonServiceImplUtil commonServiceImplUtil;
@@ -65,6 +72,9 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private UserRepository userRepository;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     private final GenericMapper<OrderItem, OrderItemDTO> orderItemMapper =
             MapperFactory.getMapper(OrderItem.class, OrderItemDTO.class);
 
@@ -77,8 +87,18 @@ public class OrderServiceImpl implements OrderService {
         Order order = mapper.toEntity(orderDTO);
         order.setRestaurant(restaurant);
 
-        // need to check this is correct
-        order.setUser(userRepository.findByRestaurantIdAndRoleAndUserName(restaurant.getId(), Role.COOK, orderDTO.getOrderedBy()));
+        // Find the user who placed the order (customer)
+        if (orderDTO.getOrderedBy() != null && !orderDTO.getOrderedBy().trim().isEmpty()) {
+            User customer = userRepository.findByRestaurantCodeAndUserName(restaurantCode, orderDTO.getOrderedBy());
+            if (customer != null) {
+                order.setUser(customer);
+            } else {
+                throw new ResourceNotFoundException("User not found with name: " + orderDTO.getOrderedBy() + " for restaurant: " + restaurantCode);
+            }
+        } else {
+            throw new IllegalArgumentException("Order must have a customer (orderedBy field cannot be null or empty)");
+        }
+        
         order.setStatus(OrderStatus.NEW);
         
         // Calculate and set serve time based on order items
@@ -86,8 +106,16 @@ public class OrderServiceImpl implements OrderService {
         order.setServeTime(serveTime);
         
         resolveRelationships(order, orderDTO);
+        
+        // Save the order first without order items
         Order savedOrder = orderRepository.save(order);
-        saveEachOrderItem(orderDTO, restaurantCode, savedOrder);
+        
+        // Flush to ensure the order is persisted
+        entityManager.flush();
+        
+        // Now create and save order items with the persisted order
+        createAndPersistOrderItems(orderDTO, restaurantCode, savedOrder);
+        
         if (savedOrder.getId() != null) {
             return ResponseEntity.ok("Order created successfully with Order Number: " + savedOrder.getOrderNumber());
         } else {
@@ -188,37 +216,182 @@ public class OrderServiceImpl implements OrderService {
 
     private OrderDTO mapToDTO(Order order, GenericMapper<Order, OrderDTO> mapper){
         OrderDTO dto = mapper.toDto(order);
-        dto.setOrderedBy(order.getUser().getFirstName()+" "+order.getUser().getLastName());
-        dto.setDiningTables(order.getReservation().getDiningTableSet()
-                .stream()
-                .map(DiningTable::getTableNumber)
-                .collect(Collectors.toList()));
-        dto.setPaymentNumber(order.getPayments().stream()
-                .map(Payment::getPaymentNumber)
-                .collect(Collectors.toList()));
-        dto.setOrderItems(order.getOrderItems().stream()
-                .map(
-                        orderItem -> OrderItemDTO.builder()
-                                    .orderItemStatus(orderItem.getOrderItemStatus())
-                                    .itemName(Objects.nonNull(orderItem.getMenuItem()) ?
-                                            orderItem.getMenuItem().getMenuItemName() : orderItem.getCombo().getComboName())
-//                                    .isCombo(Objects.nonNull(orderItem.getCombo()))
-                                    .quantity(orderItem.getQuantity())
-                                    .totalPrice(orderItem.getTotalPrice())
-                                    .build()
-                )
-                .toList());
+        
+        // Safely handle user information
+        if (order.getUser() != null) {
+            String firstName = order.getUser().getFirstName() != null ? order.getUser().getFirstName() : "";
+            String lastName = order.getUser().getLastName() != null ? order.getUser().getLastName() : "";
+            dto.setOrderedBy(firstName + " " + lastName);
+        }
+        
+        // Safely handle reservation and dining tables
+        if (order.getReservation() != null && order.getReservation().getDiningTableSet() != null) {
+            dto.setDiningTables(order.getReservation().getDiningTableSet()
+                    .stream()
+                    .map(DiningTable::getTableNumber)
+                    .collect(Collectors.toList()));
+        } else {
+            dto.setDiningTables(new ArrayList<>());
+        }
+        
+        // Safely handle payments
+        if (order.getPayments() != null) {
+            dto.setPaymentNumber(order.getPayments().stream()
+                    .map(Payment::getPaymentNumber)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList()));
+        } else {
+            dto.setPaymentNumber(new ArrayList<>());
+        }
+        
+        // Safely handle order items
+        if (order.getOrderItems() != null) {
+            dto.setOrderItems(order.getOrderItems().stream()
+                    .filter(Objects::nonNull)
+                    .map(orderItem -> OrderItemDTO.builder()
+                                .orderItemStatus(orderItem.getOrderItemStatus())
+                                .itemName(Objects.nonNull(orderItem.getMenuItem()) ?
+                                        orderItem.getMenuItem().getMenuItemName() : 
+                                        (Objects.nonNull(orderItem.getCombo()) ? orderItem.getCombo().getComboName() : "Unknown Item"))
+                                .quantity(orderItem.getQuantity())
+                                .totalPrice(orderItem.getTotalPrice())
+                                .build())
+                    .toList());
+        } else {
+            dto.setOrderItems(new ArrayList<>());
+        }
+        
         return dto;
     }
 
-    private void saveEachOrderItem(OrderDTO orderDTO, String resCode, Order savedOrder) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    private void createAndPersistOrderItems(OrderDTO orderDTO, String restaurantCode, Order savedOrder) {
         List<OrderItemDTO> orderItemDTOList = orderDTO.getOrderItems();
+        
+        if (orderItemDTOList == null || orderItemDTOList.isEmpty()) {
+            throw new IllegalArgumentException("Order must contain at least one item");
+        }
 
         Set<String> comboItemNames = new HashSet<>();
         Set<String> menuItemNames = new HashSet<>();
 
         for (OrderItemDTO dto : orderItemDTOList) {
-            if (FoodType.COMBO.equals(dto.getFoodType())) {
+            if (dto == null || dto.getItemName() == null || dto.getItemName().trim().isEmpty()) {
+                continue; // Skip invalid items
+            }
+            
+            if ("COMBO".equalsIgnoreCase(dto.getFoodType())) {
+                comboItemNames.add(dto.getItemName());
+            } else {
+                menuItemNames.add(dto.getItemName());
+            }
+        }
+
+        Map<String, Combo> comboMap = comboRepository
+                .findByComboNamesAndRestaurantCode(comboItemNames, restaurantCode)
+                .stream()
+                .collect(Collectors.toMap(Combo::getComboName, Function.identity()));
+
+        Map<String, MenuItem> menuItemMap = menuItemRepository
+                .findByMenuItemNamesAndRestaurantCode(menuItemNames, restaurantCode)
+                .stream()
+                .collect(Collectors.toMap(MenuItem::getMenuItemName, Function.identity()));
+
+        for (OrderItemDTO dto : orderItemDTOList) {
+            if (dto == null || dto.getItemName() == null || dto.getItemName().trim().isEmpty()) {
+                continue; // Skip invalid items
+            }
+            
+            OrderItem orderItem = new OrderItem(); // Create new instance instead of using mapper
+            
+            // Manually set the basic properties
+            orderItem.setQuantity(dto.getQuantity() != null ? dto.getQuantity() : 1);
+            orderItem.setTotalPrice(dto.getTotalPrice());
+            
+            // Convert string to FoodType enum
+            if (dto.getFoodType() != null && !dto.getFoodType().trim().isEmpty()) {
+                try {
+                    orderItem.setFoodType(FoodType.valueOf(dto.getFoodType().toUpperCase()));
+                } catch (IllegalArgumentException e) {
+                    // Default to MENU_ITEM if invalid value
+                    orderItem.setFoodType(FoodType.MENU_ITEM);
+                }
+            } else {
+                // Default to MENU_ITEM if not specified
+                orderItem.setFoodType(FoodType.MENU_ITEM);
+            }
+            
+            // Set default values for required fields if not provided
+            if (orderItem.getTotalPrice() == null) {
+                orderItem.setTotalPrice(BigDecimal.ZERO);
+            }
+
+            if ("COMBO".equalsIgnoreCase(dto.getFoodType())) {
+                Combo combo = comboMap.get(dto.getItemName());
+                if (combo == null) {
+                    throw new ResourceNotFoundException("Combo not found: " + dto.getItemName());
+                }
+                orderItem.setCombo(combo);
+                
+                // Set price from combo
+                if (combo.getPrice() != null) {
+                    orderItem.setPrice(combo.getPrice());
+                    if (orderItem.getTotalPrice().equals(BigDecimal.ZERO)) {
+                        orderItem.setTotalPrice(combo.getPrice().multiply(BigDecimal.valueOf(orderItem.getQuantity())));
+                    }
+                } else {
+                    orderItem.setPrice(BigDecimal.ZERO);
+                }
+                
+                // Calculate and set MaxTimeLimitToStart for combo items
+                calculateAndSetMaxTimeLimitForCombo(orderItem, restaurantCode);
+            } else {
+                MenuItem menuItem = menuItemMap.get(dto.getItemName());
+                if (menuItem == null) {
+                    throw new ResourceNotFoundException("Menu item not found: " + dto.getItemName());
+                }
+                orderItem.setMenuItem(menuItem);
+                
+                // Set price from menu item
+                if (menuItem.getPrice() != null) {
+                    orderItem.setPrice(menuItem.getPrice());
+                    if (orderItem.getTotalPrice().equals(BigDecimal.ZERO)) {
+                        orderItem.setTotalPrice(menuItem.getPrice().multiply(BigDecimal.valueOf(orderItem.getQuantity())));
+                    }
+                } else {
+                    orderItem.setPrice(BigDecimal.ZERO);
+                }
+                
+                // Calculate and set MaxTimeLimitToStart for menu items
+                calculateAndSetMaxTimeLimitForMenuItem(orderItem, restaurantCode);
+            }
+
+            // Set the order reference
+            orderItem.setOrder(savedOrder);
+            
+            // Persist each OrderItem individually
+            orderItemRepository.save(orderItem);
+        }
+    }
+
+    private List<OrderItem> createOrderItems(OrderDTO orderDTO, String resCode) {
+        List<OrderItemDTO> orderItemDTOList = orderDTO.getOrderItems();
+        
+        if (orderItemDTOList == null || orderItemDTOList.isEmpty()) {
+            throw new IllegalArgumentException("Order must contain at least one item");
+        }
+        
+        List<OrderItem> orderItems = new ArrayList<>();
+
+        Set<String> comboItemNames = new HashSet<>();
+        Set<String> menuItemNames = new HashSet<>();
+
+        for (OrderItemDTO dto : orderItemDTOList) {
+            if (dto == null || dto.getItemName() == null || dto.getItemName().trim().isEmpty()) {
+                continue; // Skip invalid items
+            }
+            
+            if ("COMBO".equalsIgnoreCase(dto.getFoodType())) {
                 comboItemNames.add(dto.getItemName());
             } else {
                 menuItemNames.add(dto.getItemName());
@@ -236,20 +409,43 @@ public class OrderServiceImpl implements OrderService {
                 .collect(Collectors.toMap(MenuItem::getMenuItemName, Function.identity()));
 
         for (OrderItemDTO dto : orderItemDTOList) {
+            if (dto == null || dto.getItemName() == null || dto.getItemName().trim().isEmpty()) {
+                continue; // Skip invalid items
+            }
+            
             OrderItem orderItem = orderItemMapper.toEntity(dto);
+            
+            if (orderItem == null) {
+                continue; // Skip if mapping failed
+            }
 
-            if (FoodType.COMBO.equals(dto.getFoodType())) {
-                orderItem.setCombo(comboMap.get(dto.getItemName()));
+            if ("COMBO".equalsIgnoreCase(dto.getFoodType())) {
+                Combo combo = comboMap.get(dto.getItemName());
+                if (combo == null) {
+                    throw new ResourceNotFoundException("Combo not found: " + dto.getItemName());
+                }
+                orderItem.setCombo(combo);
                 // Calculate and set MaxTimeLimitToStart for combo items
                 calculateAndSetMaxTimeLimitForCombo(orderItem, resCode);
             } else {
-                orderItem.setMenuItem(menuItemMap.get(dto.getItemName()));
+                MenuItem menuItem = menuItemMap.get(dto.getItemName());
+                if (menuItem == null) {
+                    throw new ResourceNotFoundException("Menu item not found: " + dto.getItemName());
+                }
+                orderItem.setMenuItem(menuItem);
                 // Calculate and set MaxTimeLimitToStart for menu items
                 calculateAndSetMaxTimeLimitForMenuItem(orderItem, resCode);
             }
 
-            orderItem.setOrder(savedOrder);
+            // Don't set order here - it will be set in the calling method
+            orderItems.add(orderItem);
         }
+        
+        if (orderItems.isEmpty()) {
+            throw new IllegalArgumentException("No valid order items found");
+        }
+        
+        return orderItems;
     }
 
     /**
@@ -268,7 +464,7 @@ public class OrderServiceImpl implements OrderService {
 
         // Separate combo items and menu items
         for (OrderItemDTO dto : orderItemDTOList) {
-            if (FoodType.COMBO.equals(dto.getFoodType())) {
+            if ("COMBO".equalsIgnoreCase(dto.getFoodType())) {
                 comboItemNames.add(dto.getItemName());
             } else {
                 menuItemNames.add(dto.getItemName());
@@ -292,7 +488,7 @@ public class OrderServiceImpl implements OrderService {
         for (OrderItemDTO dto : orderItemDTOList) {
             long itemTimeInMinutes = 0;
             
-            if (FoodType.COMBO.equals(dto.getFoodType())) {
+            if ("COMBO".equalsIgnoreCase(dto.getFoodType())) {
                 Combo combo = comboMap.get(dto.getItemName());
                 if (combo != null) {
                     // For combos, use preparation time directly
