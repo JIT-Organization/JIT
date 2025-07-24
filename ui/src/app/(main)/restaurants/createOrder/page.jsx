@@ -442,6 +442,7 @@ const CreateOrder = ({ isNew = true }) => {
                 handleUpdateQty={handleUpdateQty}
                 openCustomizeDialog={openCustomizeDialog}
                 onOpenCustomerDialog={() => setIsCustomerDialogOpen(true)}
+                handleCopyItem={handleAddAgain}
                 isDialog={true}
               />
           </DialogContent>

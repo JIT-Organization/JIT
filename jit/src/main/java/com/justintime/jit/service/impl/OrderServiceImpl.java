@@ -4,6 +4,7 @@ import com.justintime.jit.dto.OrderDTO;
 import com.justintime.jit.dto.OrderItemDTO;
 import com.justintime.jit.entity.*;
 import com.justintime.jit.entity.ComboEntities.Combo;
+import com.justintime.jit.entity.ComboEntities.ComboItem;
 import com.justintime.jit.entity.Enums.FoodType;
 import com.justintime.jit.entity.Enums.OrderStatus;
 import com.justintime.jit.entity.Enums.Role;
@@ -79,6 +80,11 @@ public class OrderServiceImpl implements OrderService {
         // need to check this is correct
         order.setUser(userRepository.findByRestaurantIdAndRoleAndUserName(restaurant.getId(), Role.COOK, orderDTO.getOrderedBy()));
         order.setStatus(OrderStatus.NEW);
+        
+        // Calculate and set serve time based on order items
+        LocalDateTime serveTime = calculateServeTime(orderDTO, restaurantCode);
+        order.setServeTime(serveTime);
+        
         resolveRelationships(order, orderDTO);
         Order savedOrder = orderRepository.save(order);
         saveEachOrderItem(orderDTO, restaurantCode, savedOrder);
@@ -234,11 +240,251 @@ public class OrderServiceImpl implements OrderService {
 
             if (FoodType.COMBO.equals(dto.getFoodType())) {
                 orderItem.setCombo(comboMap.get(dto.getItemName()));
+                // Calculate and set MaxTimeLimitToStart for combo items
+                calculateAndSetMaxTimeLimitForCombo(orderItem, resCode);
             } else {
                 orderItem.setMenuItem(menuItemMap.get(dto.getItemName()));
+                // Calculate and set MaxTimeLimitToStart for menu items
+                calculateAndSetMaxTimeLimitForMenuItem(orderItem, resCode);
             }
 
             orderItem.setOrder(savedOrder);
         }
+    }
+
+    /**
+     * Calculate serve time based on maximum time required across all order items.
+     * For each order item: maxTimeLimitToStart + cookingTime from its menu item.
+     * Return the maximum time from order time.
+     */
+    private LocalDateTime calculateServeTime(OrderDTO orderDTO, String restaurantCode) {
+        List<OrderItemDTO> orderItemDTOList = orderDTO.getOrderItems();
+        
+        // Get current time as base (order time)
+        LocalDateTime orderTime = LocalDateTime.now();
+        
+        Set<String> comboItemNames = new HashSet<>();
+        Set<String> menuItemNames = new HashSet<>();
+
+        // Separate combo items and menu items
+        for (OrderItemDTO dto : orderItemDTOList) {
+            if (FoodType.COMBO.equals(dto.getFoodType())) {
+                comboItemNames.add(dto.getItemName());
+            } else {
+                menuItemNames.add(dto.getItemName());
+            }
+        }
+
+        // Fetch combos and menu items
+        Map<String, Combo> comboMap = comboRepository
+                .findByComboNamesAndRestaurantCode(comboItemNames, restaurantCode)
+                .stream()
+                .collect(Collectors.toMap(Combo::getComboName, Function.identity()));
+
+        Map<String, MenuItem> menuItemMap = menuItemRepository
+                .findByMenuItemNamesAndRestaurantCode(menuItemNames, restaurantCode)
+                .stream()
+                .collect(Collectors.toMap(MenuItem::getMenuItemName, Function.identity()));
+
+        long maxTimeInMinutes = 0;
+
+        // Calculate maximum time required across all order items
+        for (OrderItemDTO dto : orderItemDTOList) {
+            long itemTimeInMinutes = 0;
+            
+            if (FoodType.COMBO.equals(dto.getFoodType())) {
+                Combo combo = comboMap.get(dto.getItemName());
+                if (combo != null) {
+                    // For combos, use preparation time directly
+                    // In a real scenario, you might want to calculate the maximum preparation time
+                    // from all combo items, but for now using the combo's preparation time
+                    itemTimeInMinutes = combo.getPreparationTime() != null ? combo.getPreparationTime() : 0;
+                }
+            } else {
+                MenuItem menuItem = menuItemMap.get(dto.getItemName());
+                if (menuItem != null) {
+                    // For menu items, use preparation time directly
+                    // In a real scenario, you might want to add cook availability calculation
+                    itemTimeInMinutes = menuItem.getPreparationTime() != null ? menuItem.getPreparationTime() : 0;
+                }
+            }
+            
+            // Update maximum time
+            maxTimeInMinutes = Math.max(maxTimeInMinutes, itemTimeInMinutes);
+        }
+
+        // Return order time + maximum preparation time
+        return orderTime.plusMinutes(maxTimeInMinutes);
+    }
+
+    /**
+     * Calculate and set MaxTimeLimitToStart for a menu item based on cook's availability
+     * Also assigns the order item to the most quickly available cook
+     */
+    private void calculateAndSetMaxTimeLimitForMenuItem(OrderItem orderItem, String restaurantCode) {
+        MenuItem menuItem = orderItem.getMenuItem();
+        if (menuItem == null || menuItem.getCookSet() == null || menuItem.getCookSet().isEmpty()) {
+            orderItem.setMaxTimeLimitToStart(LocalDateTime.now()); // Default if no cooks assigned - can start immediately
+            return;
+        }
+
+        // Find the most quickly available cook among all responsible cooks
+        User mostAvailableCook = null;
+        long shortestWaitTime = Long.MAX_VALUE;
+
+        for (User responsibleCook : menuItem.getCookSet()) {
+            long cookAvailabilityTime = calculateCookAvailabilityTime(responsibleCook, restaurantCode);
+            if (cookAvailabilityTime < shortestWaitTime) {
+                shortestWaitTime = cookAvailabilityTime;
+                mostAvailableCook = responsibleCook;
+            }
+        }
+
+        // Assign the order item to the most available cook
+        if (mostAvailableCook != null) {
+            orderItem.setCook(mostAvailableCook);
+            // Calculate the actual start time by adding wait time to current time
+            orderItem.setMaxTimeLimitToStart(LocalDateTime.now().plusMinutes(shortestWaitTime));
+        } else {
+            orderItem.setMaxTimeLimitToStart(LocalDateTime.now());
+        }
+    }
+
+    /**
+     * Calculate and set MaxTimeLimitToStart for a combo item based on cook's availability
+     * Also assigns each combo item to the most quickly available cook
+     */
+    private void calculateAndSetMaxTimeLimitForCombo(OrderItem orderItem, String restaurantCode) {
+        Combo combo = orderItem.getCombo();
+        if (combo == null) {
+            orderItem.setMaxTimeLimitToStart(LocalDateTime.now()); // Default if no combo - can start immediately
+            return;
+        }
+
+        // For combos, we need to check all responsible cooks for each combo item
+        // and find the maximum time required across all combo items
+        long maxTimeLimitToStart = 0L;
+        Map<User, Long> cookAssignments = new HashMap<>();
+
+        // Assuming combo has a collection of combo items with menu items
+        if (combo.getComboItemSet() != null) {
+            for (ComboItem comboItem : combo.getComboItemSet()) {
+                if (comboItem.getMenuItem() != null && 
+                    comboItem.getMenuItem().getCookSet() != null && 
+                    !comboItem.getMenuItem().getCookSet().isEmpty()) {
+                    
+                    // Find the most quickly available cook for this combo item
+                    User mostAvailableCook = null;
+                    long shortestWaitTime = Long.MAX_VALUE;
+
+                    for (User responsibleCook : comboItem.getMenuItem().getCookSet()) {
+                        long cookAvailabilityTime = calculateCookAvailabilityTime(responsibleCook, restaurantCode);
+                        
+                        // Consider existing assignments in this combo to balance load
+                        if (cookAssignments.containsKey(responsibleCook)) {
+                            cookAvailabilityTime += cookAssignments.get(responsibleCook);
+                        }
+
+                        if (cookAvailabilityTime < shortestWaitTime) {
+                            shortestWaitTime = cookAvailabilityTime;
+                            mostAvailableCook = responsibleCook;
+                        }
+                    }
+
+                    // Assign this combo item to the most available cook
+                    if (mostAvailableCook != null) {
+                        // Track cook assignments within this combo
+                        Integer preparationTime = comboItem.getMenuItem().getPreparationTime();
+                        cookAssignments.put(mostAvailableCook, 
+                            cookAssignments.getOrDefault(mostAvailableCook, 0L) + 
+                            (preparationTime != null ? preparationTime.longValue() : 0L));
+                        
+                        maxTimeLimitToStart = Math.max(maxTimeLimitToStart, shortestWaitTime);
+                    }
+                }
+            }
+        }
+        
+        // Calculate the actual start time by adding wait time to current time
+        orderItem.setMaxTimeLimitToStart(LocalDateTime.now().plusMinutes(maxTimeLimitToStart));
+    }
+
+    /**
+     * Calculate when a cook will be available based on their current workload
+     */
+    private long calculateCookAvailabilityTime(User cook, String restaurantCode) {
+        LocalDateTime currentTime = LocalDateTime.now();
+        
+        // Get all orders for this restaurant
+        List<Order> allOrders = orderRepository.findByRestaurantCode(restaurantCode);
+        
+        // Filter to get only pending/in-progress orders
+        List<Order> pendingOrders = allOrders.stream()
+                .filter(order -> order.getStatus() == OrderStatus.NEW || 
+                               order.getStatus() == OrderStatus.PREPARING || 
+                               order.getStatus() == OrderStatus.SERVING)
+                .collect(Collectors.toList());
+
+        long totalWorkloadMinutes = 0L;
+
+        // Calculate current workload for this cook
+        for (Order order : pendingOrders) {
+            for (OrderItem orderItem : order.getOrderItems()) {
+                User itemCook = null;
+                Long cookingTime = 0L;
+
+                // Check if this order item is assigned to our cook
+                if (orderItem.getMenuItem() != null && orderItem.getCook() != null) {
+                    // Use the assigned cook for this order item
+                    itemCook = orderItem.getCook();
+                    cookingTime = orderItem.getMenuItem().getPreparationTime() != null ? 
+                        orderItem.getMenuItem().getPreparationTime().longValue() : 0L;
+                } else if (orderItem.getMenuItem() != null && orderItem.getMenuItem().getCookSet() != null) {
+                    // Fallback: check if cook is among responsible cooks (for backward compatibility)
+                    for (User responsibleCook : orderItem.getMenuItem().getCookSet()) {
+                        if (responsibleCook.getId().equals(cook.getId())) {
+                            itemCook = cook;
+                            cookingTime = orderItem.getMenuItem().getPreparationTime() != null ? 
+                                orderItem.getMenuItem().getPreparationTime().longValue() : 0L;
+                            break;
+                        }
+                    }
+                } else if (orderItem.getCombo() != null && orderItem.getCombo().getComboItemSet() != null) {
+                    // For combos, check if any combo item is assigned to our cook
+                    for (ComboItem comboItem : orderItem.getCombo().getComboItemSet()) {
+                        if (comboItem.getMenuItem() != null && 
+                            comboItem.getMenuItem().getCookSet() != null) {
+                            // Check if cook is among responsible cooks for this combo item
+                            for (User responsibleCook : comboItem.getMenuItem().getCookSet()) {
+                                if (responsibleCook.getId().equals(cook.getId())) {
+                                    itemCook = cook;
+                                    cookingTime = Math.max(cookingTime, 
+                                        comboItem.getMenuItem().getPreparationTime() != null ? 
+                                            comboItem.getMenuItem().getPreparationTime().longValue() : 0L);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // If this cook is responsible for this item, add to workload
+                if (itemCook != null && itemCook.getId().equals(cook.getId())) {
+                    // Calculate remaining time for this order item
+                    LocalDateTime orderTime = order.getOrderDate() != null ? order.getOrderDate() : order.getCreatedDttm();
+                    LocalDateTime expectedStartTime = orderItem.getMaxTimeLimitToStart() != null ? orderItem.getMaxTimeLimitToStart() : orderTime;
+                    LocalDateTime expectedEndTime = expectedStartTime.plusMinutes(cookingTime != null ? cookingTime : 0);
+
+                    // If the item is still being prepared or will be prepared, add to workload
+                    if (expectedEndTime.isAfter(currentTime)) {
+                        long remainingTime = expectedEndTime.isAfter(currentTime) ? 
+                            java.time.Duration.between(currentTime, expectedEndTime).toMinutes() : 0;
+                        totalWorkloadMinutes += Math.max(0, remainingTime);
+                    }
+                }
+            }
+        }
+
+        return totalWorkloadMinutes;
     }
 }

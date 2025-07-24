@@ -18,6 +18,10 @@ body {
     --button-text: #fff;
     --input-bg: #e3f2fd;
     --input-text-color: #222;
+    
+    /* Ensure popover and select backgrounds are white */
+    --popover: #ffffff;
+    --popover-foreground: #000000;
   }
 
   .app-bar {
@@ -29,6 +33,12 @@ body {
     background-color: var(--sidebar-color) !important;
     color: var(--sidebar-text-color) !important;
   }
+  
+  /* Ensure mobile sidebar has correct background */
+  .sidebar-theme[data-mobile="true"] {
+    background-color: var(--sidebar-color) !important;
+  }
+  
   .sidebar-theme .sidebar-item {
     color: var(--sidebar-text-color) !important;
   }
@@ -72,5 +82,18 @@ body {
   .input {
     background-color: var(--input-bg) !important;
     color: var(--input-text-color) !important;
+  }
+
+  /* Force white backgrounds for popover components */
+  [data-radix-popper-content-wrapper],
+  [data-radix-select-content],
+  [data-radix-popover-content] {
+    background-color: #ffffff !important;
+  }
+  
+  /* Additional fallback for any transparent backgrounds */
+  .bg-popover {
+    background-color: #ffffff !important;
+    color: #000000 !important;
   }
 }

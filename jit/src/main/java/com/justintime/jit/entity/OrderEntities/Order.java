@@ -51,7 +51,7 @@ public class Order extends BaseEntity {
     private Restaurant restaurant;
 
     @Enumerated(EnumType.STRING)
-    @Column(name ="status")
+    @Column(name ="status", length = 20)
     private OrderStatus status;
 
     @Column(name = "order_type")

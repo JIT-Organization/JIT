@@ -119,7 +119,7 @@ export default function DialogForm({ type, data, onSubmit, selectOptions, isLoad
               <SelectTrigger>
                 <SelectValue placeholder="Role" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 {options.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
@@ -144,7 +144,7 @@ export default function DialogForm({ type, data, onSubmit, selectOptions, isLoad
               <SelectTrigger>
                 <SelectValue placeholder="Select shift" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 {options.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}

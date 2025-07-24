@@ -82,7 +82,9 @@ const MenuList = () => {
   }
 
   const handleToggle = (index, value) => {
-    const menuItemName = menuItems[index].menuItemName;
+    const menuItem = menuItems[index];
+    const menuItemName = menuItem.menuItemName;
+    const foodType = menuItem.foodType;
     patchMutation.mutate({ menuItemName, foodType, fields: { active: value } });
   };
 
