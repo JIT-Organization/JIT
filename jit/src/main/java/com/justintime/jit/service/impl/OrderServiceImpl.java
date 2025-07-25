@@ -80,6 +80,9 @@ public class OrderServiceImpl implements OrderService {
     private EntityManager entityManager;
 
     @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
+    @Autowired
     private NotificationService notificationService;
 
     private final GenericMapper<OrderItem, OrderItemDTO> orderItemMapper = MapperFactory.getMapper(OrderItem.class, OrderItemDTO.class);
@@ -109,9 +112,9 @@ public class OrderServiceImpl implements OrderService {
 //        resolveRelationships(order, orderDTO); // Commented this out we need not require this here
         Order savedOrder = orderRepository.save(order);
         entityManager.flush();
-        createAndPersistOrderItems(orderDTO, restaurantCode, savedOrder);
-        entityManager.flush();
-        notificationService.notifyOrderItemCreation(savedOrder);
+        List<OrderItem> orderItems = createAndPersistOrderItems(orderDTO, restaurantCode, savedOrder);
+        publishToOrderCreatedEventListener(orderItems);
+//        notificationService.notifyOrderItemCreation(orderItems);
         if (savedOrder.getId() != null) {
             return ResponseEntity.ok("Order created successfully with Order Number: " + savedOrder.getOrderNumber());
         } else {
@@ -253,8 +256,7 @@ public class OrderServiceImpl implements OrderService {
         return dto;
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    private void createAndPersistOrderItems(OrderDTO orderDTO, String restaurantCode, Order savedOrder) {
+    private List<OrderItem> createAndPersistOrderItems(OrderDTO orderDTO, String restaurantCode, Order savedOrder) {
         List<OrderItemDTO> orderItemDTOList = orderDTO.getOrderItems();
         
         if (orderItemDTOList == null || orderItemDTOList.isEmpty()) {
@@ -286,12 +288,12 @@ public class OrderServiceImpl implements OrderService {
                 .stream()
                 .collect(Collectors.toMap(MenuItem::getMenuItemName, Function.identity()));
 
-        List<OrderItem> orderItems = new ArrayList<>();
-        buildOrderItemEntities(orderItemDTOList, comboMap, menuItemMap, savedOrder, restaurantCode, orderItems);
+        List<OrderItem> orderItems = buildOrderItemEntities(orderItemDTOList, comboMap, menuItemMap, savedOrder, restaurantCode);
         orderItemRepository.saveAll(orderItems);
+        return orderItems;
     }
 
-    private void buildOrderItemEntities(List<OrderItemDTO> orderItemDTOList, Map<String, Combo> comboMap, Map<String, MenuItem> menuItemMap, Order savedOrder, String restaurantCode, List<OrderItem> orderItems) {
+    private List<OrderItem> buildOrderItemEntities(List<OrderItemDTO> orderItemDTOList, Map<String, Combo> comboMap, Map<String, MenuItem> menuItemMap, Order savedOrder, String restaurantCode) {
         List<OrderItem> allOrderItems = new ArrayList<>();
         for (OrderItemDTO dto : orderItemDTOList) {
             OrderItem item = orderItemMapper.toEntity(dto);
@@ -316,7 +318,7 @@ public class OrderServiceImpl implements OrderService {
             }
             allOrderItems.add(item);
         }
-        orderItems.addAll(allOrderItems);
+        return allOrderItems;
     }
 
     /**
@@ -394,6 +396,11 @@ public class OrderServiceImpl implements OrderService {
                 return itemPrepTime + comboPrepTime;
             })
             .sum();
+    }
+
+    private void publishToOrderCreatedEventListener(List<OrderItem> orderItems) {
+        OrderCreatedEvent event = new OrderCreatedEvent(this, orderItems);
+        eventPublisher.publishEvent(event);
     }
 }
 

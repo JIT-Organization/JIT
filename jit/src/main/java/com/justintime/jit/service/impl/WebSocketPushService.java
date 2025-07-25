@@ -1,6 +1,9 @@
 package com.justintime.jit.service.impl;
 
 import com.justintime.jit.service.PushService;
+import com.justintime.jit.util.LoggingAspect;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -19,8 +22,7 @@ public class WebSocketPushService implements PushService {
     }
 
     @Override
-    public void sendToUser(String restaurantCode, String email, String role, String event, Object payload) {
-        String userId = "%s|%s|%s".formatted(restaurantCode, email, role);
-        template.convertAndSendToUser(userId, "/queue/"+event, payload);
+    public void sendToUser(String email, String event, Object payload) {
+        template.convertAndSendToUser(email, "/queue/"+event, payload);
     }
 }
