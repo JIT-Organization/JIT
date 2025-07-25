@@ -50,7 +50,12 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("register", "login", "refresh").permitAll()
+                        .requestMatchers("register", "login", "refresh",
+                            "/swagger-ui/**",         // Swagger UI HTML, JS, CSS
+                            "/v3/api-docs/**",        // OpenAPI JSON spec
+                            "/swagger-resources/**",  // (in older setups)
+                            "/webjars/**"             // Swagger static files
+                        ).permitAll()
                         .anyRequest().authenticated())
                 .httpBasic(httpBasic -> httpBasic.authenticationEntryPoint(authenticationEntryPoint()))
 //                .formLogin(form -> form
@@ -80,7 +85,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000")); // Explicit origin
+        configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:8080")); // Explicit origin
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
