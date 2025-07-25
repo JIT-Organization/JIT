@@ -1,12 +1,12 @@
 package com.justintime.jit.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.justintime.jit.entity.Enums.OrderItemStatus;
-import com.justintime.jit.service.OrderItemService;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.util.Set;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -23,8 +23,9 @@ public class OrderItemDTO {
     private BigDecimal totalPrice; // price * quantity
     private Integer quantity;
     private OrderItemStatus orderItemStatus;
-    private List<AddOnDTO> addOns; // List of add-ons for the item
+    private Set<AddOnDTO> addOns; // List of add-ons for the item
     private String customNotes;
     private String orderNumber;
-    private List<String> batchNumber;
+    @JsonIgnore
+    private Set<String> batchNumber;
 }
