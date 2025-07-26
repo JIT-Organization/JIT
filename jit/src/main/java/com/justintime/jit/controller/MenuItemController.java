@@ -9,6 +9,7 @@ import com.justintime.jit.exception.ImageSizeLimitExceededException;
 import com.justintime.jit.service.JwtService;
 import com.justintime.jit.util.ValidationUtils;
 import com.justintime.jit.service.MenuItemService;
+import com.justintime.jit.validators.ValidateInput;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -59,24 +60,24 @@ public class MenuItemController extends BaseController {
         }
     }
 
+    @ValidateInput
     @PostMapping("/{restaurantCode}")
     @PreAuthorize("hasPermission(null, 'ADD_MENU_ITEMS')")
     public ResponseEntity<ApiResponse<MenuItem>> addMenuItem(@PathVariable String restaurantCode, @RequestBody MenuItemDTO menuItemDTO) {
-        validate(menuItemDTO, null, restaurantCode);
         return success(menuItemService.addMenuItem(restaurantCode,menuItemDTO), "Created Menu Item Successfully");
     }
 
+    @ValidateInput
     @PutMapping("/{restaurantCode}/{id}")
     @PreAuthorize("hasPermission(null, 'ADD_MENU_ITEMS')")
     public MenuItem updateMenuItem(@PathVariable String restaurantCode,@PathVariable Long id, @RequestBody MenuItemDTO updatedItem) {
-        validate(updatedItem, null, restaurantCode);
         return menuItemService.updateMenuItem(restaurantCode,id, updatedItem);
     }
 
+    @ValidateInput
     @PatchMapping("/{restaurantCode}/{menuItemName}")
     @PreAuthorize("hasPermission(null, 'ADD_MENU_ITEMS')")
     public ResponseEntity<ApiResponse<MenuItemDTO>> patchUpdateMenuItem(@PathVariable String restaurantCode,@PathVariable String menuItemName, @RequestBody PatchRequest<MenuItemDTO> payload) {
-        validate(payload.getDto(), payload.getPropertiesToBeUpdated(), restaurantCode);
         return success(menuItemService.patchUpdateMenuItem(restaurantCode,menuItemName, payload.getDto(), payload.getPropertiesToBeUpdated()));
     }
 
