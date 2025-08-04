@@ -6,6 +6,10 @@ public final class JITConstants {
 
     public static final String COMBO = "COMBO";
 
+    public static final String ORDER_ITEM_CREATED_EVENT = "orderItemCreated";
+
+    public static final String ORDER_ITEM_STATUS_UPDATED_EVENT = "orderItemStatusUpdated";
+
     private JITConstants() {
         // prevents instantiation
     }

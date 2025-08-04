@@ -12,6 +12,7 @@ import com.justintime.jit.repository.MenuItemRepository;
 import com.justintime.jit.repository.OrderRepo.OrderItemRepository;
 import com.justintime.jit.repository.OrderRepo.OrderRepository;
 import com.justintime.jit.repository.UserRepository;
+import com.justintime.jit.service.NotificationService;
 import com.justintime.jit.service.OrderItemService;
 import com.justintime.jit.repository.RestaurantRepository;
 import com.justintime.jit.util.CommonServiceImplUtil;
@@ -29,6 +30,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+// TODO Refactor
 public class OrderItemServiceImpl extends BaseServiceImpl<OrderItem,Long> implements OrderItemService {
 
         @Autowired
@@ -48,6 +50,9 @@ public class OrderItemServiceImpl extends BaseServiceImpl<OrderItem,Long> implem
 
        @Autowired
        private CommonServiceImplUtil commonServiceImplUtil;
+
+       @Autowired
+       private NotificationService notificationService;
 
         public List<OrderItemDTO> getAllOrderItems() {
             return new ArrayList<>();
@@ -75,7 +80,8 @@ public class OrderItemServiceImpl extends BaseServiceImpl<OrderItem,Long> implem
               //resolveRelationships(patchedItem, menuItemDTO, propertiesToBeUpdated, true);
                 commonServiceImplUtil.copySelectedProperties(patchedItem, existingItem, payload.getPropertiesToBeUpdated());
                 existingItem.setUpdatedDttm(LocalDateTime.now());
-               OrderItem orderItem = orderItemRepository.save(existingItem);
+                OrderItem orderItem = orderItemRepository.save(existingItem);
+                if(payload.getPropertiesToBeUpdated().contains("status")) notificationService.notifyOrderItemStatusUpdate(orderItem);
                 return mapToDTO(orderItem, orderItemMapper);
         }
 

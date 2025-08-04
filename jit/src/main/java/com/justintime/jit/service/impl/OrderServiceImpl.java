@@ -11,6 +11,7 @@ import com.justintime.jit.entity.Enums.OrderStatus;
 import com.justintime.jit.entity.OrderEntities.Order;
 import com.justintime.jit.entity.OrderEntities.OrderItem;
 import com.justintime.jit.entity.PaymentEntities.Payment;
+import com.justintime.jit.event.OrderCreatedEvent;
 import com.justintime.jit.exception.ResourceNotFoundException;
 import com.justintime.jit.repository.ComboRepo.ComboRepository;
 import com.justintime.jit.repository.MenuItemRepository;
@@ -20,12 +21,14 @@ import com.justintime.jit.repository.PaymentRepo.PaymentRepository;
 import com.justintime.jit.repository.ReservationRepository;
 import com.justintime.jit.repository.RestaurantRepository;
 import com.justintime.jit.repository.UserRepository;
+import com.justintime.jit.service.NotificationService;
 import com.justintime.jit.service.OrderService;
 import com.justintime.jit.util.CommonServiceImplUtil;
 import com.justintime.jit.util.mapper.GenericMapper;
 import com.justintime.jit.util.mapper.MapperFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,6 +79,9 @@ public class OrderServiceImpl implements OrderService {
     @PersistenceContext
     private EntityManager entityManager;
 
+    @Autowired
+    private NotificationService notificationService;
+
     private final GenericMapper<OrderItem, OrderItemDTO> orderItemMapper = MapperFactory.getMapper(OrderItem.class, OrderItemDTO.class);
 
     private final GenericMapper<Order, OrderDTO> orderMapper = MapperFactory.getMapper(Order.class, OrderDTO.class);
@@ -104,6 +110,8 @@ public class OrderServiceImpl implements OrderService {
         Order savedOrder = orderRepository.save(order);
         entityManager.flush();
         createAndPersistOrderItems(orderDTO, restaurantCode, savedOrder);
+        entityManager.flush();
+        notificationService.notifyOrderItemCreation(savedOrder);
         if (savedOrder.getId() != null) {
             return ResponseEntity.ok("Order created successfully with Order Number: " + savedOrder.getOrderNumber());
         } else {

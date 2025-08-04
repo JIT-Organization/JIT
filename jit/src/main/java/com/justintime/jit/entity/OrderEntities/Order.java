@@ -1,8 +1,5 @@
 package com.justintime.jit.entity.OrderEntities;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.justintime.jit.entity.BaseEntity;
 import com.justintime.jit.entity.Enums.OrderStatus;
 import com.justintime.jit.entity.Enums.OrderType;
@@ -15,8 +12,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
 
 import java.math.BigDecimal;
