@@ -13,6 +13,7 @@ public interface UserService extends BaseService<User, Long>, UserDetailsService
     List<User> findByRole(Role role);
     User findByEmail(String email);
     List<User> findByUserName(String username);
+    List<String> getCookNamesByRestaurantCode(String restaurantCode);
     void delete(Long id);
     void update(Long id, User user);
 

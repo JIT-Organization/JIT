@@ -19,6 +19,11 @@ public interface ComboRepository extends BaseRepository<Combo, Long> {
             "WHERE r.restaurant_code = :restaurantCode", nativeQuery = true)
     List<Combo> findByRestaurantCode(@Param("restaurantCode") String restaurantCode);
 
+    @Query(value = "SELECT c.combo_name FROM combo c " +
+            "JOIN restaurant r ON c.restaurant_id = r.id " +
+            "WHERE r.restaurant_code = :restaurantCode", nativeQuery = true)
+    List<String> findComboNamesByRestaurantCode(@Param("restaurantCode") String restaurantCode);
+
     List<Combo> findByRestaurantId(Long restaurantId);
     @Query(value = "SELECT c.* FROM combo c " +
             "WHERE c.combo_name IN (:formattedComboNames) " +

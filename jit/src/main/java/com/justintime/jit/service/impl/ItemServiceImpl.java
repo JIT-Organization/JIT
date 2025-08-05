@@ -100,6 +100,25 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    public List<String> getAllItemNamesForRestaurant(String restaurantCode) {
+        List<String> menuItemNames = menuItemRepository.findMenuItemNamesByRestaurantCode(restaurantCode);
+        List<String> comboNames = comboRepository.findComboNamesByRestaurantCode(restaurantCode);
+        List<String> allItems = new ArrayList<>(menuItemNames);
+        allItems.addAll(comboNames);
+        return allItems;
+    }
+
+    @Override
+    public List<String> getAllItemNamesForRestaurantAndFoodType(String restaurantCode, FoodType foodType) {
+        return switch (foodType) {
+            case MENU_ITEM -> menuItemRepository.findMenuItemNamesByRestaurantCode(restaurantCode);
+            case COMBO -> comboRepository.findComboNamesByRestaurantCode(restaurantCode);
+            case VARIANT -> throw new UnsupportedOperationException("Variant type is not supported yet.");
+            default -> throw new ResourceNotFoundException("Invalid food type: " + foodType);
+        };
+    }
+
+    @Override
     public ItemDTO getItemByRestaurantAndNameAndFoodType(String restaurantCode, String itemName, FoodType foodType) {
         Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode)
                 .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found with code: " + restaurantCode));

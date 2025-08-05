@@ -9,6 +9,8 @@ import java.util.Set;
 
 public interface ItemService {
     List<ItemDTO> getAllItemsForRestaurant(String restaurantCode);
+    List<String> getAllItemNamesForRestaurant(String restaurantCode);
+    List<String> getAllItemNamesForRestaurantAndFoodType(String restaurantCode, FoodType foodType);
     List<ItemDTO> getAllItemsForRestaurantAndFoodType(String restaurantCode, FoodType foodType);
     ItemDTO getItemByRestaurantAndNameAndFoodType(String restaurantCode, String itemName, FoodType foodType);
     ItemDTO createItem(String restaurantCode, FoodType foodType, ItemDTO itemDTO);

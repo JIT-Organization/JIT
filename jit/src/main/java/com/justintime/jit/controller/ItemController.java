@@ -29,6 +29,17 @@ public class ItemController extends BaseController{
         }
     }
 
+    @GetMapping("/getItemNames/{restaurantCode}")
+    public ResponseEntity<ApiResponse<List<String>>> getItemNamesByRestaurantAndFoodType(
+            @PathVariable String restaurantCode,
+            @RequestParam(required = false) FoodType foodType) {
+        if (foodType != null) {
+            return success(itemService.getAllItemNamesForRestaurantAndFoodType(restaurantCode, foodType));
+        } else {
+            return success(itemService.getAllItemNamesForRestaurant(restaurantCode));
+        }
+    }
+
     @GetMapping("/{restaurantCode}/{itemName}")
     public ResponseEntity<ApiResponse<ItemDTO>> getItemByRestaurantAndName(
             @PathVariable String restaurantCode,

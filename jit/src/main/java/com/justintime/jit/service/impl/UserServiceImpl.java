@@ -43,6 +43,11 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
     }
 
     @Override
+    public List<String> getCookNamesByRestaurantCode(String restaurantCode) {
+        return userRepository.findUserNamesByRestaurantCodeAndRole(restaurantCode, Role.COOK);
+    }
+
+    @Override
     public void delete(Long id) {
         if (!userRepository.existsById(id)) {
             throw new RuntimeException("Category not found with id " + id);
