@@ -51,14 +51,20 @@ export const getOrderColumns = (handleEditClick, handleDeleteClick) => [
         <Button 
           variant="ghost"
           colorVariant="none"
-          onClick={() => handleEditClick(row.original.orderNumber)}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleEditClick(row.original.orderNumber);
+          }}
         >
           <Pencil className="h-5" />
         </Button>
         <Button
           variant="ghost"
           colorVariant="none"
-          onClick={() => handleDeleteClick(row.original.id)}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleDeleteClick(row.original.id);
+          }}
         >
           <Trash2 className="text-red-600 h-5" />
         </Button>

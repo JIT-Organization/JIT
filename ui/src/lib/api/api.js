@@ -339,6 +339,28 @@ export const createOrder = (queryClient) => ({
   },
 });
 
+export const getOrderDetails = (orderNumber) => ({
+  queryKey: ['orderDetails', orderNumber],
+  queryFn: () => getRequest(`${URLS.ordersList}/TGSR/${orderNumber}`, "Failed to fetch order details"),
+  enabled: !!orderNumber,
+  ...cacheConfig
+});
+
+export const updateOrder = (queryClient) => ({
+  mutationFn: async ({ orderNumber, ...orderDTO }) => {
+    return await patchRequest(`${URLS.ordersList}/TGSR/${orderNumber}`, orderDTO, "Failed to update order");
+  },
+  onMutate: async ({ orderNumber, ...orderDTO }) => handleMutate(queryClient, ["ordersList"], orderNumber, orderDTO, "orderNumber"),
+  onError: (error, variables, context) => {
+    console.error("Failed to update order:", error);
+    handleError(queryClient, ["ordersList"], context);
+  },
+  onSettled: () => {
+    queryClient.invalidateQueries(["ordersList"]);
+    queryClient.invalidateQueries(["orderDetails"]);
+  },
+});
+
 // export const getMenuItemListOptions = (id) => ({
 //   queryKey: ["menuItemList"],
 //   queryFn: async () => {
