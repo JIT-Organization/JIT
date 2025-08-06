@@ -33,6 +33,11 @@ export const deleteRequest = async (url) => {
   return response.data;
 };
 
+export const generateQueryString = (baseUrl, params) => {
+  const queryString = new URLSearchParams(params).toString();
+  return `${baseUrl}?${queryString}`;
+}
+
 export const handleMutate = async (queryClient, queryKey, id, fields, checkColumn = "id", mode = "update") => {
   await queryClient.cancelQueries(queryKey);
 

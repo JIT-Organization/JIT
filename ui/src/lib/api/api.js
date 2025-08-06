@@ -1,5 +1,5 @@
 import { URLS } from "./urls";
-import { getRequest, patchRequest, deleteRequest, handleMutate, handleError, postRequest } from "./api-helper";
+import { getRequest, patchRequest, deleteRequest, handleMutate, handleError, postRequest, generateQueryString } from "./api-helper";
 import Cookies from "js-cookie";
 
 const cacheConfig = {
@@ -104,7 +104,7 @@ export const deleteOrderItem = (queryClient) => ({
 
 export const getCategoriesListOptions = () => ({
   queryKey: ["categoriesList"],
-  queryFn: () => getRequest(`${URLS.categoriesList}/getAll`, "Failed to fetch Categories List"),
+  queryFn: () => getRequest(`${URLS.categoriesList}/getAll/TGSR`, "Failed to fetch Categories List"),
   ...cacheConfig
 });
 
@@ -242,6 +242,25 @@ export const deleteTableItem = (queryClient) => ({
   },
 });
 
+export const registerUser = () => ({
+  mutationFn: async ({ token, userData }) => {
+    const url = generateQueryString(URLS.register, { token });
+    return postRequest(url, userData);
+  }
+})
+
+export const sendInviteToUser = () => ({
+  mutationFn: async (userData) => {
+    return postRequest(URLS.sendInvite, userData)
+  }
+})
+
+export const getPermisisonsForRole = (role) => ({
+  queryKey: ['permissions', role],
+  queryFn: () => getRequest(`${URLS.permissions}/${role}`, `Failed to fetch permissions for role ${role}`),
+  enabled: !!role,
+  ...cacheConfig,
+});
 
 // export const getMenuItemListOptions = (id) => ({
 //   queryKey: ["menuItemList"],

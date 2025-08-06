@@ -6,4 +6,7 @@ export const URLS = {
   categoriesList: createUrl("/categories"),
   tablesList: createUrl("/tables"),
   usersList: createUrl("/users"),
+  register: "http://localhost:8080/register",
+  sendInvite: createUrl("/users/send-invite"),
+  permissions: createUrl("/permissions")
 };

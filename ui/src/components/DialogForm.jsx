@@ -1,5 +1,4 @@
 "use client";
-
 import { Button } from "./ui/button";
 import {
   Form,
@@ -23,8 +22,30 @@ import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
 import MultiSelect from "./customUIComponents/MultiSelect";
 import { X } from "lucide-react";
 import { Switch } from "./ui/switch";
+import { useEffect, useState } from "react";
+import { getPermisisonsForRole } from "@/lib/api/api";
+import { useQuery } from "@tanstack/react-query";
+import { checkPermission } from "@/lib/utils/checkPerimission";
 
 export default function DialogForm({ type, data, onSubmit, selectOptions }) {
+  const isEdit = !!data;
+
+  const [viewPermissions, setViewPermissions] = useState(false);
+  const [addPermissions, setAddPermissions] = useState(false);
+  const [editPermissions, setEditPermissions] = useState(false);
+  const [delPermissions, setDelPermissions] = useState(false);
+
+  const setPermissions = () => {
+    if (checkPermission("P203")) setViewPermissions(true);
+    if (checkPermission("P201")) setAddPermissions(true);
+    if (checkPermission("P202")) setEditPermissions(true);
+    if (checkPermission("P204")) setDelPermissions(true)
+  }
+
+  useEffect(() => {
+    setPermissions();
+  }, []);
+
   const getDefaultValues = (type) => {
     switch (type) {
       case "category":
@@ -36,7 +57,8 @@ export default function DialogForm({ type, data, onSubmit, selectOptions }) {
 
       case "user":
         return {
-          name: "",
+          firstName: "",
+          lastName: "",
           phoneNumber: "",
           email: "",
           role: "",
@@ -59,11 +81,18 @@ export default function DialogForm({ type, data, onSubmit, selectOptions }) {
   const fieldConfig = {
     user: [
       {
-        name: "name",
-        label: "Name",
-        rules: { required: "Name is required" },
+        name: "firstName",
+        label: "First Name",
+        rules: { required: "First Name is required" },
         render: (props) => (
-          <Input type="text" placeholder="Enter your name" {...props} />
+          <Input type="text" placeholder="Enter your first name" {...props} />
+        ),
+      },
+      {
+        name: "lastName",
+        label: "Last Name",
+        render: (props) => (
+          <Input type="text" placeholder="Enter your last name" {...props} />
         ),
       },
       {
@@ -150,8 +179,8 @@ export default function DialogForm({ type, data, onSubmit, selectOptions }) {
       {
         name: "isActive",
         label: "Active",
+        dontDisplay: !isEdit,
         render: (props) => {
-          console.log(props);
           return (
             <Switch
               checked={props.value === true}
@@ -163,6 +192,92 @@ export default function DialogForm({ type, data, onSubmit, selectOptions }) {
           );
         },
       },
+      {
+        name: "restaurantCodes",
+        label: "Restaurants",
+        dontDisplay: isEdit,
+        render: (props) => {
+          const options = [
+            { label: "The Gourment Spot", value: "TGSR" }
+          ];
+
+          return (
+            <div>
+              <MultiSelect
+                options={options}
+                value={props.value || []}
+                onChange={props.onChange}
+                placeholder="Select restaurants"
+              />
+              <div className="flex flex-wrap gap-2 mt-2 bg-gray-600/20 p-6 overflow-auto h-20">
+                {(props.value || []).map((val) => {
+                  const option = selectOptions?.find((o) => o.value === val);
+                  return (
+                    <span
+                      key={val}
+                      className="flex items-center gap-1 rounded bg-black text-white px-2 py-1 text-sm"
+                    >
+                      {option?.label || val}
+                      <X
+                        className="cursor-pointer h-4 w-4"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          props.onChange(props.value.filter((v) => v !== val));
+                        }}
+                      />
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        },
+      },
+      {
+        name: "permissionCodes",
+        label: "Permissions",
+        dontDisplay: !viewPermissions || (isEdit && !editPermissions),
+        render: (props) => {
+          const options = permissionOptions.map(permission => ({
+            label: permission.title,
+            value: permission.permissionCode,
+          }));
+          return (
+            <div>
+              <MultiSelect
+                options={options}
+                value={props.value || []}
+                onChange={props.onChange}
+                placeholder="Select permissions"
+                disabled={!addPermissions}
+              />
+              <div className="flex flex-wrap gap-2 mt-2 bg-gray-600/20 p-6 overflow-auto h-20">
+                {(props.value || []).map((val) => {
+                  console.log(props)
+                  const option = options?.find((o) => o.value === val);
+                  console.log(option)
+                  console.log(options)
+                  return (
+                    <span
+                      key={val}
+                      className="flex items-center gap-1 rounded bg-black text-white px-2 py-1 text-sm"
+                    >
+                      {option?.label || val}
+                      <X
+                        className="cursor-pointer h-4 w-4"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          props.onChange(props.value.filter((v) => v !== val));
+                        }}
+                      />
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        },
+      }
     ],
     category: [
       {
@@ -285,43 +400,58 @@ export default function DialogForm({ type, data, onSubmit, selectOptions }) {
   const form = useForm({
     defaultValues: data || getDefaultValues(type),
     mode: "onBlur",
-  });
+  });  
+  const role = form.watch("role");
+  const { data: permissionOptions = [] } = useQuery(getPermisisonsForRole(role)); 
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {fieldConfig?.[type]?.map((field) => (
-          <FormField
-            key={field.name}
-            control={form.control}
-            name={field.name}
-            rules={field.rules}
-            render={({ field: formField }) => (
-              <FormItem>
-                <div className="grid grid-cols-3 items-center">
-                  <FormLabel className="mb-0 col-span-1">
-                    {field.label}
-                  </FormLabel>
-                  <FormControl className="col-span-2 justify-start">
-                    {field.render(formField)}
-                  </FormControl>
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        ))}
-        <div className="flex space-x-4 items-center">
-          <DialogClose>
-            <div className="hover:bg-gray-600/10 py-2 px-4 rounded-lg">
-              Cancel
-            </div>
-          </DialogClose>
-          <DialogClose asChild>
-            <Button type="submit">Submit</Button>
-          </DialogClose>
-        </div>
-      </form>
+      <div className="max-h-[80vh] overflow-y-auto pr-2">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <div
+            className={`grid gap-6 ${(fieldConfig?.[type]?.length || 0) > 6
+                ? "grid-cols-1 sm:grid-cols-2"
+                : "grid-cols-1"
+              }`}
+          >
+            {fieldConfig?.[type]?.map((field) => (
+              <FormField
+                key={field.name}
+                control={form.control}
+                name={field.name}
+                rules={field.rules}
+                render={({ field: formField }) =>
+                  !field?.dontDisplay && (
+                    <FormItem>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 items-center gap-2">
+                        <FormLabel className="mb-0 sm:col-span-1">
+                          {field.label}
+                        </FormLabel>
+                        <FormControl className="sm:col-span-2">
+                          {field.render(formField)}
+                        </FormControl>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )
+                }
+              />
+            ))}
+          </div>
+          <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0 items-start sm:items-center pt-4">
+            <DialogClose>
+              <div className="hover:bg-gray-600/10 py-2 px-4 rounded-lg w-full sm:w-auto text-center">
+                Cancel
+              </div>
+            </DialogClose>
+            <DialogClose asChild>
+              <Button type="submit" className="w-full sm:w-auto">
+                {isEdit ? "Submit" : "Add"}
+              </Button>
+            </DialogClose>
+          </div>
+        </form>
+      </div>
     </Form>
   );
 }

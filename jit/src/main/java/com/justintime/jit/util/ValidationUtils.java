@@ -1,8 +1,11 @@
 package com.justintime.jit.util;
 
 import com.justintime.jit.exception.ImageSizeLimitExceededException;
+import com.justintime.jit.validators.ValidationRule;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import jakarta.annotation.Nullable;
 
+import java.util.List;
 import java.util.Set;
 
 public class ValidationUtils {
@@ -41,6 +44,15 @@ public class ValidationUtils {
             throw new ImageSizeLimitExceededException("Please upload an image with size less than "
                     + (maxSize / 1024 / 1024) + " MB. The uploaded image size is "
                     + (imageSize / 1024 / 1024) + " MB.");
+        }
+    }
+
+    @SuppressFBWarnings(value = "UC", justification = "Used for runtime validation of DTO fields")
+    public static void runValidation(List<ValidationRule> allRules, @Nullable Set<String> fieldsToValidate) {
+        for (ValidationRule rule : allRules) {
+            if (shouldValidate(rule.fieldName(), fieldsToValidate)) {
+                rule.validationLogic().run();
+            }
         }
     }
 }

@@ -8,6 +8,7 @@ import com.justintime.jit.entity.Restaurant;
 import com.justintime.jit.service.RestaurantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -50,6 +51,7 @@ public class RestaurantController extends BaseController {
     }
 
     @PatchMapping("/{restaurantCode}")
+    @PreAuthorize("hasPermission(null, 'MANAGE_SETTINGS')")
     public ResponseEntity<ApiResponse<RestaurantDTO>> patchUpdateRestaurant (
             @PathVariable String restaurantCode, @RequestBody PatchRequest<RestaurantDTO> payload) {
         restaurantService.patchUpdateRestaurant(restaurantCode, payload.getDto(), payload.getPropertiesToBeUpdated());

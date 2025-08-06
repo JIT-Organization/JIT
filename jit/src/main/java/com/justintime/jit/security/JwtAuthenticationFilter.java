@@ -1,4 +1,4 @@
-package com.justintime.jit.config;
+package com.justintime.jit.security;
 
 import com.justintime.jit.service.JwtService;
 import com.justintime.jit.service.UserService;

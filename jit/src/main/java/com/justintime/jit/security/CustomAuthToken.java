@@ -1,4 +1,4 @@
-package com.justintime.jit.config;
+package com.justintime.jit.security;
 
 import lombok.Getter;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

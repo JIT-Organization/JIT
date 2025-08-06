@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import static com.justintime.jit.util.ValidationUtils.runValidation;
 import static com.justintime.jit.util.ValidationUtils.shouldValidate;
 
 public class MenuItemRequestValidator implements RequestValidator<MenuItemDTO> {
@@ -118,11 +119,7 @@ public class MenuItemRequestValidator implements RequestValidator<MenuItemDTO> {
                 })
         );
 
-        for (ValidationRule rule : allRules) {
-            if (shouldValidate(rule.fieldName(), fieldsToValidate)) {
-                rule.validationLogic().run();
-            }
-        }
+        runValidation(allRules, fieldsToValidate);
 
         if (!errors.isEmpty()) {
             throw new ValidationException(errors);

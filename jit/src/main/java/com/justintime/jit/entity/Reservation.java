@@ -1,24 +1,16 @@
 package com.justintime.jit.entity;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.justintime.jit.util.CodeNumberGenerator;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
 
-import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Entity
 @Audited
@@ -71,51 +63,4 @@ public class Reservation extends BaseEntity{
 
         @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL)
         private List<ReservationActivity> reservationActivities;
-
-//        // Copy Constructor
-//        public Reservation(Reservation other) {
-//                this.id = other.id;
-//                this.customer = other.customer != null ? new User(other.customer) : null;
-//                this.restaurant = other.restaurant != null ? new Restaurant(other.restaurant) : null;
-//                this.shiftCapacity = other.shiftCapacity != null ? new ShiftCapacity(other.shiftCapacity) : null;
-//                this.reservationStart = other.reservationStart;
-//                this.reservationEnd = other.reservationEnd;
-//                this.headCount = other.headCount;
-//                this.status = other.status;
-//                this.createdDttm = other.createdDttm;
-//                this.updatedDttm = other.updatedDttm;
-//                this.reservationActivities = other.reservationActivities != null ? other.reservationActivities.stream().map(ReservationActivity::new).collect(Collectors.toList()) : null; // Deep copy of reservationActivities
-//        }
-//
-//        public User getCustomer() {
-//                return customer != null ? new User(customer) : null; // Defensive copy
-//        }
-//
-//        public void setCustomer(User customer) {
-//                this.customer = customer != null ? new User(customer) : null; // Defensive copy
-//        }
-//
-//        public Restaurant getRestaurant() {
-//                return restaurant != null ? new Restaurant(restaurant) : null; // Defensive copy
-//        }
-//
-//        public void setRestaurant(Restaurant restaurant) {
-//                this.restaurant = restaurant != null ? new Restaurant(restaurant) : null; // Defensive copy
-//        }
-//
-//        public ShiftCapacity getShiftCapacity() {
-//                return shiftCapacity != null ? new ShiftCapacity(shiftCapacity) : null; // Defensive copy
-//        }
-//
-//        public void setShiftCapacity(ShiftCapacity shiftCapacity) {
-//                this.shiftCapacity = shiftCapacity != null ? new ShiftCapacity(shiftCapacity) : null; // Defensive copy
-//        }
-//
-//        public List<ReservationActivity> getReservationActivities() {
-//                return reservationActivities != null ? reservationActivities.stream().map(ReservationActivity::new).collect(Collectors.toList()) : null; // Defensive copy
-//        }
-//
-//        public void setReservationActivities(List<ReservationActivity> reservationActivities) {
-//                this.reservationActivities = reservationActivities != null ? reservationActivities.stream().map(ReservationActivity::new).collect(Collectors.toList()) : null; // Defensive copy
-//        }
 }

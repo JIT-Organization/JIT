@@ -9,8 +9,10 @@ import com.justintime.jit.exception.ImageSizeLimitExceededException;
 import com.justintime.jit.service.JwtService;
 import com.justintime.jit.util.ValidationUtils;
 import com.justintime.jit.service.MenuItemService;
+import com.justintime.jit.validators.ValidateInput;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,15 +24,13 @@ public class MenuItemController extends BaseController {
     @Autowired
     private MenuItemService menuItemService;
 
-    @Autowired
-    private JwtService jwtService;
-
 //    @GetMapping
 //    public List<MenuItemDTO> getAllMenuItems() {
 //        return menuItemService.getAllMenuItems();
 //    }
 
     @GetMapping("/{restaurantCode}")
+    @PreAuthorize("hasPermission(null, 'VIEW_MENU_ITEMS')")
     public ResponseEntity<ApiResponse<List<MenuItemDTO>>> getMenuItemsByRestaurant(
             @PathVariable String restaurantCode,
             @RequestParam(required = false) Sort sortBy,
@@ -42,6 +42,7 @@ public class MenuItemController extends BaseController {
     }
 
     @GetMapping("/{restaurantId}/{id}")
+    @PreAuthorize("hasPermission(null, 'VIEW_MENU_ITEMS')")
     public ResponseEntity<ApiResponse<MenuItemDTO>> getMenuItemByRestaurantIdAndId(@PathVariable Long restaurantId, @PathVariable Long id){
         return success(menuItemService.getMenuItemByRestaurantIdAndId(restaurantId, id));
     }
@@ -59,25 +60,29 @@ public class MenuItemController extends BaseController {
         }
     }
 
+    @ValidateInput
     @PostMapping("/{restaurantCode}")
+    @PreAuthorize("hasPermission(null, 'ADD_MENU_ITEMS')")
     public ResponseEntity<ApiResponse<MenuItem>> addMenuItem(@PathVariable String restaurantCode, @RequestBody MenuItemDTO menuItemDTO) {
-        validate(menuItemDTO, null, restaurantCode);
         return success(menuItemService.addMenuItem(restaurantCode,menuItemDTO), "Created Menu Item Successfully");
     }
 
+    @ValidateInput
     @PutMapping("/{restaurantCode}/{id}")
+    @PreAuthorize("hasPermission(null, 'ADD_MENU_ITEMS')")
     public MenuItem updateMenuItem(@PathVariable String restaurantCode,@PathVariable Long id, @RequestBody MenuItemDTO updatedItem) {
-        validate(updatedItem, null, restaurantCode);
         return menuItemService.updateMenuItem(restaurantCode,id, updatedItem);
     }
 
+    @ValidateInput
     @PatchMapping("/{restaurantCode}/{menuItemName}")
+    @PreAuthorize("hasPermission(null, 'ADD_MENU_ITEMS')")
     public ResponseEntity<ApiResponse<MenuItemDTO>> patchUpdateMenuItem(@PathVariable String restaurantCode,@PathVariable String menuItemName, @RequestBody PatchRequest<MenuItemDTO> payload) {
-        validate(payload.getDto(), payload.getPropertiesToBeUpdated(), restaurantCode);
         return success(menuItemService.patchUpdateMenuItem(restaurantCode,menuItemName, payload.getDto(), payload.getPropertiesToBeUpdated()));
     }
 
     @DeleteMapping("/{restaurantCode}/{menuItemName}")
+    @PreAuthorize("hasPermission(null, 'DELETE_MENU_ITEMS')")
     public void deleteMenuItem(@PathVariable String restaurantCode, @PathVariable String menuItemName) {
         menuItemService.deleteMenuItem(restaurantCode, menuItemName);
     }

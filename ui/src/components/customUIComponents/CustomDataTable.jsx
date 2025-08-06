@@ -22,6 +22,7 @@ import { ChevronLeft, Filter } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Separator } from "../ui/separator";
 import CustomPopup from "./CustomPopup";
+import { checkPermission } from "@/lib/utils/checkPerimission";
 
 export function CustomDataTable({
   columns = [],
@@ -33,7 +34,8 @@ export function CustomDataTable({
   headerDialogType,
   categories,
   onSubmitClick,
-  selectOptions
+  selectOptions,
+  permissionIdentifier
 }) {
   const [sorting, setSorting] = React.useState([]);
   const [columnFilters, setColumnFilters] = React.useState([]);
@@ -79,6 +81,10 @@ export function CustomDataTable({
     }
   };
 
+  const buttonDisplayPermissions = {
+    users: checkPermission("P101")
+  }
+
   return (
     <div className="w-full">
       <div className="flex items-center justify-between py-4">
@@ -96,11 +102,10 @@ export function CustomDataTable({
           <Button variant="ghost">
             <Filter />
           </Button>
-          {headerDialogType && headerButtonName ? (
+          {buttonDisplayPermissions[permissionIdentifier] && (headerDialogType && headerButtonName ? (
             <CustomPopup
               type={headerDialogType}
               trigger={<Button>{headerButtonName}</Button>}
-              // dialogDescription={"Category Info"}
               onSubmit={onSubmitClick}
               selectOptions={selectOptions}
             />
@@ -108,7 +113,7 @@ export function CustomDataTable({
             headerButtonName && (
               <Button onClick={handleHeaderButtonClick}>{headerButtonName}</Button>
             )
-          )}
+          ))}
         </div>
       </div>
       {categories && (
