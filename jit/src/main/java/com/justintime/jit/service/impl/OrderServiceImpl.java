@@ -134,22 +134,25 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderDTO getOrderByRestaurantAndId(String restaurantCode, Long id) {
-        Order order = orderRepository.findByRestaurantCodeAndId(restaurantCode, id);
+    public OrderDTO getOrderByRestaurantAndOrderNumber(String restaurantCode, String orderNumber) {
+        Order order = orderRepository.findByRestaurantCodeAndOrderNumber(restaurantCode, orderNumber)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with number: " + orderNumber + " for restaurant: " + restaurantCode));
         return mapToDTO(order);
     }
 
     @Override
-    public OrderDTO updateOrderStatus(String restaurantCode, Long id, OrderStatus status) {
-        Order existingOrder = orderRepository.findByRestaurantCodeAndId(restaurantCode, id);
+    public OrderDTO updateOrderStatus(String restaurantCode, String orderNumber, OrderStatus status) {
+        Order existingOrder = orderRepository.findByRestaurantCodeAndOrderNumber(restaurantCode, orderNumber)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with number: " + orderNumber + " for restaurant: " + restaurantCode));
         existingOrder.setStatus(status);  // Update the order's status
         orderRepository.save(existingOrder);
         return mapToDTO(existingOrder);
     }
 
     @Override
-    public OrderDTO patchUpdateOrder(String restaurantCode, Long orderId, OrderDTO orderDTO, HashSet<String> propertiesToBeUpdated){
-        Order existingOrder = orderRepository.findByRestaurantCodeAndId(restaurantCode, orderId);
+    public OrderDTO patchUpdateOrder(String restaurantCode, String orderNumber, OrderDTO orderDTO, HashSet<String> propertiesToBeUpdated){
+        Order existingOrder = orderRepository.findByRestaurantCodeAndOrderNumber(restaurantCode, orderNumber)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with number: " + orderNumber + " for restaurant: " + restaurantCode));
         existingOrder.setRestaurant(restaurantRepository.findByRestaurantCode(restaurantCode)
                 .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found")));
         Order patchedOrder = orderMapper.toEntity(orderDTO);
@@ -161,8 +164,9 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void deleteOrder(String restaurantCode, Long id) {
-        Order existingOrder = orderRepository.findByRestaurantCodeAndId(restaurantCode, id);
+    public void deleteOrder(String restaurantCode, String orderNumber) {
+        Order existingOrder = orderRepository.findByRestaurantCodeAndOrderNumber(restaurantCode, orderNumber)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with number: " + orderNumber + " for restaurant: " + restaurantCode));
         orderRepository.delete(existingOrder);
     }
 

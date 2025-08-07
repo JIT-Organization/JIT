@@ -31,32 +31,32 @@ public class OrderController extends BaseController {
         return success(orderDTOs, "Orders fetched successfully");
     }
 
-    @GetMapping("/{restaurantCode}/{orderId}")
-    public ResponseEntity<OrderDTO> getOrderById(@PathVariable String restaurantCode, @PathVariable Long orderId) {
-        OrderDTO orderDTO = orderService.getOrderByRestaurantAndId(restaurantCode, orderId);
+    @GetMapping("/{restaurantCode}/{orderNumber}")
+    public ResponseEntity<OrderDTO> getOrderById(@PathVariable String restaurantCode, @PathVariable String orderNumber) {
+        OrderDTO orderDTO = orderService.getOrderByRestaurantAndOrderNumber(restaurantCode, orderNumber);
         return ResponseEntity.ok(orderDTO);
     }
 
-    @PutMapping("/{restaurantCode}/{orderId}/status")
+    @PutMapping("/{restaurantCode}/{orderNumber}/status")
     public ResponseEntity<OrderDTO> updateOrderStatus(
             @PathVariable String restaurantCode,
-            @PathVariable Long orderId,
+            @PathVariable String orderNumber,
             @RequestParam OrderStatus status) {
-        OrderDTO updatedOrderDTO = orderService.updateOrderStatus(restaurantCode, orderId, status);
+        OrderDTO updatedOrderDTO = orderService.updateOrderStatus(restaurantCode, orderNumber, status);
         return ResponseEntity.ok(updatedOrderDTO);
     }
 
-    @PatchMapping("/{restaurantCode}/{orderId}")
+    @PatchMapping("/{restaurantCode}/{orderNumber}")
     public OrderDTO patchUpdateOrder(
             @PathVariable String restaurantCode,
-            @PathVariable Long orderId,
+            @PathVariable String orderNumber,
             @RequestBody PatchRequest<OrderDTO> payload){
-        return orderService.patchUpdateOrder(restaurantCode, orderId, payload.getDto(), payload.getPropertiesToBeUpdated());
+        return orderService.patchUpdateOrder(restaurantCode, orderNumber, payload.getDto(), payload.getPropertiesToBeUpdated());
     }
 
-    @DeleteMapping("/{restaurantCode}/{orderId}")
-    public ResponseEntity<String> deleteOrder(@PathVariable String restaurantCode, @PathVariable Long orderId) {
-        orderService.deleteOrder(restaurantCode,orderId);
+    @DeleteMapping("/{restaurantCode}/{orderNumber}")
+    public ResponseEntity<String> deleteOrder(@PathVariable String restaurantCode, @PathVariable String orderNumber) {
+        orderService.deleteOrder(restaurantCode, orderNumber);
         return ResponseEntity.ok("Order deleted successfully.");
     }
 

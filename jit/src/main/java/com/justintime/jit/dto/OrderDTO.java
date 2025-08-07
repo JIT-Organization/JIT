@@ -18,7 +18,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderDTO {
-    private Long id;
     private String orderNumber;
     private String orderedBy;
     private String mobileNumber;
