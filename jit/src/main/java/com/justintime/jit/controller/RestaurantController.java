@@ -39,7 +39,7 @@ public class RestaurantController extends BaseController {
     //Get a restaurant by ID
     @GetMapping("/{restaurantCode}")
     public ResponseEntity<ApiResponse<RestaurantDTO>> getRestaurantByCode(@PathVariable String restaurantCode) {
-        RestaurantDTO restaurant = restaurantService.getRestaurantByRestaurantCode(restaurantCode);
+        RestaurantDTO restaurant = restaurantService.getRestaurantDTOByRestaurantCode(restaurantCode);
         return success(restaurant);
     }
 

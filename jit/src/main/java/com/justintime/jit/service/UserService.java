@@ -19,5 +19,7 @@ public interface UserService extends BaseService<User, Long>, UserDetailsService
 
     List<UserDTO> getUsersByRestaurantCode(String restaurantCode);
 
+    User getUserByRestaurantCodeAndUsername(String restaurantCode, String username);
+
     UserDTO patchUpdateUser(String restaurantCode, String username, UserDTO dto, HashSet<String> propertiesToBeUpdated);
 }
