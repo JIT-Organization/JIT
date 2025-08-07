@@ -1,28 +1,16 @@
 package com.justintime.jit.service.impl;
 
-import com.justintime.jit.dto.AddOnDTO;
 import com.justintime.jit.dto.OrderDTO;
 import com.justintime.jit.dto.OrderItemDTO;
 import com.justintime.jit.entity.*;
-import com.justintime.jit.entity.ComboEntities.Combo;
-import com.justintime.jit.entity.ComboEntities.ComboItem;
-import com.justintime.jit.entity.Enums.OrderItemStatus;
 import com.justintime.jit.entity.Enums.OrderStatus;
 import com.justintime.jit.entity.OrderEntities.Order;
 import com.justintime.jit.entity.OrderEntities.OrderItem;
 import com.justintime.jit.entity.PaymentEntities.Payment;
 import com.justintime.jit.event.OrderCreatedEvent;
 import com.justintime.jit.exception.ResourceNotFoundException;
-import com.justintime.jit.repository.ComboRepo.ComboRepository;
-import com.justintime.jit.repository.MenuItemRepository;
 import com.justintime.jit.repository.OrderRepo.OrderRepository;
-import com.justintime.jit.repository.OrderRepo.OrderItemRepository;
-import com.justintime.jit.repository.PaymentRepo.PaymentRepository;
-import com.justintime.jit.repository.ReservationRepository;
-import com.justintime.jit.repository.RestaurantRepository;
-import com.justintime.jit.repository.UserRepository;
-import com.justintime.jit.service.NotificationService;
-import com.justintime.jit.service.OrderService;
+import com.justintime.jit.service.*;
 import com.justintime.jit.util.CommonServiceImplUtil;
 import com.justintime.jit.util.mapper.GenericMapper;
 import com.justintime.jit.util.mapper.MapperFactory;
@@ -30,7 +18,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,41 +26,11 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static com.justintime.jit.util.constants.JITConstants.COMBO;
 
 @Service
 @Transactional
 public class OrderServiceImpl implements OrderService {
-
-    @Autowired
-    private OrderRepository orderRepository;
-
-    @Autowired
-    private OrderItemRepository orderItemRepository;
-
-    @Autowired
-    private CommonServiceImplUtil commonServiceImplUtil;
-
-    @Autowired
-    private RestaurantRepository restaurantRepository;
-
-    @Autowired
-    private ReservationRepository reservationRepository;
-
-    @Autowired
-    private PaymentRepository paymentRepository;
-
-    @Autowired
-    private MenuItemRepository menuItemRepository;
-
-    @Autowired
-    private ComboRepository comboRepository;
-
-    @Autowired
-    private UserRepository userRepository;
 
     @Autowired
     @PersistenceContext
@@ -82,24 +39,40 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private ApplicationEventPublisher eventPublisher;
 
-    @Autowired
-    private NotificationService notificationService;
+    private final OrderRepository orderRepository;
 
-    private final GenericMapper<OrderItem, OrderItemDTO> orderItemMapper = MapperFactory.getMapper(OrderItem.class, OrderItemDTO.class);
+    private final CommonServiceImplUtil commonServiceImplUtil;
+
+    private final RestaurantService restaurantService;
+
+    private final ReservationService reservationService;
+
+    private final UserService userService;
+
+    private final OrderItemService orderItemService;
+
+    private final PaymentService paymentService;
 
     private final GenericMapper<Order, OrderDTO> orderMapper = MapperFactory.getMapper(Order.class, OrderDTO.class);
 
-    private final GenericMapper<AddOn, AddOnDTO> addOnMapper = MapperFactory.getMapper(AddOn.class, AddOnDTO.class);
+    public OrderServiceImpl(OrderRepository orderRepository, CommonServiceImplUtil commonServiceImplUtil, RestaurantService restaurantService, ReservationService reservationService, UserService userService, OrderItemService orderItemService, PaymentService paymentService) {
+        this.orderRepository = orderRepository;
+        this.commonServiceImplUtil = commonServiceImplUtil;
+        this.restaurantService = restaurantService;
+        this.reservationService = reservationService;
+        this.userService = userService;
+        this.orderItemService = orderItemService;
+        this.paymentService = paymentService;
+    }
 
     @Override
     public ResponseEntity<String> createOrder(String restaurantCode, OrderDTO orderDTO) {
-        Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode)
-                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
+        Restaurant restaurant = restaurantService.getRestaurantByRestaurantCode(restaurantCode);
         Order order = orderMapper.toEntity(orderDTO);
         order.setRestaurant(restaurant);
 
         if (orderDTO.getOrderedBy() != null && !orderDTO.getOrderedBy().trim().isEmpty()) {
-            User customer = userRepository.findByRestaurantCodeAndUserName(restaurantCode, orderDTO.getOrderedBy());
+            User customer = userService.getUserByRestaurantCodeAndUsername(restaurantCode, orderDTO.getOrderedBy());
             if (customer != null) {
                 order.setUser(customer);
             } else {
@@ -109,12 +82,10 @@ public class OrderServiceImpl implements OrderService {
             throw new IllegalArgumentException("Order must have a customer (orderedBy field cannot be null or empty)");
         }
         order.setStatus(OrderStatus.NEW);
-//        resolveRelationships(order, orderDTO); // Commented this out we need not require this here
         Order savedOrder = orderRepository.save(order);
         entityManager.flush();
-        List<OrderItem> orderItems = createAndPersistOrderItems(orderDTO, restaurantCode, savedOrder);
+        List<OrderItem> orderItems = orderItemService.createAndPersistOrderItems(orderDTO, restaurantCode, savedOrder);
         publishToOrderCreatedEventListener(orderItems);
-//        notificationService.notifyOrderItemCreation(orderItems);
         if (savedOrder.getId() != null) {
             return ResponseEntity.ok("Order created successfully with Order Number: " + savedOrder.getOrderNumber());
         } else {
@@ -153,8 +124,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderDTO patchUpdateOrder(String restaurantCode, String orderNumber, OrderDTO orderDTO, HashSet<String> propertiesToBeUpdated){
         Order existingOrder = orderRepository.findByRestaurantCodeAndOrderNumber(restaurantCode, orderNumber)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found with number: " + orderNumber + " for restaurant: " + restaurantCode));
-        existingOrder.setRestaurant(restaurantRepository.findByRestaurantCode(restaurantCode)
-                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found")));
+        existingOrder.setRestaurant(restaurantService.getRestaurantByRestaurantCode(restaurantCode));
         Order patchedOrder = orderMapper.toEntity(orderDTO);
         resolveRelationships(patchedOrder, orderDTO);
         commonServiceImplUtil.copySelectedProperties(patchedOrder, existingOrder,propertiesToBeUpdated);
@@ -198,14 +168,14 @@ public class OrderServiceImpl implements OrderService {
 
     private void resolveRelationships(Order order, OrderDTO orderDTO){
         if (orderDTO.getReservationNumber()!=null){
-            Reservation reservation = reservationRepository.findByReservationNumber(orderDTO.getReservationNumber());
+            Reservation reservation = reservationService.getReservationByReservationNumber(orderDTO.getReservationNumber());
             if (reservation == null) {
                 throw new ResourceNotFoundException("Reservation not found with number: " + orderDTO.getReservationNumber());
             }
             order.setReservation(reservation);
         }
         if (orderDTO.getPaymentNumber()!=null){
-            List<Payment> payment = paymentRepository.findByOrderId(orderDTO.getId());
+            List<Payment> payment = paymentService.getPaymentsByOrderId(order.getId());
             order.setPayments(payment);
         }
     }
@@ -217,7 +187,7 @@ public class OrderServiceImpl implements OrderService {
         if (order.getUser() != null) {
             String firstName = order.getUser().getFirstName() != null ? order.getUser().getFirstName() : "";
             String lastName = order.getUser().getLastName() != null ? order.getUser().getLastName() : "";
-            dto.setOrderedBy(firstName + " " + lastName);
+            dto.setOrderedBy(firstName + " " + lastName); // will this be username when it is coming from ui or similar to this a full name?
         }
         
         // Safely handle reservation and dining tables
@@ -258,148 +228,6 @@ public class OrderServiceImpl implements OrderService {
         }
         
         return dto;
-    }
-
-    private List<OrderItem> createAndPersistOrderItems(OrderDTO orderDTO, String restaurantCode, Order savedOrder) {
-        List<OrderItemDTO> orderItemDTOList = orderDTO.getOrderItems();
-        
-        if (orderItemDTOList == null || orderItemDTOList.isEmpty()) {
-            throw new IllegalArgumentException("Order must contain at least one item");
-        } // this must be done before coming to service
-
-        Set<String> comboItemNames = new HashSet<>();
-        Set<String> menuItemNames = new HashSet<>();
-
-        for (OrderItemDTO dto : orderItemDTOList) {
-            if (dto == null || dto.getItemName() == null || dto.getItemName().trim().isEmpty()) {
-                continue;
-            } // check this in the validation itself
-            
-            if (COMBO.equalsIgnoreCase(dto.getFoodType())) {
-                comboItemNames.add(dto.getItemName());
-            } else {
-                menuItemNames.add(dto.getItemName());
-            }
-        }
-
-        Map<String, Combo> comboMap = comboRepository
-                .findByComboNamesAndRestaurantCode(comboItemNames, restaurantCode)
-                .stream()
-                .collect(Collectors.toMap(Combo::getComboName, Function.identity()));
-
-        Map<String, MenuItem> menuItemMap = menuItemRepository
-                .findByMenuItemNamesAndRestaurantCode(menuItemNames, restaurantCode)
-                .stream()
-                .collect(Collectors.toMap(MenuItem::getMenuItemName, Function.identity()));
-
-        List<OrderItem> orderItems = buildOrderItemEntities(orderItemDTOList, comboMap, menuItemMap, savedOrder, restaurantCode);
-        orderItemRepository.saveAll(orderItems);
-        return orderItems;
-    }
-
-    private List<OrderItem> buildOrderItemEntities(List<OrderItemDTO> orderItemDTOList, Map<String, Combo> comboMap, Map<String, MenuItem> menuItemMap, Order savedOrder, String restaurantCode) {
-        List<OrderItem> allOrderItems = new ArrayList<>();
-        for (OrderItemDTO dto : orderItemDTOList) {
-            OrderItem item = orderItemMapper.toEntity(dto);
-            item.setOrder(savedOrder);
-            if (COMBO.equalsIgnoreCase(dto.getFoodType())) {
-                Combo combo = comboMap.get(dto.getItemName());
-//                if (combo == null) throw new IllegalArgumentException("Invalid combo: " + dto.getItemName());
-                item.setCombo(combo);
-                List<OrderItem> subItems = setMaxTimeLimitForCombo(item, restaurantCode);
-                allOrderItems.addAll(subItems);
-            } else {
-                MenuItem menuItem = menuItemMap.get(dto.getItemName());
-//                if (menuItem == null) throw new IllegalArgumentException("Invalid menu item: " + dto.getItemName());
-                item.setMenuItem(menuItem);
-                setMaxTimeLimitAndAssignCook(item, restaurantCode);
-            }
-            if (dto.getAddOns() != null) {
-                Set<AddOn> addOns = dto.getAddOns().stream()
-                        .map(addOnMapper::toEntity)
-                        .collect(Collectors.toSet());
-                item.setAddOnSet(addOns);
-            }
-            allOrderItems.add(item);
-        }
-        return allOrderItems;
-    }
-
-    /**
-     * Calculate and set MaxTimeLimitToStart for a menu item based on cook's availability
-     * Also assigns the order item to the most quickly available cook
-     */
-    private void setMaxTimeLimitAndAssignCook(OrderItem orderItem, String restaurantCode) {
-        MenuItem menuItem = orderItem.getMenuItem();
-
-        if (menuItem == null || menuItem.getCookSet() == null || menuItem.getCookSet().isEmpty()) {
-            orderItem.setMaxTimeLimitToStart(LocalDateTime.now());
-            orderItem.setOrderItemStatus(OrderItemStatus.ASSIGNED);
-            return;
-        }
-
-        User mostAvailableCook = null;
-        long shortestWaitTime = Long.MAX_VALUE;
-
-        for (User cook : menuItem.getCookSet()) {
-            long waitTime = calculateCookAvailabilityTime(cook, restaurantCode);
-            if (waitTime < shortestWaitTime) {
-                shortestWaitTime = waitTime;
-                mostAvailableCook = cook;
-            }
-        }
-
-        if (mostAvailableCook != null) {
-            orderItem.setCook(mostAvailableCook);
-            orderItem.setMaxTimeLimitToStart(LocalDateTime.now().plusMinutes(shortestWaitTime));
-            orderItem.setOrderItemStatus(OrderItemStatus.ASSIGNED);
-        }
-    }
-
-    /**
-     * Calculate and set MaxTimeLimitToStart for a combo item based on cook's availability
-     * Also assigns each combo item to the most quickly available cook
-     */
-    private List<OrderItem> setMaxTimeLimitForCombo(OrderItem parent, String restaurantCode) {
-        List<OrderItem> subItems = new ArrayList<>();
-        for (ComboItem comboItem : parent.getCombo().getComboItemSet()) {
-            OrderItem subItem = new OrderItem();
-            subItem.setOrder(parent.getOrder());
-            subItem.setParentItem(parent);
-            subItem.setMenuItem(comboItem.getMenuItem());
-            setMaxTimeLimitAndAssignCook(subItem, restaurantCode);
-            subItems.add(subItem);
-        }
-        return subItems;
-    }
-
-    /**
-     * Calculate when a cook will be available based on their current workload
-     */
-    private long calculateCookAvailabilityTime(User cook, String restaurantCode) {
-        List<OrderItem> pendingOrderItems = orderItemRepository.findAssignedAndStartedItemsByRestaurantCodeAndCook(restaurantCode, cook.getId());
-        return pendingOrderItems.stream()
-            .mapToInt(orderItem -> {
-                int itemPrepTime = 0;
-                int comboPrepTime = 0;
-
-                MenuItem menuItem = orderItem.getMenuItem();
-                if (menuItem != null && menuItem.getPreparationTime() != null) {
-                    itemPrepTime = menuItem.getPreparationTime();
-                }
-
-                Combo combo = orderItem.getCombo();
-                if (combo != null && combo.getComboItemSet() != null) {
-                    comboPrepTime = combo.getComboItemSet().stream()
-                            .map(ComboItem::getMenuItem)
-                            .filter(Objects::nonNull)
-                            .mapToInt(mi -> mi.getPreparationTime() != null ? mi.getPreparationTime() : 0)
-                            .sum();
-                }
-
-                return itemPrepTime + comboPrepTime;
-            })
-            .sum();
     }
 
     private void publishToOrderCreatedEventListener(List<OrderItem> orderItems) {

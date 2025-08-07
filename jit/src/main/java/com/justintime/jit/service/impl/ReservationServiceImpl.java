@@ -55,4 +55,9 @@ public class ReservationServiceImpl implements ReservationService {
             reservationRepository.delete(reservation);
             return ResponseEntity.noContent().build();
         }
+
+    @Override
+    public Reservation getReservationByReservationNumber(String reservationNumber) {
+        return reservationRepository.findByReservationNumber(reservationNumber);
+    }
 }

@@ -81,6 +81,11 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
     }
 
     @Override
+    public User getUserByRestaurantCodeAndUsername(String restaurantCode, String username) {
+        return userRepository.findByRestaurantCodeAndUserName(restaurantCode, username);
+    }
+
+    @Override
     public UserDTO patchUpdateUser(String restaurantCode, String username, UserDTO dto, HashSet<String> propertiesToBeUpdated) {
         User existingUser = userRepository.findByRestaurantCodeAndUserName(restaurantCode, username);
         GenericMapper<User, UserDTO> userMapper = MapperFactory.getMapper(User.class, UserDTO.class);

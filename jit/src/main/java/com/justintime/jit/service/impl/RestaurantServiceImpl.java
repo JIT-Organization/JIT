@@ -64,7 +64,13 @@ public class RestaurantServiceImpl extends BaseServiceImpl<Restaurant,Long> impl
     }
 
     @Override
-    public RestaurantDTO getRestaurantByRestaurantCode(String restaurantCode) {
+    public Restaurant getRestaurantByRestaurantCode(String restaurantCode) {
+        return restaurantRepository.findByRestaurantCode(restaurantCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
+    }
+
+    @Override
+    public RestaurantDTO getRestaurantDTOByRestaurantCode(String restaurantCode) {
         Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode)
                 .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
         GenericMapper<Restaurant, RestaurantDTO> mapper = MapperFactory.getMapper(Restaurant.class, RestaurantDTO.class);

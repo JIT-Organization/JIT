@@ -12,4 +12,6 @@ public interface ReservationService {
     ResponseEntity<Reservation> getReservationById(Long id);
     ResponseEntity<Reservation> updateReservation(Long id, Reservation reservationDetails);
     ResponseEntity<Void> deleteReservation(Long id);
+
+    Reservation getReservationByReservationNumber(String reservationNumber);
 }
