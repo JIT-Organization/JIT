@@ -14,12 +14,14 @@ import com.justintime.jit.repository.MenuItemRepository;
 import com.justintime.jit.repository.OrderRepo.OrderItemRepository;
 import com.justintime.jit.repository.OrderRepo.OrderRepository;
 import com.justintime.jit.repository.UserRepository;
+import com.justintime.jit.service.CookLoadTrackerService;
 import com.justintime.jit.service.NotificationService;
 import com.justintime.jit.service.OrderItemService;
 import com.justintime.jit.repository.RestaurantRepository;
 import com.justintime.jit.util.CommonServiceImplUtil;
 import com.justintime.jit.util.mapper.GenericMapper;
 import com.justintime.jit.util.mapper.MapperFactory;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -58,6 +60,9 @@ public class OrderItemServiceImpl extends BaseServiceImpl<OrderItem,Long> implem
 
    @Autowired
    private ComboRepository comboRepository;
+
+   @Autowired
+   private CookLoadTrackerService cookLoadTrackerService;
 
    private final GenericMapper<OrderItem, OrderItemDTO> orderItemMapper = MapperFactory.getMapper(OrderItem.class, OrderItemDTO.class);
 
@@ -298,5 +303,68 @@ public class OrderItemServiceImpl extends BaseServiceImpl<OrderItem,Long> implem
                     return itemPrepTime + comboPrepTime;
                 })
                 .sum();
+    }
+
+    @Transactional
+    public void assignCook(OrderItem orderItem, String restaurantCode) {
+        // Step 1: Find all available cooks for the menu item
+        Set<User> cooks = Optional.ofNullable(orderItem.getMenuItem())
+                .map(MenuItem::getCookSet)
+                .orElse(Collections.emptySet());
+
+        if (cooks.isEmpty()) {
+            // No cooks defined, auto-assign now with zero wait
+            orderItem.setMaxTimeLimitToStart(LocalDateTime.now());
+            orderItem.setOrderItemStatus(OrderItemStatus.ASSIGNED);
+            return;
+        }
+
+        // Step 2: Find cook with lowest total load
+        User bestCook = cooks.stream()
+                .min(Comparator.comparingInt(cook -> cookLoadTrackerService.getCookLoad(cook.getId())))
+                .orElseThrow(() -> new IllegalStateException("No available cooks"));
+
+        // Step 3: Calculate prep time for this order
+        int prepTime = calculatePrepTime(orderItem);
+
+        // Step 4: Update tracker immediately (O(1) in Redis or memory)
+        cookLoadTrackerService.addLoad(bestCook.getId(), prepTime, orderItem.getId());
+
+        // Step 5: Set order metadata
+        orderItem.setCook(bestCook);
+        orderItem.setMaxTimeLimitToStart(LocalDateTime.now()
+                .plusMinutes(cookLoadTrackerService.getCookLoad(bestCook.getId())));
+        orderItem.setOrderItemStatus(OrderItemStatus.ASSIGNED);
+
+        // Step 6: Persist order assignment
+        orderItemRepository.save(orderItem);
+    }
+
+    /**
+     * Called when an order item is completed.
+     */
+    @Transactional
+    public void completeOrder(Long cookId, Long orderItemId, int actualTimeTakenMinutes) {
+        cookLoadTrackerService.removeLoad(cookId, actualTimeTakenMinutes, orderItemId);
+    }
+
+    /**
+     * Calculates total prep time for an order item (menu item + combo items)
+     */
+    private int calculatePrepTime(OrderItem orderItem) {
+        int itemPrepTime = Optional.ofNullable(orderItem.getMenuItem())
+                .map(MenuItem::getPreparationTime)
+                .orElse(0);
+
+        int comboPrepTime = Optional.ofNullable(orderItem.getCombo())
+                .map(Combo::getComboItemSet)
+                .orElse(Collections.emptySet())
+                .stream()
+                .map(ComboItem::getMenuItem)
+                .filter(Objects::nonNull)
+                .mapToInt(mi -> Optional.ofNullable(mi.getPreparationTime()).orElse(0))
+                .sum();
+
+        return itemPrepTime + comboPrepTime;
     }
 }

@@ -74,6 +74,9 @@ dependencies {
 	//WebSocket
 	implementation("org.springframework.boot:spring-boot-starter-websocket:3.5.3")
 	implementation 'org.springframework.security:spring-security-messaging'
+
+	//Redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 }
 
 dependencyManagement {
