@@ -34,7 +34,6 @@ const TimeIntervalSetInput = ({ value = [], onChange, className }) => {
               type="time"
               value={slot.startTime}
               onChange={(e) => handleTimingChange(index, 'startTime', e.target.value)}
-              className="bg-yellow-50"
             />
           </div>
           <div className="flex-1">
@@ -46,7 +45,6 @@ const TimeIntervalSetInput = ({ value = [], onChange, className }) => {
               type="time"
               value={slot.endTime}
               onChange={(e) => handleTimingChange(index, 'endTime', e.target.value)}
-              className="bg-yellow-50"
             />
           </div>
           {value.length > 1 && (
@@ -55,7 +53,7 @@ const TimeIntervalSetInput = ({ value = [], onChange, className }) => {
               onClick={() => removeTiming(index)}
               variant="ghost"
               size="icon"
-              className="text-red-500 text-xl pb-1"
+              className="button-remove text-xl pb-1"
               title="Remove this time slot"
             >
               &times;

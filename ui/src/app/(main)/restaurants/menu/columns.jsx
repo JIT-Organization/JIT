@@ -65,11 +65,14 @@ export const getMenuListcolumns = (
     accessorKey: "offerPrice",
     header: () => <div className="text-right">Offer Price</div>,
     cell: ({ row }) => {
-      const offerPrice = parseFloat(row.getValue("offerPrice"));
+      const offerPrice = row.getValue("offerPrice");
+      if (offerPrice === null || offerPrice === undefined) {
+      return <div className="text-center font-medium">--</div>;
+      }
       const formatted = new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "INR",
-      }).format(offerPrice);
+      }).format(parseFloat(offerPrice));
 
       return <div className="text-right font-medium">{formatted}</div>;
     },
@@ -120,6 +123,7 @@ export const getMenuListcolumns = (
     header: <div className="flex justify-center">Actions</div>,
     cell: ({ row }) => {
       const menuItemName = row.original.menuItemName;
+      const foodType = row.original.foodType;
       const isDeleting = loadingStates.isDeleting(menuItemName);
       const isUpdating = loadingStates.isUpdating(menuItemName);
 
@@ -128,10 +132,11 @@ export const getMenuListcolumns = (
           <Button
             className="cursor-pointer hover:bg-gray-600/10 h-10 w-10 flex justify-center items-center rounded-md"
             variant="ghost"
-            onClick={() => handleEditClick(menuItemName)}
+            colorVariant="none"
+            onClick={() => handleEditClick(menuItemName,foodType)}
             disabled={isDeleting || isUpdating}
           >
-            <Pencil className="text-black h-5" />
+            <Pencil className="h-5" />
           </Button>
           <CustomPopup
             type="delete"
@@ -139,12 +144,13 @@ export const getMenuListcolumns = (
               <Button
                 className="cursor-pointer hover:bg-gray-600/20 h-10 w-10 flex justify-center items-center rounded-md"
                 variant="ghost"
+                colorVariant="none"
                 disabled={isDeleting || isUpdating}
               >
-                {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="text-black h-5" />}
+                {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="text-red-600 h-5" />}
               </Button>
             }
-            onConfirm={() => handleDeleteClick(menuItemName)}
+            onConfirm={() => handleDeleteClick(menuItemName, foodType)}
           />
         </div>
       );

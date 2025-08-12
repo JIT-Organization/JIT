@@ -4,10 +4,12 @@ import com.justintime.jit.controller.BaseController;
 import com.justintime.jit.dto.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.web.csrf.InvalidCsrfTokenException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.security.auth.login.LoginException;
+import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends BaseController {
@@ -30,5 +32,10 @@ public class GlobalExceptionHandler extends BaseController {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiResponse<Object>> handleResourceNotFoundException(Exception ex) {
         return error(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(InvalidCsrfTokenException.class)
+    public ResponseEntity<ApiResponse<Object>> handleInvalidCsrf(InvalidCsrfTokenException ex) {
+        return error(ex.getMessage(), HttpStatus.FORBIDDEN);
     }
 }

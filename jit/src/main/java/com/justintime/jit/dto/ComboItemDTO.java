@@ -10,8 +10,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ComboItemDTO {
-    private Long id;
-    private Long menuItemId;
     private String comboItemName;
     private Integer quantity;
 }

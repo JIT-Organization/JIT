@@ -16,6 +16,7 @@ import MapPopup from "./MapPopup";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
+import { useColor } from "@/components/providers/ColorProvider";
 
 
 export default function BusinessProfilePage() {
@@ -32,6 +33,7 @@ export default function BusinessProfilePage() {
     },
   });
 
+  const { primaryColor, setPrimaryColor } = useColor();
   const [location, setLocation] = React.useState("");
 
   const onSubmit = (data) => {
@@ -191,30 +193,41 @@ export default function BusinessProfilePage() {
             />
             <FormMessage />
           </FormItem>
-        </div>
- 
-        
-        <div className="p-10 w-1/2 mx-left relative">
-                  <FormItem>
-                    <FormLabel className="text-2xl font-extrabold">Address</FormLabel>
-                      <FormField
-                        name="location"
-                        control={methods.control}
-                        render={({ field }) => (
-                          <FormControl>
-                            <MapPopup
-                              value={location}
-                              onChange={(address) => {
-                                setLocation(address);
-                                methods.setValue("location", address); 
-                                field.onChange(address); 
-                              }}
-                            />
-                        </FormControl>
-                      )}
+
+          <FormItem>
+            <FormLabel className="text-2xl font-extrabold">Address</FormLabel>
+              <FormField
+                name="location"
+                control={methods.control}
+                render={({ field }) => (
+                  <FormControl>
+                    <MapPopup
+                      value={location}
+                      onChange={(address) => {
+                        setLocation(address);
+                        methods.setValue("location", address); 
+                        field.onChange(address); 
+                      }}
                     />
-                    <FormMessage />
-                  </FormItem>
+                </FormControl>
+              )}
+            />
+            <FormMessage />
+          </FormItem>
+
+          <FormItem>
+            <FormLabel className="text-2xl font-extrabold">Theme Color</FormLabel>
+            <div className="flex items-center gap-4">
+              <input
+                type="color"
+                value={primaryColor}
+                onChange={e => setPrimaryColor(e.target.value)}
+                className="w-12 h-12 border-2 border-black rounded cursor-pointer"
+                aria-label="Theme Color"
+              />
+              <span className="text-lg">{primaryColor}</span>
+            </div>
+          </FormItem>
         </div>
         
         <div className="pl-10 flex justify-left">

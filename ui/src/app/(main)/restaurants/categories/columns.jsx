@@ -42,8 +42,8 @@ export const getCategoryColumns = (
         <CustomPopup
           type="category"
           trigger={
-            <Button variant="ghost">
-              <Pencil className="text-black h-50 w-50" />
+            <Button variant="ghost" colorVariant="none">
+              <Pencil className="h-5" />
             </Button>
           }
           dialogDescription={"Category Info"}
@@ -56,8 +56,9 @@ export const getCategoryColumns = (
           trigger={
             <Button
               variant="ghost"
+              colorVariant="none"
             >
-              <Trash2 className="text-black h-50 w-50" />
+              <Trash2 className="text-red-600 h-5" />
             </Button>
           }
           onConfirm={() => handleDeleteClick(row.original.id)}

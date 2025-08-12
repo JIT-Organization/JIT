@@ -40,9 +40,9 @@ export const getTableColumns = (
           <CustomPopup
             type="table"
             trigger={
-              <Button variant="ghost">
-                <Pencil className="text-black h-50 w-50" />
-              </Button>
+              <Button variant="ghost" colorVariant="none">
+                <Pencil className="h-50 w-50" />
+          </Button>
             }
             // dialogDescription={"Tables Info"}
             data={handleEditClick(row.original)}
@@ -51,8 +51,8 @@ export const getTableColumns = (
           <CustomPopup
             type="delete"
             trigger={
-              <Button variant="ghost">
-                <Trash2 className="text-black h-50 w-50" />
+              <Button variant="ghost" colorVariant="none">
+                <Trash2 className="text-red-600 h-50 w-50" />
               </Button>
             }
             onConfirm={() => handleDeleteClick(row.original.tableNumber)}

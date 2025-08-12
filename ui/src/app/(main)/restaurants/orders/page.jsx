@@ -2,7 +2,7 @@
 import FoodCard from "@/components/customUIComponents/FoodCard";
 import { getOrderColumns } from "./columns";
 import { CustomDataTable } from "@/components/customUIComponents/CustomDataTable";
-import { deleteMenuItem, getOrdersListOptions } from "@/lib/api/api";
+import { deleteOrderItem, getOrdersListOptions } from "@/lib/api/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 
@@ -15,21 +15,21 @@ const Orders = () => {
     isLoading,
     error,
   } = useQuery(getOrdersListOptions());
-  const deleteMutation = useMutation(deleteMenuItem(queryClient));
+  const deleteMutation = useMutation(deleteOrderItem(queryClient));
 
   if (isLoading) return <p>Loading orders list...</p>;
   if (error) return <p>Error loading orders list: {error.message}</p>;
 
   const handleEditClick = (id) => {
-    console.log("Edit clicked for id: ", id);
     router.push(`${pathName}/${id}`);
   };
 
   const handleDeleteClick = (id) => {
-    console.log("Delete clicked for id: ", id);
     deleteMutation.mutate({ id });
   };
-
+  const handleCreateOrderClick = () => {
+    router.push("/restaurants/createOrder");
+  };
   const toggleRowClick = (row) => {
     row.toggleExpanded();
   };
@@ -42,7 +42,7 @@ const Orders = () => {
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 p-4">
         {row.original.orderItems.map((item) => (
           <div key={item.itemName}>
-            <FoodCard food={item} quantity={item.quantity}/>
+            <FoodCard mode="order" food={item} quantity={item.quantity} status="READY_TO_SERVE"/>
           </div>
         ))}
       </div>
@@ -55,9 +55,7 @@ const Orders = () => {
         columns={columns}
         data={orderListData}
         tabName="Orders"
-        handleHeaderButtonClick={() => {
-          console.log("Orders Page URL");
-        }}
+        handleHeaderButtonClick={handleCreateOrderClick}
         headerButtonName="New Order"
         handleRowClick={toggleRowClick}
         expandableRowContent={expandableRowContent}

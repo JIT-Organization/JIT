@@ -52,6 +52,14 @@ public interface UserRepository extends BaseRepository<User, Long> {
     Set<User> findCooksByRestaurantIdAndRoleAndUserNames(@Param("restaurantId") Long restaurantId,
                                                           @Param("role") Role role,
                                                           @Param("cookNames") Set<String> cookNames);
+    @Query(value = "SELECT u.user_name " +
+            "FROM users u " +
+            "JOIN user_restaurant ur ON u.id = ur.user_id " +
+            "JOIN restaurants r ON ur.restaurant_id = r.id " +
+            "WHERE r.restaurant_code = :restaurantCode AND u.role = :role", nativeQuery = true)
+    List<String> findUserNamesByRestaurantCodeAndRole(@Param("restaurantCode") String restaurantCode,
+                                                      @Param("role") Role role);
+
 //    DO NOT DELETE
 //    @Query("SELECT u FROM User u " +
 //            "JOIN u.restaurants r " +
@@ -94,4 +102,12 @@ public interface UserRepository extends BaseRepository<User, Long> {
             @Param("restaurantCode") String restaurantCode,
             @Param("userName") String userName);
 
+    @Query(
+            value = "SELECT COUNT(u.id) FROM users u " +
+                    "JOIN user_restaurant ur ON u.id = ur.user_id " +
+                    "JOIN restaurant r ON ur.restaurant_id = r.id " +
+                    "WHERE r.id = :restaurantId AND u.role = :role",
+            nativeQuery = true
+    )
+    long countByRestaurantIdAndRole(Long restaurantId, Role role);
 }

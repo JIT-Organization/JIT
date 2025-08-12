@@ -33,4 +33,5 @@ public interface CategoryRepository extends BaseRepository<Category,Long> {
     Set<Category> findByCategoryNamesAndRestaurantId(@Param("categoryNames") Set<String> categoryNames,
                                                      @Param("restaurantId") Long restaurantId);
 
+    long countByRestaurantId(Long restaurantId);
 }

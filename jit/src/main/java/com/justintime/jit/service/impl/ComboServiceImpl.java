@@ -45,9 +45,7 @@ public class ComboServiceImpl extends BaseServiceImpl<Combo,Long> implements Com
                     // Map Combo Items
                     comboDTO.setComboItemSet(
                             combo.getComboItemSet().stream()
-                                    .map(comboItem -> new ComboItemDTO(
-                                            comboItem.getId(),
-                                            comboItem.getMenuItem().getId(), // Assuming there's a getMenuItem() method
+                                    .map(comboItem -> new ComboItemDTO( // Assuming there's a getMenuItem() method
                                             comboItem.getMenuItem().getMenuItemName(), // Assuming getMenuItemName() exists
                                             comboItem.getQuantity()
                                     ))

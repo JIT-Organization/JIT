@@ -82,16 +82,18 @@ const MenuList = () => {
   }
 
   const handleToggle = (index, value) => {
-    const menuItemName = menuItems[index].menuItemName;
-    patchMutation.mutate({ menuItemName, fields: { active: value } });
+    const menuItem = menuItems[index];
+    const menuItemName = menuItem.menuItemName;
+    const foodType = menuItem.foodType;
+    patchMutation.mutate({ menuItemName, foodType, fields: { active: value } });
   };
 
-  const handleEditClick = (menuItemName) => {
-    router.push(`${pathName}/${menuItemName}`);
+  const handleEditClick = (menuItemName, foodType) => {
+    router.push(`${pathName}/${foodType}/${menuItemName}`);
   };
 
-  const handleDeleteClick = async (menuItemName) => {
-    deleteMutation.mutate({ menuItemName });
+  const handleDeleteClick = async (menuItemName, foodType) => {
+    deleteMutation.mutate({ menuItemName, foodType });
   };
 
   const columns = getMenuListcolumns(
@@ -105,7 +107,7 @@ const MenuList = () => {
   );
 
   const handleAddFoodClick = () => {
-    router.push(`${pathName}/add_food`);
+    router.push(`${pathName}/MENU_ITEM/add_food`);
   };
 
   const categories = getDistinctCategories(menuItems);

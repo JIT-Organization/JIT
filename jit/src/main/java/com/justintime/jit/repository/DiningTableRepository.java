@@ -29,4 +29,6 @@ public interface DiningTableRepository extends BaseRepository<DiningTable, Long>
             "JOIN restaurant r ON dt.restaurant_id = r.id " +
             "WHERE r.restaurant_code = :restaurantCode AND dt.table_number = :tableNumber", nativeQuery = true)
     void deleteTableByRestaurantCodeAndTableNumber(@Param("restaurantCode") String restaurantCode, @Param("tableNumber") String tableNumber);
+
+    long countByRestaurantId(Long restaurantId);
 }

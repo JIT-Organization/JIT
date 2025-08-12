@@ -23,8 +23,9 @@ import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
 import MultiSelect from "./customUIComponents/MultiSelect";
 import { X } from "lucide-react";
 import { Switch } from "./ui/switch";
+import { AddOnSingleInput } from "./AddOnInput";
 
-export default function DialogForm({ type, data, onSubmit, selectOptions }) {
+export default function DialogForm({ type, data, onSubmit, selectOptions, isLoading }) {
   const getDefaultValues = (type) => {
     switch (type) {
       case "category":
@@ -49,6 +50,13 @@ export default function DialogForm({ type, data, onSubmit, selectOptions }) {
           tableNumber: "",
           seatingCapacity: "",
           isAvailable: "yes",
+        };
+
+      case "add-on":
+        return {
+          label: "",
+          price: "",
+          options: [],
         };
 
       default:
@@ -111,7 +119,7 @@ export default function DialogForm({ type, data, onSubmit, selectOptions }) {
               <SelectTrigger>
                 <SelectValue placeholder="Role" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 {options.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
@@ -136,7 +144,7 @@ export default function DialogForm({ type, data, onSubmit, selectOptions }) {
               <SelectTrigger>
                 <SelectValue placeholder="Select shift" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 {options.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
@@ -287,9 +295,47 @@ export default function DialogForm({ type, data, onSubmit, selectOptions }) {
     mode: "onBlur",
   });
 
+  // This function will be called by the form submit event
+  const handleSubmit = async (fields) => {
+    if (onSubmit) {
+      // Pass a closeDialog callback to parent
+      await onSubmit(fields);
+    }
+  };
+
+  if (type === "add-on") {
+    return (
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(handleSubmit)}
+          className="space-y-4"
+        >
+          <AddOnSingleInput
+            value={form.watch()}
+            onChange={(val) => {
+              form.reset(val);
+            }}
+            showRemove={false}
+            highlight={false}
+          />
+          <div className="flex space-x-4 items-center">
+            <DialogClose>
+              <div className="hover:bg-gray-600/10 py-2 px-4 rounded-lg">
+                Cancel
+              </div>
+            </DialogClose>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? "Saving..." : "Save"}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    );
+  }
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         {fieldConfig?.[type]?.map((field) => (
           <FormField
             key={field.name}
@@ -317,7 +363,9 @@ export default function DialogForm({ type, data, onSubmit, selectOptions }) {
               Cancel
             </div>
           </DialogClose>
-          <Button type="submit">Submit</Button>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? "Saving..." : "Save"}
+          </Button>
         </div>
       </form>
     </Form>

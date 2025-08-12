@@ -23,6 +23,15 @@ public interface OrderRepository extends BaseRepository<Order, Long> {
 
     Optional<Order> findByRestaurantIdAndId(Long restaurantId, Long Id);
 
+    @Query(value = "SELECT o.* FROM orders o " +
+            "JOIN restaurant r ON r.id = o.restaurant_id " +
+            "WHERE r.restaurant_code = :resCode AND o.order_number = :orderNumber",
+            nativeQuery = true)
+    Optional<Order> findByRestaurantCodeAndOrderNumber(
+            @Param("resCode") String restaurantCode,
+            @Param("orderNumber") String orderNumber
+    );
+
     List<Order> findAll();
 
     // Find orders by status
@@ -41,4 +50,10 @@ public interface OrderRepository extends BaseRepository<Order, Long> {
     List<Order> findByRestaurantId(Long restaurantId);
 
     Optional<Order> findByOrderNumber(String orderNumber);
+
+    long countByRestaurantId(Long restaurantId);
+
+    @Query(value = "SELECT SUM(o.amount) FROM orders o " +
+            "WHERE o.restaurant_id = :restaurantId", nativeQuery = true)
+    double calculateTotalRevenueByRestaurantId(Long restaurantId);
 }

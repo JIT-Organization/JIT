@@ -7,12 +7,19 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Pencil, Trash2, User, Copy } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-const BillPreview = ({ cartItems, handleUpdateQty, openCustomizeDialog }) => {
+const BillPreview = ({ cartItems, handleUpdateQty, openCustomizeDialog, onOpenCustomerDialog, handleCopyItem, isDialog = false }) => {
   return (
-    <Card className="w-full max-w-xs flex flex-col h-full">
-      <CardHeader className="p-4 border-b">
-        <CardTitle className="text-lg">Order Summary</CardTitle>
+    <Card className="w-full flex flex-col h-full overflow-hidden">
+      <CardHeader className="p-4 border-b flex-shrink-0">
+        <div className={cn("flex justify-between items-center", isDialog && "pr-8")}>
+          <CardTitle className="text-lg">Order Summary</CardTitle>
+          <Button variant="ghost" size="icon" onClick={onOpenCustomerDialog}>
+            <User className="h-5 w-5" />
+          </Button>
+        </div>
       </CardHeader>
 
       <ScrollArea className="flex-1 p-4">
@@ -20,19 +27,23 @@ const BillPreview = ({ cartItems, handleUpdateQty, openCustomizeDialog }) => {
           <p className="text-sm">No items added</p>
         ) : (
           <ul className="space-y-2">
-            {cartItems.map((item) => (
+            {cartItems.map((item) => {
+              const isItemEditable = !item.status || item.status === "UNASSIGNED" || item.status === "ASSIGNED";
+              
+              return (
               <li
-                key={item.id}
+                key={item.itemName}
                 className="flex justify-between border-b pb-2 text-sm"
               >
                 <div className="flex flex-col">
-                  <span className="text-xs font-medium">{item.name}</span>
+                  <span className="text-xs font-medium">{item.itemName} {`(₹${item.itemPrice})`}</span>
                   <div className="flex items-center gap-1 mt-1 text-xs">
                     <Button
                       variant="outline"
                       size="xs"
                       className="px-1 py-0.5 h-6"
-                      onClick={() => handleUpdateQty(item.id, "decrement")}
+                      disabled={!isItemEditable}
+                      onClick={() => isItemEditable && handleUpdateQty(item.itemName, "decrement")}
                     >
                       -
                     </Button>
@@ -41,7 +52,8 @@ const BillPreview = ({ cartItems, handleUpdateQty, openCustomizeDialog }) => {
                       variant="outline"
                       size="xs"
                       className="px-1 py-0.5 h-6"
-                      onClick={() => handleUpdateQty(item.id, "increment")}
+                      disabled={!isItemEditable}
+                      onClick={() => isItemEditable && handleUpdateQty(item.itemName, "increment")}
                     >
                       +
                     </Button>
@@ -50,35 +62,51 @@ const BillPreview = ({ cartItems, handleUpdateQty, openCustomizeDialog }) => {
 
                 <div className="flex flex-col items-end">
                   <span className="text-sm font-semibold">
-                    ₹ {(item.price * item.qty).toFixed(2)}
+                    ₹ {(item.itemPrice * item.qty).toFixed(2)}
                   </span>
                   <div className="flex gap-2 mt-1">
                     <button
-                      onClick={() => openCustomizeDialog(item.id)}
-                      className="text-blue-500 text-xs underline"
+                      onClick={() => isItemEditable && openCustomizeDialog(item.itemName, false)}
+                      disabled={!isItemEditable}
+                      className={`text-xs underline flex items-center ${
+                        isItemEditable ? 'text-blue-500 cursor-pointer hover:text-blue-700' : 'text-gray-400 cursor-not-allowed'
+                      }`}
+                      title={isItemEditable ? "Edit" : "Cannot edit - item is being processed"}
                     >
-                      Customize
+                      <Pencil size={16} />
                     </button>
                     <button
-                      onClick={() => handleUpdateQty(item.id, "remove")}
-                      className="text-red-500 text-xs underline"
+                      onClick={() => handleCopyItem(item)}
+                      className="text-green-500 text-xs underline flex items-center cursor-pointer hover:text-green-700"
+                      title="Copy"
                     >
-                      Remove
+                      <Copy size={16} />
+                    </button>
+                    <button
+                      onClick={() => isItemEditable && handleUpdateQty(item.itemName, "remove")}
+                      disabled={!isItemEditable}
+                      className={`text-xs underline flex items-center ${
+                        isItemEditable ? 'text-red-500 cursor-pointer hover:text-red-700' : 'text-gray-400 cursor-not-allowed'
+                      }`}
+                      title={isItemEditable ? "Delete" : "Cannot delete - item is being processed"}
+                    >
+                      <Trash2 size={16} />
                     </button>
                   </div>
                 </div>
               </li>
-            ))}
+              );
+            })}
           </ul>
         )}
       </ScrollArea>
 
-      <CardFooter className="p-4 border-t font-bold flex justify-between">
+      <CardFooter className="p-4 border-t font-bold flex justify-between flex-shrink-0">
         <span>Total:</span>
         <span>
           ₹
           {cartItems
-            .reduce((total, item) => total + item.price * item.qty, 0)
+            .reduce((total, item) => total + item.itemPrice * item.qty, 0)
             .toFixed(2)}
         </span>
       </CardFooter>

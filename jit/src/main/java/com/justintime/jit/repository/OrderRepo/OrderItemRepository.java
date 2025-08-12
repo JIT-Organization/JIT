@@ -3,6 +3,7 @@ package com.justintime.jit.repository.OrderRepo;
 import com.justintime.jit.entity.MenuItem;
 import com.justintime.jit.entity.OrderEntities.OrderItem;
 import com.justintime.jit.entity.BatchConfig;
+import com.justintime.jit.entity.User;
 import com.justintime.jit.repository.BaseRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -106,4 +107,11 @@ public interface OrderItemRepository extends BaseRepository<OrderItem,Long> {
            "     OR (oi.menuItem IS NOT NULL AND oi.menuItem.batchConfig IS NOT NULL AND :cookId IN (SELECT c.id FROM oi.menuItem.batchConfig.cooks c)))) " +
            "ORDER BY oi.createdDttm ASC")
     List<OrderItem> findOrderItemsByCookIdAndUnassigned(@Param("cookId") Long cookId);
+
+    @Query("SELECT oi FROM OrderItem oi " +
+            "WHERE oi.cook.id = :cookId " +
+            "  AND (oi.orderItemStatus = 'ASSIGNED' OR oi.orderItemStatus = 'STARTED') " +
+            "  AND oi.order.restaurant.restaurantCode = :restaurantCode " +
+            "ORDER BY oi.createdDttm ASC")
+    List<OrderItem> findAssignedAndStartedItemsByRestaurantCodeAndCook(@Param("restaurantCode") String restaurantCode, @Param("cookId") Long cookId);
 }

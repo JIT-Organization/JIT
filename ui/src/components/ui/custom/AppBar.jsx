@@ -4,7 +4,7 @@ import { CustomTrigger } from "./CustomTrigger";
 
 export default function AppBar() {
   return (
-    <div className="bg-gray-800 text-white p-4 flex justify-between items-center shadow-md w-full fixed top-0 left-0 z-20">
+    <div className="app-bar bg-gray-800 text-white p-4 flex justify-between items-center shadow-md w-full fixed top-0 left-0 z-20">
       <div className="flex items-center">
         <div className="flex items-center space-x-2">
           <CustomTrigger />

@@ -26,6 +26,12 @@ public class UserController extends BaseController {
 //        return ResponseEntity.ok(users);
 //    }
 
+    @GetMapping("/getCookNames/{restaurantCode}")
+    public ResponseEntity<ApiResponse<List<String>>> getCookNamesByRestaurantCode(@PathVariable String restaurantCode) {
+        List<String> cookNames = userService.getCookNamesByRestaurantCode(restaurantCode);
+        return success(cookNames);
+    }
+
     @GetMapping("/{restaurantCode}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<UserDTO>>> getUsersByRestaurantCode(@PathVariable String restaurantCode) {

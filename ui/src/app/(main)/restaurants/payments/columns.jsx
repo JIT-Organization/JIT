@@ -65,12 +65,20 @@ export const getPaymentsHistory = ( handleEditClick, handleDeleteClick) => [
       header: "Actions",
       cell: ({ row }) => (
         <div className="flex space-x-2">
-          <Button variant="ghost" onClick={() => handleEditClick(row.original.id)}>
-            <Pencil className="text-black h-50 w-50" />
+          <Button 
+            variant="ghost" 
+            colorVariant="none"
+            onClick={() => handleEditClick(row.original.id)}
+          >
+            <Pencil className="h-50 w-50" />
           </Button>
-          <Button variant="ghost" onClick={() => handleDeleteClick(row.original.id)}>
-            <Trash2 className="text-black h-50 w-50" />
-          </Button>
+          <Button 
+            variant="ghost" 
+            colorVariant="none"
+            onClick={() => handleDeleteClick(row.original.id)}
+          >
+            <Trash2 className="text-red-600 h-50 w-50" />
+              </Button>
         </div>
       ),
     },

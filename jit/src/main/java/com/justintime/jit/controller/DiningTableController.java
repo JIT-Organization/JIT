@@ -3,7 +3,6 @@ package com.justintime.jit.controller;
 import com.justintime.jit.dto.ApiResponse;
 import com.justintime.jit.dto.DiningTableDTO;
 import com.justintime.jit.dto.PatchRequest;
-import com.justintime.jit.entity.DiningTable;
 import com.justintime.jit.service.DiningTableService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

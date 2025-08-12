@@ -100,7 +100,7 @@ export function DateTimePicker({ value, onChange, className }) {
           </span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-4 space-y-3" align="start">
+      <PopoverContent className="w-auto p-4 space-y-3 bg-white" align="start">
         <Calendar
           mode="single"
           selected={selectedDate}
@@ -115,7 +115,7 @@ export function DateTimePicker({ value, onChange, className }) {
             <SelectTrigger className="w-14">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white">
               {[...Array(12)].map((_, i) => {
                 const h = (i + 1).toString().padStart(2, '0');
                 return (
@@ -133,7 +133,7 @@ export function DateTimePicker({ value, onChange, className }) {
             <SelectTrigger className="w-14">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white">
               {[...Array(60)].map((_, i) => {
                 const m = i.toString().padStart(2, '0');
                 return (
@@ -149,7 +149,7 @@ export function DateTimePicker({ value, onChange, className }) {
             <SelectTrigger className="w-16">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white">
               <SelectItem value="AM">AM</SelectItem>
               <SelectItem value="PM">PM</SelectItem>
             </SelectContent>
