@@ -4,6 +4,7 @@ import com.justintime.jit.dto.*;
 import com.justintime.jit.entity.*;
 import com.justintime.jit.entity.ComboEntities.Combo;
 import com.justintime.jit.entity.ComboEntities.ComboItem;
+import com.justintime.jit.entity.Enums.ConfigurationName;
 import com.justintime.jit.entity.Enums.OrderItemStatus;
 import com.justintime.jit.entity.Enums.Role;
 import com.justintime.jit.entity.OrderEntities.Order;
@@ -14,12 +15,14 @@ import com.justintime.jit.repository.MenuItemRepository;
 import com.justintime.jit.repository.OrderRepo.OrderItemRepository;
 import com.justintime.jit.repository.OrderRepo.OrderRepository;
 import com.justintime.jit.repository.UserRepository;
+import com.justintime.jit.service.BusinessConfigurationService;
 import com.justintime.jit.service.NotificationService;
 import com.justintime.jit.service.OrderItemService;
 import com.justintime.jit.repository.RestaurantRepository;
 import com.justintime.jit.util.CommonServiceImplUtil;
 import com.justintime.jit.util.mapper.GenericMapper;
 import com.justintime.jit.util.mapper.MapperFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -58,6 +61,9 @@ public class OrderItemServiceImpl extends BaseServiceImpl<OrderItem,Long> implem
 
    @Autowired
    private ComboRepository comboRepository;
+
+   @Autowired
+   private BusinessConfigurationService businessConfigurationService;
 
    private final GenericMapper<OrderItem, OrderItemDTO> orderItemMapper = MapperFactory.getMapper(OrderItem.class, OrderItemDTO.class);
 
@@ -140,8 +146,7 @@ public class OrderItemServiceImpl extends BaseServiceImpl<OrderItem,Long> implem
     }
 
     private OrderItemDTO mapToDTO(OrderItem orderItem, GenericMapper<OrderItem, OrderItemDTO> mapper) {
-        OrderItemDTO orderItemDTO = mapper.toDto(orderItem);
-        return orderItemDTO;
+        return mapper.toDto(orderItem);
     }
 
     @Override
@@ -198,6 +203,7 @@ public class OrderItemServiceImpl extends BaseServiceImpl<OrderItem,Long> implem
 
     private List<OrderItem> buildOrderItemEntities(List<OrderItemDTO> orderItemDTOList, Map<String, Combo> comboMap, Map<String, MenuItem> menuItemMap, Order savedOrder, String restaurantCode) {
         List<OrderItem> allOrderItems = new ArrayList<>();
+        boolean isCookAssignmentManual = StringUtils.equals(businessConfigurationService.getConfigValue(savedOrder.getRestaurant().getRestaurantCode(), ConfigurationName.MANUAL_COOK_ASSIGNMENT), "Y");
         for (OrderItemDTO dto : orderItemDTOList) {
             OrderItem item = orderItemMapper.toEntity(dto);
             item.setOrder(savedOrder);
@@ -205,13 +211,16 @@ public class OrderItemServiceImpl extends BaseServiceImpl<OrderItem,Long> implem
                 Combo combo = comboMap.get(dto.getItemName());
 //                if (combo == null) throw new IllegalArgumentException("Invalid combo: " + dto.getItemName());
                 item.setCombo(combo);
-                List<OrderItem> subItems = setMaxTimeLimitForCombo(item, restaurantCode);
+                List<OrderItem> subItems = getOrderItemForEachMenuItemInCombo(item);
+                subItems.forEach(subItem -> {
+                    if(!isCookAssignmentManual) setMaxTimeLimitAndAssignCook(subItem, restaurantCode);
+                });
                 allOrderItems.addAll(subItems);
             } else {
                 MenuItem menuItem = menuItemMap.get(dto.getItemName());
 //                if (menuItem == null) throw new IllegalArgumentException("Invalid menu item: " + dto.getItemName());
                 item.setMenuItem(menuItem);
-                setMaxTimeLimitAndAssignCook(item, restaurantCode);
+                if(!isCookAssignmentManual) setMaxTimeLimitAndAssignCook(item, restaurantCode);
             }
             if (dto.getAddOns() != null) {
                 Set<AddOn> addOns = dto.getAddOns().stream()
@@ -263,14 +272,13 @@ public class OrderItemServiceImpl extends BaseServiceImpl<OrderItem,Long> implem
      * Calculate and set MaxTimeLimitToStart for a combo item based on cook's availability
      * Also assigns each combo item to the most quickly available cook
      */
-    private List<OrderItem> setMaxTimeLimitForCombo(OrderItem parent, String restaurantCode) {
+    private List<OrderItem> getOrderItemForEachMenuItemInCombo(OrderItem parent) {
         List<OrderItem> subItems = new ArrayList<>();
         for (ComboItem comboItem : parent.getCombo().getComboItemSet()) {
             OrderItem subItem = new OrderItem();
             subItem.setOrder(parent.getOrder());
             subItem.setParentItem(parent);
             subItem.setMenuItem(comboItem.getMenuItem());
-            setMaxTimeLimitAndAssignCook(subItem, restaurantCode);
             subItems.add(subItem);
         }
         return subItems;
