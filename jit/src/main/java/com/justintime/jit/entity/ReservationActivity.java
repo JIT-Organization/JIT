@@ -31,20 +31,4 @@ public class ReservationActivity extends BaseEntity{
     @Column(name = "updated_by", nullable = false, length = 100)
     private String updatedBy;
 
-//    // Copy Constructor
-//    public ReservationActivity(ReservationActivity other) {
-//        this.id = other.id;
-//        this.reservation = other.reservation != null ? new Reservation(other.reservation) : null;
-//        this.changeLog = other.changeLog;
-//        this.updatedBy = other.updatedBy;
-//        this.updatedDttm = other.updatedDttm;
-//    }
-//
-//    public Reservation getReservation() {
-//        return reservation != null ? new Reservation(reservation) : null; // Defensive copy
-//    }
-//
-//    public void setReservation(Reservation reservation) {
-//        this.reservation = reservation != null ? new Reservation(reservation) : null; // Defensive copy
-//    }
 }

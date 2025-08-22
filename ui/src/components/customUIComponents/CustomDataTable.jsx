@@ -19,6 +19,11 @@ import {
 } from "@/components/ui/table";
 import DataTableHeader from "./DataTableHeader";
 import DataTablePagination from "./DataTablePagination";
+import { ChevronLeft, Filter } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Separator } from "../ui/separator";
+import CustomPopup from "./CustomPopup";
+import { checkPermission } from "@/lib/utils/checkPerimission";
 
 export function CustomDataTable({
   columns = [],
@@ -31,7 +36,8 @@ export function CustomDataTable({
   categories = [],
   expandableRowContent = () => {},
   onSubmitClick,
-  selectOptions
+  selectOptions,
+  permissionIdentifier
 }) {
   const [sorting, setSorting] = React.useState([]);
   const [columnFilters, setColumnFilters] = React.useState([]);
@@ -61,6 +67,25 @@ export function CustomDataTable({
       globalFilter,
     },
   });
+
+  const router = useRouter();
+
+  const handlePreviousClick = () => {
+    router.back();
+  };
+
+  const handleActiveToggle = (label) => {
+    setActiveCategory(label);
+    if (label === "All") {
+      setColumnFilters([]);
+    } else {
+      setColumnFilters([{ id: "categorySet", value: label }]);
+    }
+  };
+
+  const buttonDisplayPermissions = {
+    users: checkPermission("P101")
+  }
 
   return (
     <div className="w-full">

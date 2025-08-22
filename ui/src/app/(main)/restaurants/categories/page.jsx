@@ -28,8 +28,8 @@ const Categories = () => {
   if (isLoading) return <p>Loading categories...</p>;
   if (error) return <p>Error loading categories: {error.message}</p>;
 
-  const handleToggle = (id, value) => {
-    patchMutation.mutate({ id, fields: { isPublic: value } });
+  const handleToggle = (categoryName, value) => {
+    patchMutation.mutate({ categoryName, fields: { isPublic: value } });
   };
 
   const handleEditClick = (row) => {
@@ -43,7 +43,7 @@ const Categories = () => {
 
   const onUpdateSubmit = (row) => (values) => {
     const formValues = { ...values, isPublic: values.visibility === "public" };
-    const id = row.id;
+    const categoryName = row.categoryName;
     delete formValues["visibility"];
     const formValueKeys = Object.keys(formValues);
     formValueKeys.forEach((key) => {
@@ -57,7 +57,7 @@ const Categories = () => {
       }
     });
     if (Object.keys(formValues).length !== 0)
-      patchMutation.mutate({ id, fields: { ...formValues } });
+      patchMutation.mutate({ categoryName, fields: { ...formValues } });
   };
 
   const onAddSubmit = (values) => {
@@ -66,8 +66,8 @@ const Categories = () => {
     postMutation.mutate({ fields: formValues });
   };
 
-  const handleDeleteClick = (id) => {
-    deleteMutation.mutate({ id });
+  const handleDeleteClick = (categoryName) => {
+    deleteMutation.mutate({ categoryName });
   };
 
   const columns = getCategoryColumns(

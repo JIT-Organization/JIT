@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+} from "@/components/ui/popover";
 
 export function DateTimePicker({ value, onChange, className }) {
   const [open, setOpen] = React.useState(false);
@@ -36,27 +37,29 @@ export function DateTimePicker({ value, onChange, className }) {
     selectedDate ? selectedDate.getMinutes() : 0
   );
   const [ampm, setAmPm] = React.useState(() =>
-    selectedDate ? (selectedDate.getHours() >= 12 ? 'PM' : 'AM') : 'AM'
+    selectedDate ? (selectedDate.getHours() >= 12 ? "PM" : "AM") : "AM"
   );
 
   const convertTo24Hour = (h, ampmVal) => {
-    if (ampmVal === 'AM') return h === 12 ? 0 : h;
+    if (ampmVal === "AM") return h === 12 ? 0 : h;
     return h === 12 ? 12 : h + 12;
   };
 
+  // Sync when external value changes
   React.useEffect(() => {
     if (!value) return;
 
-    const newVal = typeof value === 'string' ? new Date(value) : value;
+    const newVal = typeof value === "string" ? new Date(value) : value;
     if (isNaN(newVal.getTime())) return;
 
     setSelectedDate(new Date(newVal));
     const h = newVal.getHours();
     setHour(h % 12 || 12);
     setMinute(newVal.getMinutes());
-    setAmPm(h >= 12 ? 'PM' : 'AM');
+    setAmPm(h >= 12 ? "PM" : "AM");
   }, [value]);
 
+  // Emit onChange when date/time updates
   React.useEffect(() => {
     if (!selectedDate) return;
 
@@ -66,6 +69,7 @@ export function DateTimePicker({ value, onChange, className }) {
     updated.setSeconds(0);
     updated.setMilliseconds(0);
 
+    // Only emit if date is different
     if (!value || updated.getTime() !== new Date(value).getTime()) {
       onChange?.(updated);
     }
@@ -87,20 +91,20 @@ export function DateTimePicker({ value, onChange, className }) {
         <Button
           variant="outline"
           className={cn(
-            'justify-start text-left font-normal',
-            !selectedDate && 'text-muted-foreground',
+            "justify-start text-left font-normal",
+            !selectedDate && "text-muted-foreground",
             className
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
           <span className="truncate overflow-hidden whitespace-nowrap block">
             {selectedDate
-              ? format(selectedDate, 'PPP hh:mm a')
-              : 'Pick date & time'}
+              ? format(selectedDate, "PPP hh:mm a")
+              : "Pick date & time"}
           </span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-4 space-y-3 bg-white" align="start">
+      <PopoverContent className="w-auto p-4 space-y-3" align="start">
         <Calendar
           mode="single"
           selected={selectedDate}
@@ -111,49 +115,43 @@ export function DateTimePicker({ value, onChange, className }) {
         <div className="flex items-center gap-2">
           <Clock className="h-4 w-4 text-muted-foreground" />
 
-          <Select value={hour.toString()} onValueChange={(val) => setHour(Number(val))}>
-            <SelectTrigger className="w-14">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-white">
-              {[...Array(12)].map((_, i) => {
-                const h = (i + 1).toString().padStart(2, '0');
-                return (
-                  <SelectItem key={h} value={parseInt(h).toString()}>
-                    {h}
-                  </SelectItem>
-                );
-              })}
-            </SelectContent>
-          </Select>
+          <select
+            value={hour}
+            onChange={(e) => setHour(parseInt(e.target.value))}
+            className="border rounded px-2 py-1"
+          >
+            {[...Array(12)].map((_, i) => {
+              const h = i + 1;
+              return (
+                <option key={h} value={h}>
+                  {h.toString().padStart(2, "0")}
+                </option>
+              );
+            })}
+          </select>
 
           <span>:</span>
 
-          <Select value={minute.toString()} onValueChange={(val) => setMinute(Number(val))}>
-            <SelectTrigger className="w-14">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-white">
-              {[...Array(60)].map((_, i) => {
-                const m = i.toString().padStart(2, '0');
-                return (
-                  <SelectItem key={m} value={i.toString()}>
-                    {m}
-                  </SelectItem>
-                );
-              })}
-            </SelectContent>
-          </Select>
+          <select
+            value={minute}
+            onChange={(e) => setMinute(parseInt(e.target.value))}
+            className="border rounded px-2 py-1"
+          >
+            {[...Array(60)].map((_, i) => (
+              <option key={i} value={i}>
+                {i.toString().padStart(2, "0")}
+              </option>
+            ))}
+          </select>
 
-          <Select value={ampm} onValueChange={(val) => setAmPm(val)}>
-            <SelectTrigger className="w-16">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-white">
-              <SelectItem value="AM">AM</SelectItem>
-              <SelectItem value="PM">PM</SelectItem>
-            </SelectContent>
-          </Select>
+          <select
+            value={ampm}
+            onChange={(e) => setAmPm(e.target.value)}
+            className="border rounded px-2 py-1"
+          >
+            <option value="AM">AM</option>
+            <option value="PM">PM</option>
+          </select>
         </div>
       </PopoverContent>
     </Popover>

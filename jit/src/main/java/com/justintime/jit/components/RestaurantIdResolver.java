@@ -1,6 +1,6 @@
 package com.justintime.jit.components;
 
-import com.justintime.jit.config.CustomAuthToken;
+import com.justintime.jit.security.CustomAuthToken;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;

@@ -1,33 +1,40 @@
 package com.justintime.jit.entity;
 
+import com.justintime.jit.entity.Enums.Role;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.Collections;
 
 public class UserPrincipal implements UserDetails {
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    private final User user;
+    private final String email;
+    private final String passwordHash;
+    private final Role role;
 
     public UserPrincipal(User user) {
-        this.user = user;
+        this.email = user.getEmail();
+        this.passwordHash = user.getPasswordHash();
+        this.role = user.getRole();
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singleton(user.getRole());
+        return Collections.singleton(role);
     }
 
     @Override
     public String getPassword() {
-        return user.getPasswordHash();
+        return passwordHash;
     }
 
     @Override
     public String getUsername() {
-        return user.getEmail();
+        return email;
     }
 
     @Override

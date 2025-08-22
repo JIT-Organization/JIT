@@ -17,7 +17,7 @@ export default function MultiSelect({
   const toggleOption = (optionValue) => {
     if (disabled) return;
     const currentValue = value || [];
-    
+
     if (isSingleSelect) {
       if (currentValue.includes(optionValue)) {
         onChange([]);

@@ -30,7 +30,7 @@ export const getCategoryColumns = (
     cell: ({ row }) => (
       <Switch
         checked={row.original.isPublic}
-        onCheckedChange={(value) => handleSwitchToggle(row.original.id, value)}
+        onCheckedChange={(value) => handleSwitchToggle(row.original.categoryName, value)}
       />
     ),
   },
@@ -61,7 +61,7 @@ export const getCategoryColumns = (
               <Trash2 className="text-red-600 h-5" />
             </Button>
           }
-          onConfirm={() => handleDeleteClick(row.original.id)}
+          onConfirm={() => handleDeleteClick(row.original.categoryName)}
         />
       </div>
     ),

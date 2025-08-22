@@ -13,6 +13,7 @@ import com.justintime.jit.util.CommonServiceImplUtil;
 import com.justintime.jit.util.filter.FilterItemsUtil;
 import com.justintime.jit.util.mapper.GenericMapper;
 import com.justintime.jit.util.mapper.MapperFactory;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,7 @@ public class MenuItemServiceImpl extends BaseServiceImpl<MenuItem, Long> impleme
     @Autowired
     private CommonServiceImplUtil commonServiceImplUtil;
 
+    @SuppressFBWarnings(value = "EI2", justification = "All the params are Spring-managed beans and are not exposed.")
     public MenuItemServiceImpl(MenuItemRepository menuItemRepository,
                                CategoryRepository categoryRepository,
                                OrderItemRepository orderItemRepository,

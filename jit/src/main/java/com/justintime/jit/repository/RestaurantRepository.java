@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
@@ -19,4 +20,6 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
     List<Restaurant> findByRestaurantNameContaining(String restaurantName);
 
     Optional<Restaurant> findByRestaurantCode(String restaurantCode);
+
+    Optional<Set<Restaurant>> findByRestaurantCodeIn(Set<String> restaurantCodes);
 }

@@ -23,10 +23,17 @@ export default function CustomPopup({ type, trigger, onConfirm, dialogDescriptio
       ) : (
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>{trigger}</DialogTrigger>
-          <DialogContent className="w-full">
-            <DialogTitle className="capitalize">{type}</DialogTitle>
-            <DialogDescription>{dialogDescription}</DialogDescription>
-            <DialogForm type={type} data={data} onSubmit={handleSubmit} selectOptions={selectOptions} isLoading={isLoading} />
+          <DialogContent className="w-full max-w-4xl p-6 sm:p-8 md:p-10 rounded-2xl shadow-lg">
+            <DialogTitle className="capitalize text-2xl font-semibold mb-1">{type}</DialogTitle>
+            <DialogDescription className="text-muted-foreground mb-6">
+              {dialogDescription}
+            </DialogDescription>
+            <DialogForm
+              type={type}
+              data={data}
+              onSubmit={onSubmit}
+              selectOptions={selectOptions}
+            />
           </DialogContent>
         </Dialog>
       )}

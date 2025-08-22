@@ -30,21 +30,4 @@ public class OrderActivity extends BaseEntity {
 
     @Column(name = "updated_by", nullable = false, length = 100)
     private String updatedBy;
-
-//    // Copy constructor
-//    public OrderActivity(OrderActivity other) {
-//        this.id = other.id;
-//        this.order = other.order != null ? new Order(other.order) : null;
-//        this.changeLog = other.changeLog;
-//        this.updatedBy = other.updatedBy;
-//        this.updatedDttm = other.updatedDttm;
-//    }
-//
-//    public Order getOrder() {
-//        return order != null ? new Order(order) : null; // Defensive copy
-//    }
-//
-//    public void setOrder(Order order) {
-//        this.order = order != null ? new Order(order) : null; // Defensive copy
-//    }
 }

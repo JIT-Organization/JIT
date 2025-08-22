@@ -43,6 +43,13 @@ public interface MenuItemRepository extends BaseRepository<MenuItem, Long> {
     //@Modifying
     void deleteByRestaurantIdAndMenuItemName(@Param("restaurantId") Long restaurantId, @Param("menuItemName") String menuItemName);
 
+    @Modifying
+    @Query(value = "DELETE mi FROM menu_item mi " +
+            "JOIN restaurant r ON mi.restaurant_id = r.id " +
+            "WHERE r.restaurant_code = :restaurantCode AND mi.menu_item_name = :menuItemName", nativeQuery = true)
+    void deleteByRestaurantCodeAndMenuItemName(@Param("restaurantCode") String restaurantCode, @Param("menuItemName") String menuItemName);
+
+    boolean existsByMenuItemNameAndRestaurant_RestaurantCode(String menuItemName, String restaurantCode);
     @Query(value = "SELECT mi.* FROM menu_item mi " +
             "JOIN restaurant r ON r.id = mi.restaurant_id " +
             "WHERE mi.menu_item_name IN (:menuItemNames) " +

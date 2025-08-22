@@ -1,8 +1,21 @@
 package com.justintime.jit.util;
 
 import com.justintime.jit.exception.ImageSizeLimitExceededException;
+import com.justintime.jit.validators.ValidationRule;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import jakarta.annotation.Nullable;
 
-public class ImageValidation {
+import java.util.List;
+import java.util.Set;
+
+public class ValidationUtils {
+
+    /**
+     * Helper method to determine if a field should be validated.
+     */
+    public static boolean shouldValidate(String fieldName, @Nullable Set<String> fieldsToValidate) {
+        return fieldsToValidate == null || fieldsToValidate.contains(fieldName);
+    }
 
     // Helper method to calculate padding length for base64 string
     private static int countPadding(String encodedData) {
@@ -31,6 +44,15 @@ public class ImageValidation {
             throw new ImageSizeLimitExceededException("Please upload an image with size less than "
                     + (maxSize / 1024 / 1024) + " MB. The uploaded image size is "
                     + (imageSize / 1024 / 1024) + " MB.");
+        }
+    }
+
+    @SuppressFBWarnings(value = "UC", justification = "Used for runtime validation of DTO fields")
+    public static void runValidation(List<ValidationRule> allRules, @Nullable Set<String> fieldsToValidate) {
+        for (ValidationRule rule : allRules) {
+            if (shouldValidate(rule.fieldName(), fieldsToValidate)) {
+                rule.validationLogic().run();
+            }
         }
     }
 }

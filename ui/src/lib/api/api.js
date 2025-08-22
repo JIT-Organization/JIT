@@ -1,5 +1,5 @@
 import { URLS } from "./urls";
-import { getRequest, patchRequest, deleteRequest, handleMutate, handleError, postRequest } from "./api-helper";
+import { getRequest, patchRequest, deleteRequest, handleMutate, handleError, postRequest, generateQueryString } from "./api-helper";
 import Cookies from "js-cookie";
 
 const cacheConfig = {
@@ -116,7 +116,7 @@ export const getCategoriesListOptions = () => ({
 
 export const createCategory = (queryClient) => ({
   mutationFn: async ({ id, fields }) => {
-    return await postRequest(URLS.categoriesList, {
+    return await postRequest(`${URLS.categoriesList}/TGSR`, {
       ...fields
     });
   },
@@ -131,13 +131,14 @@ export const createCategory = (queryClient) => ({
 });
 
 export const patchUpdateCategoriesList = (queryClient) => ({
-  mutationFn: async ({ id, fields }) => {
-    return await patchRequest(`${URLS.categoriesList}/${id}`, {
+  mutationFn: async ({ categoryName, fields }) => {
+    console.log("ccc", categoryName)
+    return await patchRequest(`${URLS.categoriesList}/TGSR/${categoryName}`, {
       dto: { ...fields },
       propertiesToBeUpdated: Object.keys(fields),
     });
   },
-  onMutate: async ({ id, fields }) => handleMutate(queryClient, ["categoriesList"], id, fields),
+  onMutate: async ({ categoryName, fields }) => handleMutate(queryClient, ["categoriesList"], categoryName, fields, "categoryName"),
   onError: (error, variables, context) => {
     console.error("Failed to update item:", error);
     handleError(queryClient, ["categoriesList"], context);
@@ -148,8 +149,8 @@ export const patchUpdateCategoriesList = (queryClient) => ({
 });
 
 export const deleteCategoryItem = (queryClient) => ({
-  mutationFn: async ({ id }) => deleteRequest(`${URLS.categoriesList}/${id}`),
-  onMutate: async ({ id }) => handleMutate(queryClient, ["categoriesList"], id),
+  mutationFn: async ({ categoryName }) => deleteRequest(`${URLS.categoriesList}/TGSR/${categoryName}`),
+  onMutate: async ({ categoryName }) => handleMutate(queryClient, ["categoriesList"], categoryName, null, "categoryName", "delete"),
   onError: (err, variables, context) => handleError(queryClient, ["categoriesList"], context),
   onSettled: () => {
     queryClient.invalidateQueries(["categoriesList"]);
@@ -359,6 +360,25 @@ export const updateOrder = (queryClient) => ({
     queryClient.invalidateQueries(["ordersList"]);
     queryClient.invalidateQueries(["orderDetails"]);
   },
+});
+export const registerUser = () => ({
+  mutationFn: async ({ token, userData }) => {
+    const url = generateQueryString(URLS.register, { token });
+    return postRequest(url, userData);
+  }
+})
+
+export const sendInviteToUser = () => ({
+  mutationFn: async (userData) => {
+    return postRequest(URLS.sendInvite, userData)
+  }
+})
+
+export const getPermisisonsForRole = (role) => ({
+  queryKey: ['permissions', role],
+  queryFn: () => getRequest(`${URLS.permissions}/${role}`, `Failed to fetch permissions for role ${role}`),
+  enabled: !!role,
+  ...cacheConfig,
 });
 
 // export const getMenuItemListOptions = (id) => ({

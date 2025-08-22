@@ -1,4 +1,5 @@
 import axios from "axios";
+import Cookies from "js-cookie";
 
 export const getDistinctCategories = (data) => {
   const categorySet = new Set();

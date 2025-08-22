@@ -104,33 +104,4 @@ export const getStaffMemberColumns = (
       );
     },
   },
-  // {
-  //   id: "dotActions",
-  //   enableHiding: false,
-  //   cell: ({ row }) => {
-  //     const staff = row.original;
-
-  //     return (
-  //       <DropdownMenu>
-  //         <DropdownMenuTrigger asChild>
-  //           <Button variant="ghost" className="h-8 w-8 p-0">
-  //             <span className="sr-only">Open menu</span>
-  //             <MoreHorizontal />
-  //           </Button>
-  //         </DropdownMenuTrigger>
-  //         <DropdownMenuContent align="end">
-  //           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-  //           <DropdownMenuItem
-  //             onClick={() => navigator.clipboard.writeText(staff.userName)}
-  //           >
-  //             Copy user name
-  //           </DropdownMenuItem>
-  //           <DropdownMenuSeparator />
-  //           <DropdownMenuItem>View profile</DropdownMenuItem>
-  //           <DropdownMenuItem>View shift details</DropdownMenuItem>
-  //         </DropdownMenuContent>
-  //       </DropdownMenu>
-  //     );
-  //   },
-  // },
 ];

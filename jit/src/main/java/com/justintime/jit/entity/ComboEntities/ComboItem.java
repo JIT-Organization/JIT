@@ -34,31 +34,4 @@ public class ComboItem extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "menu_item_id", nullable = false)
     private MenuItem menuItem;
-
-//
-//    public Set<Combo> getComboSet() {
-//        return Collections.unmodifiableSet(comboSet);
-//    }
-//
-//    public void setComboSet(Set<Combo> comboSet) {
-//        this.comboSet = comboSet != null ? new HashSet<>(comboSet) : new HashSet<>();
-//    }
-//
-//    public MenuItem getMenuItem() {
-//        return menuItem == null ? null : new MenuItem(menuItem);
-//    }
-//
-//    public void setMenuItem(MenuItem menuItem) {
-//        this.menuItem = menuItem == null ? null : new MenuItem(menuItem);
-//    }
-//
-//    public ComboItem(ComboItem other) {
-//        this.id = null; // Ensure new instance doesn't have the same ID
-//        this.comboSet = new HashSet<>(other.comboSet); // Deep copy of comboSet if necessary
-//        this.menuItem = new MenuItem(other.menuItem); // Deep copy of MenuItem, assuming MenuItem has a copy constructor
-//        this.createdDttm = other.createdDttm;
-//        this.updatedDttm = other.updatedDttm;
-//    }
-
-
 }
