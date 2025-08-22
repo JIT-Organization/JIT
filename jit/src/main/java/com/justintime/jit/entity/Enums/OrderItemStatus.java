@@ -5,5 +5,6 @@ public enum OrderItemStatus {
     ASSIGNED,
     STARTED,
     READY_TO_SERVE,
-    SERVED
+    SERVED,
+    CANCELLED
 }

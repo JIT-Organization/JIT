@@ -3,30 +3,21 @@ package com.justintime.jit.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.socket.EnableWebSocketSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.AuthenticationEntryPoint;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.*;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.cors.*;
 import org.springframework.web.filter.CorsFilter;
 
 import java.util.List;
@@ -34,109 +25,70 @@ import java.util.Map;
 
 @Configuration
 @EnableWebSecurity
+@EnableWebSocketSecurity
 public class SecurityConfig {
 
-    @Autowired
-    public UserDetailsService userDetailsService;
+    private final JwtAuthenticationFilter jwtFilter;
+    @Value("${login.page.url}") private String loginPageUrl;
 
-    @Autowired
-    private JwtAuthenticationFilter jwtFilter;
-
-    @Value("${login.page.url}")
-    private String loginPageUrl;
+    public SecurityConfig(JwtAuthenticationFilter jwtFilter) {
+        this.jwtFilter = jwtFilter;
+    }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(request -> request
-                        .requestMatchers("register", "login", "refresh").permitAll()
+                .authorizeHttpRequests(req -> req
+                        .requestMatchers(
+                                "/register", "/login", "/refresh",
+                                "/swagger-ui/**", "/v3/api-docs/**",
+                                "/swagger-resources/**", "/webjars/**"
+                        ).permitAll()
+                        .requestMatchers( "/ws/**", "/user/**", "/topic/**").authenticated() // Web Socket matchers
                         .anyRequest().authenticated())
-                .httpBasic(httpBasic -> httpBasic.authenticationEntryPoint(authenticationEntryPoint()))
-//                .formLogin(form -> form
-//                        .loginPage("/login")
-//                        .failureHandler(customAuthFailureHandler())
-////                        .failureForwardUrl("/refresh")
-//                        .defaultSuccessUrl("/", true)
-//                        .permitAll())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(this::apiAwareEntryPoint))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
-    @Bean
-    public CorsFilter corsFilter() {
-        return new CorsFilter(corsConfigurationSource());
+    /* ---------- Beans ---------- */
+    @Bean AuthenticationManager authenticationManager(AuthenticationConfiguration cfg) throws Exception {
+        return cfg.getAuthenticationManager();
     }
 
     @Bean
-    public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setPasswordEncoder(passwordEncoder());
-        provider.setUserDetailsService(userDetailsService);
-        return provider;
-    }
+    PasswordEncoder passwordEncoder() { return new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder(12); }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000")); // Explicit origin
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(true);
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
+    CorsFilter corsFilter() {
+        return new CorsFilter(corsSource());
     }
 
-    private AuthenticationFailureHandler customAuthFailureHandler() {
-        return (HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) -> {
-            try {
-                response.sendRedirect("/refresh");
-            } catch (Exception e) {
-                response.sendRedirect(loginPageUrl);
-            }
-        };
+    private CorsConfigurationSource corsSource() {
+        CorsConfiguration cfg = new CorsConfiguration();
+        cfg.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:8080"));
+        cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        cfg.setAllowedHeaders(List.of("*"));
+        cfg.setAllowCredentials(true);  // Crucial for cookie-based auth
+
+        UrlBasedCorsConfigurationSource src = new UrlBasedCorsConfigurationSource();
+        src.registerCorsConfiguration("/**", cfg);
+        return src;
     }
 
-//    @Bean
-//    public AuthenticationManager authenticationManager(
-//            UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
-//        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-//        authProvider.setUserDetailsService(userDetailsService);
-//        authProvider.setPasswordEncoder(passwordEncoder);
-//        return new ProviderManager(authProvider);
-//    }
-
-    @Bean
-    public AuthenticationManager authenticationManager (AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
-    }
-
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(12);
-    }
-
-    @Bean
-    public AuthenticationEntryPoint authenticationEntryPoint() {
-        return ((request, response, authException) -> {
-            if(isApiRequest(request)) {
-                response.setContentType("application/json");
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.getWriter().write(new ObjectMapper().writeValueAsString(
-                        Map.of("error", "Unauthorized", "message", "Token expired or missing")
-                ));
-            } else {
-                response.sendRedirect("/refresh");
-            }
-        });
-    }
-
-    private boolean isApiRequest(HttpServletRequest request) {
-        String acceptHeader = request.getHeader("Accept");
-        return acceptHeader != null && acceptHeader.contains("application/json");
+    /* smarter 401 vs redirect */
+    private void apiAwareEntryPoint(HttpServletRequest req, HttpServletResponse res, AuthenticationException ex)
+            throws java.io.IOException {
+        String accept = req.getHeader("Accept");
+        if (accept != null && accept.contains("application/json")) {
+            res.setContentType("application/json");
+            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            res.getWriter().write(new ObjectMapper().writeValueAsString(
+                    Map.of("error", "Unauthorized", "message", "Token expired or missing")));
+        } else {
+            res.sendRedirect(loginPageUrl);
+        }
     }
 }

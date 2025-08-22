@@ -2,16 +2,14 @@
 import { useState, useMemo } from "react";
 import {
   FaTachometerAlt,
-  FaUtensils,
-  FaCartPlus,
-  FaClipboardList,
   FaCreditCard,
   FaLayerGroup,
   FaUsers,
   FaTable,
   FaCog,
-  FaListAlt,
-} from "react-icons/fa"; 
+} from "react-icons/fa";
+import { GiCook } from "react-icons/gi";
+import { MdAddCircleOutline, MdRestaurantMenu, MdAddShoppingCart, MdListAlt } from "react-icons/md";
 import {
   Sidebar,
   SidebarContent,
@@ -35,9 +33,7 @@ function SidebarNavigation({ activePage, setActivePage, sidebarLinks }) {
             <SidebarMenuButton asChild>
               <Link
                 href={href}
-                className={`menu-item sidebar-link flex items-center text-xl transition-all duration-300 ease-in-out hover:bg-gray-200 hover:shadow-md rounded-lg ${
-                  activePage === href ? "bg-gray-400 shadow-md" : ""
-                }`}
+                className={`menu-item sidebar-item flex items-center text-xl transition-all duration-300 ease-in-out rounded-lg ${activePage === href ? "active" : ""}`}
                 aria-current={activePage === href ? "page" : undefined}
                 onClick={() => setActivePage(href)}
               >
@@ -72,14 +68,15 @@ export default function RootLayout({ children }) {
   const sidebarLinks = useMemo(
     () => [
       { href: "/dashboard", label: "Dashboard", icon: <FaTachometerAlt /> },
-      { href: "/restaurants/kitchen", label: "Kitchen", icon: <FaUtensils /> },
-      { href: "/restaurants/menu", label: "Our Menu", icon: <FaCartPlus /> },
-      { href: "/restaurants/createOrder", label: "New Order", icon: <FaClipboardList /> },
-      { href: "/restaurants/orders", label: "View Orders", icon: <FaListAlt /> },
+      { href: "/restaurants/kitchen", label: "Kitchen", icon: <GiCook /> },
+      { href: "/restaurants/menu", label: "Our Menu", icon: <MdRestaurantMenu /> },
+      { href: "/restaurants/createOrder", label: "New Order", icon: <MdAddShoppingCart /> },
+      { href: "/restaurants/orders", label: "View Orders", icon: <MdListAlt /> },
       { href: "/restaurants/payments", label: "Payment History", icon: <FaCreditCard /> },
       { href: "/restaurants/categories", label: "Categories", icon: <FaLayerGroup /> },
       { href: "/restaurants/users", label: "Users", icon: <FaUsers /> },
       { href: "/restaurants/tables", label: "Tables", icon: <FaTable /> },
+      { href: "/restaurants/add-on", label: "Add-Ons", icon: <MdAddCircleOutline /> },
       { href: "/restaurants/settings", label: "Settings", icon: <FaCog /> },
     ],
     []
@@ -89,7 +86,7 @@ export default function RootLayout({ children }) {
     <>
       <SidebarProvider>
         <AppBar />
-        <Sidebar className="pt-16 overflow-x-hidden" collapsible="icon" aria-label="Sidebar">
+        <Sidebar className="pt-16 overflow-x-hidden sidebar-theme" collapsible="icon" aria-label="Sidebar">
           <SidebarNavigation 
             activePage={activePage}
             setActivePage={setActivePage}

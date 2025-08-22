@@ -1,10 +1,8 @@
 package com.justintime.jit.entity.ComboEntities;
 
-import com.justintime.jit.entity.BaseEntity;
-import com.justintime.jit.entity.Category;
+import com.justintime.jit.entity.*;
+import com.justintime.jit.entity.Enums.FoodType;
 import com.justintime.jit.entity.OrderEntities.OrderItem;
-import com.justintime.jit.entity.Restaurant;
-import com.justintime.jit.entity.TimeInterval;
 import com.justintime.jit.util.filter.FilterableItem;
 import jakarta.persistence.*;
 import lombok.*;
@@ -13,10 +11,13 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
 
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Audited
@@ -52,13 +53,13 @@ public class Combo extends BaseEntity implements FilterableItem {
     @Column(name = "price", nullable = false, columnDefinition = "DECIMAL(10,2)")
     private BigDecimal price;
 
-    @Column(name = "stock", nullable = false, columnDefinition = "INT DEFAULT 0")
-    private Integer stock = 0;
+    @Column(name = "stock")
+    private Integer stock;
 
-    @Column(name="description", nullable = false, columnDefinition = "TEXT")
+    @Column(name="description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "offer_price", nullable = false, columnDefinition = "DECIMAL(10,2)")
+    @Column(name = "offer_price", columnDefinition = "DECIMAL(10,2)")
     private BigDecimal offerPrice;
 
     @UpdateTimestamp
@@ -80,6 +81,9 @@ public class Combo extends BaseEntity implements FilterableItem {
     )
     private Set<TimeInterval> timeIntervalSet = new HashSet<>();
 
+    @ManyToMany(mappedBy = "comboSet", cascade = {CascadeType.MERGE})
+    private Set<AddOn> addOnSet = new HashSet<>();
+
     @Column(name = "preparation_time", nullable = false)
     private Integer preparationTime;
 
@@ -92,13 +96,16 @@ public class Combo extends BaseEntity implements FilterableItem {
     @Column(name = "active", nullable = false, length = 1)
     private Boolean active;
 
+    @Column(name = "availability")
+    private String availability;
+
     @Column(name = "hotel_special", nullable = false, length = 1)
     private Boolean hotelSpecial;
 
     @Column(name = "image", columnDefinition = "TEXT")
     private String base64Image;
 
-    @Column(name = "rating", nullable = false, columnDefinition = "DECIMAL(10,1)")
+    @Column(name = "rating", columnDefinition = "DECIMAL(10,1)")
     private BigDecimal rating;
 
     @OneToMany(mappedBy = "combo", cascade = CascadeType.ALL)
@@ -115,9 +122,30 @@ public class Combo extends BaseEntity implements FilterableItem {
     }
 
     @Override
-    public Boolean isCombo() {
-        return true;
+    public FoodType getFoodType() {
+        return FoodType.COMBO;
     }
+
+    public Set<DayOfWeek> getAvailability() {
+        if (this.availability == null || this.availability.isBlank()) {
+            return new HashSet<>();
+        }
+        return Arrays.stream(this.availability.split(","))
+                .map(String::trim)
+                .map(DayOfWeek::valueOf)
+                .collect(Collectors.toSet());
+    }
+
+    public void setAvailability(Set<DayOfWeek> days) {
+        if (days == null || days.isEmpty()) {
+            this.availability = null;
+        } else {
+            this.availability = days.stream()
+                    .map(DayOfWeek::name)
+                    .collect(Collectors.joining(","));
+        }
+    }
+
 
 //    public Set<ComboItem> getComboItemSet() {
 //        return Collections.unmodifiableSet(comboItemSet);

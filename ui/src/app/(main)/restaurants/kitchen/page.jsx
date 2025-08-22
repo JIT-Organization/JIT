@@ -61,8 +61,9 @@ const CreateOrder = () => {
                   <FoodCard
                     food={food}
                     quantity={food.id} //qty update pannanum
-                    mode = "order" status="Ordered"
-                    onActionClick={(id,x)=> console.log(id, x) }
+                    mode="kitchen"
+                    status="STARTED"
+                    onActionClick={(id, x) => console.log(id, x)}
                   />
                 </div>
               ))}

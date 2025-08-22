@@ -1,6 +1,8 @@
 package com.justintime.jit.entity;
 
+import com.justintime.jit.entity.ComboEntities.Combo;
 import com.justintime.jit.entity.ComboEntities.ComboItem;
+import com.justintime.jit.entity.Enums.FoodType;
 import com.justintime.jit.entity.OrderEntities.OrderItem;
 import com.justintime.jit.util.filter.FilterableItem;
 import jakarta.persistence.*;
@@ -10,8 +12,10 @@ import lombok.Setter;
 import org.hibernate.envers.Audited;
 
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Audited
@@ -42,6 +46,9 @@ public class MenuItem extends BaseEntity implements FilterableItem {
     @Column(name = "price", columnDefinition = "DECIMAL(10,2)")
     private BigDecimal price;
 
+    @Column(name = "food_type")
+    private FoodType foodType; // MenuItem, Variant
+
     @Column(name = "offer_price", columnDefinition = "DECIMAL(10,2)")
     private BigDecimal offerPrice;
 
@@ -50,6 +57,9 @@ public class MenuItem extends BaseEntity implements FilterableItem {
 
     @Column(name = "offer_to")
     private LocalDateTime offerTo;
+
+    @Column(name = "availability")
+    private String availability;
 
     @Column(name = "stock", columnDefinition = "INT DEFAULT 0")
     private Integer stock = 0;
@@ -61,7 +71,7 @@ public class MenuItem extends BaseEntity implements FilterableItem {
     @JoinTable(
             name = "menu_item_cook",
             joinColumns = @JoinColumn(name = "menu_item_id"),
-            inverseJoinColumns = @JoinColumn(name = "cook_id")
+            inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private Set<User> cookSet = new HashSet<>();
 
@@ -73,6 +83,9 @@ public class MenuItem extends BaseEntity implements FilterableItem {
             uniqueConstraints = @UniqueConstraint(columnNames = {"menu_item_id", "time_interval_id"})
     )
     private Set<TimeInterval> timeIntervalSet = new HashSet<>();
+
+    @ManyToMany(mappedBy = "menuItemSet", cascade = {CascadeType.MERGE})
+    private Set<AddOn> addOnSet = new HashSet<>();
 
     @Column(name = "preparation_time")
     private Integer preparationTime;
@@ -119,10 +132,26 @@ public class MenuItem extends BaseEntity implements FilterableItem {
         return this.menuItemName;
     }
 
-    @Override
-    public Boolean isCombo() {
-        return false;
+    public Set<DayOfWeek> getAvailability() {
+        if (this.availability == null || this.availability.isBlank()) {
+            return new HashSet<>();
+        }
+        return Arrays.stream(this.availability.split(","))
+                .map(String::trim)
+                .map(DayOfWeek::valueOf)
+                .collect(Collectors.toSet());
     }
+
+    public void setAvailability(Set<DayOfWeek> days) {
+        if (days == null || days.isEmpty()) {
+            this.availability = null;
+        } else {
+            this.availability = days.stream()
+                    .map(DayOfWeek::name)
+                    .collect(Collectors.joining(","));
+        }
+    }
+
 
 //    // Copy Constructor
 //    public MenuItem(MenuItem other) {

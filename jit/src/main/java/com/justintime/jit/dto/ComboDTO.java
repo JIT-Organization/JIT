@@ -11,7 +11,6 @@ import java.util.Set;
 @Getter
 @Setter
 public class ComboDTO {
-    private Long id;
     private String comboName;
     private String description;
     private BigDecimal price;

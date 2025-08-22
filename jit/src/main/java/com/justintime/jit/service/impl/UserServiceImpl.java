@@ -13,6 +13,7 @@ import com.justintime.jit.util.CommonServiceImplUtil;
 import com.justintime.jit.util.mapper.GenericMapper;
 import com.justintime.jit.util.mapper.MapperFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -40,6 +41,11 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
     @Override
     public List<User> findByUserName(String userName) {
         return userRepository.findByUserName(userName);
+    }
+
+    @Override
+    public List<String> getCookNamesByRestaurantCode(String restaurantCode) {
+        return userRepository.findUserNamesByRestaurantCodeAndRole(restaurantCode, Role.COOK);
     }
 
     @Override
@@ -75,6 +81,11 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
     }
 
     @Override
+    public User getUserByRestaurantCodeAndUsername(String restaurantCode, String username) {
+        return userRepository.findByRestaurantCodeAndUserName(restaurantCode, username);
+    }
+
+    @Override
     public UserDTO patchUpdateUser(String restaurantCode, String username, UserDTO dto, HashSet<String> propertiesToBeUpdated) {
         User existingUser = userRepository.findByRestaurantCodeAndUserName(restaurantCode, username);
         GenericMapper<User, UserDTO> userMapper = MapperFactory.getMapper(User.class, UserDTO.class);
@@ -98,6 +109,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
     }
 
     @Override
+//    @Cacheable("principal_user")
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email);
         if(user == null) {
