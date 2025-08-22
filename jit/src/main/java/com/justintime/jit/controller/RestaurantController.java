@@ -27,6 +27,9 @@ public class RestaurantController extends BaseController {
         return ResponseEntity.ok(createdRestaurant);
     }
 
+
+
+
     // Get all restaurants
 //    @GetMapping
 //    public ResponseEntity<List<Restaurant>> getAllRestaurants() {
@@ -37,8 +40,14 @@ public class RestaurantController extends BaseController {
     //Get a restaurant by ID
     @GetMapping("/{restaurantCode}")
     public ResponseEntity<ApiResponse<RestaurantDTO>> getRestaurantByCode(@PathVariable String restaurantCode) {
-        RestaurantDTO restaurant = restaurantService.getRestaurantByRestaurantCode(restaurantCode);
+        RestaurantDTO restaurant = restaurantService.getRestaurantDTOByRestaurantCode(restaurantCode);
         return success(restaurant);
+    }
+
+    @GetMapping("/getUpiId/{restaurantCode}")
+    public ResponseEntity<ApiResponse<String>> getUpiIdByRestaurantCode(@PathVariable String restaurantCode) {
+        String upiId = restaurantService.getUpiIdByRestaurantCode(restaurantCode);
+        return success(upiId);
     }
 
     // Update restaurant details

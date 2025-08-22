@@ -24,16 +24,24 @@ public interface MenuItemRepository extends BaseRepository<MenuItem, Long> {
     Set<MenuItem> findByMenuItemNamesAndRestaurantId(@Param("formattedMenuItemNames") Set<String> formattedMenuItemNames,
                                                    @Param("restaurantId") Long restaurantId);
 
-    MenuItem findByRestaurantIdAndId(Long restaurantId, Long id);
+    MenuItem findByRestaurantIdAndMenuItemName(Long restaurantId, String menuItemName);
     @Query(value = "SELECT mi.* FROM menu_item mi " +
             "JOIN restaurant r ON r.id = mi.restaurant_id " +
             "WHERE r.restaurant_code = :restaurantCode", nativeQuery = true)
     List<MenuItem> findByRestaurantCode(@Param("restaurantCode") String restaurantCode);
 
+    @Query(value = "SELECT mi.menu_item_name FROM menu_item mi " +
+            "JOIN restaurant r ON r.id = mi.restaurant_id " +
+            "WHERE r.restaurant_code = :restaurantCode", nativeQuery = true)
+    List<String> findMenuItemNamesByRestaurantCode(@Param("restaurantCode") String restaurantCode);
+
     @Query(value = "SELECT mi.* FROM menu_item mi " +
             "JOIN restaurant r ON r.id = mi.restaurant_id " +
             "WHERE r.restaurant_code = :restaurantCode and mi.menu_item_name = :menuItemName", nativeQuery = true)
-    Optional<MenuItem> findByRestaurantCodeAndMenuItemName(String restaurantCode, String menuItemName);
+    MenuItem findByRestaurantCodeAndMenuItemName(String restaurantCode, String menuItemName);
+
+    //@Modifying
+    void deleteByRestaurantIdAndMenuItemName(@Param("restaurantId") Long restaurantId, @Param("menuItemName") String menuItemName);
 
     @Modifying
     @Query(value = "DELETE mi FROM menu_item mi " +
@@ -42,4 +50,17 @@ public interface MenuItemRepository extends BaseRepository<MenuItem, Long> {
     void deleteByRestaurantCodeAndMenuItemName(@Param("restaurantCode") String restaurantCode, @Param("menuItemName") String menuItemName);
 
     boolean existsByMenuItemNameAndRestaurant_RestaurantCode(String menuItemName, String restaurantCode);
+    @Query(value = "SELECT mi.* FROM menu_item mi " +
+            "JOIN restaurant r ON r.id = mi.restaurant_id " +
+            "WHERE mi.menu_item_name IN (:menuItemNames) " +
+            "AND r.restaurant_code = :restaurantCode", nativeQuery = true)
+    Set<MenuItem> findByMenuItemNamesAndRestaurantCode(@Param("menuItemNames") Set<String> menuItemNames, @Param("restaurantCode") String restaurantCode);
+
+    @Query(value = "SELECT mi.* FROM menu_item mi " +
+            "JOIN restaurant r ON r.id = mi.restaurant_id " +
+            "WHERE mi.menu_item_name = :menuItemName " +
+            "AND r.restaurant_code = :restaurantCode", nativeQuery = true)
+    MenuItem findMenuItemByMenuItemNamesAndRestaurantCode(@Param("menuItemName") String menuItemName, @Param("restaurantCode") String restaurantCode);
+
+    long countByRestaurantId(Long restaurantId);
 }

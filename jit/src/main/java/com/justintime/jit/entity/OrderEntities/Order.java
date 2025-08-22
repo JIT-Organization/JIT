@@ -2,6 +2,7 @@ package com.justintime.jit.entity.OrderEntities;
 
 import com.justintime.jit.entity.BaseEntity;
 import com.justintime.jit.entity.Enums.OrderStatus;
+import com.justintime.jit.entity.Enums.OrderType;
 import com.justintime.jit.entity.PaymentEntities.Payment;
 import com.justintime.jit.entity.Reservation;
 import com.justintime.jit.entity.Restaurant;
@@ -25,7 +26,7 @@ import java.util.List;
 @Table(name = "orders")
 public class Order extends BaseEntity {
 
-    @Column(name = "order_number", unique = true, nullable = false, updatable = false)
+    @Column(name = "order_number", unique = true, updatable = false)
     private String orderNumber;
 
     @PrePersist
@@ -34,39 +35,43 @@ public class Order extends BaseEntity {
     }
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "restaurant_id", nullable = false)
+    @JoinColumn(name = "restaurant_id")
     private Restaurant restaurant;
 
     @Enumerated(EnumType.STRING)
-    @Column(name ="status", nullable = false)
+    @Column(name ="status", length = 20)
     private OrderStatus status;
 
-    @Column(name = "order_date", nullable = false, updatable = false)
+    @Column(name = "order_type")
+    private OrderType orderType;
+
+    @Column(name = "order_date", updatable = false)
     private LocalDateTime orderDate = LocalDateTime.now();
 
-    @Column(name="notes")
+    @Column(name="notes", columnDefinition = "TEXT")
     private String notes;
 
-    @Column(name = "serve_time", nullable = false)
+    @Column(name = "serve_time")
     private LocalDateTime serveTime;
 
-    @Column(name = "amount", nullable = false, columnDefinition = "DECIMAL(10,2)")
+    @Column(name = "amount", columnDefinition = "DECIMAL(10,2)")
     private BigDecimal amount;
 
     @OneToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JoinColumn(name = "reservation_id")
     private Reservation reservation;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.REMOVE)
     private List<Payment> payments;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.REMOVE)
     private List<OrderItem> orderItems;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.REMOVE)
     private List<OrderActivity> orderActivities;
+
 }

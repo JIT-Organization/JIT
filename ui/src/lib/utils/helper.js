@@ -78,3 +78,21 @@ export const getAxiosInstance = (cookies = "") => {
     prefetch: (queryClient, queryOptions) => queryClient.prefetchQuery(queryOptions)
   }
 }
+
+export const getChangedFields = (original, updated) => {
+  const changed = {};
+  Object.keys(updated).forEach((key) => {
+    if (
+      (Array.isArray(original?.[key]) && Array.isArray(updated[key]) &&
+        JSON.stringify(original[key]) === JSON.stringify(updated[key]))
+      || original?.[key] === updated[key]
+    ) {
+      return;
+    }
+    if (updated[key] === null || updated[key] === undefined) {
+      return;
+    }
+    changed[key] = updated[key];
+  });
+  return changed;
+};

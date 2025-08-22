@@ -2,7 +2,6 @@ package com.justintime.jit.service;
 
 import com.justintime.jit.dto.OrderDTO;
 import com.justintime.jit.entity.Enums.OrderStatus;
-import com.justintime.jit.entity.OrderEntities.Order;
 import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
@@ -11,12 +10,12 @@ import java.util.List;
 import java.util.Optional;
 
 public interface OrderService {
-    ResponseEntity<String> createOrder(Long restaurantId, Long userId, OrderDTO orderDTO);
-    List<OrderDTO> getOrdersByRestaurantId(Long restaurantId);
-    OrderDTO getOrderByRestaurantAndId(Long restaurantId, Long id);
-    OrderDTO updateOrderStatus(Long restaurantId, Long id, OrderStatus status);
-    OrderDTO patchUpdateOrder(Long restaurantId, Long orderId, OrderDTO orderDTO, HashSet<String> propertiesToBeUpdated);
-    void deleteOrder(Long restaurantId, Long id);
+    ResponseEntity<String> createOrder(String restaurantCode, OrderDTO orderDTO);
+    List<OrderDTO> getOrdersByRestaurantId(String restaurantCode);
+    OrderDTO getOrderByRestaurantAndOrderNumber(String restaurantCode, String orderNumber);
+    OrderDTO updateOrderStatus(String restaurantCode, String orderNumber, OrderStatus status);
+    OrderDTO patchUpdateOrder(String restaurantCode, String orderNumber, OrderDTO orderDTO, HashSet<String> propertiesToBeUpdated);
+    void deleteOrder(String restaurantCode, String orderNumber);
     List<OrderDTO> getOrdersByRestaurantAndUserId(Optional<Long> restaurantId, Optional<Long> userId);
-    BigDecimal calculateTotalRevenue(Long restaurantId);
+    BigDecimal calculateTotalRevenue(String restaurantCode);
 }

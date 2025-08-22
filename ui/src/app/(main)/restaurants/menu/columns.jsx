@@ -3,6 +3,7 @@ import * as React from "react";
 import {
   Pencil,
   Trash2,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -13,7 +14,8 @@ import CustomPopup from "@/components/customUIComponents/CustomPopup";
 export const getMenuListcolumns = (
   handleSwitchToggle,
   handleEditClick,
-  handleDeleteClick
+  handleDeleteClick,
+  loadingStates = { isDeleting: () => false, isUpdating: () => false }
 ) => [
   {
     accessorKey: "image",
@@ -63,11 +65,14 @@ export const getMenuListcolumns = (
     accessorKey: "offerPrice",
     header: () => <div className="text-right">Offer Price</div>,
     cell: ({ row }) => {
-      const offerPrice = parseFloat(row.getValue("offerPrice"));
+      const offerPrice = row.getValue("offerPrice");
+      if (offerPrice === null || offerPrice === undefined) {
+      return <div className="text-center font-medium">--</div>;
+      }
       const formatted = new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "INR",
-      }).format(offerPrice);
+      }).format(parseFloat(offerPrice));
 
       return <div className="text-right font-medium">{formatted}</div>;
     },
@@ -75,12 +80,21 @@ export const getMenuListcolumns = (
   {
     accessorKey: "active",
     header: "Active",
-    cell: ({ row }) => (
-      <Switch
-        checked={row.original.active}
-        onCheckedChange={(value) => handleSwitchToggle(row.index, value)}
-      />
-    ),
+    cell: ({ row }) => {
+      const menuItemName = row.original.menuItemName;
+      const isDeleting = loadingStates.isDeleting(menuItemName);
+      const isUpdating = loadingStates.isUpdating(menuItemName);
+      return (
+        <div className="flex items-center space-x-2">
+          <Switch
+            checked={row.original.active}
+            onCheckedChange={(value) => handleSwitchToggle(row.index, value)}
+            disabled={isUpdating || isDeleting}
+          />
+          {isUpdating && <Loader2 className="h-4 w-4 animate-spin" />}
+        </div>
+      );
+    },
   },
   {
     accessorKey: "categorySet",
@@ -108,51 +122,38 @@ export const getMenuListcolumns = (
     id: "actions",
     header: <div className="flex justify-center">Actions</div>,
     cell: ({ row }) => {
+      const menuItemName = row.original.menuItemName;
+      const foodType = row.original.foodType;
+      const isDeleting = loadingStates.isDeleting(menuItemName);
+      const isUpdating = loadingStates.isUpdating(menuItemName);
+
       return (
         <div className="flex justify-center">
-          <Button className="cursor-pointer hover:bg-gray-600/10 h-10 w-10 flex justify-center items-center rounded-md" variant="ghost" onClick={() => handleEditClick(row.original.id)}>
-            <Pencil className="text-black h-5" />
+          <Button
+            className="cursor-pointer hover:bg-gray-600/10 h-10 w-10 flex justify-center items-center rounded-md"
+            variant="ghost"
+            colorVariant="none"
+            onClick={() => handleEditClick(menuItemName,foodType)}
+            disabled={isDeleting || isUpdating}
+          >
+            <Pencil className="h-5" />
           </Button>
           <CustomPopup
             type="delete"
             trigger={
-              <Button className="cursor-pointer hover:bg-gray-600/20 h-10 w-10 flex justify-center items-center rounded-md" variant="ghost">
-                <Trash2 className="text-black h-5" />
+              <Button
+                className="cursor-pointer hover:bg-gray-600/20 h-10 w-10 flex justify-center items-center rounded-md"
+                variant="ghost"
+                colorVariant="none"
+                disabled={isDeleting || isUpdating}
+              >
+                {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="text-red-600 h-5" />}
               </Button>
             }
-            onConfirm={() => handleDeleteClick(row.original.menuItemName)}
+            onConfirm={() => handleDeleteClick(menuItemName, foodType)}
           />
         </div>
       );
     },
   },
-  // {
-  //   id: "dotActions",
-  //   enableHiding: false,
-  //   cell: ({ row }) => {
-  //     const payment = row.original;
-
-  //     return (
-  //       <DropdownMenu>
-  //         <DropdownMenuTrigger asChild>
-  //           <Button variant="ghost" className="h-8 w-8 p-0">
-  //             <span className="sr-only">Open menu</span>
-  //             <MoreHorizontal />
-  //           </Button>
-  //         </DropdownMenuTrigger>
-  //         <DropdownMenuContent align="end">
-  //           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-  //           <DropdownMenuItem
-  //             onClick={() => navigator.clipboard.writeText(payment.id)}
-  //           >
-  //             Copy payment ID
-  //           </DropdownMenuItem>
-  //           <DropdownMenuSeparator />
-  //           <DropdownMenuItem>View customer</DropdownMenuItem>
-  //           <DropdownMenuItem>View payment details</DropdownMenuItem>
-  //         </DropdownMenuContent>
-  //       </DropdownMenu>
-  //     );
-  //   },
-  // },
 ];

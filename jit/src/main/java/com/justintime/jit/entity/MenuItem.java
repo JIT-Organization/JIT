@@ -1,24 +1,21 @@
 package com.justintime.jit.entity;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.justintime.jit.entity.ComboEntities.Combo;
 import com.justintime.jit.entity.ComboEntities.ComboItem;
+import com.justintime.jit.entity.Enums.FoodType;
 import com.justintime.jit.entity.OrderEntities.OrderItem;
 import com.justintime.jit.util.filter.FilterableItem;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
 
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Audited
@@ -49,16 +46,20 @@ public class MenuItem extends BaseEntity implements FilterableItem {
     @Column(name = "price", columnDefinition = "DECIMAL(10,2)")
     private BigDecimal price;
 
+    @Column(name = "food_type")
+    private FoodType foodType; // MenuItem, Variant
+
     @Column(name = "offer_price", columnDefinition = "DECIMAL(10,2)")
     private BigDecimal offerPrice;
 
-    @UpdateTimestamp
     @Column(name = "offer_from")
     private LocalDateTime offerFrom;
 
-    @UpdateTimestamp
     @Column(name = "offer_to")
     private LocalDateTime offerTo;
+
+    @Column(name = "availability")
+    private String availability;
 
     @Column(name = "stock", columnDefinition = "INT DEFAULT 0")
     private Integer stock = 0;
@@ -68,11 +69,11 @@ public class MenuItem extends BaseEntity implements FilterableItem {
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
-            name = "menu_item_cook", // Join table name
-            joinColumns = @JoinColumn(name = "menu_item_id"), // Foreign key for MenuItem
-            inverseJoinColumns = @JoinColumn(name = "cook_id")
+            name = "menu_item_cook",
+            joinColumns = @JoinColumn(name = "menu_item_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private Set<Cook> cookSet = new HashSet<>();
+    private Set<User> cookSet = new HashSet<>();
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
@@ -83,8 +84,17 @@ public class MenuItem extends BaseEntity implements FilterableItem {
     )
     private Set<TimeInterval> timeIntervalSet = new HashSet<>();
 
+    @ManyToMany(mappedBy = "menuItemSet", cascade = {CascadeType.MERGE})
+    private Set<AddOn> addOnSet = new HashSet<>();
+
     @Column(name = "preparation_time")
     private Integer preparationTime;
+
+    @Column(name = "is_preparation_time_for_single_menu_item", length=1)
+    private Boolean isPreparationTimeForSingleMenuItem = true;
+
+    @Column(name = "max_clubbed_menu_items")
+    private Integer maxClubbedMenuItems = 1;
 
     @Column(name = "accept_bulk_orders", length = 1)
     private Boolean acceptBulkOrders;
@@ -113,14 +123,34 @@ public class MenuItem extends BaseEntity implements FilterableItem {
     @OneToMany(mappedBy = "menuItem", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems = new ArrayList<>();
 
+    @ManyToOne
+    @JoinColumn(name = "batch_config_id")
+    private BatchConfig batchConfig;
+
     @Override
     public String getName() {
         return this.menuItemName;
     }
 
-    @Override
-    public Boolean isCombo() {
-        return false;
+    public Set<DayOfWeek> getAvailability() {
+        if (this.availability == null || this.availability.isBlank()) {
+            return new HashSet<>();
+        }
+        return Arrays.stream(this.availability.split(","))
+                .map(String::trim)
+                .map(DayOfWeek::valueOf)
+                .collect(Collectors.toSet());
     }
+
+    public void setAvailability(Set<DayOfWeek> days) {
+        if (days == null || days.isEmpty()) {
+            this.availability = null;
+        } else {
+            this.availability = days.stream()
+                    .map(DayOfWeek::name)
+                    .collect(Collectors.joining(","));
+        }
+    }
+
 
 }

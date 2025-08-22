@@ -8,9 +8,11 @@ import com.justintime.jit.repository.RestaurantRepository;
 import com.justintime.jit.service.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class SearchServiceImpl implements SearchService {
@@ -57,4 +59,24 @@ public class SearchServiceImpl implements SearchService {
 
         return results;
     }
+    public void checkMenuItemExistsInRestaurant(String restaurantCode, String menuItemName) {
+        if (!StringUtils.hasText(menuItemName) || !StringUtils.hasText(restaurantCode)) {
+            throw new IllegalArgumentException("Menu item name and restaurant code must not be empty");
+        }
+
+        Optional<Restaurant> restaurantOpt = restaurantRepository.findByRestaurantCode(restaurantCode);
+
+        if (restaurantOpt.isEmpty()) {
+            throw new IllegalArgumentException("Restaurant with code '" + restaurantCode + "' not found");
+        }
+
+        Restaurant restaurant = restaurantOpt.get();
+        boolean exists = restaurant.getMenu().stream()
+                .anyMatch(menuItem -> menuItem.getMenuItemName().equalsIgnoreCase(menuItemName));
+
+        if (exists) {
+            throw new IllegalStateException("Menu item '" + menuItemName + "' already exists in restaurant '" + restaurant.getRestaurantName() + "'");
+        }
+    }
+
 }

@@ -12,8 +12,9 @@ public interface RestaurantService {
     Restaurant getRestaurantById(Long id);
     void updateRestaurant(String code, Restaurant restaurant);
     void deleteRestaurant(String restaurantCode);
-    RestaurantDTO getRestaurantByRestaurantCode(String restaurantCode);
-
+    Restaurant getRestaurantByRestaurantCode(String restaurantCode);
+    RestaurantDTO getRestaurantDTOByRestaurantCode(String restaurantCode);
+    String getUpiIdByRestaurantCode(String restaurantCode);
     void patchUpdateRestaurant(String restaurantCode, RestaurantDTO dto, HashSet<String> propertiesToBeUpdated);
 
 //    List<String> findSimilarNames(String name);

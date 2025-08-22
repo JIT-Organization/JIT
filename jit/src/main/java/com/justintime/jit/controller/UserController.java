@@ -26,6 +26,12 @@ public class UserController extends BaseController {
 //        return ResponseEntity.ok(users);
 //    }
 
+    @GetMapping("/getCookNames/{restaurantCode}")
+    public ResponseEntity<ApiResponse<List<String>>> getCookNamesByRestaurantCode(@PathVariable String restaurantCode) {
+        List<String> cookNames = userService.getCookNamesByRestaurantCode(restaurantCode);
+        return success(cookNames);
+    }
+
     @GetMapping("/{restaurantCode}")
     @PreAuthorize("hasPermission(null, 'VIEW_USERS')")
     public ResponseEntity<ApiResponse<List<UserDTO>>> getUsersByRestaurantCode(@PathVariable String restaurantCode) {
@@ -73,7 +79,7 @@ public class UserController extends BaseController {
     @GetMapping("/search")
     @PreAuthorize("hasPermission(null, 'VIEW_USERS')")
     public ResponseEntity<List<User>> searchUsers(@RequestParam String userName) {
-        List<User> users = userService.findByUsername(userName);
+        List<User> users = userService.findByUserName(userName);
         return ResponseEntity.ok(users);
     }
 

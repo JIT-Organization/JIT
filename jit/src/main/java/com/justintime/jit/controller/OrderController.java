@@ -1,9 +1,9 @@
 package com.justintime.jit.controller;
 
+import com.justintime.jit.dto.ApiResponse;
 import com.justintime.jit.dto.OrderDTO;
 import com.justintime.jit.dto.PatchRequest;
 import com.justintime.jit.entity.Enums.OrderStatus;
-import com.justintime.jit.entity.OrderEntities.Order;
 import com.justintime.jit.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,57 +17,57 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/jit-api/orders")
-public class OrderController {
+public class OrderController extends BaseController {
 
     @Autowired
     private OrderService orderService;
 
-    @PostMapping("/{restaurantId}/{userId}")
+    @PostMapping("/{restaurantCode}")
     @PreAuthorize("hasPermission(null, 'ADD_ORDERS')")
-    public ResponseEntity<String> createOrder(@PathVariable Long restaurantId, @PathVariable Long userId, @RequestBody OrderDTO orderDTO) {
-        return orderService.createOrder(restaurantId, userId, orderDTO);
+    public ResponseEntity<String> createOrder(@PathVariable String restaurantCode, @RequestBody OrderDTO orderDTO) {
+        return orderService.createOrder(restaurantCode, orderDTO);
     }
 
-    @GetMapping("/{restaurantId}")
+    @GetMapping("/{restaurantCode}")
     @PreAuthorize("hasPermission(null, 'VIEW_ORDERS')")
-    public ResponseEntity<List<OrderDTO>> getAllOrders(@PathVariable Long restaurantId) {
-        List<OrderDTO> orderDTOs = orderService.getOrdersByRestaurantId(restaurantId);
-        return ResponseEntity.ok(orderDTOs);
+    public ResponseEntity<ApiResponse<List<OrderDTO>>> getAllOrders(@PathVariable String restaurantCode) {
+        List<OrderDTO> orderDTOs = orderService.getOrdersByRestaurantId(restaurantCode);
+        return success(orderDTOs, "Orders fetched successfully");
     }
 
-    @GetMapping("/{restaurantId}/{orderId}")
+    @GetMapping("/{restaurantCode}/{orderNumber}")
     @PreAuthorize("hasPermission(null, 'VIEW_ORDERS')")
-    public ResponseEntity<OrderDTO> getOrderById(@PathVariable Long restaurantId, @PathVariable Long orderId) {
-        OrderDTO orderDTO = orderService.getOrderByRestaurantAndId(restaurantId, orderId);
+    public ResponseEntity<OrderDTO> getOrderById(@PathVariable String restaurantCode, @PathVariable String orderNumber) {
+        OrderDTO orderDTO = orderService.getOrderByRestaurantAndOrderNumber(restaurantCode, orderNumber);
         return ResponseEntity.ok(orderDTO);
     }
 
-    @PutMapping("/{restaurantId}/{orderId}/status")
-//    @PreAuthorize("hasPermission(null, 'ADD_ORDERS')")
+    @PutMapping("/{restaurantCode}/{orderNumber}/status")
+    //    @PreAuthorize("hasPermission(null, 'ADD_ORDERS')")
     public ResponseEntity<OrderDTO> updateOrderStatus(
-            @PathVariable Long restaurantId,
-            @PathVariable Long orderId,
+            @PathVariable String restaurantCode,
+            @PathVariable String orderNumber,
             @RequestParam OrderStatus status) {
-        OrderDTO updatedOrderDTO = orderService.updateOrderStatus(restaurantId, orderId, status);
+        OrderDTO updatedOrderDTO = orderService.updateOrderStatus(restaurantCode, orderNumber, status);
         return ResponseEntity.ok(updatedOrderDTO);
     }
 
-    @PatchMapping("/{restaurantId}/{orderId}")
+    @PatchMapping("/{restaurantCode}/{orderNumber}")
     @PreAuthorize("hasPermission(null, 'ADD_ORDERS')")
     public OrderDTO patchUpdateOrder(
-            @PathVariable Long restaurantId,
-            @PathVariable Long orderId,
+            @PathVariable String restaurantCode,
+            @PathVariable String orderNumber,
             @RequestBody PatchRequest<OrderDTO> payload){
-        return orderService.patchUpdateOrder(restaurantId, orderId, payload.getDto(), payload.getPropertiesToBeUpdated());
+        return orderService.patchUpdateOrder(restaurantCode, orderNumber, payload.getDto(), payload.getPropertiesToBeUpdated());
     }
 
-    @DeleteMapping("/{restaurantId}/{orderId}")
-    public ResponseEntity<String> deleteOrder(@PathVariable Long restaurantId, @PathVariable Long orderId) {
-        orderService.deleteOrder(restaurantId,orderId);
+    @DeleteMapping("/{restaurantCode}/{orderNumber}")
+    public ResponseEntity<String> deleteOrder(@PathVariable String restaurantCode, @PathVariable String orderNumber) {
+        orderService.deleteOrder(restaurantCode, orderNumber);
         return ResponseEntity.ok("Order deleted successfully.");
     }
 
-    @GetMapping("/{restaurantId}/users/{userId}/orders")
+    @GetMapping("/{restaurantCode}/users/{username}/orders")
     @PreAuthorize("hasPermission(null, 'VIEW_ORDERS')")
     public ResponseEntity<List<OrderDTO>> getOrdersByRestaurantAndUserId(
             @PathVariable(required = false) Long restaurantId,
@@ -80,9 +80,9 @@ public class OrderController {
         return ResponseEntity.ok(orderDTOs);
     }
 
-    @GetMapping("/{restaurantId}/revenue")
+    @GetMapping("/{restaurantCode}/revenue")
     @PreAuthorize("hasPermission(null, 'ADD_ORDERS')")
-    public ResponseEntity<BigDecimal> calculateTotalRevenue(@PathVariable Long restaurantId) {
-        BigDecimal totalRevenue = orderService.calculateTotalRevenue(restaurantId);
+    public ResponseEntity<BigDecimal> calculateTotalRevenue(@PathVariable String restaurantCode) {
+        BigDecimal totalRevenue = orderService.calculateTotalRevenue(restaurantCode);
         return ResponseEntity.ok(totalRevenue); }
 }

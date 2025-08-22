@@ -1,6 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 
 const ImageUploader = ({
@@ -79,7 +80,7 @@ const ImageUploader = ({
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {images.map((img, index) => (
             <div key={index} className="relative group border rounded overflow-hidden">
-              <img
+              <Image
                 src={img.preview}
                 alt={`preview-${index}`}
                 className="w-full h-32 object-cover"

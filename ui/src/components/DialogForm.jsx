@@ -22,12 +22,13 @@ import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
 import MultiSelect from "./customUIComponents/MultiSelect";
 import { X } from "lucide-react";
 import { Switch } from "./ui/switch";
+import { AddOnSingleInput } from "./AddOnInput";
 import { useEffect, useState } from "react";
 import { getPermisisonsForRole } from "@/lib/api/api";
 import { useQuery } from "@tanstack/react-query";
 import { checkPermission } from "@/lib/utils/checkPerimission";
 
-export default function DialogForm({ type, data, onSubmit, selectOptions }) {
+export default function DialogForm({ type, data, onSubmit, selectOptions, isLoading }) {
   const isEdit = !!data;
 
   const [viewPermissions, setViewPermissions] = useState(false);
@@ -71,6 +72,13 @@ export default function DialogForm({ type, data, onSubmit, selectOptions }) {
           tableNumber: "",
           seatingCapacity: "",
           isAvailable: "yes",
+        };
+
+      case "add-on":
+        return {
+          label: "",
+          price: "",
+          options: [],
         };
 
       default:
@@ -140,7 +148,7 @@ export default function DialogForm({ type, data, onSubmit, selectOptions }) {
               <SelectTrigger>
                 <SelectValue placeholder="Role" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 {options.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
@@ -165,7 +173,7 @@ export default function DialogForm({ type, data, onSubmit, selectOptions }) {
               <SelectTrigger>
                 <SelectValue placeholder="Select shift" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 {options.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
@@ -400,14 +408,51 @@ export default function DialogForm({ type, data, onSubmit, selectOptions }) {
   const form = useForm({
     defaultValues: data || getDefaultValues(type),
     mode: "onBlur",
-  });  
+  });
   const role = form.watch("role");
-  const { data: permissionOptions = [] } = useQuery(getPermisisonsForRole(role)); 
+  const { data: permissionOptions = [] } = useQuery(getPermisisonsForRole(role));
+
+  // This function will be called by the form submit event
+  const handleSubmit = async (fields) => {
+    if (onSubmit) {
+      // Pass a closeDialog callback to parent
+      await onSubmit(fields);
+    }
+  };
+
+  if (type === "add-on") {
+    return (
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(handleSubmit)}
+          className="space-y-4"
+        >
+          <AddOnSingleInput
+            value={form.watch()}
+            onChange={(val) => {
+              form.reset(val);
+            }}
+            showRemove={false}
+            highlight={false}
+          />
+          <div className="flex space-x-4 items-center">
+            <DialogClose>
+              <div className="hover:bg-gray-600/10 py-2 px-4 rounded-lg">
+                Cancel
+              </div>
+            </DialogClose>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? "Saving..." : "Save"}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    );
+  }
 
   return (
     <Form {...form}>
-      <div className="max-h-[80vh] overflow-y-auto pr-2">
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
           <div
             className={`grid gap-6 ${(fieldConfig?.[type]?.length || 0) > 6
                 ? "grid-cols-1 sm:grid-cols-2"
@@ -445,13 +490,13 @@ export default function DialogForm({ type, data, onSubmit, selectOptions }) {
               </div>
             </DialogClose>
             <DialogClose asChild>
-              <Button type="submit" className="w-full sm:w-auto">
+              <Button type="submit" disabled={isLoading}>
                 {isEdit ? "Submit" : "Add"}
+                {isLoading ? "Saving..." : "Save"}
               </Button>
             </DialogClose>
           </div>
         </form>
-      </div>
     </Form>
   );
 }

@@ -9,8 +9,8 @@ import com.justintime.jit.exception.ImageSizeLimitExceededException;
 import com.justintime.jit.service.JwtService;
 import com.justintime.jit.util.ValidationUtils;
 import com.justintime.jit.service.MenuItemService;
-import com.justintime.jit.validators.ValidateInput;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.justintime.jit.validators.ValidateInput;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -41,10 +41,10 @@ public class MenuItemController extends BaseController {
         return success(menuItemService.getMenuItemsByRestaurantId(restaurantCode, sortBy, priceRange, category, onlyVeg, onlyForCombos));
     }
 
-    @GetMapping("/{restaurantId}/{id}")
+    @GetMapping("/{restaurantCode}/{menuItemName}")
     @PreAuthorize("hasPermission(null, 'VIEW_MENU_ITEMS')")
-    public ResponseEntity<ApiResponse<MenuItemDTO>> getMenuItemByRestaurantIdAndId(@PathVariable Long restaurantId, @PathVariable Long id){
-        return success(menuItemService.getMenuItemByRestaurantIdAndId(restaurantId, id));
+    public ResponseEntity<ApiResponse<MenuItemDTO>> getMenuItemByRestaurantIdAndMenuItemName(@PathVariable String restaurantCode, @PathVariable String menuItemName) {
+        return success(menuItemService.getMenuItemByRestaurantIdAndMenuItemName(restaurantCode, menuItemName));
     }
 
     @Deprecated

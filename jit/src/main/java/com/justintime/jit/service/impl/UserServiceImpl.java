@@ -4,9 +4,12 @@ import com.justintime.jit.dto.PermissionsDTO;
 import com.justintime.jit.dto.UserDTO;
 import com.justintime.jit.entity.*;
 import com.justintime.jit.entity.Enums.Role;
-import com.justintime.jit.event.UserInvitationEvent;
+import com.justintime.jit.entity.Restaurant;
+import com.justintime.jit.entity.User;
+import com.justintime.jit.entity.UserPrincipal;
 import com.justintime.jit.exception.ResourceNotFoundException;
 import com.justintime.jit.repository.RestaurantRepository;
+import com.justintime.jit.event.UserInvitationEvent;
 import com.justintime.jit.repository.UserInvitationRepository;
 import com.justintime.jit.repository.UserRepository;
 import com.justintime.jit.service.PermissionsService;
@@ -38,6 +41,8 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
 
     private final UserRepository userRepository;
 
+    private final RestaurantRepository restaurantRepository;
+
     private final CommonServiceImplUtil commonServiceImplUtil;
 
     private final PermissionsService permissionsService;
@@ -47,8 +52,6 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
     private final GenericMapper<User, UserDTO> userMapper = MapperFactory.getMapper(User.class, UserDTO.class);
 
     private final GenericMapper<Permissions, PermissionsDTO> permissionsMapper = MapperFactory.getMapper(Permissions.class, PermissionsDTO.class);
-
-    private final RestaurantRepository restaurantRepository;
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
@@ -66,8 +69,13 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
     }
 
     @Override
-    public List<User> findByUsername(String username) {
-        return userRepository.findByUsername(username);
+    public List<User> findByUserName(String userName) {
+        return userRepository.findByUsername(userName);
+    }
+
+    @Override
+    public List<String> getCookNamesByRestaurantCode(String restaurantCode) {
+        return userRepository.findUserNamesByRestaurantCodeAndRole(restaurantCode, Role.COOK);
     }
 
     @Override
@@ -107,8 +115,13 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
     }
 
     @Override
+    public User getUserByRestaurantCodeAndUsername(String restaurantCode, String username) {
+        return userRepository.findByRestaurantCodeAndUserName(restaurantCode, username);
+    }
+
+    @Override
     public UserDTO patchUpdateUser(String restaurantCode, String username, UserDTO dto, HashSet<String> propertiesToBeUpdated) {
-        User existingUser = userRepository.findByRestaurantCodeAndUsername(restaurantCode, username);
+        User existingUser = userRepository.findByRestaurantCodeAndUserName(restaurantCode, username);
         User patchedUser = userMapper.toEntity(dto);
         // TODO write a validation where the username should be unique if they are updating it
         if(propertiesToBeUpdated.contains("permissionCodes")) {
@@ -207,6 +220,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
     }
 
     @Override
+//    @Cacheable("principal_user")
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email);
         if(user == null) {

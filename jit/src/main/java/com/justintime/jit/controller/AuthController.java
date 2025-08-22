@@ -15,8 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.security.auth.login.LoginException;
 
-import static org.springframework.http.ResponseEntity.ok;
-
 @RestController
 @RequestMapping("/")
 public class AuthController extends BaseController {
