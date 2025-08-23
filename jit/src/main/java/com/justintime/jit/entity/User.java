@@ -1,23 +1,19 @@
 package com.justintime.jit.entity;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.justintime.jit.entity.Enums.Role;
 import com.justintime.jit.entity.OrderEntities.Order;
+import com.justintime.jit.entity.OrderEntities.OrderItem;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Entity
 @Audited
@@ -25,12 +21,12 @@ import java.util.stream.Collectors;
 @Setter
 @NoArgsConstructor
 @Table(name = "users")
-public class User extends BaseEntity{
+public class User extends BaseEntity {
 
         @Column(name = "first_name", nullable = false)
         private String firstName;
 
-        @Column(name = "last_name", nullable = false)
+        @Column(name = "last_name")
         private String lastName;
 
         @Column(name = "profile_picture_url")
@@ -39,7 +35,7 @@ public class User extends BaseEntity{
         @Column(name = "is_active", nullable = false)
         private Boolean isActive;
 
-        @Column(name = "user_name", nullable = false)
+        @Column(name = "user_name")
         private String username;
 
         @Column(name = "email", nullable = false)
@@ -48,17 +44,28 @@ public class User extends BaseEntity{
         @Column(name = "phone_number")
         private String phoneNumber;
 
-        @Column(name = "password_hash", nullable = false)
+        @Column(name = "password_hash")
         private String passwordHash;
 
         @Enumerated(EnumType.STRING)
         @Column(name = "role", nullable = false)
         private Role role;
 
-        @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
+        @Column(name = "shift")
+        private String shift;
+
+        @ManyToMany
+        @JoinTable(
+                name = "user_permissions",
+                joinColumns = @JoinColumn(name = "user_id"),
+                inverseJoinColumns = @JoinColumn(name = "permission_id")
+        )
+        private Set<Permissions> permissions;
+
+        @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
         private List<Order> orders;
 
-        @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
+        @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
         private List<Reservation> reservations;
 
         @ManyToMany
@@ -68,6 +75,24 @@ public class User extends BaseEntity{
                 inverseJoinColumns = @JoinColumn(name = "restaurant_id")
         )
         private Set<Restaurant> restaurants;
+
+        @ManyToMany(mappedBy = "cookSet")
+        private Set<MenuItem> menuItemSet;
+
+        @OneToMany(mappedBy = "cook")
+        private Set<Batch> batches;
+
+        @ManyToMany
+        @JoinTable(
+                name = "batch_config_cook",
+                joinColumns = @JoinColumn(name = "user_id"),
+                inverseJoinColumns = @JoinColumn(name = "batch_config_id")
+        )
+        private Set<BatchConfig> batchConfigs = new HashSet<>();
+
+        @OneToMany(mappedBy = "cook")
+        private List<OrderItem> orderItems = new ArrayList<>();
+
 
 //        // Copy Constructor
 //        public User(User other) {

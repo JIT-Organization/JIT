@@ -1,37 +1,81 @@
 package com.justintime.jit.service.impl;
 
-import com.justintime.jit.dto.LoginRequestDto;
+import com.justintime.jit.dto.PermissionsDTO;
+import com.justintime.jit.dto.UserDTO;
+import com.justintime.jit.entity.*;
 import com.justintime.jit.entity.Enums.Role;
+import com.justintime.jit.entity.Restaurant;
 import com.justintime.jit.entity.User;
 import com.justintime.jit.entity.UserPrincipal;
+import com.justintime.jit.exception.ResourceNotFoundException;
+import com.justintime.jit.repository.RestaurantRepository;
+import com.justintime.jit.event.UserInvitationEvent;
+import com.justintime.jit.repository.UserInvitationRepository;
 import com.justintime.jit.repository.UserRepository;
-import com.justintime.jit.service.JwtService;
+import com.justintime.jit.service.PermissionsService;
 import com.justintime.jit.service.UserService;
+import com.justintime.jit.util.CommonServiceImplUtil;
+import com.justintime.jit.util.mapper.GenericMapper;
+import com.justintime.jit.util.mapper.MapperFactory;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl extends BaseServiceImpl<User, Long> implements UserService {
 
     private final UserRepository userRepository;
 
+    private final RestaurantRepository restaurantRepository;
+
+    private final CommonServiceImplUtil commonServiceImplUtil;
+
+    private final PermissionsService permissionsService;
+
+    private final UserInvitationRepository userInvitationRepository;
+
+    private final GenericMapper<User, UserDTO> userMapper = MapperFactory.getMapper(User.class, UserDTO.class);
+
+    private final GenericMapper<Permissions, PermissionsDTO> permissionsMapper = MapperFactory.getMapper(Permissions.class, PermissionsDTO.class);
+
     @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
+    private ApplicationEventPublisher eventPublisher;
+
+    @Value("${register.invite.url}")
+    private String registrationUrl;
+
+    @SuppressFBWarnings(value = "EI2", justification = "User Service Impl is a Spring-managed bean and is not exposed.")
+    public UserServiceImpl(UserRepository userRepository, CommonServiceImplUtil commonServiceImplUtil, PermissionsService permissionsService, UserInvitationRepository userInvitationRepository, RestaurantRepository restaurantRepository, RestaurantRepository restaurantRepository1) {
         this.userRepository = userRepository;
+        this.commonServiceImplUtil = commonServiceImplUtil;
+        this.permissionsService = permissionsService;
+        this.userInvitationRepository = userInvitationRepository;
+        this.restaurantRepository = restaurantRepository1;
     }
 
     @Override
-    public List<User> findByUsername(String username) {
-        return userRepository.findByUsername(username);
+    public List<User> findByUserName(String userName) {
+        return userRepository.findByUsername(userName);
+    }
+
+    @Override
+    public List<String> getCookNamesByRestaurantCode(String restaurantCode) {
+        return userRepository.findUserNamesByRestaurantCodeAndRole(restaurantCode, Role.COOK);
     }
 
     @Override
@@ -60,6 +104,112 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
     }
 
     @Override
+    public List<UserDTO> getUsersByRestaurantCode(String restaurantCode) {
+        List<User> users = userRepository.findAllByRestaurantCode(restaurantCode);
+        return users.stream().map(user -> {
+            Set<String> permissionsCodes = user.getPermissions().stream().map(Permissions::getPermissionCode).collect(Collectors.toSet());
+            UserDTO userDTO = userMapper.toDto(user);
+            userDTO.setPermissionCodes(permissionsCodes);
+            return userDTO;
+        }).toList();
+    }
+
+    @Override
+    public User getUserByRestaurantCodeAndUsername(String restaurantCode, String username) {
+        return userRepository.findByRestaurantCodeAndUserName(restaurantCode, username);
+    }
+
+    @Override
+    public UserDTO patchUpdateUser(String restaurantCode, String username, UserDTO dto, HashSet<String> propertiesToBeUpdated) {
+        User existingUser = userRepository.findByRestaurantCodeAndUserName(restaurantCode, username);
+        User patchedUser = userMapper.toEntity(dto);
+        // TODO write a validation where the username should be unique if they are updating it
+        if(propertiesToBeUpdated.contains("permissionCodes")) {
+            Set<Permissions> permissions = permissionsService.getAllPermissionsByPermissionCodes(dto.getPermissionCodes());
+            permissions.addAll(existingUser.getPermissions());
+            patchedUser.setPermissions(permissions);
+            propertiesToBeUpdated.remove("permissionCodes");
+            propertiesToBeUpdated.add("permissions");
+        }
+        HashSet<String> propertiesToBeUpdatedClone = new HashSet<>(propertiesToBeUpdated);
+        commonServiceImplUtil.copySelectedProperties(patchedUser, existingUser, propertiesToBeUpdatedClone);
+        existingUser.setUpdatedDttm(LocalDateTime.now());
+        userRepository.save(existingUser);
+        Set<String> permissionCodes = existingUser.getPermissions().stream().map(Permissions::getPermissionCode).collect(Collectors.toSet());
+        UserDTO savedUserDTO = userMapper.toDto(existingUser);
+        savedUserDTO.setPermissionCodes(permissionCodes);
+        return savedUserDTO;
+    }
+
+    @Override
+    public UserDTO addOrUpdatePermissions(String email, List<PermissionsDTO> permissionsDTOS, boolean isEdit) throws AccessDeniedException {
+        if(isEdit) {
+            permissionsService.updatePermissions(email, false, permissionsDTOS);
+        } else {
+            Set<String> permissionCodes = permissionsDTOS.stream().map(PermissionsDTO::getPermissionCode).collect(Collectors.toSet());
+            permissionsService.addPermissionsToUser(email, permissionCodes);
+        }
+        User user = userRepository.findByEmail(email);
+        // TODO Add permissions DTO instead of permissions
+        return userMapper.toDto(user);
+    }
+
+    @Override
+    public List<PermissionsDTO> getAllPermissions() {
+        return permissionsService.getAllPermissionsByUserEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+    }
+
+    @Override
+    @Transactional
+    // TODO modify this method to a user registration link sender thru email service method
+    public UserDTO addUser(UserDTO addUserRequest) {
+        Set<String> permissionCodes = addUserRequest.getPermissionCodes();
+        User user = userMapper.toEntity(addUserRequest);
+        addPermissionsToUser(user, permissionCodes);
+        userRepository.save(user);
+        return userMapper.toDto(user);
+    }
+
+    // TODO get all possible details of the user in this itself, in link just pass the email so that the user can note that email and set the password alone
+    @Override
+    @Transactional
+    public void sendInviteToUser(UserDTO inviteUserDTO) throws IOException {
+        User user = userMapper.toEntity(inviteUserDTO);
+        user.setIsActive(false);
+        Set<Restaurant> restaurants = restaurantRepository.findByRestaurantCodeIn(inviteUserDTO.getRestaurantCodes()).orElseThrow(() -> new ResourceNotFoundException("Restaurants Not Found for given codes"));
+        user.setRestaurants(restaurants);
+        userRepository.save(user);
+        String token = UUID.randomUUID().toString();
+        UserInvitationToken invitationToken = new UserInvitationToken();
+        invitationToken.setToken(token);
+        invitationToken.setEmail(user.getEmail());
+        invitationToken.setExpiresAt(LocalDateTime.now().plusDays(1));
+        invitationToken.setUser(user);
+        userInvitationRepository.save(invitationToken);
+        String restaurantName = "";
+        if(Objects.nonNull(inviteUserDTO.getRestaurantCodes())) {
+            if(restaurants.size() == 1) {
+                restaurantName = restaurants.stream().findFirst().get().getRestaurantName();
+            } else {
+                if(inviteUserDTO.getRestaurantCodes().stream().findFirst().isPresent()) restaurantName = inviteUserDTO.getRestaurantCodes().stream().findFirst().get();
+            }
+        }
+        String queryParams = "token=%s&email=%s".formatted(token, user.getEmail());
+        String encodedQueryParams = Base64.getUrlEncoder().encodeToString(queryParams.getBytes(StandardCharsets.UTF_8));
+        String link = "%s?params=".formatted(registrationUrl) + encodedQueryParams;
+        String subject = "Welcome to the %s user registration".formatted(restaurantName);
+        String toEmail = user.getEmail();
+        publishToInvitationEventListener(toEmail, subject, link);
+    }
+
+    private void publishToInvitationEventListener(String toEmail, String subject, String link) throws IOException {
+        Resource resource = new ClassPathResource("templates/inviteLink.html");
+        String body = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8)
+                .replace("${link}", link);
+        eventPublisher.publishEvent(new UserInvitationEvent(this, toEmail, subject, body));
+    }
+
+    @Override
     public List<User> findByRole(Role role) {
         return userRepository.findByRole(role);
     }
@@ -70,11 +220,17 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
     }
 
     @Override
+//    @Cacheable("principal_user")
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email);
         if(user == null) {
             throw new UsernameNotFoundException("User not found");
         }
         return new UserPrincipal(user);
+    }
+
+    private void addPermissionsToUser(User user, Set<String> permissionCodes) {
+        Set<Permissions> permissions = permissionsService.getAllPermissionsByPermissionCodes(permissionCodes);
+        user.setPermissions(permissions);
     }
 }

@@ -1,10 +1,8 @@
 package com.justintime.jit.controller;
 
 
-import com.justintime.jit.entity.ComboEntities.Combo;
 import com.justintime.jit.entity.ComboEntities.ComboItem;
 import com.justintime.jit.service.ComboItemService;
-import com.justintime.jit.service.ComboService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/jit-api/ComboItems")
+@RequestMapping("/jit-api/comboItems")
 public class ComboItemController {
     @Autowired
     private ComboItemService comboItemService;

@@ -7,20 +7,19 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
 import java.security.Key;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.function.Function;
 
 @Service
 public class JwtServiceImpl implements JwtService {
 
-    private static final String secretKey = "N3VzdCFuVCFtMzUzY3JldEtleTRKU09Od2ViVDBrM25z";
+    @Value("${jwt.secret.key}")
+    private String secretKey;
     private final UserRepository userRepository;
     private static final long accessTokenExpiration = 1000 * 60 * 15;
     private static final long refreshTokenExpiration = 1000 * 60 * 60 * 12;
@@ -30,19 +29,19 @@ public class JwtServiceImpl implements JwtService {
         this.userRepository = userRepository;
     }
 
-    private List<Long> getRestaurantIds(String email) {
-        return userRepository.findRestaurantIdsByEmail(email);
+    private List<String> getRestaurantCodes(String email) {
+        return userRepository.findRestaurantCodesByEmail(email);
     }
 
     private String generateToken(String email, long expiration) {
         Map<String, Object> claims = new HashMap<>();
-        List<Long> restaurantIds = getRestaurantIds(email);
+        List<String> restaurantCodes = getRestaurantCodes(email);
         claims.put("role", userRepository.findByEmail(email).getRole().toString());
-        if(!restaurantIds.isEmpty()) {
-            if(restaurantIds.size() == 1) {
-                claims.put("restaurantId", restaurantIds.get(0));
+        if(!restaurantCodes.isEmpty()) {
+            if(restaurantCodes.size() == 1) {
+                claims.put("restaurantCode", restaurantCodes.get(0));
             } else {
-                claims.put("restaurantIds", restaurantIds);
+                claims.put("restaurantCodes", restaurantCodes);
             }
         }
         return Jwts.builder()
@@ -68,6 +67,19 @@ public class JwtServiceImpl implements JwtService {
     public String extractEmail(String token) {
         return extractClaim(token, Claims::getSubject);
     }
+
+    @Override
+    public Object extractRestaurantCode(String token) {
+        return extractClaim(token, claims -> {
+            if (claims.containsKey("restaurantCode")) {
+                return claims.get("restaurantCode", String.class);
+            } else if (claims.containsKey("restaurantCodes")) {
+                return claims.get("restaurantCodes", List.class);
+            }
+            return null;
+        });
+    }
+
 
     private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);

@@ -4,7 +4,6 @@ import com.justintime.jit.dto.ComboDTO;
 import com.justintime.jit.dto.MenuItemDTO;
 import com.justintime.jit.dto.TimeIntervalDTO;
 import com.justintime.jit.entity.ComboEntities.Combo;
-import com.justintime.jit.entity.Cook;
 import com.justintime.jit.entity.Enums.Sort;
 import com.justintime.jit.entity.MenuItem;
 import com.justintime.jit.entity.Category;
@@ -27,7 +26,7 @@ public class FilterItemsUtil {
 
     public static <T extends FilterableItem, DTO> List<DTO> filterAndSortItems(
             List<T> items,
-            Long restaurantId,
+            String restaurantCode,
             Sort sortBy,
             String priceRange,
             String category,
@@ -65,9 +64,9 @@ public class FilterItemsUtil {
 
             List<Object[]> result = new ArrayList<>();
             if (dtoClass.equals(MenuItemDTO.class)) {
-                result = orderItemRepository.findMenuItemsWithOrderCount(restaurantId, itemIds);
+                result = orderItemRepository.findMenuItemsWithOrderCount(restaurantCode, itemIds);
             } else if (dtoClass.equals(ComboDTO.class)) {
-                result = orderItemRepository.findCombosWithOrderCount(restaurantId, itemIds);
+                result = orderItemRepository.findCombosWithOrderCount(restaurantCode, itemIds);
             }
 
             final var idToCountMap = result.stream()
@@ -108,11 +107,6 @@ public class FilterItemsUtil {
             menuItemDTO.setCategorySet(
                     menuItem.getCategorySet().stream()
                             .map(Category::getCategoryName)
-                            .collect(Collectors.toSet())
-            );
-            menuItemDTO.setCookSet(
-                    menuItem.getCookSet().stream()
-                            .map(Cook::getName)
                             .collect(Collectors.toSet())
             );
             menuItemDTO.setTimeIntervalSet(convertTimeIntervals(menuItem.getTimeIntervalSet())); // Add conversion

@@ -1,15 +1,14 @@
 "use client";
-import * as React from "react";
+import React from "react";
 import {
-  flexRender,
+  useReactTable,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  useReactTable,
+  flexRender,
 } from "@tanstack/react-table";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+
 import {
   Table,
   TableBody,
@@ -18,10 +17,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import DataTableHeader from "./DataTableHeader";
+import DataTablePagination from "./DataTablePagination";
 import { ChevronLeft, Filter } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Separator } from "../ui/separator";
 import CustomPopup from "./CustomPopup";
+import { checkPermission } from "@/lib/utils/checkPerimission";
 
 export function CustomDataTable({
   columns = [],
@@ -31,7 +33,11 @@ export function CustomDataTable({
   handleHeaderButtonClick = () => {},
   headerButtonName,
   headerDialogType,
-  categories,
+  categories = [],
+  expandableRowContent = () => {},
+  onSubmitClick,
+  selectOptions,
+  permissionIdentifier
 }) {
   const [sorting, setSorting] = React.useState([]);
   const [columnFilters, setColumnFilters] = React.useState([]);
@@ -77,57 +83,27 @@ export function CustomDataTable({
     }
   };
 
+  const buttonDisplayPermissions = {
+    users: checkPermission("P101")
+  }
+
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between py-4">
-        <Button variant="ghost" onClick={handlePreviousClick}>
-          <ChevronLeft />
-          {tabName}
-        </Button>
-        <div className="flex ">
-          <Input
-            placeholder="Search across all columns..."
-            value={globalFilter}
-            onChange={(event) => setGlobalFilter(event.target.value)}
-            className="max-w-md w-96"
-          />
-          <Button variant="ghost">
-            <Filter />
-          </Button>
-          {headerDialogType && headerButtonName ? (
-            <CustomPopup
-              type={headerDialogType}
-              trigger={<Button>{headerButtonName}</Button>}
-              // dialogDescription={"Category Info"}
-            />
-          ) : (
-            headerButtonName && (
-              <Button onClick={handleHeaderButtonClick}>{headerButtonName}</Button>
-            )
-          )}
-        </div>
-      </div>
-      {categories && (
-        <div>
-          <div className="flex space-x-5 ml-4">
-            {categories.map((category) => (
-              <div
-                key={category}
-                className="cursor-pointer"
-                onClick={() => handleActiveToggle(category)}
-              >
-                <div className="text-sm">{category}</div>
-                <div
-                  className={`w-full border-b-4 border-black transition-transform duration-300 ease-in-out origin-center ${
-                    activeCategory === category ? "scale-x-100" : "scale-x-0"
-                  }`}
-                ></div>
-              </div>
-            ))}
-          </div>
-          <Separator className="mb-4" />
-        </div>
-      )}
+      <DataTableHeader
+        tabName={tabName}
+        globalFilter={globalFilter}
+        setGlobalFilter={setGlobalFilter}
+        headerButtonName={headerButtonName}
+        headerButtonClick={handleHeaderButtonClick}
+        headerDialogType={headerDialogType}
+        categories={categories}
+        activeCategory={activeCategory}
+        setActiveCategory={setActiveCategory}
+        setColumnFilters={setColumnFilters}
+        onSubmitClick={onSubmitClick}
+        selectOptions={selectOptions}
+      />
+
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -149,29 +125,34 @@ export function CustomDataTable({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  onClick={handleRowClick}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
+                <React.Fragment key={row.id}>
+                  <TableRow
+                    onClick={() => handleRowClick(row)}
+                    data-state={row.getIsSelected() && "selected"}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id} className="text-center">
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                  {row.getIsExpanded() && (
+                    <TableRow>
+                      <TableCell colSpan={row.getVisibleCells().length}>
+                        {expandableRowContent(row)}
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </React.Fragment>
               ))
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
+                <TableCell colSpan={columns.length} className="h-24 text-center">
                   No results.
                 </TableCell>
               </TableRow>
@@ -179,29 +160,8 @@ export function CustomDataTable({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-between space-x-2 py-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <span className="text-sm font-medium">
-          Page {table.getState().pagination.pageIndex + 1} of{" "}
-          {table.getPageCount()} | Total Records:{" "}
-          {table.getPrePaginationRowModel().rows.length}
-        </span>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
-      </div>
+
+      <DataTablePagination table={table} />
     </div>
   );
 }

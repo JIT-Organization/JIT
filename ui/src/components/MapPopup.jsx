@@ -68,7 +68,7 @@ const MapPopup = ({ value, onChange }) => {
             onClick={() => setIsOpen(false)}
             variant="destructive"
             size="sm"
-            className="absolute top-2 right-2"
+            className="absolute top-2 right-2 button-remove"
           >
             Close
           </Button>

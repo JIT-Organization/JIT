@@ -1,24 +1,21 @@
 package com.justintime.jit.entity;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.justintime.jit.entity.ComboEntities.Combo;
 import com.justintime.jit.entity.ComboEntities.ComboItem;
+import com.justintime.jit.entity.Enums.FoodType;
 import com.justintime.jit.entity.OrderEntities.OrderItem;
 import com.justintime.jit.util.filter.FilterableItem;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
 
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Audited
@@ -28,11 +25,11 @@ import java.util.*;
 @NoArgsConstructor
 public class MenuItem extends BaseEntity implements FilterableItem {
 
-    @Column(name="menu_item_name", nullable = false, length = 100)
+    @Column(name="menu_item_name", length = 100)
     private String menuItemName;
 
     @ManyToOne
-    @JoinColumn(name = "restaurant_id", nullable = false)
+    @JoinColumn(name = "restaurant_id")
     private Restaurant restaurant;
 
     @ManyToMany(cascade = CascadeType.ALL)
@@ -43,36 +40,40 @@ public class MenuItem extends BaseEntity implements FilterableItem {
     )
     private Set<Category> categorySet = new HashSet<>();
 
-    @Column(name="description", nullable = false, columnDefinition = "TEXT")
+    @Column(name="description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "price", nullable = false, columnDefinition = "DECIMAL(10,2)")
+    @Column(name = "price", columnDefinition = "DECIMAL(10,2)")
     private BigDecimal price;
 
-    @Column(name = "offer_price", nullable = false, columnDefinition = "DECIMAL(10,2)")
+    @Column(name = "food_type")
+    private FoodType foodType; // MenuItem, Variant
+
+    @Column(name = "offer_price", columnDefinition = "DECIMAL(10,2)")
     private BigDecimal offerPrice;
 
-    @UpdateTimestamp
     @Column(name = "offer_from")
     private LocalDateTime offerFrom;
 
-    @UpdateTimestamp
     @Column(name = "offer_to")
     private LocalDateTime offerTo;
 
-    @Column(name = "stock", nullable = false, columnDefinition = "INT DEFAULT 0")
+    @Column(name = "availability")
+    private String availability;
+
+    @Column(name = "stock", columnDefinition = "INT DEFAULT 0")
     private Integer stock = 0;
 
-    @Column(name = "count", nullable = false, columnDefinition = "INT DEFAULT 0")
+    @Column(name = "count", columnDefinition = "INT DEFAULT 0")
     private Integer count = 0;
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
-            name = "menu_item_cook", // Join table name
-            joinColumns = @JoinColumn(name = "menu_item_id"), // Foreign key for MenuItem
-            inverseJoinColumns = @JoinColumn(name = "cook_id")
+            name = "menu_item_cook",
+            joinColumns = @JoinColumn(name = "menu_item_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private Set<Cook> cookSet = new HashSet<>();
+    private Set<User> cookSet = new HashSet<>();
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
@@ -83,28 +84,37 @@ public class MenuItem extends BaseEntity implements FilterableItem {
     )
     private Set<TimeInterval> timeIntervalSet = new HashSet<>();
 
-    @Column(name = "preparation_time", nullable = false)
+    @ManyToMany(mappedBy = "menuItemSet", cascade = {CascadeType.MERGE})
+    private Set<AddOn> addOnSet = new HashSet<>();
+
+    @Column(name = "preparation_time")
     private Integer preparationTime;
 
-    @Column(name = "accept_bulk_orders", nullable = false, length = 1)
+    @Column(name = "is_preparation_time_for_single_menu_item", length=1)
+    private Boolean isPreparationTimeForSingleMenuItem = true;
+
+    @Column(name = "max_clubbed_menu_items")
+    private Integer maxClubbedMenuItems = 1;
+
+    @Column(name = "accept_bulk_orders", length = 1)
     private Boolean acceptBulkOrders;
 
-    @Column(name = "only_veg", nullable = false, length = 1)
+    @Column(name = "only_veg", length = 1)
     private Boolean onlyVeg;
 
-    @Column(name = "only_for_combos", nullable = false, length = 1)
+    @Column(name = "only_for_combos", length = 1)
     private Boolean onlyForCombos;
 
-    @Column(name = "active", nullable = false, length = 1)
+    @Column(name = "active", length = 1)
     private Boolean active;
 
-    @Column(name = "hotel_special", nullable = false, length = 1)
+    @Column(name = "hotel_special", length = 1)
     private Boolean hotelSpecial;
 
     @Column(name = "image", columnDefinition = "TEXT")
     private String base64Image;
 
-    @Column(name = "rating", nullable = false, columnDefinition = "DECIMAL(10,1)")
+    @Column(name = "rating", columnDefinition = "DECIMAL(10,1)")
     private BigDecimal rating;
 
     @OneToMany(mappedBy = "menuItem", cascade = CascadeType.ALL)
@@ -113,66 +123,34 @@ public class MenuItem extends BaseEntity implements FilterableItem {
     @OneToMany(mappedBy = "menuItem", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems = new ArrayList<>();
 
+    @ManyToOne
+    @JoinColumn(name = "batch_config_id")
+    private BatchConfig batchConfig;
+
     @Override
     public String getName() {
         return this.menuItemName;
     }
 
-    @Override
-    public Boolean isCombo() {
-        return false;
+    public Set<DayOfWeek> getAvailability() {
+        if (this.availability == null || this.availability.isBlank()) {
+            return new HashSet<>();
+        }
+        return Arrays.stream(this.availability.split(","))
+                .map(String::trim)
+                .map(DayOfWeek::valueOf)
+                .collect(Collectors.toSet());
     }
 
-//    // Copy Constructor
-//    public MenuItem(MenuItem other) {
-//        this.id = null; // New instance should not copy the ID (leave it null for persistence)
-//        this.restaurant = other.restaurant != null ? new Restaurant(other.restaurant) : null;
-//        this.food = other.food != null ? new Food(other.food) : null;
-//        this.price = other.price;
-//        this.stock = other.stock;
-//        this.createdDttm = other.createdDttm;
-//        this.updatedDttm = other.updatedDttm;
-//
-//        // Deep copy the comboItems
-//        this.comboItems = other.comboItems.stream()
-//                .map(ComboItem::new) // Assuming ComboItem also has a copy constructor
-//                .toList();
-//
-//        // Deep copy the orderItems
-//        this.orderItems = other.orderItems.stream()
-//                .map(OrderItem::new) // Assuming OrderItem also has a copy constructor
-//                .toList();
-//    }
-//
-//    public Restaurant getRestaurant() {
-//        return restaurant != null ? new Restaurant(restaurant) : null; // Defensive copy
-//    }
-//
-//    public void setRestaurant(Restaurant restaurant) {
-//        this.restaurant = restaurant != null ? new Restaurant(restaurant) : null; // Defensive copy
-//    }
-//
-//    public Food getFood() {
-//        return food != null ? new Food(food) : null; // Defensive copy
-//    }
-//
-//    public void setFood(Food food) {
-//        this.food = food != null ? new Food(food) : null; // Defensive copy
-//    }
-//
-//    public List<ComboItem> getComboItems() {
-//        return Collections.unmodifiableList(comboItems);
-//    }
-//
-//    public void setComboItems(List<ComboItem> comboItems) {
-//        this.comboItems = comboItems != null ? new ArrayList<>(comboItems) : new ArrayList<>();
-//    }
-//
-//    public List<OrderItem> getOrderItems() {
-//        return Collections.unmodifiableList(orderItems);
-//    }
-//
-//    public void setOrderItems(List<OrderItem> orderItems) {
-//        this.orderItems = orderItems != null ? new ArrayList<>(orderItems) : new ArrayList<>();
-//    }
+    public void setAvailability(Set<DayOfWeek> days) {
+        if (days == null || days.isEmpty()) {
+            this.availability = null;
+        } else {
+            this.availability = days.stream()
+                    .map(DayOfWeek::name)
+                    .collect(Collectors.joining(","));
+        }
+    }
+
+
 }

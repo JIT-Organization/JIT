@@ -4,12 +4,12 @@ import { CustomTrigger } from "./CustomTrigger";
 
 export default function AppBar() {
   return (
-    <div className="bg-gray-800 text-white p-4 flex justify-between items-center shadow-md w-full fixed top-0 left-0 z-20">
+    <div className="app-bar bg-gray-800 text-white p-4 flex justify-between items-center shadow-md w-full fixed top-0 left-0 z-20">
       <div className="flex items-center">
         <div className="flex items-center space-x-2">
           <CustomTrigger />
-          <Image src="/favicon.ico" alt="Logo" width={20} height={20} />
-          <span className="font-bold text-lg">Business Name</span>
+          <Image src="/favicon.ico" className="pl-2" alt="Logo" width={35} height={40} />
+          <span className="font-bold text-lg pl-2">Business Name</span>
         </div>
       </div>
 

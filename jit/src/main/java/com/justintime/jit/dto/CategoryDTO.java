@@ -15,8 +15,8 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CategoryDTO {
-    private Long id;
     private String categoryName;
-    private Set<String> menuItemSet;
-    private Set<String> comboSet;
+    private Set<String> foodItems;
+    private Boolean isPublic;
+    private Integer foodCount;
 }

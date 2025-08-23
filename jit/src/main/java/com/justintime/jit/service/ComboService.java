@@ -11,7 +11,7 @@ public interface ComboService extends BaseService<Combo,Long>{
 
     List<ComboDTO> getAllCombos();
     Optional<Combo> getComboById(Long id);
-    List<ComboDTO> getCombosByRestaurantId(Long restaurantId, Sort sortBy, String priceRange, String category, Boolean onlyVeg, Boolean onlyForCombos);
+    List<ComboDTO> getCombosByRestaurantId(String restaurantCode, Sort sortBy, String priceRange, String category, Boolean onlyVeg, Boolean onlyForCombos);
     Combo createCombo(Combo combo);
     Combo updateCombo(Long id, Combo updatedCombo);
     void deleteCombo(Long id);

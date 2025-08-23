@@ -1,23 +1,15 @@
 package com.justintime.jit.entity;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.justintime.jit.entity.ComboEntities.Combo;
 import com.justintime.jit.entity.OrderEntities.Order;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Entity
 @Audited
@@ -26,6 +18,9 @@ import java.util.stream.Collectors;
 @Table(name = "restaurant")
 @NoArgsConstructor
 public class Restaurant extends BaseEntity{
+
+        @Column(name="restaurant_code", length = 12, unique = true, nullable = false)
+        private String restaurantCode;
 
         @Column(name = "restaurant_name", nullable = false)
         private String restaurantName;
@@ -51,6 +46,12 @@ public class Restaurant extends BaseEntity{
         @Column(name = "country", nullable = false, length = 100)
         private String country;
 
+        @Column(name = "upi_id", length = 50)
+        private String upiId;
+
+        @Column(name = "theme", length = 50)
+        private String theme;
+
         @Column(name = "latitude", nullable = false)
         private Double latitude;
 
@@ -63,9 +64,6 @@ public class Restaurant extends BaseEntity{
         @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
         private List<Combo> combos;
 
-        @OneToMany(mappedBy = "restaurant")
-        private List<Cook> Ccooks;
-
         @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
         private List<Order> orders;
 
@@ -74,6 +72,9 @@ public class Restaurant extends BaseEntity{
 
         @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
         private List<Reservation> reservations;
+
+        @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
+        private List<DiningTable> diningTables;
 
         @ManyToMany(cascade = CascadeType.REMOVE)
         @JoinTable(
@@ -85,6 +86,9 @@ public class Restaurant extends BaseEntity{
 
         @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
         private List<Category> categories;
+
+        @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
+        private List<BatchConfig> batchConfigs;
 
 //        // Copy Constructor
 //        public Restaurant(Restaurant other) {

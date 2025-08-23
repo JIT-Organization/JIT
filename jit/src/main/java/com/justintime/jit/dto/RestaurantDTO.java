@@ -10,8 +10,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RestaurantDTO {
-    private Long id;
     private String restaurantName;
+    private String restaurantCode;
     private String contactNumber;
     private String email;
     private String addressLine1;

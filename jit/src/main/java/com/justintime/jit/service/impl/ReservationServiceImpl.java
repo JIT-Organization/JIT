@@ -35,7 +35,7 @@ public class ReservationServiceImpl implements ReservationService {
             Reservation reservation = reservationRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("Reservation not found for this id :: " + id));
 
-            reservation.setCustomer(reservationDetails.getCustomer());
+            reservation.setUser(reservationDetails.getUser());
             reservation.setRestaurant(reservationDetails.getRestaurant());
             reservation.setShiftCapacity(reservationDetails.getShiftCapacity());
             reservation.setReservationStart(reservationDetails.getReservationStart());
@@ -55,4 +55,9 @@ public class ReservationServiceImpl implements ReservationService {
             reservationRepository.delete(reservation);
             return ResponseEntity.noContent().build();
         }
+
+    @Override
+    public Reservation getReservationByReservationNumber(String reservationNumber) {
+        return reservationRepository.findByReservationNumber(reservationNumber);
+    }
 }
