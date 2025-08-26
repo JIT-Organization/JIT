@@ -21,11 +21,12 @@ import com.justintime.jit.service.UserAuthService;
 import com.justintime.jit.util.mapper.GenericMapper;
 import com.justintime.jit.util.mapper.MapperFactory;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import io.micrometer.common.util.StringUtils;
+
 import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -80,6 +81,7 @@ public class UserAuthServiceImpl extends BaseServiceImpl<User, Long> implements 
     @Transactional
     public void register(@Nullable String token, UserDTO userDTO) {
         User user;
+        if(StringUtils.equalsIgnoreCase(token, "null")) token = null;
         if(StringUtils.isNotEmpty(token)) {
             UserInvitationToken userInvitationToken = userInvitationRepository.findByToken(token)
                 .orElseThrow(() -> new ResourceNotFoundException("Invalid Token"));

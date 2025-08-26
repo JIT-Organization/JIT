@@ -5,7 +5,7 @@ const page = () => {
   return (
     <div>
       <Suspense fallback={<div>Loading...</div>}>
-        <LoginAndResgisterForm defaultIsLogin={false} />
+        <LoginAndResgisterForm />
       </Suspense>
     </div>
   );

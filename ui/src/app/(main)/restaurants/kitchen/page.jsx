@@ -53,9 +53,9 @@ const CreateOrder = () => {
         <div className="flex flex-1 overflow-hidden" style={{ height: "calc(100vh - 191px)" }}>
           <div className="flex-1 overflow-y-auto p-0 pb-4">
             <div className="grid gap-4 grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-              {filteredMenuItems.map((food) => (
+              {filteredMenuItems.map((food, index) => (
                 <div
-                  key={food.id}
+                  key={food.id + (index + 1)}
                   className="w-full"
                 >
                   <FoodCard
