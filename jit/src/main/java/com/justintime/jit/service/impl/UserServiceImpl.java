@@ -18,6 +18,7 @@ import com.justintime.jit.util.CommonServiceImplUtil;
 import com.justintime.jit.util.mapper.GenericMapper;
 import com.justintime.jit.util.mapper.MapperFactory;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
@@ -110,6 +111,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
             Set<String> permissionsCodes = user.getPermissions().stream().map(Permissions::getPermissionCode).collect(Collectors.toSet());
             UserDTO userDTO = userMapper.toDto(user);
             userDTO.setPermissionCodes(permissionsCodes);
+            userDTO.setIsRegistrationCompleted(StringUtils.isNotEmpty(user.getPasswordHash()));
             return userDTO;
         }).toList();
     }

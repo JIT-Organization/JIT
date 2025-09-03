@@ -492,7 +492,6 @@ export default function DialogForm({ type, data, onSubmit, selectOptions, isLoad
             <DialogClose asChild>
               <Button type="submit" disabled={isLoading}>
                 {isEdit ? "Submit" : "Add"}
-                {isLoading ? "Saving..." : "Save"}
               </Button>
             </DialogClose>
           </div>

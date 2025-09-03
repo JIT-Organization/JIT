@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Send, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import Image from "next/image";
@@ -10,7 +10,8 @@ export const getStaffMemberColumns = (
   handleSwitchToggle,
   handleEditClick,
   handleDeleteClick,
-  onSubmit
+  onSubmit,
+  handleResendClick
 ) => [
   {
     accessorKey: "profilePictureUrl",
@@ -81,6 +82,14 @@ export const getStaffMemberColumns = (
     cell: ({ row }) => {
       return (
         <div className="flex space-x-2">
+          <Button
+            variant="ghost"
+            colorVariant="none"
+            onClick={() => handleResendClick(row.original)}
+            disabled={!row.original.isRegistrationCompleted}
+          >
+            <Send className="text-red-600 h-50 w-50" />
+          </Button>
           <CustomPopup
             type="user"
             trigger={
