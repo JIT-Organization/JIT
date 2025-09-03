@@ -11,7 +11,8 @@ export const URLS = {
   login: createUrl("/login"),
   refresh: createUrl("/refresh"),
   sendInvite: createUrl("/users/send-invite"),
-  permissions: createUrl("/permissions")
+  permissions: createUrl("/permissions"),
+  subscribeForPushNotifications: createUrl("/notifications/subscribe")
 };
 
 export function getBaseUrl() {

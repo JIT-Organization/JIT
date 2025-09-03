@@ -9,7 +9,6 @@ import com.justintime.jit.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -38,13 +37,14 @@ public class OrderController extends BaseController {
 
     @GetMapping("/{restaurantCode}/{orderNumber}")
     @PreAuthorize("hasPermission(null, 'VIEW_ORDERS')")
-    public ResponseEntity<OrderDTO> getOrderById(@PathVariable String restaurantCode, @PathVariable String orderNumber) {
+    public ResponseEntity<OrderDTO> getOrderById(@PathVariable String restaurantCode,
+            @PathVariable String orderNumber) {
         OrderDTO orderDTO = orderService.getOrderByRestaurantAndOrderNumber(restaurantCode, orderNumber);
         return ResponseEntity.ok(orderDTO);
     }
 
     @PutMapping("/{restaurantCode}/{orderNumber}/status")
-    //    @PreAuthorize("hasPermission(null, 'ADD_ORDERS')")
+    // @PreAuthorize("hasPermission(null, 'ADD_ORDERS')")
     public ResponseEntity<OrderDTO> updateOrderStatus(
             @PathVariable String restaurantCode,
             @PathVariable String orderNumber,
@@ -58,8 +58,9 @@ public class OrderController extends BaseController {
     public OrderDTO patchUpdateOrder(
             @PathVariable String restaurantCode,
             @PathVariable String orderNumber,
-            @RequestBody PatchRequest<OrderDTO> payload){
-        return orderService.patchUpdateOrder(restaurantCode, orderNumber, payload.getDto(), payload.getPropertiesToBeUpdated());
+            @RequestBody PatchRequest<OrderDTO> payload) {
+        return orderService.patchUpdateOrder(restaurantCode, orderNumber, payload.getDto(),
+                payload.getPropertiesToBeUpdated());
     }
 
     @DeleteMapping("/{restaurantCode}/{orderNumber}")
@@ -100,5 +101,12 @@ public class OrderController extends BaseController {
     public ResponseEntity<ApiResponse<OrderItemDTO>> updateOrderItemStatus(@RequestBody OrderItemDTO orderItemDTO) {
         OrderItemDTO returnOrderItemDTO = orderService.updateOrderItemStatus(orderItemDTO);
         return success(returnOrderItemDTO, "Order Item updated successfully");
+    }
+
+    @GetMapping("/assignedOrders")
+    @PreAuthorize("hasPermission(null, 'VIEW_ORDERS')")
+    public ResponseEntity<ApiResponse<List<OrderItemDTO>>> getAllAssignedOrdersForUser() {
+        List<OrderItemDTO> orderItemDTOS = orderService.getAllAssignedOrdersForUser();
+        return success(orderItemDTOS, "Order Items retrieved");
     }
 }

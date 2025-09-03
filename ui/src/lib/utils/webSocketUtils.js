@@ -7,9 +7,9 @@ import { Client as StompClient } from "@stomp/stompjs";
  * @param {string} url full WS endpoint, e.g. "ws://localhost:8080/ws"
  */
 const useWebSocket = (url) => {
-  const stompRef = useRef(/** @type {CompatClient|null} */ (null));
-  const subsRef = useRef(/** @type {Record<string, any>} */ ({}));
-  const pendingSubsRef = useRef(/** @type {Array<{dest:string,fn:Function}>} */ ([]));
+  const stompRef = useRef(/** @type {CompatClient|null} */(null));
+  const subsRef = useRef(/** @type {Record<string, any>} */({}));
+  const pendingSubsRef = useRef(/** @type {Array<{dest:string,fn:Function}>} */([]));
   const [isConnected, setIsConnected] = useState(false);
 
   const doSubscribe = useCallback((dest, fn) => {
@@ -42,8 +42,8 @@ const useWebSocket = (url) => {
         console.error("WebSocket connection error:", event);
       }
     });
-    
-    stompRef.current = client; 
+
+    stompRef.current = client;
     client.activate();
 
     return () => {
@@ -63,7 +63,7 @@ const useWebSocket = (url) => {
         );
       };
     }
-    
+
     if (subsRef.current[destination]) {
       return () => {
         subsRef.current[destination]?.unsubscribe();
