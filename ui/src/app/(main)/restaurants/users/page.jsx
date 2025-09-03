@@ -66,7 +66,22 @@ const Users = () => {
     postMutation.mutate(userData);
   };
 
-  const columns = getStaffMemberColumns(handleToggle, handleEditClick, handleDeleteClick, onUpdateSubmit);
+  function handleResendClick (data) {
+    const obj = {
+      firstName: data.firstName,
+      lastName: data.lastName,
+      email: data.email,
+      phoneNumber: data.phoneNumber,
+      role: data.role,
+      shift: data?.shift,
+      username: data?.username,
+      isActive: data?.isActive,
+      permissionCodes: data?.permissionCodes
+    }
+    postMutation.mutate(obj);
+  }
+
+  const columns = getStaffMemberColumns(handleToggle, handleEditClick, handleDeleteClick, onUpdateSubmit, handleResendClick);
 
   return (
     <div>
