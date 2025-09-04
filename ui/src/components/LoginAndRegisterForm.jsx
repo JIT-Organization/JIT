@@ -16,10 +16,14 @@ import { Input } from "./ui/input";
 import { registerUser } from "@/lib/api/api";
 import { useMutation } from "@tanstack/react-query";
 import { Card, CardDescription, CardHeader } from "./ui/card";
+import { useToast } from "@/hooks/use-toast";
 
 const LoginAndRegisterForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { toast } = useToast();
+  const [isLoginLoading, setIsLoginLoading] = React.useState(false);
+  const [isRegisterLoading, setIsRegisterLoading] = React.useState(false);
   const encodedParams = searchParams.get("params");
   const decodedParams = encodedParams ? atob(encodedParams) : "";
   const urlParams = new URLSearchParams(decodedParams);
@@ -36,7 +40,20 @@ const LoginAndRegisterForm = () => {
     mode: "onBlur",
   });
 
-  const registerUserMutation = useMutation(registerUser());
+  const registerUserMutation = useMutation({
+    ...registerUser(),
+    onMutate: () => {
+      setIsRegisterLoading(true);
+    },
+    onSuccess: () => {
+      toast({ variant: "success", title: "Success", description: "Registration successful! Please login." });
+      setIsRegisterLoading(false);
+    },
+    onError: (error) => {
+      toast({ title: "Error", description: error.response?.data?.message || "Failed to register", variant: "destructive" });
+      setIsRegisterLoading(false);
+    },
+  });
 
   const onSubmit = async () => {
     const email = form.getValues().email;
@@ -44,12 +61,24 @@ const LoginAndRegisterForm = () => {
 
     if (!isRegister) {
       // Login flow
-      await axios.post(
-        "http://localhost:8080/login",
-        { email, password },
-        { withCredentials: true }
-      );
-      router.push(`/restaurants/menu`);
+      setIsLoginLoading(true);
+      try {
+        await axios.post(
+          "http://localhost:8080/login",
+          { email, password },
+          { withCredentials: true }
+        );
+        toast({ variant: "success", title: "Success", description: "Login successful!" });
+        router.push(`/restaurants/menu`);
+      } catch (error) {
+        toast({ 
+          title: "Error", 
+          description: error.response?.data?.message || "Failed to login", 
+          variant: "destructive" 
+        });
+      } finally {
+        setIsLoginLoading(false);
+      }
     } else {
       // Register flow
       const userData = { email, password };
@@ -138,9 +167,13 @@ const LoginAndRegisterForm = () => {
               <div className="flex justify-center">
                 <Button
                   type="submit"
+                  disabled={isRegister ? isRegisterLoading : isLoginLoading}
                   className="w-full text-white py-2 text-sm rounded-md transition"
                 >
-                  {isRegister ? "Register" : "Login"}
+                  {isRegister 
+                    ? (isRegisterLoading ? "Registering..." : "Register")
+                    : (isLoginLoading ? "Logging in..." : "Login")
+                  }
                 </Button>
               </div>
             </form>

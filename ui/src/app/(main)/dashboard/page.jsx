@@ -7,6 +7,9 @@ import { FaShoppingCart, FaUserFriends, FaTable, FaUsers, FaRupeeSign } from "re
 import { useState } from "react";
 import useWebSocket from "@/lib/utils/webSocketUtils";
 import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useNotifications } from "@/contexts/NotificationContext";
+import { NOTIFICATION_TYPES } from "@/lib/constants/notifications";
 
 const sampleData = [
   { name: "Pizza", quantity: 4 },
@@ -99,46 +102,73 @@ const cardData = [
 ];
 
 export default function DashboardPage() {
-  const [expandedIdx, setExpandedIdx] = useState(0); // Default: first card expanded
+  const [expandedCards, setExpandedCards] = useState(new Set([])); // Default: no card expanded
+  const queryClient = useQueryClient();
+  const { addNotification } = useNotifications();
+  
   // Use the hook and get connection status
   const { subscribe, isConnected } = useWebSocket("ws://localhost:8080/ws");
 
   // Effect to log connection status changes from the component's perspective
   useEffect(() => {
     if (isConnected) {
-      console.log("Component detected WebSocket connection.");
+      console.log("Dashboard WebSocket connection established.");
     } else {
-      console.log("Component detected WebSocket disconnection.");
+      console.log("Dashboard WebSocket connection lost.");
     }
   }, [isConnected]);
 
-
-  // Effect for handling subscriptions
+  // Effect for handling dashboard-specific subscriptions
   useEffect(() => {
-    // This will now only attempt to subscribe once the stable `subscribe` function is available.
-    // The hook itself handles queuing if the connection is not ready.
-    console.log("Setting up WebSocket subscriptions...");
+    if (!subscribe) return;
 
-    const handleUserEvent = (message) => {
+    console.log("Setting up Dashboard WebSocket subscriptions...");
+
+    const handleOrderItemCreated = (message) => {
       console.log("%cReceived message on /user/queue/orderItemCreated:", "color: #007bff;", message);
-      // You might want to invalidate a query here to refresh data
-      // queryClient.invalidateQueries(['orders']);
+      
+      // Add notification
+      addNotification({
+        type: NOTIFICATION_TYPES.ORDER_CREATED,
+        message: `New order item created: ${message.itemName || 'Unknown item'}`,
+        priority: 'high',
+        data: message
+      });
+
+      // Invalidate queries to refresh dashboard data
+      queryClient.invalidateQueries(['orders']);
+      queryClient.invalidateQueries(['dashboard-stats']);
     };
 
     const handleRoleEvent = (message) => {
       console.log("%cReceived message on /topic/role:", "color: #6f42c1;", message);
+      // This is already handled in the global WebSocket handler in layout
+      // But you can add dashboard-specific logic here if needed
     };
 
-    const unsubUser = subscribe("/user/queue/orderItemCreated", handleUserEvent);
+    // Subscribe to user-specific queue
+    const unsubUser = subscribe("/user/queue/orderItemCreated", handleOrderItemCreated);
     const unsubTopic = subscribe("/topic/role", handleRoleEvent);
 
     // The cleanup function will be called when the component unmounts
     return () => {
-      console.log("Cleaning up WebSocket subscriptions.");
+      console.log("Cleaning up Dashboard WebSocket subscriptions.");
       unsubUser();
       unsubTopic();
     };
-  }, [subscribe]);
+  }, [subscribe, addNotification, queryClient]);
+
+  const toggleCardExpansion = (idx) => {
+    setExpandedCards(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(idx)) {
+        newSet.delete(idx);
+      } else {
+        newSet.add(idx);
+      }
+      return newSet;
+    });
+  };
 
   return (
     <div className="p-4">
@@ -151,9 +181,9 @@ export default function DashboardPage() {
             data={card.data}
             icon={card.icon}
             color={card.color}
-            showBreakdown={expandedIdx === idx}
-            className="p-2"
-            onMouseEnter={() => setExpandedIdx(idx)}
+            showBreakdown={expandedCards.has(idx)}
+            className="p-2 cursor-pointer"
+            onClick={() => toggleCardExpansion(idx)}
           />
         ))}
       </div>

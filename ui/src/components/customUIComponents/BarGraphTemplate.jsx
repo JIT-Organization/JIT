@@ -40,7 +40,7 @@ const BarGraphTemplate = ({ data, xKey, barKeys, config = {} }) => {
           <Bar
             key={key}
             dataKey={key}
-            fill={COLORS[index % COLORS.length]}
+            fill={config[key]?.color || COLORS[index % COLORS.length]}
             radius={[4, 4, 0, 0]}
             barSize={20}
           >

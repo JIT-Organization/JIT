@@ -1,9 +1,9 @@
 "use client";
 import * as React from "react";
-import { ChevronDown, ChevronUp, Pencil, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Pencil, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export const getOrderColumns = (handleEditClick, handleDeleteClick) => [
+export const getOrderColumns = (handleEditClick, handleDeleteClick, loadingStates = {}) => [
   {
     accessorKey: "orderNumber",
     header: "Order Number",
@@ -46,30 +46,41 @@ export const getOrderColumns = (handleEditClick, handleDeleteClick) => [
   {
     id: "actions",
     header: "Actions",
-    cell: ({ row }) => (
-      <div className="flex space-x-2 items-center justify-center">
-        <Button 
-          variant="ghost"
-          colorVariant="none"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleEditClick(row.original.orderNumber);
-          }}
-        >
-          <Pencil className="h-5" />
-        </Button>
-        <Button
-          variant="ghost"
-          colorVariant="none"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleDeleteClick(row.original.id);
-          }}
-        >
-          <Trash2 className="text-red-600 h-5" />
-        </Button>
-        {row.getIsExpanded() ? <ChevronUp className="opacity-40"/> : <ChevronDown className="opacity-40"/>}
-      </div>
-    ),
+    cell: ({ row }) => {
+      const orderId = row.original.id;
+      const isDeleting = loadingStates.isDeleting?.(orderId);
+      
+      return (
+        <div className="flex space-x-2 items-center justify-center">
+          <Button 
+            variant="ghost"
+            colorVariant="none"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleEditClick(row.original.orderNumber);
+            }}
+            disabled={isDeleting}
+          >
+            <Pencil className="h-5" />
+          </Button>
+          <Button
+            variant="ghost"
+            colorVariant="none"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDeleteClick(row.original.id);
+            }}
+            disabled={isDeleting}
+          >
+            {isDeleting ? (
+              <Loader2 className="h-5 w-5 animate-spin text-red-600" />
+            ) : (
+              <Trash2 className="text-red-600 h-5" />
+            )}
+          </Button>
+          {row.getIsExpanded() ? <ChevronUp className="opacity-40"/> : <ChevronDown className="opacity-40"/>}
+        </div>
+      );
+    },
   },
 ];

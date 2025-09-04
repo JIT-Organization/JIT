@@ -18,6 +18,11 @@ import CommonForm from "@/components/CommonForm";
 import { useCart } from "@/hooks/useCart";
 import { useCustomizeDialog } from "@/hooks/useCustomizeDialog";
 import { getTablesListOptions, createOrder, updateOrder, getOrderDetails } from "@/lib/api/api";
+import LoadingState from "@/components/customUIComponents/LoadingState";
+import ErrorState from "@/components/customUIComponents/ErrorState";
+import useWebSocket from "@/lib/utils/webSocketUtils";
+import { useNotifications } from "@/contexts/NotificationContext";
+import { NOTIFICATION_TYPES } from "@/lib/constants/notifications";
 
 const customerFormSchema = z.object({
   tables: z.array(z.string()),
@@ -43,6 +48,7 @@ const OrderPageWrapper = ({
   const router = useRouter();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { addNotification } = useNotifications();
   const isMobile = useIsMobile();
   
   const [globalFilter, setGlobalFilter] = useState("");
@@ -52,6 +58,9 @@ const OrderPageWrapper = ({
   const isNewOrder = mode === "create";
   const isEditOrder = mode === "edit";
   const currentOrderNumber = orderNumber;
+
+  // WebSocket connection
+  const { subscribe, isConnected } = useWebSocket("ws://localhost:8080/ws");
 
   // Form setup
   const form = useForm({
@@ -70,6 +79,112 @@ const OrderPageWrapper = ({
       setIsCustomerDialogOpen(true);
     }
   }, [isNewOrder]);
+
+  // WebSocket connection status
+  useEffect(() => {
+    if (isConnected) {
+      console.log("Order Page WebSocket connection established.");
+    } else {
+      console.log("Order Page WebSocket connection lost.");
+    }
+  }, [isConnected]);
+
+  // WebSocket subscriptions for order page
+  useEffect(() => {
+    if (!subscribe) return;
+
+    console.log("Setting up Order Page WebSocket subscriptions...");
+
+    // Handle menu item availability changes
+    const handleMenuItemAvailability = (message) => {
+      console.log("%cReceived menu availability update:", "color: #e74c3c;", message);
+      
+      const availabilityMessage = message.available 
+        ? `${message.itemName || 'Menu item'} is now available`
+        : `${message.itemName || 'Menu item'} is out of stock`;
+      
+      addNotification({
+        type: NOTIFICATION_TYPES.MENU_UPDATE,
+        message: availabilityMessage,
+        priority: message.available ? 'medium' : 'high',
+        data: message
+      });
+
+      // Invalidate menu queries to refresh availability
+      queryClient.invalidateQueries(['menu-items']);
+      queryClient.invalidateQueries(['menu-items-order']);
+    };
+
+    // Handle table availability changes
+    const handleTableAvailability = (message) => {
+      console.log("%cReceived table availability update:", "color: #3498db;", message);
+      
+      const tableMessage = message.available 
+        ? `Table ${message.tableName || message.tableNumber || 'Unknown'} is now available`
+        : `Table ${message.tableName || message.tableNumber || 'Unknown'} is no longer available`;
+      
+      addNotification({
+        type: NOTIFICATION_TYPES.TABLE_STATUS,
+        message: tableMessage,
+        priority: 'medium',
+        data: message
+      });
+
+      // Invalidate tables query to refresh availability
+      queryClient.invalidateQueries(['tables']);
+    };
+
+    // Handle pricing updates
+    const handlePricingUpdate = (message) => {
+      console.log("%cReceived pricing update:", "color: #f39c12;", message);
+      
+      addNotification({
+        type: NOTIFICATION_TYPES.MENU_UPDATE,
+        message: `Price updated for ${message.itemName || 'menu item'}: ₹${message.newPrice || 'Updated'}`,
+        priority: 'medium',
+        data: message
+      });
+
+      // Invalidate menu queries to refresh pricing
+      queryClient.invalidateQueries(['menu-items']);
+      queryClient.invalidateQueries(['menu-items-order']);
+    };
+
+    // Handle real-time order updates (for edit mode)
+    const handleOrderRealTimeUpdate = (message) => {
+      // Only listen for updates if we're editing this specific order
+      if (isEditOrder && message.orderNumber === currentOrderNumber) {
+        console.log("%cReceived real-time order update:", "color: #9b59b6;", message);
+        
+        addNotification({
+          type: NOTIFICATION_TYPES.ORDER_UPDATED,
+          message: `Order #${message.orderNumber} has been updated by another user`,
+          priority: 'high',
+          data: message
+        });
+
+        // Invalidate order details to refresh
+        queryClient.invalidateQueries(['order-details', currentOrderNumber]);
+      }
+    };
+
+    // Subscribe to topic channels (broadcast messages)
+    const unsubMenuAvailability = subscribe("/topic/menuItemAvailability", handleMenuItemAvailability);
+    const unsubTableAvailability = subscribe("/topic/tableAvailability", handleTableAvailability);
+    const unsubPricing = subscribe("/topic/pricing", handlePricingUpdate);
+
+    // Subscribe to user-specific updates
+    const unsubOrderUpdate = subscribe("/user/queue/orderRealTimeUpdate", handleOrderRealTimeUpdate);
+
+    // Cleanup function
+    return () => {
+      console.log("Cleaning up Order Page WebSocket subscriptions.");
+      unsubMenuAvailability();
+      unsubTableAvailability();
+      unsubPricing();
+      unsubOrderUpdate();
+    };
+  }, [subscribe, addNotification, queryClient, isEditOrder, currentOrderNumber]);
 
   // Queries
   const {
@@ -310,12 +425,17 @@ const OrderPageWrapper = ({
     }
   };
 
-  const isLoading = queryLoading || (isEditOrder && isOrderLoading);
+  const isLoading = queryLoading || (isEditOrder && isOrderLoading) || isTablesLoading;
   const error = queryError || orderError;
   const isMutationPending = createOrderMutation.isPending || updateOrderMutation.isPending;
 
-  if (isLoading) return <p>Loading...</p>;
-  if (error) return <p>Error loading data: {error.message}</p>;
+  if (isLoading) {
+    return <LoadingState message="Loading order data..." />;
+  }
+
+  if (error) {
+    return <ErrorState title="Error loading data" message={error.message} />;
+  }
 
   return (
     <Card>
@@ -378,6 +498,7 @@ const OrderPageWrapper = ({
         onSave={handleSaveCustomizeDialog}
         items={customizeItems}
         onClose={closeCustomizeDialog}
+        isLoading={isMutationPending}
       />
 
       <Dialog open={isCustomerDialogOpen} onOpenChange={setIsCustomerDialogOpen}>

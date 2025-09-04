@@ -17,9 +17,11 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { useColor } from "@/components/providers/ColorProvider";
+import { Loader2 } from "lucide-react";
 
 
 export default function BusinessProfilePage() {
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const methods = useForm({
     defaultValues: {
       coverPic: null,
@@ -36,9 +38,17 @@ export default function BusinessProfilePage() {
   const { primaryColor, setPrimaryColor } = useColor();
   const [location, setLocation] = React.useState("");
 
-  const onSubmit = (data) => {
-    console.log(data);
-    // handle form submission
+  const onSubmit = async (data) => {
+    setIsSubmitting(true);
+    try {
+      console.log(data);
+      // handle form submission
+      // await submitSettings(data);
+    } catch (error) {
+      console.error('Error submitting form:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const DEFAULT_CENTER = [12.971599, 77.594566]; // Bangalore, India
@@ -233,9 +243,17 @@ export default function BusinessProfilePage() {
         <div className="pl-10 flex justify-left">
           <Button 
             type="submit" 
+            disabled={isSubmitting}
             className="bg-gray-800 text-white font-bold py-2 px-6 rounded-lg transition-all duration-300 hover:bg-black hover:shadow-lg hover:scale-105"
           >
-            Save
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              "Save"
+            )}
           </Button>
         </div>
       </form>

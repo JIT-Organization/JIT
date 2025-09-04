@@ -5,6 +5,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getAddOnsListOptions, createAddOn, patchUpdateAddOn, deleteAddOn } from "@/lib/api/api";
 import { useToast } from "@/hooks/use-toast";
 import React from "react";
+import LoadingState from "@/components/customUIComponents/LoadingState";
+import ErrorState from "@/components/customUIComponents/ErrorState";
 
 const AddOns = () => {
   const queryClient = useQueryClient();
@@ -93,8 +95,17 @@ const AddOns = () => {
 
   const columns = getAddOnColumns(handleEditClick, handleDeleteClick, handleUpdate, loadingItems);
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error loading add-ons.</div>;
+  if (isLoading) {
+    return <LoadingState message="Loading add-ons..." />;
+  }
+
+  if (error) {
+    return <ErrorState title="Error loading add-ons" message={error.message} />;
+  }
+
+  if (!data?.length) {
+    return <ErrorState title="No Add-ons" message="No add-ons found." />;
+  }
 
   return (
     <div>
