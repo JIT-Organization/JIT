@@ -9,15 +9,90 @@ import {
 import { getCategoryColumns } from "./columns";
 import { CustomDataTable } from "@/components/customUIComponents/CustomDataTable";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { getSelectOptions } from "@/lib/utils/helper";
+import LoadingState from "@/components/customUIComponents/LoadingState";
+import ErrorState from "@/components/customUIComponents/ErrorState";
+import { useToast } from "@/hooks/use-toast";
 
 const Categories = () => {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const [loadingItems, setLoadingItems] = useState({});
+
+  const clearLoadingItem = (id) =>
+    setLoadingItems((prev) => {
+      const newState = { ...prev };
+      delete newState[id];
+      return newState;
+    });
+
   const { data: categoriesList, isLoading, error } = useQuery(getCategoriesListOptions());
-  const patchMutation = useMutation(patchUpdateCategoriesList(queryClient));
-  const deleteMutation = useMutation(deleteCategoryItem(queryClient));
-  const postMutation = useMutation(createCategory(queryClient));
+  
+  const patchMutation = useMutation({
+    ...patchUpdateCategoriesList(queryClient),
+    onMutate: ({ id }) => {
+      setLoadingItems((prev) => ({ ...prev, [id]: "updating" }));
+    },
+    onSuccess: (_, { id }) => {
+      toast({
+        variant: "success",
+        title: "Success",
+        description: "Category updated successfully",
+      });
+      clearLoadingItem(id);
+    },
+    onError: (error, { id }) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update category",
+        variant: "destructive",
+      });
+      clearLoadingItem(id);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    ...deleteCategoryItem(queryClient),
+    onMutate: ({ id }) => {
+      setLoadingItems((prev) => ({ ...prev, [id]: "deleting" }));
+    },
+    onSuccess: (_, { id }) => {
+      toast({
+        variant: "success",
+        title: "Success",
+        description: "Category deleted successfully",
+      });
+      clearLoadingItem(id);
+    },
+    onError: (error, { id }) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete category",
+        variant: "destructive",
+      });
+      clearLoadingItem(id);
+    },
+  });
+
+  const postMutation = useMutation({
+    ...createCategory(queryClient),
+    onSuccess: () => {
+      toast({
+        variant: "success",
+        title: "Success",
+        description: "Category created successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create category",
+        variant: "destructive",
+      });
+    },
+  });
+
   const { data: menuItemsList } = useQuery(getMenuItemListOptions())
 
   const selectOptions = useMemo(() => {
@@ -25,8 +100,17 @@ const Categories = () => {
     return getSelectOptions(menuItemsList || [])
   }, [menuItemsList])
 
-  if (isLoading) return <p>Loading categories...</p>;
-  if (error) return <p>Error loading categories: {error.message}</p>;
+  if (isLoading) {
+    return <LoadingState message="Loading categories..." />;
+  }
+
+  if (error) {
+    return <ErrorState title="Error loading categories" message={error.message} />;
+  }
+
+  if (!categoriesList?.length) {
+    return <ErrorState title="No Categories" message="No categories found." />;
+  }
 
   const handleToggle = (categoryName, value) => {
     patchMutation.mutate({ categoryName, fields: { isPublic: value } });

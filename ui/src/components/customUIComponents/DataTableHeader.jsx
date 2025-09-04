@@ -2,7 +2,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ChevronLeft, Filter } from "lucide-react";
+import { ChevronLeft, Filter, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import CustomPopup from "./CustomPopup";
 import { Separator } from "../ui/separator";
@@ -19,7 +19,8 @@ export default function DataTableHeader({
   setActiveCategory,
   setColumnFilters,
   onSubmitClick,
-  selectOptions
+  selectOptions,
+  disabled = false, // Add disabled prop for loading state
 }) {
   const router = useRouter();
 
@@ -62,7 +63,20 @@ export default function DataTableHeader({
             />
           ) : (
             headerButtonName && (
-              <Button onClick={headerButtonClick}>{headerButtonName}</Button>
+              <Button 
+                onClick={headerButtonClick}
+                disabled={disabled}
+                className="min-w-[120px]"
+              >
+                {disabled ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  headerButtonName
+                )}
+              </Button>
             )
           )}
         </div>

@@ -7,8 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
 
-const FoodCustomizeStepperDialog = ({ isOpen, onSave, items = [], onClose }) => {
+const FoodCustomizeStepperDialog = ({ isOpen, onSave, items = [], onClose, isLoading = false }) => {
   const [current, setCurrent] = useState(0);
   const [customizedItems, setCustomizedItems] = useState(items);
 
@@ -182,7 +183,16 @@ const FoodCustomizeStepperDialog = ({ isOpen, onSave, items = [], onClose }) => 
           <Button onClick={handleNext} disabled={current === items.length - 1} variant="outline">
             Next
           </Button>
-          <Button onClick={handleSave} className="ml-2">Save</Button>
+          <Button onClick={handleSave} disabled={isLoading} className="ml-2">
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              "Save"
+            )}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

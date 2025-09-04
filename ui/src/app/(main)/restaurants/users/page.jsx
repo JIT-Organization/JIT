@@ -3,6 +3,10 @@ import { getStaffMemberColumns } from "./columns";
 import { CustomDataTable } from "@/components/customUIComponents/CustomDataTable";
 import { deleteUserItem, getUsersListOptions, patchUpdateUserItemList, sendInviteToUser } from "@/lib/api/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import LoadingState from "@/components/customUIComponents/LoadingState";
+import ErrorState from "@/components/customUIComponents/ErrorState";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 const Users = () => {
   const queryClient = useQueryClient();
@@ -10,9 +14,27 @@ const Users = () => {
   const patchMutation = useMutation(patchUpdateUserItemList(queryClient));
   const deleteMutation = useMutation(deleteUserItem(queryClient));
   const postMutation = useMutation(sendInviteToUser());
+  const { toast } = useToast();
+  const [loadingItems, setLoadingItems] = useState({});
 
-  if (isLoading) return <p>Loading Users...</p>;
-  if (error) return <p>Error loading users: {error.message}</p>;
+  const clearLoadingItem = (username) =>
+    setLoadingItems((prev) => {
+      const newState = { ...prev };
+      delete newState[username];
+      return newState;
+    });
+
+  if (isLoading) {
+    return <LoadingState message="Loading users..." />;
+  }
+
+  if (error) {
+    return <ErrorState title="Error loading users" message={error.message} />;
+  }
+
+  if (!usersListData?.length) {
+    return <ErrorState title="No Users" message="No users found." />;
+  }
 
   const handleToggle = (username, value) => {
     patchMutation.mutate({ username, fields: { isActive: value } });

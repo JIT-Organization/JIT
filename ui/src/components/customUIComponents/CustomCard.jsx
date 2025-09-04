@@ -2,12 +2,13 @@
 
 import * as React from "react";
 
-const CustomCard = ({ title, value, data, icon, color = '', showBreakdown = false, className = '', onMouseEnter, onMouseLeave }) => {
+const CustomCard = ({ title, value, data, icon, color = '', showBreakdown = false, className = '', onMouseEnter, onMouseLeave, onClick }) => {
   return (
     <div
       className={`group flex items-center min-w-[220px] h-28 bg-[#F8F5ED] border border-gray-300 rounded-lg shadow-sm px-6 py-4 gap-4 relative overflow-visible ${className}`}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
+      onClick={onClick}
     >
       {/* Icon */}
       <div className="flex items-center justify-center w-12 h-12 

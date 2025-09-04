@@ -48,6 +48,20 @@ export const getAxiosInstance = (cookies = "") => {
     (response) => response,
     async (error) => {
       const originalRequest = error.config;  
+      
+      // Handle Network Errors (when backend is down)
+      if (error.code === 'ERR_NETWORK') {
+        // Only redirect to login if this is an authentication-related endpoint
+        const isAuthRelatedEndpoint = originalRequest.url.includes('/jit-api/') || 
+                                     originalRequest.url.includes('/api/');
+        
+        if (isAuthRelatedEndpoint && !isServer) {
+          window.location.href = "/login";
+        }
+        return Promise.reject(error);
+      }
+      
+      // Handle 401 Unauthorized errors
       if (
         error.response?.status === 401 &&
         !originalRequest._retry &&
@@ -55,16 +69,20 @@ export const getAxiosInstance = (cookies = "") => {
       ) {
         originalRequest._retry = true;
         try {
-          console.log("refresh cookie", cookies)
+          console.log("🔄 Attempting token refresh...");
           await refreshInstance.post("/refresh");
+          console.log("✅ Token refresh successful");
           return axiosInstance(originalRequest);
         } catch (refreshError) {
-          console.error("Token refresh failed", refreshError);
+          console.error("❌ Token refresh failed", refreshError);
           if (!isServer) {
+            console.log("🚪 Redirecting to login due to failed token refresh");
             window.location.href = "/login";
           }
+          return Promise.reject(refreshError);
         }
       }
+      
       return Promise.reject(error);
     }
   );
