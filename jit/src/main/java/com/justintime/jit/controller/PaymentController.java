@@ -1,7 +1,10 @@
 package com.justintime.jit.controller;
 
+import com.justintime.jit.dto.RazorpayOrderRequest;
+import com.justintime.jit.dto.RazorpayOrderResponse;
 import com.justintime.jit.entity.PaymentEntities.Payment;
 import com.justintime.jit.service.PaymentService;
+import com.justintime.jit.service.RazorpayService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +17,8 @@ public class PaymentController {
 
     @Autowired
     private PaymentService paymentService;
+    @Autowired
+    private final RazorpayService razorpayService;
 
     @GetMapping
     public List<Payment> getAllPayments() {
@@ -25,6 +30,16 @@ public class PaymentController {
         return paymentService.getPaymentById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    public PaymentController(RazorpayService razorpayService) {
+        this.razorpayService = razorpayService;
+    }
+
+    @PostMapping("/create-order")
+    public ResponseEntity<RazorpayOrderResponse> createOrder(@RequestBody RazorpayOrderRequest request) {
+        RazorpayOrderResponse response = razorpayService.createOrder(request);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping

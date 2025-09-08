@@ -81,6 +81,13 @@ public class OrderItem extends BaseEntity {
         @JoinColumn(name = "assigned_cook_id")
         private User cook;
 
+        @Column(name = "order_item_name", nullable = false)
+        private String orderItemName;
+
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "inventory_id", nullable = false)
+        private Inventory inventory;
+
         @PrePersist
         @PreUpdate
         public void calculateMaxTimeLimitToStart() {
