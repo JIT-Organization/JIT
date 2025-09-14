@@ -85,7 +85,7 @@ public class OrderItem extends BaseEntity {
         private String orderItemName;
 
         @ManyToOne(fetch = FetchType.LAZY)
-        @JoinColumn(name = "inventory_id", nullable = false)
+        @JoinColumn(name = "inventory_id")
         private Inventory inventory;
 
         @PrePersist

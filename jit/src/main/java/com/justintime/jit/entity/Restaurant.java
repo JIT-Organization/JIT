@@ -90,6 +90,9 @@ public class Restaurant extends BaseEntity{
         @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
         private List<BatchConfig> batchConfigs;
 
+        @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
+        private List<Inventory> inventories;
+
 //        // Copy Constructor
 //        public Restaurant(Restaurant other) {
 //                this.id = other.id;
