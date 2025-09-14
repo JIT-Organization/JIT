@@ -11,5 +11,5 @@ public interface InventoryRepository extends BaseRepository<Inventory, Long>{
 
         List<Inventory> findByRestaurant_RestaurantCode(String restaurantCode);
         Optional<Inventory> findByRestaurant_RestaurantCodeAndItemName(String restaurantCode, String itemName);
-        boolean existsByItemNameAndRestaurant_RestaurantCode(String itemName, String restaurantCode);
+        boolean existsByRestaurant_RestaurantCodeAndItemName(String restaurantCode, String itemName);
     }

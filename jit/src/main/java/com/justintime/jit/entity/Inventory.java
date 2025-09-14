@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.envers.Audited;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
@@ -17,17 +18,21 @@ import java.util.List;
 @Audited
 public class Inventory {
 
-    @Column(name = "stock", nullable = false)
-    private Integer stock;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(name = "item_name", nullable = false)
     private String itemName;
 
+    @Column(name = "stock", nullable = false)
+    private Integer stock;
+
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
-    @Column(name = "expense", nullable = false)
-    private float expense;
+    @Column(name = "expense", nullable = false, precision = 12, scale = 2)
+    private BigDecimal expense;
 
     @Column(name = "item", nullable = false)
     private String item;
@@ -35,12 +40,14 @@ public class Inventory {
     @Column(name = "unit", nullable = false)
     private String unit;
 
-    // One-to-One mapping with Supplier (User entity acting as Supplier)
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "supplier_id", referencedColumnName = "id")
     private User supplier;
 
-    // One-to-Many mapping with OrderItem
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "restaurant_id", nullable = false)
+    private Restaurant restaurant;
+
     @OneToMany(mappedBy = "inventory", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems;
 }

@@ -10,9 +10,9 @@ import java.util.Optional;
 
 public interface InventoryService extends BaseService<Inventory,Long>{
     List<InventoryDTO> getAllInventories(String restaurantCode);
-    String createInventory(String restaurantCode,InventoryDTO inventoryDTO);
-    Optional<InventoryDTO> get(Long restaurantId, Long id);
-    InventoryDTO updateInventory(String restaurantCode, String categoryName, InventoryDTO updatedInventoryDTO);
-    InventoryDTO patchUpdateInventory(String restaurantCode, String categoryName, InventoryDTO inventoryDTO, HashSet<String> propertiesToBeUpdated);
-    void deleteInventory(String restaurantCode, String categoryName);
+    InventoryDTO createInventory(String restaurantCode,InventoryDTO inventoryDTO);
+    InventoryDTO getInventoryByRestaurantAndItemName(String restaurantCode, String itemName);
+    InventoryDTO updateInventory(String restaurantCode, String ItemName, InventoryDTO updatedInventoryDTO);
+    InventoryDTO patchUpdateInventory(String restaurantCode, String ItemName, InventoryDTO inventoryDTO, HashSet<String> propertiesToBeUpdated);
+    void deleteInventory(String restaurantCode, String ItemName);
 }

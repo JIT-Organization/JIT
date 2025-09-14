@@ -5,33 +5,33 @@ import com.justintime.jit.dto.CategoryDTO;
 import com.justintime.jit.dto.InventoryDTO;
 import com.justintime.jit.dto.PatchRequest;
 import com.justintime.jit.entity.Category;
+import com.justintime.jit.entity.Inventory;
 import com.justintime.jit.service.InventoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/jit-api/inventories")
-public class InventoryController {
+public class InventoryController extends BaseController{
 
     @Autowired
     private InventoryService inventoryService;
 
     @PostMapping("/{restaurantCode}")
-    public ResponseEntity<ApiResponse<Category>> createInventory(@PathVariable String restaurantCode, @RequestBody InventoryDTO inventoryDTO) {
+    public ResponseEntity<ApiResponse<InventoryDTO>> createInventory(@PathVariable String restaurantCode, @RequestBody InventoryDTO inventoryDTO) {
         return success(inventoryService.createInventory(restaurantCode, inventoryDTO), "Category Created Successfully");
     }
 
     @GetMapping("/getAll/{restaurantCode}")
-    public ResponseEntity<ApiResponse<List<CategoryDTO>>> getAllInventories(@PathVariable String restaurantCode) {
+    public ResponseEntity<ApiResponse<List<InventoryDTO>>> getAllInventories(@PathVariable String restaurantCode) {
         return success(inventoryService.getAllInventories(restaurantCode));
     }
 
     @GetMapping("/{restaurantCode}/{itemName}")
-    public ResponseEntity<InventoryDTO> getInventoryByItem(
+    public ResponseEntity<InventoryDTO> getInventoryByRestaurantAndItemName(
             @PathVariable String restaurantCode,
             @PathVariable String itemName) {
         InventoryDTO inventoryDTO = inventoryService.getInventoryByRestaurantAndItemName(restaurantCode, itemName);
@@ -41,8 +41,9 @@ public class InventoryController {
     @PutMapping("/{restaurantCode}/{itemName}/status")
     public ResponseEntity<InventoryDTO> updateInventory(
             @PathVariable String restaurantCode,
-            @PathVariable String itemName) {
-        InventoryDTO updatedInventoryDTO = inventoryService.updateInventory(restaurantCode, itemName);
+            @PathVariable String itemName,
+            @RequestBody InventoryDTO inventoryDTO) {
+        InventoryDTO updatedInventoryDTO = inventoryService.updateInventory(restaurantCode, itemName,inventoryDTO);
         return ResponseEntity.ok(updatedInventoryDTO);
     }
 
