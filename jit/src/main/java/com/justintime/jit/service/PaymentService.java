@@ -9,6 +9,7 @@ public interface PaymentService {
     List<Payment> getAllPayments();
     Optional<Payment> getPaymentById(Long id);
     Payment createPayment(Payment payment);
+    Payment verifyAndUpdatePayment(String razorpayPaymentId, String razorpayOrderId, String razorpaySignature);
     Payment updatePayment(Long id, Payment updatedPayment);
     void deletePayment(Long id);
     List<Payment> getPaymentsByOrderId(Long orderId);

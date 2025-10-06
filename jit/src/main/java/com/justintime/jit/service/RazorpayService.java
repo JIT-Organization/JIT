@@ -1,17 +1,20 @@
 package com.justintime.jit.service;
 
+import com.justintime.jit.dto.RazorpayOrderRequest;
+import com.justintime.jit.dto.RazorpayOrderResponse;
+import com.justintime.jit.dto.RazorpayPaymentResponse;
 import com.justintime.jit.util.RazorpayClient;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import  com.justintime.jit.dto.RazorpayOrderRequest;
-import com.justintime.jit.dto.RazorpayOrderResponse;
 
 import java.util.Base64;
 
+@Getter
+@Setter
 @Service
 public class RazorpayService {
-
 
     private final RazorpayClient razorpayClient;
 
@@ -25,11 +28,17 @@ public class RazorpayService {
         this.razorpayClient = razorpayClient;
     }
 
-    public RazorpayOrderResponse createOrder(RazorpayOrderRequest request) {
+    private String buildAuthHeader() {
         String auth = key + ":" + secret;
         String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
-        String authHeader = "Basic " + encodedAuth;
+        return "Basic " + encodedAuth;
+    }
 
-        return razorpayClient.createOrder(request, authHeader);
+    public RazorpayOrderResponse createOrder(RazorpayOrderRequest request) {
+        return razorpayClient.createOrder(request, buildAuthHeader());
+    }
+
+    public RazorpayPaymentResponse getPayment(String paymentId) {
+        return razorpayClient.getPayment(paymentId, buildAuthHeader());
     }
 }

@@ -7,9 +7,12 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PaymentRepository extends BaseRepository<Payment ,Long> {
     @Query("SELECT p FROM Payment p WHERE p.order.id = :orderId ORDER BY p.updatedDttm")
     List<Payment> findByOrderId(@Param("orderId") Long orderId);
+
+    Optional<Payment> findByRazorpayOrderId(String razorpayOrderId);
 }

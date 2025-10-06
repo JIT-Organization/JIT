@@ -40,7 +40,7 @@ public class Payment extends BaseEntity {
     @Column(name = "amount", nullable = false)
     private BigDecimal amount;
 
-    @Column(name = "currency", nullable = false)
+    @Column(name = "currency", precision = 10,scale=2, nullable = false)
     private String currency = "USD";
 
     @Column(name = "payment_status", nullable = false)
@@ -48,6 +48,15 @@ public class Payment extends BaseEntity {
 
     @Column(name = "payment_date", nullable = false, updatable = false)
     private LocalDateTime paymentDate = LocalDateTime.now();
+
+    @Column(name = "razorpay_order_id")
+    private String razorpayOrderId;
+
+    @Column(name = "razorpay_payment_id")
+    private String razorpayPaymentId;
+
+    @Column(name = "razorpay_signature")
+    private String razorpaySignature;
 
     @Column(name = "updated_by")
     private String updatedBy;

@@ -47,6 +47,18 @@ public class PaymentController {
         return paymentService.createPayment(payment);
     }
 
+
+    @PostMapping("/verify")
+    public ResponseEntity<Payment> verifyPayment(@RequestParam String razorpayPaymentId,
+                                                 @RequestParam String razorpayOrderId) {
+        try {
+            Payment payment = paymentService.verifyAndUpdatePayment(razorpayPaymentId, razorpayOrderId, null);
+            return ResponseEntity.ok(payment);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<Payment> updatePayment(@PathVariable Long id, @RequestBody Payment payment) {
         try {
