@@ -75,7 +75,8 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
     }
 
     @Override
-    public List<String> getCookNamesByRestaurantCode(String restaurantCode) {
+    public List<String> getCookNamesByRestaurantCode() {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         return userRepository.findUserNamesByRestaurantCodeAndRole(restaurantCode, Role.COOK);
     }
 
@@ -105,7 +106,8 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
     }
 
     @Override
-    public List<UserDTO> getUsersByRestaurantCode(String restaurantCode) {
+    public List<UserDTO> getUsersByRestaurantCode() {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         List<User> users = userRepository.findAllByRestaurantCode(restaurantCode);
         return users.stream().map(user -> {
             Set<String> permissionsCodes = user.getPermissions().stream().map(Permissions::getPermissionCode).collect(Collectors.toSet());
@@ -117,12 +119,14 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
     }
 
     @Override
-    public User getUserByRestaurantCodeAndUsername(String restaurantCode, String username) {
+    public User getUserByRestaurantCodeAndUsername(String username) {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         return userRepository.findByRestaurantCodeAndUserName(restaurantCode, username);
     }
 
     @Override
-    public UserDTO patchUpdateUser(String restaurantCode, String username, UserDTO dto, HashSet<String> propertiesToBeUpdated) {
+    public UserDTO patchUpdateUser(String username, UserDTO dto, HashSet<String> propertiesToBeUpdated) {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         User existingUser = userRepository.findByRestaurantCodeAndUserName(restaurantCode, username);
         User patchedUser = userMapper.toEntity(dto);
         // TODO write a validation where the username should be unique if they are updating it

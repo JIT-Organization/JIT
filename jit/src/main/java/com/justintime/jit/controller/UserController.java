@@ -26,16 +26,16 @@ public class UserController extends BaseController {
 //        return ResponseEntity.ok(users);
 //    }
 
-    @GetMapping("/getCookNames/{restaurantCode}")
-    public ResponseEntity<ApiResponse<List<String>>> getCookNamesByRestaurantCode(@PathVariable String restaurantCode) {
-        List<String> cookNames = userService.getCookNamesByRestaurantCode(restaurantCode);
+    @GetMapping("/getCookNames")
+    public ResponseEntity<ApiResponse<List<String>>> getCookNamesByRestaurantCode() {
+        List<String> cookNames = userService.getCookNamesByRestaurantCode();
         return success(cookNames);
     }
 
-    @GetMapping("/{restaurantCode}")
+    @GetMapping
     @PreAuthorize("hasPermission(null, 'VIEW_USERS')")
     public ResponseEntity<ApiResponse<List<UserDTO>>> getUsersByRestaurantCode(@PathVariable String restaurantCode) {
-        List<UserDTO> users = userService.getUsersByRestaurantCode(restaurantCode);
+        List<UserDTO> users = userService.getUsersByRestaurantCode();
         return success(users);
     }
 
@@ -47,16 +47,16 @@ public class UserController extends BaseController {
         return ResponseEntity.ok("User updated successfully");
     }
 
-    @PatchMapping("/{restaurantCode}/{username}")
+    @PatchMapping("/{username}")
     @PreAuthorize("hasPermission(null, 'EDIT_USERS')")
-    public ResponseEntity<ApiResponse<UserDTO>> patchUpdateUser(@PathVariable String restaurantCode, @PathVariable String username, @RequestBody PatchRequest<UserDTO> patchRequest) {
-        UserDTO updatedUser = userService.patchUpdateUser(restaurantCode, username, patchRequest.getDto(), patchRequest.getPropertiesToBeUpdated());
+    public ResponseEntity<ApiResponse<UserDTO>> patchUpdateUser(@PathVariable String username, @RequestBody PatchRequest<UserDTO> patchRequest) {
+        UserDTO updatedUser = userService.patchUpdateUser(username, patchRequest.getDto(), patchRequest.getPropertiesToBeUpdated());
         return success(updatedUser);
     }
 
-    @PostMapping("/{restaurantCode}")
+    @PostMapping
     @PreAuthorize("hasPermission(null, 'ADD_USERS')")
-    public ResponseEntity<ApiResponse<UserDTO>> addUser(@PathVariable String restaurantCode, @RequestBody UserDTO addUserRequest) {
+    public ResponseEntity<ApiResponse<UserDTO>> addUser(@RequestBody UserDTO addUserRequest) {
         return success(userService.addUser(addUserRequest), "User Added Successfully");
     }
 

@@ -1,10 +1,8 @@
 package com.justintime.jit.service.impl;
 
-import com.justintime.jit.dto.MenuItemDTO;
 import com.justintime.jit.entity.*;
 import com.justintime.jit.dto.AddOnDTO;
 import com.justintime.jit.entity.ComboEntities.Combo;
-import com.justintime.jit.entity.Enums.Role;
 import com.justintime.jit.repository.AddOnRepository;
 import com.justintime.jit.repository.ComboRepo.ComboRepository;
 import com.justintime.jit.repository.MenuItemRepository;
@@ -47,7 +45,8 @@ public class AddOnServiceImpl extends BaseServiceImpl<AddOn, Long> implements Ad
     private CommonServiceImplUtil commonServiceImplUtil;
 
 
-    public List<AddOnDTO> getAllAddOnsForRestaurant(String restaurantCode){
+    public List<AddOnDTO> getAllAddOnsForRestaurant() {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         List<AddOn> addOns = addOnRepository.findAllByRestaurant_RestaurantCode(restaurantCode);
         GenericMapper<AddOn, AddOnDTO> mapper = MapperFactory.getMapper(AddOn.class, AddOnDTO.class);
         List<AddOnDTO> addOnDTOs = new ArrayList<>();
@@ -57,7 +56,8 @@ public class AddOnServiceImpl extends BaseServiceImpl<AddOn, Long> implements Ad
         return addOnDTOs;
     }
 
-    public List<AddOnDTO> getAllAddOnsForMenuItem(String restaurantCode, String menuItemName) {
+    public List<AddOnDTO> getAllAddOnsForMenuItem(String menuItemName) {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         List<AddOn> addOns = addOnRepository.findAllByRestaurantCodeAndMenuItemName(restaurantCode, menuItemName);
         GenericMapper<AddOn, AddOnDTO> mapper = MapperFactory.getMapper(AddOn.class, AddOnDTO.class);
         return addOns.stream()
@@ -65,7 +65,8 @@ public class AddOnServiceImpl extends BaseServiceImpl<AddOn, Long> implements Ad
                 .collect(Collectors.toList());
     }
 
-    public List<AddOnDTO> getAllAddOnsForCombo(String restaurantCode, String comboName) {
+    public List<AddOnDTO> getAllAddOnsForCombo(String comboName) {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         List<AddOn> addOns = addOnRepository.findAllByRestaurantCodeAndComboName(restaurantCode, comboName);
         GenericMapper<AddOn, AddOnDTO> mapper = MapperFactory.getMapper(AddOn.class, AddOnDTO.class);
         return addOns.stream()
@@ -73,7 +74,8 @@ public class AddOnServiceImpl extends BaseServiceImpl<AddOn, Long> implements Ad
                 .collect(Collectors.toList());
     }
 
-    public List<AddOnDTO> getAllAddOnsForOrderItem(String restaurantCode, String orderNumber, String orderItemName) {
+    public List<AddOnDTO> getAllAddOnsForOrderItem(String orderNumber, String orderItemName) {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         List<AddOn> addOns = addOnRepository.findAddOnsByRestaurantCodeAndOrderNumberAndOrderItemName(restaurantCode, orderNumber, orderItemName);
         GenericMapper<AddOn, AddOnDTO> mapper = MapperFactory.getMapper(AddOn.class, AddOnDTO.class);
         return addOns.stream()
@@ -81,7 +83,8 @@ public class AddOnServiceImpl extends BaseServiceImpl<AddOn, Long> implements Ad
                 .collect(Collectors.toList());
     }
 
-    public void createAddOn(String restaurantCode, AddOnDTO addOnDTO) {
+    public void createAddOn(AddOnDTO addOnDTO) {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         GenericMapper<AddOn, AddOnDTO> mapper = MapperFactory.getMapper(AddOn.class, AddOnDTO.class);
         AddOn addOn = mapper.toEntity(addOnDTO);
         Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode)
@@ -90,7 +93,8 @@ public class AddOnServiceImpl extends BaseServiceImpl<AddOn, Long> implements Ad
         addOn.setRestaurant(restaurant);
         addOnRepository.save(addOn);
     }
-    public AddOnDTO updateAddOn(String restaurantCode, AddOnDTO updatedAddOnDTO) {
+    public AddOnDTO updateAddOn(AddOnDTO updatedAddOnDTO) {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         AddOn existingAddOn = addOnRepository.findByLabel(updatedAddOnDTO.getLabel())
                 .orElseThrow(() -> new RuntimeException("AddOn not found with label: " + updatedAddOnDTO.getLabel()));
         GenericMapper<AddOn, AddOnDTO> mapper = MapperFactory.getMapper(AddOn.class, AddOnDTO.class);
@@ -105,7 +109,8 @@ public class AddOnServiceImpl extends BaseServiceImpl<AddOn, Long> implements Ad
         return mapToDTO(addOnRepository.save(existingAddOn), mapper);
     }
 
-    public AddOnDTO patchAddOn(String restaurantCode, AddOnDTO addOnDTO, HashSet<String> propertiesToBeUpdated) {
+    public AddOnDTO patchAddOn(AddOnDTO addOnDTO, HashSet<String> propertiesToBeUpdated) {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         GenericMapper<AddOn, AddOnDTO> mapper = MapperFactory.getMapper(AddOn.class, AddOnDTO.class);
         AddOn existingAddOn = addOnRepository.findByLabel(addOnDTO.getLabel())
                 .orElseThrow(() -> new RuntimeException("AddOn not found with label: " + addOnDTO.getLabel()));
@@ -122,7 +127,8 @@ public class AddOnServiceImpl extends BaseServiceImpl<AddOn, Long> implements Ad
         return mapToDTO(addOnRepository.save(existingAddOn), mapper);
     }
 
-    public void deleteAddOn(String restaurantCode, String label) {
+    public void deleteAddOn(String label) {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         AddOn addOn = addOnRepository.findByLabel(label)
                 .orElseThrow(() -> new RuntimeException("AddOn not found with label: " + label));
         if (!addOn.getRestaurant().getRestaurantCode().equals(restaurantCode)) {

@@ -17,6 +17,7 @@ import com.justintime.jit.util.mapper.MapperFactory;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
-public class OrderServiceImpl implements OrderService {
+public class OrderServiceImpl extends BaseServiceImpl<Order, Long> implements OrderService {
 
     @Autowired
     @PersistenceContext
@@ -68,17 +69,19 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public ResponseEntity<String> createOrder(String restaurantCode, OrderDTO orderDTO) {
-        Restaurant restaurant = restaurantService.getRestaurantByRestaurantCode(restaurantCode);
+    public ResponseEntity<String> createOrder(OrderDTO orderDTO) {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
+        String username = getUsernameFromJWTBean();
+        Restaurant restaurant = restaurantService.getRestaurantByRestaurantCode();
         Order order = orderMapper.toEntity(orderDTO);
         order.setRestaurant(restaurant);
 
-        if (orderDTO.getOrderedBy() != null && !orderDTO.getOrderedBy().trim().isEmpty()) {
-            User customer = userService.getUserByRestaurantCodeAndUsername(restaurantCode, orderDTO.getOrderedBy());
-            if (customer != null) {
-                order.setUser(customer);
+        if (StringUtils.isNotEmpty(username)) {
+            User orderedBy = userService.getUserByRestaurantCodeAndUsername(username);
+            if (orderedBy != null) {
+                order.setUser(orderedBy);
             } else {
-                throw new ResourceNotFoundException("User not found with name: " + orderDTO.getOrderedBy() + " for restaurant: " + restaurantCode);
+                throw new ResourceNotFoundException("User not found with name: " + username + " for restaurant: " + restaurantCode);
             }
         } else {
             throw new IllegalArgumentException("Order must have a customer (orderedBy field cannot be null or empty)");
@@ -96,7 +99,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderDTO> getOrdersByRestaurantId(String restaurantCode) {
+    public List<OrderDTO> getOrdersByRestaurantId() {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         List<Order> orders = orderRepository.findByRestaurantCode(restaurantCode);
         if (orders.isEmpty()) {
             throw new ResourceNotFoundException("No orders found for restaurant with code: " + restaurantCode);
@@ -126,7 +130,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderDTO patchUpdateOrder(String restaurantCode, String orderNumber, OrderDTO orderDTO, HashSet<String> propertiesToBeUpdated){
         Order existingOrder = orderRepository.findByRestaurantCodeAndOrderNumber(restaurantCode, orderNumber)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found with number: " + orderNumber + " for restaurant: " + restaurantCode));
-        existingOrder.setRestaurant(restaurantService.getRestaurantByRestaurantCode(restaurantCode));
+        existingOrder.setRestaurant(restaurantService.getRestaurantByRestaurantCode());
         Order patchedOrder = orderMapper.toEntity(orderDTO);
         resolveRelationships(patchedOrder, orderDTO);
         commonServiceImplUtil.copySelectedProperties(patchedOrder, existingOrder,propertiesToBeUpdated);

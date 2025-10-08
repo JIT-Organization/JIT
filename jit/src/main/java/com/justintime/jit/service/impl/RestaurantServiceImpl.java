@@ -42,8 +42,9 @@ public class RestaurantServiceImpl extends BaseServiceImpl<Restaurant,Long> impl
 
 
     @Override
-    public void updateRestaurant(String code, Restaurant restaurant) {
-        Restaurant existingRestaurant = restaurantRepository.findByRestaurantCode(code)
+    public void updateRestaurant(Restaurant restaurant) {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
+        Restaurant existingRestaurant = restaurantRepository.findByRestaurantCode(restaurantCode)
                 .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
 
         existingRestaurant.setRestaurantName(restaurant.getRestaurantName());
@@ -57,20 +58,23 @@ public class RestaurantServiceImpl extends BaseServiceImpl<Restaurant,Long> impl
     }
 
     @Override
-    public void deleteRestaurant(String restaurantCode) {
+    public void deleteRestaurant() {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         Restaurant existingRestaurant = restaurantRepository.findByRestaurantCode(restaurantCode)
                 .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
         restaurantRepository.delete(existingRestaurant);
     }
 
     @Override
-    public Restaurant getRestaurantByRestaurantCode(String restaurantCode) {
+    public Restaurant getRestaurantByRestaurantCode() {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         return restaurantRepository.findByRestaurantCode(restaurantCode)
                 .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
     }
 
     @Override
-    public RestaurantDTO getRestaurantDTOByRestaurantCode(String restaurantCode) {
+    public RestaurantDTO getRestaurantDTOByRestaurantCode() {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode)
                 .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
         GenericMapper<Restaurant, RestaurantDTO> mapper = MapperFactory.getMapper(Restaurant.class, RestaurantDTO.class);
@@ -78,7 +82,8 @@ public class RestaurantServiceImpl extends BaseServiceImpl<Restaurant,Long> impl
     }
 
     @Override
-    public void patchUpdateRestaurant(String restaurantCode, RestaurantDTO dto, HashSet<String> propertiesToBeUpdated) {
+    public void patchUpdateRestaurant(RestaurantDTO dto, HashSet<String> propertiesToBeUpdated) {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         Restaurant existingItem = restaurantRepository.findByRestaurantCode(restaurantCode)
                 .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
         GenericMapper<Restaurant, RestaurantDTO> restaurantMapper = MapperFactory.getMapper(Restaurant.class, RestaurantDTO.class);
@@ -89,7 +94,8 @@ public class RestaurantServiceImpl extends BaseServiceImpl<Restaurant,Long> impl
     }
 
     @Override
-    public String getUpiIdByRestaurantCode(String restaurantCode) {
+    public String getUpiIdByRestaurantCode() {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode)
                 .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
         return restaurant.getUpiId();

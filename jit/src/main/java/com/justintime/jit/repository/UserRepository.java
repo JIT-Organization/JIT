@@ -96,7 +96,7 @@ public interface UserRepository extends BaseRepository<User, Long> {
     @Query(value = "SELECT u.* FROM users u " +
             "JOIN user_restaurant ur ON u.id = ur.user_id " +
             "JOIN restaurant r ON ur.restaurant_id = r.id " +
-            "WHERE r.restaurant_code = :restaurantCode AND u.user_name = :userName",
+            "WHERE r.restaurant_code = :restaurantCode AND u.email = :userName",
             nativeQuery = true)
     User findByRestaurantCodeAndUserName(
             @Param("restaurantCode") String restaurantCode,

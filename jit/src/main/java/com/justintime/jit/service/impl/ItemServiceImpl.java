@@ -26,7 +26,7 @@ import java.util.*;
 import static com.justintime.jit.service.impl.MenuItemServiceImpl.convertTimeIntervals;
 
 @Service
-public class ItemServiceImpl implements ItemService {
+public class ItemServiceImpl extends BaseServiceImpl<MenuItem, Long> implements ItemService {
 
     @Autowired
     private RestaurantRepository restaurantRepository;
@@ -53,7 +53,8 @@ public class ItemServiceImpl implements ItemService {
     private CommonServiceImplUtil commonServiceImplUtil;
 
     @Override
-    public List<ItemDTO> getAllItemsForRestaurant(String restaurantCode) {
+    public List<ItemDTO> getAllItemsForRestaurant() {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         List<ItemDTO> itemDTOs = new ArrayList<>();
         List<MenuItem> menuItems = menuItemRepository.findByRestaurantCode(restaurantCode);
         List<Combo> combos = comboRepository.findByRestaurantCode(restaurantCode);
@@ -73,7 +74,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDTO> getAllItemsForRestaurantAndFoodType(String restaurantCode, FoodType foodType) {
+    public List<ItemDTO> getAllItemsForRestaurantAndFoodType(FoodType foodType) {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         List<ItemDTO> itemDTOs = new ArrayList<>();
         if (foodType == FoodType.MENU_ITEM) {
             List<MenuItem> menuItems = menuItemRepository.findByRestaurantCode(restaurantCode);
@@ -100,7 +102,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<String> getAllItemNamesForRestaurant(String restaurantCode) {
+    public List<String> getAllItemNamesForRestaurant() {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         List<String> menuItemNames = menuItemRepository.findMenuItemNamesByRestaurantCode(restaurantCode);
         List<String> comboNames = comboRepository.findComboNamesByRestaurantCode(restaurantCode);
         List<String> allItems = new ArrayList<>(menuItemNames);
@@ -109,7 +112,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<String> getAllItemNamesForRestaurantAndFoodType(String restaurantCode, FoodType foodType) {
+    public List<String> getAllItemNamesForRestaurantAndFoodType(FoodType foodType) {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         return switch (foodType) {
             case MENU_ITEM -> menuItemRepository.findMenuItemNamesByRestaurantCode(restaurantCode);
             case COMBO -> comboRepository.findComboNamesByRestaurantCode(restaurantCode);
@@ -119,7 +123,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDTO getItemByRestaurantAndNameAndFoodType(String restaurantCode, String itemName, FoodType foodType) {
+    public ItemDTO getItemByRestaurantAndNameAndFoodType(String itemName, FoodType foodType) {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode)
                 .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found with code: " + restaurantCode));
         if (foodType == FoodType.MENU_ITEM) {
@@ -144,7 +149,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDTO createItem(String restaurantCode, FoodType foodType, ItemDTO itemDTO) {
+    public ItemDTO createItem(FoodType foodType, ItemDTO itemDTO) {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode)
                 .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found with code: " + restaurantCode));
         if (foodType == FoodType.MENU_ITEM) {
@@ -170,7 +176,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDTO updateItem(String restaurantCode, String itemName, FoodType foodType, ItemDTO itemDTO) {
+    public ItemDTO updateItem(String itemName, FoodType foodType, ItemDTO itemDTO) {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode)
                 .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found with code: " + restaurantCode));
         if (foodType == FoodType.MENU_ITEM) {
@@ -200,7 +207,8 @@ public class ItemServiceImpl implements ItemService {
         }
     }
     @Override
-    public ItemDTO patchItem(String restaurantCode, String itemName, FoodType foodType, ItemDTO itemDTO, HashSet<String> propertiesToBeUpdated) {
+    public ItemDTO patchItem(String itemName, FoodType foodType, ItemDTO itemDTO, HashSet<String> propertiesToBeUpdated) {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode)
                 .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found with code: " + restaurantCode));
         if (foodType == FoodType.MENU_ITEM) {
@@ -250,7 +258,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public void deleteItem(String restaurantCode, String itemName, FoodType foodType) {
+    public void deleteItem(String itemName, FoodType foodType) {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode)
                 .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found with code: " + restaurantCode));
         if (foodType == FoodType.MENU_ITEM) {

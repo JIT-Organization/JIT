@@ -86,9 +86,9 @@ export const getStaffMemberColumns = (
             variant="ghost"
             colorVariant="none"
             onClick={() => handleResendClick(row.original)}
-            disabled={!row.original.isRegistrationCompleted}
+            disabled={row.original.isRegistrationCompleted}
           >
-            <Send className="text-red-600 h-50 w-50" />
+            <Send className="h-50 w-50" />
           </Button>
           <CustomPopup
             type="user"

@@ -100,7 +100,7 @@ const OrderPageWrapper = ({
         description: "Order created successfully",
       });
       form.reset();
-      router.push("/restaurants/orders");
+      // router.push("/restaurants/orders");
     },
   });
 

@@ -7,12 +7,12 @@ import java.util.HashSet;
 import java.util.List;
 
 public interface AddOnService extends BaseService<AddOn, Long> {
-    List<AddOnDTO> getAllAddOnsForRestaurant(String restaurantCode);
-    List<AddOnDTO> getAllAddOnsForMenuItem(String restaurantCode, String menuItemName);
-    List<AddOnDTO> getAllAddOnsForCombo(String restaurantCode, String comboName);
-    List<AddOnDTO> getAllAddOnsForOrderItem(String restaurantCode, String orderNumber, String itemName);
-    void createAddOn(String restaurantCode, AddOnDTO addOnDTO);
-    AddOnDTO updateAddOn(String restaurantCode, AddOnDTO addOnDTO);
-    AddOnDTO patchAddOn(String restaurantCode, AddOnDTO addOnDTO, HashSet<String> propertiesToBeUpdated);
-    void deleteAddOn(String restaurantCode, String label);
+    List<AddOnDTO> getAllAddOnsForRestaurant();
+    List<AddOnDTO> getAllAddOnsForMenuItem(String menuItemName);
+    List<AddOnDTO> getAllAddOnsForCombo(String comboName);
+    List<AddOnDTO> getAllAddOnsForOrderItem(String orderNumber, String itemName);
+    void createAddOn(AddOnDTO addOnDTO);
+    AddOnDTO updateAddOn(AddOnDTO addOnDTO);
+    AddOnDTO patchAddOn(AddOnDTO addOnDTO, HashSet<String> propertiesToBeUpdated);
+    void deleteAddOn(String label);
 }

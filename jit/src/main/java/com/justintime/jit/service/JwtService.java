@@ -1,5 +1,6 @@
 package com.justintime.jit.service;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 
 public interface JwtService {
@@ -8,4 +9,5 @@ public interface JwtService {
     String extractEmail(String token);
     boolean validateToken(String token, UserDetails userDetails);
     Object extractRestaurantCode(String token);
+    void createJwtBean(Authentication authentication, String token);
 }

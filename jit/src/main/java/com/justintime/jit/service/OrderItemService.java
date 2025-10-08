@@ -18,6 +18,5 @@ public interface OrderItemService {
     void deleteOrderItem(String restaurantCode, String itemName, String orderNumber);
     List<OrderItemDTO> getOrderItemsForCook(Long cookId);
     List<OrderItemDTO> getOrderItemsForCookByNameAndRestaurant(String cookName, String restaurantCode);
-
     List<OrderItem> createAndPersistOrderItems(OrderDTO orderDTO, String restaurantCode, Order savedOrder);
 }

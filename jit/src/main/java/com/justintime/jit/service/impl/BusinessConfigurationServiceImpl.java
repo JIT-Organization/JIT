@@ -24,9 +24,7 @@ public class BusinessConfigurationServiceImpl implements BusinessConfigurationSe
     public String getConfigValue(String restaurantCode, ConfigurationName configurationName) {
         return businessConfigurationRepository.findByRestaurantCodeAndConfigurationName(restaurantCode, configurationName)
                 .map(BusinessConfiguration::getValue)
-                .orElseThrow(() -> new RuntimeException(
-                        "Config not found for restaurantCode: " + restaurantCode + " and configurationName: " + configurationName
-                ));
+                .orElse("N");
     }
 
     @Override
