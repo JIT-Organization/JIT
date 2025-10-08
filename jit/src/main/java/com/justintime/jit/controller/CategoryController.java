@@ -22,10 +22,10 @@ public class CategoryController extends BaseController {
     @Autowired
     private CategoryService categoryService;
 
-    @GetMapping("/getAll/{restaurantCode}")
+    @GetMapping("/getAll")
     @PreAuthorize("hasPermission(null, 'VIEW_MENU_ITEMS')")
-    public ResponseEntity<ApiResponse<List<CategoryDTO>>> getAllCategories(@PathVariable String restaurantCode) {
-        return success(categoryService.getAllCategories(restaurantCode));
+    public ResponseEntity<ApiResponse<List<CategoryDTO>>> getAllCategories() {
+        return success(categoryService.getAllCategories());
     }
 
     @GetMapping("/{restaurantId}/{id}")
@@ -39,30 +39,30 @@ public class CategoryController extends BaseController {
     }
 
     @ValidateInput
-    @PostMapping("/{restaurantCode}")
+    @PostMapping
     @PreAuthorize("hasPermission(null, 'ADD_MENU_ITEMS')")
-    public ResponseEntity<ApiResponse<Category>> createCategory(@PathVariable String restaurantCode,@RequestBody CategoryDTO categoryDTO) {
-        return success(categoryService.createCategory(restaurantCode, categoryDTO), "Category Created Successfully");
+    public ResponseEntity<ApiResponse<Category>> createCategory(@RequestBody CategoryDTO categoryDTO) {
+        return success(categoryService.createCategory(categoryDTO), "Category Created Successfully");
     }
 
     @ValidateInput
-    @PutMapping("/{restaurantCode}/{categoryName}")
+    @PutMapping("/{categoryName}")
     @PreAuthorize("hasPermission(null, 'ADD_MENU_ITEMS')")
-    public ResponseEntity<ApiResponse<CategoryDTO>> updateCategory(@PathVariable String restaurantCode, @PathVariable String categoryName, @RequestBody CategoryDTO categoryDTO) {
-        return success(categoryService.updateCategory(restaurantCode, categoryName, categoryDTO));
+    public ResponseEntity<ApiResponse<CategoryDTO>> updateCategory(@PathVariable String categoryName, @RequestBody CategoryDTO categoryDTO) {
+        return success(categoryService.updateCategory(categoryName, categoryDTO));
     }
 
     @ValidateInput
-    @PatchMapping("/{restaurantCode}/{categoryName}")
+    @PatchMapping("/{categoryName}")
     @PreAuthorize("hasPermission(null, 'ADD_MENU_ITEMS')")
-    public ResponseEntity<ApiResponse<CategoryDTO>> patchUpdateCategory(@PathVariable String restaurantCode,@PathVariable String categoryName, @RequestBody PatchRequest<CategoryDTO> payload) {
-        return success(categoryService.patchUpdateCategory(restaurantCode, categoryName, payload.getDto(), payload.getPropertiesToBeUpdated()));
+    public ResponseEntity<ApiResponse<CategoryDTO>> patchUpdateCategory(@PathVariable String categoryName, @RequestBody PatchRequest<CategoryDTO> payload) {
+        return success(categoryService.patchUpdateCategory(categoryName, payload.getDto(), payload.getPropertiesToBeUpdated()));
     }
 
-    @DeleteMapping("/{restaurantCode}/{categoryName}")
+    @DeleteMapping("/{categoryName}")
     @PreAuthorize("hasPermission(null, 'DELETE_MENU_ITEMS')")
-    public ResponseEntity<ApiResponse<String>> deleteCategory(@PathVariable String restaurantCode, @PathVariable String categoryName) {
-        categoryService.deleteCategory(restaurantCode, categoryName);
+    public ResponseEntity<ApiResponse<String>> deleteCategory(@PathVariable String categoryName) {
+        categoryService.deleteCategory(categoryName);
         return success(null, "Category Deleted successfully");
     }
 }

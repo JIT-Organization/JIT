@@ -1,13 +1,16 @@
 package com.justintime.jit.service.impl;
 
+import com.justintime.jit.bean.JwtBean;
 import com.justintime.jit.repository.UserRepository;
+import com.justintime.jit.security.CustomAuthToken;
 import com.justintime.jit.service.JwtService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +31,9 @@ public class JwtServiceImpl implements JwtService {
     public JwtServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
+
+    @Autowired
+    public BeanFactory beanFactory;
 
     private List<String> getRestaurantCodes(String email) {
         return userRepository.findRestaurantCodesByEmail(email);
@@ -78,6 +84,17 @@ public class JwtServiceImpl implements JwtService {
             }
             return null;
         });
+    }
+
+    @Override
+    public void createJwtBean(Authentication authentication, String token) {
+        JwtBean jwtBean = beanFactory.getBean(JwtBean.class);
+        jwtBean.setUsername(authentication.getName());
+        jwtBean.setRoles(authentication.getAuthorities());
+        jwtBean.setToken(token);
+        if (authentication instanceof CustomAuthToken customAuthToken) {
+            jwtBean.setRestaurantCode(customAuthToken.getRestaurantCode());
+        }
     }
 
 

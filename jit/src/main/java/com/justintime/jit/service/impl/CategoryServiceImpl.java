@@ -39,7 +39,8 @@ public class CategoryServiceImpl extends BaseServiceImpl<Category,Long> implemen
     private final GenericMapper<Category, CategoryDTO> mapper = MapperFactory.getMapper(Category.class, CategoryDTO.class);
 
 
-    public List<CategoryDTO> getAllCategories(String restaurantCode) {
+    public List<CategoryDTO> getAllCategories() {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         List<Category> categories= categoryRepository.findByRestaurant_RestaurantCode(restaurantCode);
         return categories.stream()
                 .map(category -> mapToDTO(category, mapper))
@@ -65,14 +66,16 @@ public class CategoryServiceImpl extends BaseServiceImpl<Category,Long> implemen
 
 
     @Transactional
-    public Category createCategory(String restaurantCode, CategoryDTO categoryDTO) {
+    public Category createCategory(CategoryDTO categoryDTO) {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         Category category = mapper.toEntity(categoryDTO);
         category.setRestaurant(restaurantRepository.findByRestaurantCode(restaurantCode).orElseThrow(() -> new RuntimeException("Restaurant not found")));
         resolveRelationships(category, categoryDTO);
         return categoryRepository.save(category);
     }
 
-    public CategoryDTO updateCategory(String restaurantCode, String categoryName, CategoryDTO updatedCategoryDTO) {
+    public CategoryDTO updateCategory(String categoryName, CategoryDTO updatedCategoryDTO) {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         Category exisitingCategory = categoryRepository.findByCategoryNameAndRestaurant_RestaurantCode(categoryName, restaurantCode)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
         Category updatedCategory = mapper.toEntity(updatedCategoryDTO);
@@ -84,7 +87,8 @@ public class CategoryServiceImpl extends BaseServiceImpl<Category,Long> implemen
 
 
     @Override
-    public CategoryDTO patchUpdateCategory(String restaurantCode, String categoryName, CategoryDTO categoryDTO, HashSet<String> propertiesToBeUpdated) {
+    public CategoryDTO patchUpdateCategory(String categoryName, CategoryDTO categoryDTO, HashSet<String> propertiesToBeUpdated) {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         Category existingCategory = categoryRepository.findByCategoryNameAndRestaurant_RestaurantCode(categoryName, restaurantCode)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
         Category patchedCategory = mapper.toEntity(categoryDTO);
@@ -104,7 +108,8 @@ public class CategoryServiceImpl extends BaseServiceImpl<Category,Long> implemen
         return mapToDTO(existingCategory, mapper);
     }
 
-    public void deleteCategory(String restaurantCode, String categoryName) {
+    public void deleteCategory(String categoryName) {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         Category existingCategory = categoryRepository.findByCategoryNameAndRestaurant_RestaurantCode(categoryName, restaurantCode).orElseThrow(() -> new RuntimeException("Category not found"));
         existingCategory.setComboSet(null);
         existingCategory.setMenuItemSet(null);

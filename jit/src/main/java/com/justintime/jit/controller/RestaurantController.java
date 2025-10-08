@@ -38,39 +38,37 @@ public class RestaurantController extends BaseController {
 //    }
 
     //Get a restaurant by ID
-    @GetMapping("/{restaurantCode}")
-    public ResponseEntity<ApiResponse<RestaurantDTO>> getRestaurantByCode(@PathVariable String restaurantCode) {
-        RestaurantDTO restaurant = restaurantService.getRestaurantDTOByRestaurantCode(restaurantCode);
+    @GetMapping
+    public ResponseEntity<ApiResponse<RestaurantDTO>> getRestaurantByCode() {
+        RestaurantDTO restaurant = restaurantService.getRestaurantDTOByRestaurantCode();
         return success(restaurant);
     }
 
-    @GetMapping("/getUpiId/{restaurantCode}")
-    public ResponseEntity<ApiResponse<String>> getUpiIdByRestaurantCode(@PathVariable String restaurantCode) {
-        String upiId = restaurantService.getUpiIdByRestaurantCode(restaurantCode);
+    @GetMapping("/getUpiId")
+    public ResponseEntity<ApiResponse<String>> getUpiIdByRestaurantCode() {
+        String upiId = restaurantService.getUpiIdByRestaurantCode();
         return success(upiId);
     }
 
     // Update restaurant details
-    @PutMapping("/{restaurantCode}")
+    @PutMapping
     public ResponseEntity<ApiResponse<RestaurantDTO>> updateRestaurant(
-            @PathVariable String restaurantCode,
             @RequestBody Restaurant restaurant) {
-        restaurantService.updateRestaurant(restaurantCode, restaurant);
+        restaurantService.updateRestaurant(restaurant);
         return success(null);
     }
 
-    @PatchMapping("/{restaurantCode}")
+    @PatchMapping
     @PreAuthorize("hasPermission(null, 'MANAGE_SETTINGS')")
-    public ResponseEntity<ApiResponse<RestaurantDTO>> patchUpdateRestaurant (
-            @PathVariable String restaurantCode, @RequestBody PatchRequest<RestaurantDTO> payload) {
-        restaurantService.patchUpdateRestaurant(restaurantCode, payload.getDto(), payload.getPropertiesToBeUpdated());
+    public ResponseEntity<ApiResponse<RestaurantDTO>> patchUpdateRestaurant (@RequestBody PatchRequest<RestaurantDTO> payload) {
+        restaurantService.patchUpdateRestaurant(payload.getDto(), payload.getPropertiesToBeUpdated());
         return success(null);
     }
 
     // Delete a restaurant
-    @DeleteMapping("/{restaurantCode}")
-    public ResponseEntity<ApiResponse<RestaurantDTO>> deleteRestaurant(@PathVariable String restaurantCode) {
-        restaurantService.deleteRestaurant(restaurantCode);
+    @DeleteMapping
+    public ResponseEntity<ApiResponse<RestaurantDTO>> deleteRestaurant() {
+        restaurantService.deleteRestaurant();
         return success(null);
     }
 

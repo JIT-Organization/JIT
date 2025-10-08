@@ -31,6 +31,8 @@ public class NotificationServiceImpl implements NotificationService {
         orderItems.forEach(this::notifyOrderItemCreationToUser);
     }
 
+    // TODO Enhance this so that if we subscribe once we send the notifications
+
     @Override
     public void notifyOrderItemStatusUpdate(OrderItem orderItem) {
         notifyOrderItemStatusUpdateToUser(orderItem);

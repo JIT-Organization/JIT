@@ -14,8 +14,8 @@ public abstract class BaseController {
     @Autowired
     protected ValidationDispatcher validationDispatcher;
 
-    protected <T> void validate(T dto, @Nullable Set<String> fieldsToValidate, @Nullable String restaurantCode) {
-        validationDispatcher.process(dto, fieldsToValidate, restaurantCode);
+    protected <T> void validate(T dto, @Nullable Set<String> fieldsToValidate) {
+        validationDispatcher.process(dto, fieldsToValidate);
     }
 
     protected <T> ResponseEntity<ApiResponse<T>> respond (T data, String message, HttpStatus status) {

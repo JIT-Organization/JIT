@@ -22,16 +22,16 @@ public class OrderController extends BaseController {
     @Autowired
     private OrderService orderService;
 
-    @PostMapping("/{restaurantCode}")
+    @PostMapping
     @PreAuthorize("hasPermission(null, 'ADD_ORDERS')")
-    public ResponseEntity<String> createOrder(@PathVariable String restaurantCode, @RequestBody OrderDTO orderDTO) {
-        return orderService.createOrder(restaurantCode, orderDTO);
+    public ResponseEntity<String> createOrder(@RequestBody OrderDTO orderDTO) {
+        return orderService.createOrder(orderDTO);
     }
 
-    @GetMapping("/{restaurantCode}")
+    @GetMapping
     @PreAuthorize("hasPermission(null, 'VIEW_ORDERS')")
-    public ResponseEntity<ApiResponse<List<OrderDTO>>> getAllOrders(@PathVariable String restaurantCode) {
-        List<OrderDTO> orderDTOs = orderService.getOrdersByRestaurantId(restaurantCode);
+    public ResponseEntity<ApiResponse<List<OrderDTO>>> getAllOrders() {
+        List<OrderDTO> orderDTOs = orderService.getOrdersByRestaurantId();
         return success(orderDTOs, "Orders fetched successfully");
     }
 

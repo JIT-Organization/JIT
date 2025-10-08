@@ -26,16 +26,11 @@ public class ValidationAspect {
 
         Object dto = null;
         Set<String> fieldsToValidate = null;
-        String restaurantCode = null;
 
         for (Object arg : args) {
             if (arg instanceof PatchRequest<?> patchRequest) {
                 dto = patchRequest.getDto();
                 fieldsToValidate = patchRequest.getPropertiesToBeUpdated();
-            } else if (arg instanceof String str && str.matches("^[A-Z0-9_]+$")) {
-                restaurantCode = str;
-            } else if (restaurantCode == null) {
-                restaurantCode = extractRestaurantCodeFromObject(arg);
             } else if (isCustomDTO(arg)) {
                 dto = arg;
             }
@@ -45,26 +40,9 @@ public class ValidationAspect {
             throw new InvalidPayloadException("Invalid payload.");
         }
 
-        validationDispatcher.process(dto, fieldsToValidate, restaurantCode);
+        validationDispatcher.process(dto, fieldsToValidate);
 
         return joinPoint.proceed();
-    }
-
-    private String extractRestaurantCodeFromObject(Object arg) {
-        Method method;
-        try {
-            method = arg.getClass().getMethod("getRestaurantCode");
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
-        Object result;
-        try {
-            result = method.invoke(arg);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException(e);
-        }
-        return (result instanceof String) ? (String) result : null;
-
     }
 
     private boolean isCustomDTO(Object arg) {

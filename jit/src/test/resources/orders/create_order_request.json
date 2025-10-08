@@ -1,0 +1,21 @@
+{
+  "amount": 34,
+  "orderItems": [
+    {
+      "foodType": "MENU_ITEM",
+      "menuItemName": "Vada",
+      "itemName": "Vada",
+      "quantity": 1,
+      "price": 34,
+      "totalPrice": 34,
+      "selectedAddOns": [],
+      "customNotes": ""
+    }
+  ],
+  "diningTables": [
+    "TBL-101"
+  ],
+  "orderedBy": "Leela",
+  "orderedNumber": "9080908090",
+  "takeAway": false
+}

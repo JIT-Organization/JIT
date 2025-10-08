@@ -47,12 +47,12 @@ public class ValidationUtils {
         }
     }
 
-    @SuppressFBWarnings(value = "UC", justification = "Used for runtime validation of DTO fields")
-    public static void runValidation(List<ValidationRule> allRules, @Nullable Set<String> fieldsToValidate) {
-        for (ValidationRule rule : allRules) {
-            if (shouldValidate(rule.fieldName(), fieldsToValidate)) {
-                rule.validationLogic().run();
-            }
-        }
-    }
+//    @SuppressFBWarnings(value = "UC", justification = "Used for runtime validation of DTO fields")
+//    public static void runValidation(List<ValidationRule> allRules, @Nullable Set<String> fieldsToValidate) {
+//        for (ValidationRule rule : allRules) {
+//            if (shouldValidate(rule.getFieldName(), fieldsToValidate)) {
+//                rule.getValidationLogic().run();
+//            }
+//        }
+//    }
 }

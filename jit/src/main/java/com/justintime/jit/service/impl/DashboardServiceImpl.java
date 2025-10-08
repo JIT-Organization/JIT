@@ -1,5 +1,6 @@
 package com.justintime.jit.service.impl;
 
+import com.justintime.jit.bean.JwtBean;
 import com.justintime.jit.dto.DashboardDTO;
 import com.justintime.jit.entity.Enums.Role;
 import com.justintime.jit.entity.Restaurant;
@@ -42,8 +43,12 @@ public class DashboardServiceImpl implements DashboardService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private JwtBean jwtBean;
 
-    public DashboardDTO getDashboardData(String restaurantCode) {
+
+    public DashboardDTO getDashboardData() {
+        String restaurantCode = jwtBean.getRestaurantCode();
         Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode).orElseThrow(() -> new ResourceNotFoundException("Restaurant not found with restaurant code" + restaurantCode));
         DashboardDTO dashboardDTO = new DashboardDTO();
         dashboardDTO.setTotalMenuItems(menuItemRepository.countByRestaurantId(restaurant.getId()));
