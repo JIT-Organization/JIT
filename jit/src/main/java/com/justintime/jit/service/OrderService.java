@@ -19,6 +19,7 @@ public interface OrderService {
     void deleteOrder(String restaurantCode, String orderNumber);
     List<OrderDTO> getOrdersByRestaurantAndUserId(Optional<Long> restaurantId, Optional<Long> userId);
     BigDecimal calculateTotalRevenue(String restaurantCode);
+    List<OrderItemDTO> getAllAssignedOrdersForUser();
     List<OrderItemDTO> getAllInProgressOrderItemsForRestaurant();
     OrderItemDTO updateOrderItemStatus(OrderItemDTO orderItemDTO);
 }

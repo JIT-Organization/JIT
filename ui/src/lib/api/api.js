@@ -396,6 +396,10 @@ export const getPermisisonsForRole = (role) => ({
   ...cacheConfig,
 });
 
+export const subscribeForPushNotifications = (payload) => postRequest(URLS.subscribeForPushNotifications, payload);
+
+export const fetchPendingMessages = () => getRequest(URLS.ordersList + "/assignedOrders");
+
 // export const getMenuItemListOptions = (id) => ({
 //   queryKey: ["menuItemList"],
 //   queryFn: async () => {

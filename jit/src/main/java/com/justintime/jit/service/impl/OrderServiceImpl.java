@@ -200,6 +200,11 @@ public class OrderServiceImpl extends BaseServiceImpl<Order, Long> implements Or
     }
 
     @Override
+    public List<OrderItemDTO> getAllAssignedOrdersForUser() {
+        return orderItemService.getAllAssignedOrdersForUser();
+    }
+
+    @Override
     public List<OrderDTO> getOrdersByRestaurantAndUserId(Optional<Long> restaurantId, Optional<Long> userId)
     {
         List<Order> orders;

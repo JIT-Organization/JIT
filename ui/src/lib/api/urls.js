@@ -9,5 +9,6 @@ export const URLS = {
   addOns: createUrl("/addons"),
   register: "http://localhost:8080/register",
   sendInvite: createUrl("/users/send-invite"),
-  permissions: createUrl("/permissions")
+  permissions: createUrl("/permissions"),
+  subscribeForPushNotifications: createUrl("/notifications/subscribe")
 };

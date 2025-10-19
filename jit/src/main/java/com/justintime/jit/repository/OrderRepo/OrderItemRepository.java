@@ -1,5 +1,6 @@
 package com.justintime.jit.repository.OrderRepo;
 
+import com.justintime.jit.dto.OrderItemDTO;
 import com.justintime.jit.entity.Enums.OrderItemStatus;
 import com.justintime.jit.entity.OrderEntities.OrderItem;
 import com.justintime.jit.entity.BatchConfig;
@@ -116,4 +117,8 @@ public interface OrderItemRepository extends BaseRepository<OrderItem,Long> {
     List<OrderItem> findAssignedAndStartedItemsByRestaurantCodeAndCook(@Param("restaurantCode") String restaurantCode, @Param("cookId") Long cookId);
 
     List<OrderItem> findByOrder_Restaurant_RestaurantCodeAndOrderItemStatusIn(String restaurantCode, List<OrderItemStatus> orderItemStatuses);
+
+    @Query("SELECT oi FROM OrderItem oi " +
+            "WHERE (oi.cook.email = :email AND oi.orderItemStatus = 'ASSIGNED') ")
+    List<OrderItemDTO> findAllByUserAndAssignedStatus(@Param("email") String email);
 }

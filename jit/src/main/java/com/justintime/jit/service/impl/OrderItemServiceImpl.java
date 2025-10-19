@@ -218,6 +218,11 @@ public class OrderItemServiceImpl extends BaseServiceImpl<OrderItem,Long> implem
         return orderItems;
     }
 
+    @Override
+    public List<OrderItemDTO> getAllAssignedOrdersForUser() {
+        return orderItemRepository.findAllByUserAndAssignedStatus(getUsernameFromJWTBean());
+    }
+
     private List<OrderItem> buildOrderItemEntities(List<OrderItemDTO> orderItemDTOList, Map<String, Combo> comboMap, Map<String, MenuItem> menuItemMap, Order savedOrder, String restaurantCode) {
         List<OrderItem> allOrderItems = new ArrayList<>();
         boolean isCookAssignmentManual = StringUtils.equals(businessConfigurationService.getConfigValue(savedOrder.getRestaurant().getRestaurantCode(), ConfigurationName.MANUAL_COOK_ASSIGNMENT), "Y");

@@ -39,8 +39,8 @@ const useWebSocket = (url) => {
         console.error("STOMP error", frame.headers.message, frame.body);
       },
     });
-    
-    stompRef.current = client; 
+
+    stompRef.current = client;
     client.activate();
 
     return () => {
@@ -60,7 +60,7 @@ const useWebSocket = (url) => {
         );
       };
     }
-    
+
     if (subsRef.current[destination]) {
       return () => {
         subsRef.current[destination]?.unsubscribe();

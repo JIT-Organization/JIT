@@ -5,6 +5,7 @@ import com.justintime.jit.dto.OrderDTO;
 import com.justintime.jit.dto.OrderItemDTO;
 import com.justintime.jit.dto.PatchRequest;
 import com.justintime.jit.entity.Enums.OrderStatus;
+import com.justintime.jit.entity.OrderEntities.OrderItem;
 import com.justintime.jit.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -100,5 +101,12 @@ public class OrderController extends BaseController {
     public ResponseEntity<ApiResponse<OrderItemDTO>> updateOrderItemStatus(@RequestBody OrderItemDTO orderItemDTO) {
         OrderItemDTO returnOrderItemDTO = orderService.updateOrderItemStatus(orderItemDTO);
         return success(returnOrderItemDTO, "Order Item updated successfully");
+    }
+
+    @GetMapping("/assignedOrders")
+    @PreAuthorize("hasPermission(null, 'VIEW_ORDERS')")
+    public ResponseEntity<ApiResponse<List<OrderItemDTO>>> getAllAssignedOrdersForUser() {
+        List<OrderItemDTO> orderItemDTOS = orderService.getAllAssignedOrdersForUser();
+        return success(orderItemDTOS, "Order Items retrieved");
     }
 }
