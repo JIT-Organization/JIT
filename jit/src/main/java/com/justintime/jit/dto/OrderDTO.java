@@ -1,5 +1,6 @@
 package com.justintime.jit.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.justintime.jit.entity.Enums.OrderStatus;
 import com.justintime.jit.entity.Enums.OrderType;
 import com.justintime.jit.entity.Enums.PaymentStatus;
@@ -20,6 +21,8 @@ import java.util.List;
 public class OrderDTO {
     private String orderNumber;
     private String orderedBy;
+    @JsonIgnore
+    private String serverEmail;
     private String mobileNumber;
     private OrderType orderType;
     private String reservationNumber;

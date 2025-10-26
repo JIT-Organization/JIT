@@ -54,7 +54,8 @@ const FoodCard = ({
       kitchen: {
         UNASSIGNED: { text: "Accept", action: "accept", className: "bg-red-700" },
         ASSIGNED: { text: "Start", action: "start", className: "bg-green-500" },
-        STARTED: { text: "Ready", action: "ready", className: "bg-green-600" }
+        STARTED: { text: "Ready", action: "ready", className: "bg-green-600" },
+        READY_TO_SERVE: { text: "Served", action: "served", className: "bg-green-700" }
       },
       order: {
         READY_TO_SERVE: { text: "Complete", action: "complete", className: "bg-blue-600" }
@@ -70,7 +71,7 @@ const FoodCard = ({
         className={`${config.className} w-full`}
         onClick={config.disabled ? undefined : (e) => {
           e.stopPropagation();
-          onActionClick?.(food.menuItemName, config.action);
+          onActionClick?.(food, config.action);
         }}
       >
         {config.text}

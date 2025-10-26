@@ -1,16 +1,14 @@
 package com.justintime.jit.repository.OrderRepo;
 
-import com.justintime.jit.entity.MenuItem;
+import com.justintime.jit.entity.Enums.OrderItemStatus;
 import com.justintime.jit.entity.OrderEntities.OrderItem;
 import com.justintime.jit.entity.BatchConfig;
-import com.justintime.jit.entity.User;
 import com.justintime.jit.repository.BaseRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 
 @Repository
@@ -84,12 +82,14 @@ public interface OrderItemRepository extends BaseRepository<OrderItem,Long> {
         @Param("restaurantId") Long restaurantId
     );
 
-      @Query(value="SELECT oi from OrderItem oi JOIN restaurant r on" +
-              " oi.restaurant_id = r.id  join order o on " +
-              " oi.order_id = o.id " +
-              "WHERE r.restaurant_code = :restaurantCode " +
-              "AND o.order_number = :orderNumber " +
-              "AND oi.menuItem.name = :itemName " ,nativeQuery = true)
+    @Query(value="SELECT oi.* FROM order_item oi " +
+            "JOIN orders o ON oi.order_id = o.id " +
+            "JOIN restaurant r ON o.restaurant_id = r.id " +
+            "JOIN menu_item mi ON oi.menu_item_id = mi.id " +
+            "WHERE r.restaurant_code = :restaurantCode " +
+            "AND o.order_number = :orderNumber " +
+            "AND mi.menu_item_name = :itemName",
+            nativeQuery = true)
      OrderItem findByRestaurantCodeAndItemNameAndOrderNumber( @Param("restaurantCode") String restaurantCode, @Param("itemName") String itemName,@Param("orderNumber") String orderNumber);
 
 
@@ -114,4 +114,6 @@ public interface OrderItemRepository extends BaseRepository<OrderItem,Long> {
             "  AND oi.order.restaurant.restaurantCode = :restaurantCode " +
             "ORDER BY oi.createdDttm ASC")
     List<OrderItem> findAssignedAndStartedItemsByRestaurantCodeAndCook(@Param("restaurantCode") String restaurantCode, @Param("cookId") Long cookId);
+
+    List<OrderItem> findByOrder_Restaurant_RestaurantCodeAndOrderItemStatusIn(String restaurantCode, List<OrderItemStatus> orderItemStatuses);
 }

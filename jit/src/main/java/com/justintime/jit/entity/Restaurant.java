@@ -1,5 +1,6 @@
 package com.justintime.jit.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.justintime.jit.entity.ComboEntities.Combo;
 import com.justintime.jit.entity.OrderEntities.Order;
 import jakarta.persistence.*;
@@ -59,6 +60,7 @@ public class Restaurant extends BaseEntity{
         private Double longitude;
 
         @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
+        @JsonBackReference
         private List<MenuItem> menu;
 
         @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
