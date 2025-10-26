@@ -2,6 +2,7 @@ package com.justintime.jit.controller;
 
 import com.justintime.jit.dto.ApiResponse;
 import com.justintime.jit.dto.OrderDTO;
+import com.justintime.jit.dto.OrderItemDTO;
 import com.justintime.jit.dto.PatchRequest;
 import com.justintime.jit.entity.Enums.OrderStatus;
 import com.justintime.jit.service.OrderService;
@@ -84,5 +85,20 @@ public class OrderController extends BaseController {
     @PreAuthorize("hasPermission(null, 'ADD_ORDERS')")
     public ResponseEntity<BigDecimal> calculateTotalRevenue(@PathVariable String restaurantCode) {
         BigDecimal totalRevenue = orderService.calculateTotalRevenue(restaurantCode);
-        return ResponseEntity.ok(totalRevenue); }
+        return ResponseEntity.ok(totalRevenue);
+    }
+
+    @GetMapping("/orderItems")
+    @PreAuthorize("hasPermission(null, 'VIEW_ORDERS')")
+    public ResponseEntity<ApiResponse<List<OrderItemDTO>>> getAllInProgressOrderItemsForRestaurant() {
+        List<OrderItemDTO> orderItemDTOS = orderService.getAllInProgressOrderItemsForRestaurant();
+        return success(orderItemDTOS, "Orders fetched successfully");
+    }
+
+    @PatchMapping("/orderItem/updateStatus")
+    @PreAuthorize("hasPermission(null, 'ADD_ORDERS')")
+    public ResponseEntity<ApiResponse<OrderItemDTO>> updateOrderItemStatus(@RequestBody OrderItemDTO orderItemDTO) {
+        OrderItemDTO returnOrderItemDTO = orderService.updateOrderItemStatus(orderItemDTO);
+        return success(returnOrderItemDTO, "Order Item updated successfully");
+    }
 }

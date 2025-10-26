@@ -22,11 +22,15 @@ public class ValidationException extends RuntimeException {
             return "Validation failed with no error details.";
         }
 
-        StringBuilder sb = new StringBuilder("Validation failed: ");
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
         for (ValidationError error : errors) {
-            sb.append("[").append(error.fieldName()).append(": ")
-                    .append(error.message()).append("] ");
+            sb.append(error.message());
+            if(errors.size() > 1) {
+                sb.append(",");
+            }
         }
+        sb.append("]");
         return sb.toString();
     }
 }

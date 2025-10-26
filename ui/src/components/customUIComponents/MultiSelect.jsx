@@ -86,10 +86,10 @@ export default function MultiSelect({
                   )}
                 </CommandItem>
               )}
-              {options.map((option) =>
+              {options.map((option, index) =>
                 option.value ? (
                   <CommandItem
-                    key={option.value}
+                    key={option.value + index}
                     onSelect={() => toggleOption(option.value)}
                     className="cursor-pointer"
                   >

@@ -11,13 +11,47 @@ import { CustomDataTable } from "@/components/customUIComponents/CustomDataTable
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { getSelectOptions } from "@/lib/utils/helper";
+import { useToast } from "@/hooks/use-toast";
 
 const Categories = () => {
+  const { toast } = useToast();
   const queryClient = useQueryClient();
+  const queryKey = ["categoriesList"];
   const { data: categoriesList, isLoading, error } = useQuery(getCategoriesListOptions());
   const patchMutation = useMutation(patchUpdateCategoriesList(queryClient));
   const deleteMutation = useMutation(deleteCategoryItem(queryClient));
-  const postMutation = useMutation(createCategory(queryClient));
+  const postMutation = useMutation({
+    ...createCategory(queryClient),
+    onSuccess: () => {
+      toast({
+        title: "Category Created",
+        description: "The new category has been added successfully.",
+      });
+    },
+    onError: (error, variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData);
+      }
+      let messages = ["An unknown error occurred"]; // Default error
+      const errorMessage = error.response?.data?.message;
+
+      if (errorMessage) {
+        const match = errorMessage.match(/\[(.*?)\]/);
+        if (match && match[1]) {
+          messages = match[1]
+            .split(',')
+            .filter(msg => msg.length > 0);
+        }
+      }
+      messages.forEach((message) => {
+        toast({
+          title: "Category Creation Failed",
+          description: message,
+          variant: "destructive",
+        });
+      });
+    }
+  });
   const { data: menuItemsList } = useQuery(getMenuItemListOptions())
 
   const selectOptions = useMemo(() => {

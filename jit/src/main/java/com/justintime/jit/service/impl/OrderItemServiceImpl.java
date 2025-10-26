@@ -26,6 +26,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -96,26 +98,29 @@ public class OrderItemServiceImpl extends BaseServiceImpl<OrderItem,Long> implem
             commonServiceImplUtil.copySelectedProperties(patchedItem, existingItem, payload.getPropertiesToBeUpdated());
             existingItem.setUpdatedDttm(LocalDateTime.now());
             OrderItem orderItem = orderItemRepository.save(existingItem);
-            if(payload.getPropertiesToBeUpdated().contains("status")) notificationService.notifyOrderItemStatusUpdate(orderItem);
+//            if(payload.getPropertiesToBeUpdated().contains("orderItemStatus")) notificationService.notifyOrderItemStatusUpdate(orderItem);
             return mapToDTO(orderItem, orderItemMapper);
     }
 
-     public OrderItemDTO updateOrderItem(String restaurantCode, OrderItemDTO orderItemDTO){
+     @Transactional(propagation = Propagation.REQUIRES_NEW)
+     public OrderItemDTO updateOrderItem(OrderItemDTO orderItemDTO) {
+         String restaurantCode = getRestaurantCodeFromJWTBean();
          OrderItem existingItem = orderItemRepository.findByRestaurantCodeAndItemNameAndOrderNumber(restaurantCode,orderItemDTO.getItemName(), orderItemDTO.getOrderNumber());
          GenericMapper<OrderItem, OrderItemDTO> orderItemMapper = MapperFactory.getMapper(OrderItem.class, OrderItemDTO.class);
          OrderItem patchedOrderItem = orderItemMapper.toEntity(orderItemDTO);
          MenuItem menuItem= menuItemRepository.findByRestaurantCodeAndMenuItemName(restaurantCode,orderItemDTO.getItemName());
          patchedOrderItem.setMenuItem(menuItem);
-         if(orderItemDTO.getOrderNumber().isEmpty()) {
-             Order order=orderRepository.findByOrderNumber(orderItemDTO.getOrderNumber())
+         if(StringUtils.isNotEmpty(orderItemDTO.getOrderNumber())) {
+             Order order = orderRepository.findByOrderNumber(orderItemDTO.getOrderNumber())
                      .orElseThrow(() -> new ResourceNotFoundException("Order not found with number: " + orderItemDTO.getOrderNumber()));
              patchedOrderItem.setOrder(order);
          }
          //resolveRelationships(patchedItem, menuItemDTO, new HashSet<>(), false);
          BeanUtils.copyProperties(patchedOrderItem, existingItem, "id", "createdDttm");
          existingItem.setUpdatedDttm(LocalDateTime.now());
-        orderItemRepository.save(existingItem);
-        return  orderItemDTO;
+         orderItemRepository.save(existingItem);
+//         if(!previousStatus.equals(currentStatus)) notificationService.notifyOrderItemStatusUpdate(existingItem);
+         return orderItemDTO;
      }
 
     public void saveOrderItem(String restaurantCode,OrderItemDTO orderItemDTO) {
@@ -143,6 +148,18 @@ public class OrderItemServiceImpl extends BaseServiceImpl<OrderItem,Long> implem
              orderItemDTOs.add(mapToDTO(orderItem, orderItemMapper));
          }
          return orderItemDTOs;
+    }
+
+    @Override
+    public List<OrderItemDTO> getOrderItemsForRestaurant() {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
+        List<OrderItemStatus> orderItemStatuses = List.of(OrderItemStatus.UNASSIGNED, OrderItemStatus.ASSIGNED, OrderItemStatus.STARTED, OrderItemStatus.READY_TO_SERVE);
+        List<OrderItem> orderItems = orderItemRepository.findByOrder_Restaurant_RestaurantCodeAndOrderItemStatusIn(restaurantCode, orderItemStatuses);
+        List<OrderItemDTO> orderItemDTOs = new ArrayList<>();
+        for(OrderItem orderItem : orderItems) {
+            orderItemDTOs.add(mapToDTO(orderItem, orderItemMapper));
+        }
+        return orderItemDTOs;
     }
 
     private OrderItemDTO mapToDTO(OrderItem orderItem, GenericMapper<OrderItem, OrderItemDTO> mapper) {

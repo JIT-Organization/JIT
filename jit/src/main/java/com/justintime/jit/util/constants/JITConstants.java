@@ -10,6 +10,8 @@ public final class JITConstants {
 
     public static final String ORDER_ITEM_STATUS_UPDATED_EVENT = "orderItemStatusUpdated";
 
+    public static final String TABLE_AVAILABILITY_EVENT = "tableAvailability";
+
     private JITConstants() {
         // prevents instantiation
     }

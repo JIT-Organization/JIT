@@ -95,12 +95,30 @@ export const deleteMenuItem = (queryClient) => ({
   },
 });
 
+export const getOrderItemsForKitchen = () => ({
+  queryKey: ["orderItems"],
+  queryFn: () => getRequest(`${URLS.ordersList}/orderItems`, "Failed to fetch Order Items for Kitchen")
+})
 
 export const getOrdersListOptions = () => ({
   queryKey: ["ordersList"],
   queryFn: () => getRequest(`${URLS.ordersList}`, "Failed to fetch Orders List"),
   ...cacheConfig
 });
+
+export const patchUpdateOrderItem = (queryClient) => ({
+  mutationFn: async ({ fields }) => {
+    return await patchRequest(`${URLS.ordersList}/orderItem/updateStatus`, fields);
+  },
+  onMutate: async ({ fields, identifiers }) => handleMutate(queryClient, ["orderItems"], identifiers, fields),
+  onError: (error, variables, context) => {
+    console.error("Failed to update item:", error);
+    handleError(queryClient, ["orderItems"], context);
+  },
+  onSettled: () => {
+    queryClient.invalidateQueries(["orderItems"]);
+  },
+})
 
 export const deleteOrderItem = (queryClient) => ({
   mutationFn: async ({ id }) => deleteRequest(`${URLS.ordersList}/${id}`),
@@ -205,7 +223,7 @@ export const deleteUserItem = (queryClient) => ({
 export const getTablesListOptions = (id) => ({
   queryKey: ["tablesList"],
   queryFn: () => getRequest(`${URLS.tablesList}/${id}`, "Failed to fetch Tables List"),
-  ...cacheConfig
+  ...cacheConfig // TODO remove caching
 });
 
 export const patchTables = (queryClient) => ({

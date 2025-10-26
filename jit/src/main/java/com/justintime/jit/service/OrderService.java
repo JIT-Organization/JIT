@@ -1,6 +1,7 @@
 package com.justintime.jit.service;
 
 import com.justintime.jit.dto.OrderDTO;
+import com.justintime.jit.dto.OrderItemDTO;
 import com.justintime.jit.entity.Enums.OrderStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -18,4 +19,6 @@ public interface OrderService {
     void deleteOrder(String restaurantCode, String orderNumber);
     List<OrderDTO> getOrdersByRestaurantAndUserId(Optional<Long> restaurantId, Optional<Long> userId);
     BigDecimal calculateTotalRevenue(String restaurantCode);
+    List<OrderItemDTO> getAllInProgressOrderItemsForRestaurant();
+    OrderItemDTO updateOrderItemStatus(OrderItemDTO orderItemDTO);
 }
