@@ -22,7 +22,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
-public class DiningTableServiceImpl implements DiningTableService {
+public class DiningTableServiceImpl extends BaseServiceImpl<DiningTable, Long> implements DiningTableService {
     @Autowired
     private DiningTableRepository diningTableRepository;
 
@@ -50,6 +50,14 @@ public class DiningTableServiceImpl implements DiningTableService {
             diningTableRepository.save(existingDiningTable);
         }
         return mapper.toDto(existingDiningTable);
+    }
+
+    @Override
+    public DiningTable changeAvailabilityStatus(String tableNumber, boolean status) {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
+        DiningTable table = diningTableRepository.findByRestaurantCodeAndTableNumber(restaurantCode, tableNumber);
+        table.setIsAvailable(status);
+        return diningTableRepository.save(table);
     }
 
     @Override

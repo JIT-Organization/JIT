@@ -1,6 +1,7 @@
 package com.justintime.jit.service;
 
 import com.justintime.jit.dto.DiningTableDTO;
+import com.justintime.jit.entity.DiningTable;
 
 import java.util.HashSet;
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.List;
 public interface DiningTableService{
     List<DiningTableDTO> getDiningTablesByRestaurantCode(String restaurantCode);
     DiningTableDTO patchUpdateTablesByRestaurantCode(String restaurantCode, DiningTableDTO dto, HashSet<String> propertiesToBeUpdated);
+    DiningTable changeAvailabilityStatus(String tableNumber, boolean status);
 
     DiningTableDTO createTable(String restaurantCode, DiningTableDTO dto);
 

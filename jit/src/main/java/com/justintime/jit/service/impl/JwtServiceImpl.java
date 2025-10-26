@@ -24,7 +24,7 @@ public class JwtServiceImpl implements JwtService {
     @Value("${jwt.secret.key}")
     private String secretKey;
     private final UserRepository userRepository;
-    private static final long accessTokenExpiration = 1000 * 60 * 15;
+    private static final long accessTokenExpiration = 1000 * 60 * 60;
     private static final long refreshTokenExpiration = 1000 * 60 * 60 * 12;
 
     @Autowired
