@@ -7,9 +7,12 @@ import { FaShoppingCart, FaUserFriends, FaTable, FaUsers, FaRupeeSign } from "re
 import { useState } from "react";
 import useWebSocket from "@/lib/utils/webSocketUtils";
 import { useEffect } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { useNotifications } from "@/contexts/NotificationContext";
 import { NOTIFICATION_TYPES } from "@/lib/constants/notifications";
+import { getDashboardDataOptions } from "@/lib/api/api";
+import LoadingState from "@/components/customUIComponents/LoadingState";
+import ErrorState from "@/components/customUIComponents/ErrorState";
 
 const sampleData = [
   { name: "Pizza", quantity: 4 },
@@ -63,49 +66,16 @@ const sample5 =[
   { label: "Wallet", value: "31,872" },
 ]
 
-const cardData = [
-  {
-    title: "Orders",
-    value: "100",
-    data: sample,
-    icon: <FaShoppingCart className="text-3xl text-yellow-500" />,
-    color: "text-yellow-500",
-  },
-  {
-    title: "Active users",
-    value: "7",
-    data: sample2,
-    icon: <FaUserFriends className="text-3xl text-blue-500" />,
-    color: "text-blue-500",
-  },
-  {
-    title: "Available Tables",
-    value: "12",
-    data: sample3,
-    icon: <FaTable className="text-3xl text-green-500" />,
-    color: "text-green-500",
-  },
-  {
-    title: "Total Customers",
-    value: "99",
-    data: sample4,
-    icon: <FaUsers className="text-3xl text-purple-500" />,
-    color: "text-purple-500",
-  },
-  {
-    title: "Total Revenue",
-    value: "12,75,678",
-    data: sample5,
-    icon: <FaRupeeSign className="text-3xl text-orange-500" />,
-    color: "text-orange-500",
-  },
-];
+
 
 export default function DashboardPage() {
   const [expandedCards, setExpandedCards] = useState(new Set([])); // Default: no card expanded
   const queryClient = useQueryClient();
   const { addNotification } = useNotifications();
   
+  // Fetch dashboard data from API
+  const { data: dashboardData, isLoading, error } = useQuery(getDashboardDataOptions());
+  console.log("Dashboard data:", dashboardData);
   // Use the hook and get connection status
   const { subscribe, isConnected } = useWebSocket("ws://localhost:8080/ws");
 
@@ -137,7 +107,8 @@ export default function DashboardPage() {
 
       // Invalidate queries to refresh dashboard data
       queryClient.invalidateQueries(['orders']);
-      queryClient.invalidateQueries(['dashboard-stats']);
+      queryClient.invalidateQueries(['ordersList']);
+      queryClient.invalidateQueries(['dashboardData']);
     };
 
     const handleRoleEvent = (message) => {
@@ -147,14 +118,14 @@ export default function DashboardPage() {
     };
 
     // Subscribe to user-specific queue
-    const unsubUser = subscribe("/user/queue/orderItemCreated", handleOrderItemCreated);
-    const unsubTopic = subscribe("/topic/role", handleRoleEvent);
+    const unSubUser = subscribe("/user/queue/orderItemCreated", handleOrderItemCreated);
+    const unSubTopic = subscribe("/topic/role", handleRoleEvent);
 
     // The cleanup function will be called when the component unmounts
     return () => {
       console.log("Cleaning up Dashboard WebSocket subscriptions.");
-      unsubUser();
-      unsubTopic();
+      unSubUser();
+      unSubTopic();
     };
   }, [subscribe, addNotification, queryClient]);
 
@@ -169,6 +140,60 @@ export default function DashboardPage() {
       return newSet;
     });
   };
+
+  // Show loading state
+  if (isLoading) {
+    return <LoadingState message="Loading dashboard data..." />;
+  }
+
+  // Show error state
+  if (error) {
+    return <ErrorState title="Error loading dashboard" message={error.message} />;
+  }
+
+  // Create dynamic card data from API response
+  const cardData = dashboardData ? [
+    {
+      title: "Orders",
+      value: dashboardData.totalOrders?.toString() || "0",
+      data: sample, // Keep existing breakdown format for now
+      icon: <FaShoppingCart className="text-3xl text-yellow-500" />,
+      color: "text-yellow-500",
+    },
+    {
+      title: "Active users",
+      value: (dashboardData.totalCooks + dashboardData.totalServers)?.toString() || "0",
+      data: [
+        { label: "Cooks", value: dashboardData.totalCooks?.toString() || "0" },
+        { label: "Servers", value: dashboardData.totalServers?.toString() || "0" },
+      ],
+      icon: <FaUserFriends className="text-3xl text-blue-500" />,
+      color: "text-blue-500",
+    },
+    {
+      title: "Available Tables",
+      value: dashboardData.totalDiningTables?.toString() || "0",
+      data: [
+        { label: "Total Tables", value: dashboardData.totalDiningTables?.toString() || "0" },
+      ],
+      icon: <FaTable className="text-3xl text-green-500" />,
+      color: "text-green-500",
+    },
+    {
+      title: "Total Customers",
+      value: dashboardData.totalCustomers?.toString() || "0",
+      data: sample4, // Keep existing breakdown format for now
+      icon: <FaUsers className="text-3xl text-purple-500" />,
+      color: "text-purple-500",
+    },
+    {
+      title: "Total Revenue",
+      value: dashboardData.totalRevenue?.toLocaleString('en-IN') || "0",
+      data: sample5, // Keep existing breakdown format for now
+      icon: <FaRupeeSign className="text-3xl text-orange-500" />,
+      color: "text-orange-500",
+    },
+  ] : [];
 
   return (
     <div className="p-4">

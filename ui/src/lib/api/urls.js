@@ -7,6 +7,7 @@ export const URLS = {
   tablesList: createUrl("/tables"),
   usersList: createUrl("/users"),
   addOns: createUrl("/addons"),
+  dashboard: createUrl("/dashboard"),
   register: "http://localhost:8080/register",
   sendInvite: createUrl("/users/send-invite"),
   permissions: createUrl("/permissions")
