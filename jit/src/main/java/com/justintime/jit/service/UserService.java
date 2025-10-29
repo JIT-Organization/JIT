@@ -2,7 +2,7 @@ package com.justintime.jit.service;
 
 import com.justintime.jit.dto.PermissionsDTO;
 import com.justintime.jit.dto.UserDTO;
-import com.justintime.jit.entity.Enums.Role;
+import com.justintime.jit.entity.RestaurantRole;
 import com.justintime.jit.entity.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 
 public interface UserService extends BaseService<User, Long>, UserDetailsService {
-    List<User> findByRole(Role role);
+    List<User> findByRestaurantRole(RestaurantRole restaurantRole);
     User findByEmail(String email);
     List<User> findByUserName(String username);
     List<String> getCookNamesByRestaurantCode(String restaurantCode);

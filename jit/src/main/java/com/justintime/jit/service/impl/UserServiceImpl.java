@@ -9,6 +9,7 @@ import com.justintime.jit.entity.User;
 import com.justintime.jit.entity.UserPrincipal;
 import com.justintime.jit.exception.ResourceNotFoundException;
 import com.justintime.jit.repository.RestaurantRepository;
+import com.justintime.jit.repository.RestaurantRoleRepository;
 import com.justintime.jit.event.UserInvitationEvent;
 import com.justintime.jit.repository.UserInvitationRepository;
 import com.justintime.jit.repository.UserRepository;
@@ -48,6 +49,8 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
     private final PermissionsService permissionsService;
 
     private final UserInvitationRepository userInvitationRepository;
+    
+    private final RestaurantRoleRepository restaurantRoleRepository;
 
     private final GenericMapper<User, UserDTO> userMapper = MapperFactory.getMapper(User.class, UserDTO.class);
 
@@ -60,12 +63,13 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
     private String registrationUrl;
 
     @SuppressFBWarnings(value = "EI2", justification = "User Service Impl is a Spring-managed bean and is not exposed.")
-    public UserServiceImpl(UserRepository userRepository, CommonServiceImplUtil commonServiceImplUtil, PermissionsService permissionsService, UserInvitationRepository userInvitationRepository, RestaurantRepository restaurantRepository, RestaurantRepository restaurantRepository1) {
+    public UserServiceImpl(UserRepository userRepository, CommonServiceImplUtil commonServiceImplUtil, PermissionsService permissionsService, UserInvitationRepository userInvitationRepository, RestaurantRepository restaurantRepository, RestaurantRepository restaurantRepository1, RestaurantRoleRepository restaurantRoleRepository) {
         this.userRepository = userRepository;
         this.commonServiceImplUtil = commonServiceImplUtil;
         this.permissionsService = permissionsService;
         this.userInvitationRepository = userInvitationRepository;
         this.restaurantRepository = restaurantRepository1;
+        this.restaurantRoleRepository = restaurantRoleRepository;
     }
 
     @Override
@@ -97,7 +101,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
             existingUser.setEmail(updatedUser.getEmail());
             existingUser.setPhoneNumber(updatedUser.getPhoneNumber());
             existingUser.setPasswordHash(updatedUser.getPasswordHash());
-            existingUser.setRole(updatedUser.getRole());
+            existingUser.setRestaurantRole(updatedUser.getRestaurantRole());
             existingUser.setUpdatedDttm(LocalDateTime.now()); // Set updated timestamp
             return userRepository.save(existingUser);
         }).orElseThrow(() -> new RuntimeException("User not found with id " + id));
@@ -210,8 +214,8 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
     }
 
     @Override
-    public List<User> findByRole(Role role) {
-        return userRepository.findByRole(role);
+    public List<User> findByRestaurantRole(RestaurantRole restaurantRole) {
+        return userRepository.findByRestaurantRole(restaurantRole);
     }
 
     @Override

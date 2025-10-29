@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.justintime.jit.dto.LoginRequestDto;
 import com.justintime.jit.dto.PermissionsDTO;
 import com.justintime.jit.dto.UserDTO;
-import com.justintime.jit.entity.Enums.Role;
 import com.justintime.jit.entity.Restaurant;
+import com.justintime.jit.entity.RestaurantRole;
 import com.justintime.jit.entity.User;
 import com.justintime.jit.entity.UserInvitationToken;
 import com.justintime.jit.exception.ResourceNotFoundException;
@@ -56,6 +56,8 @@ public class UserAuthServiceImpl extends BaseServiceImpl<User, Long> implements 
     private final RefreshTokenService refreshTokenService;
 
     private final PermissionsService permissionsService;
+    
+    private final RestaurantRoleRepository restaurantRoleRepository;
 
     private final GenericMapper<User, UserDTO> userMapper = MapperFactory.getMapper(User.class, UserDTO.class);
 
@@ -66,7 +68,7 @@ public class UserAuthServiceImpl extends BaseServiceImpl<User, Long> implements 
     @SuppressFBWarnings(value = "EI2", justification = "User Auth Service Impl is a Spring-managed bean and is not exposed.")
     public UserAuthServiceImpl(PasswordEncoder passwordEncoder, JwtService jwtService,
                                RefreshTokenService refreshTokenService,
-                               AuthenticationManager authenticationManager, UserRepository userRepository, PermissionsService permissionsService, RestaurantRepository restaurantRepository, UserInvitationRepository userInvitationRepository) {
+                               AuthenticationManager authenticationManager, UserRepository userRepository, PermissionsService permissionsService, RestaurantRepository restaurantRepository, UserInvitationRepository userInvitationRepository, RestaurantRoleRepository restaurantRoleRepository) {
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
@@ -75,6 +77,7 @@ public class UserAuthServiceImpl extends BaseServiceImpl<User, Long> implements 
         this.permissionsService = permissionsService;
         this.restaurantRepository = restaurantRepository;
         this.userInvitationRepository = userInvitationRepository;
+        this.restaurantRoleRepository = restaurantRoleRepository;
     }
 
     @Override
@@ -202,7 +205,15 @@ public class UserAuthServiceImpl extends BaseServiceImpl<User, Long> implements 
         String password = userDTO.getPassword();
         Set<String> permissionCodes = userDTO.getPermissionCodes();
         if(StringUtils.isNotBlank(password)) user.setPasswordHash(passwordEncoder.encode(password));
-        if(Objects.nonNull(userDTO.getRole())) user.setRole(Role.valueOf(userDTO.getRole()));
+        if(Objects.nonNull(userDTO.getRole())) {
+            // Look up the RestaurantRole by name and restaurant code
+            if(user.getRestaurants() != null && !user.getRestaurants().isEmpty()) {
+                String restaurantCode = user.getRestaurants().iterator().next().getRestaurantCode();
+                RestaurantRole role = restaurantRoleRepository.findByNameAndRestaurantCode(userDTO.getRole(), restaurantCode)
+                        .orElseThrow(() -> new ResourceNotFoundException("Role not found: " + userDTO.getRole()));
+                user.setRestaurantRole(role);
+            }
+        }
         if(!CollectionUtils.isEmpty(permissionCodes)) user.setPermissions(permissionsService.getAllPermissionsByPermissionCodes(permissionCodes));
         if(Objects.nonNull(userDTO.getRestaurantCodes())) {
             Set<Restaurant> restaurants = new HashSet<>(restaurantRepository.findByRestaurantCodeIn(userDTO.getRestaurantCodes())

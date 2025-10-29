@@ -1,6 +1,5 @@
 package com.justintime.jit.entity;
 
-import com.justintime.jit.entity.Enums.Role;
 import com.justintime.jit.entity.OrderEntities.Order;
 import com.justintime.jit.entity.OrderEntities.OrderItem;
 import jakarta.persistence.*;
@@ -47,9 +46,9 @@ public class User extends BaseEntity {
         @Column(name = "password_hash")
         private String passwordHash;
 
-        @Enumerated(EnumType.STRING)
-        @Column(name = "role", nullable = false)
-        private Role role;
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "restaurant_role_id")
+        private RestaurantRole restaurantRole;
 
         @Column(name = "shift")
         private String shift;
@@ -105,7 +104,7 @@ public class User extends BaseEntity {
 //                this.email = other.email;
 //                this.phoneNumber = other.phoneNumber;
 //                this.passwordHash = other.passwordHash;
-//                this.role = other.role;
+//                this.restaurantRole = other.restaurantRole;
 //                this.createdDttm = other.createdDttm;
 //                this.updatedDttm = other.updatedDttm;
 //                this.orders = other.orders != null ? other.orders.stream().map(Order::new).collect(Collectors.toList()) : null; // Deep copy of orders
