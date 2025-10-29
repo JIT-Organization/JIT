@@ -53,14 +53,6 @@ public class User extends BaseEntity {
         @Column(name = "shift")
         private String shift;
 
-        @ManyToMany
-        @JoinTable(
-                name = "user_permissions",
-                joinColumns = @JoinColumn(name = "user_id"),
-                inverseJoinColumns = @JoinColumn(name = "permission_id")
-        )
-        private Set<Permissions> permissions;
-
         @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
         private List<Order> orders;
 

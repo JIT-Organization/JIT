@@ -28,10 +28,16 @@ public class RestaurantRole extends BaseEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "permission_codes", columnDefinition = "TEXT")
-    private String permissionCodes;
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+        name = "restaurant_role_permissions",
+        joinColumns = @JoinColumn(name = "restaurant_role_id"),
+        inverseJoinColumns = @JoinColumn(name = "permission_id")
+    )
+    @JsonIgnore
+    private Set<Permissions> permissions = new HashSet<>();
 
-    @OneToMany(mappedBy = "restaurantRole", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "restaurant_roles", cascade = CascadeType.ALL)
     @JsonIgnore
     private Set<User> users = new HashSet<>();
 

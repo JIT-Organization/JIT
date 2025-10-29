@@ -3,8 +3,10 @@ package com.justintime.jit.service.impl;
 import com.justintime.jit.dto.PermissionsDTO;
 import com.justintime.jit.entity.Enums.Role;
 import com.justintime.jit.entity.Permissions;
+import com.justintime.jit.entity.RestaurantRole;
 import com.justintime.jit.entity.User;
 import com.justintime.jit.repository.PermissionsRepository;
+import com.justintime.jit.repository.RestaurantRoleRepository;
 import com.justintime.jit.repository.UserRepository;
 import com.justintime.jit.service.PermissionsService;
 import com.justintime.jit.util.mapper.GenericMapper;
@@ -22,20 +24,22 @@ import java.util.stream.Collectors;
 @Service
 public class PermissionsServiceImpl implements PermissionsService {
 
-    public PermissionsServiceImpl(PermissionsRepository permissionsRepository, UserRepository userRepository) {
+    public PermissionsServiceImpl(PermissionsRepository permissionsRepository, UserRepository userRepository, RestaurantRoleRepository restaurantRoleRepository) {
         this.permissionsRepository = permissionsRepository;
         this.userRepository = userRepository;
+        this.restaurantRoleRepository = restaurantRoleRepository;
     }
 
     private final PermissionsRepository permissionsRepository;
     private final UserRepository userRepository;
+    private final RestaurantRoleRepository restaurantRoleRepository;
 
     private final GenericMapper<Permissions, PermissionsDTO> permissionsMapper = MapperFactory.getMapper(Permissions.class, PermissionsDTO.class);
 
     @Override
     @Transactional(readOnly = true)
     public List<PermissionsDTO> getAllPermissionsByUserEmail(String email) {
-        return userRepository.findByEmail(email).getPermissions().stream()
+        return userRepository.findByEmail(email).getRestaurantRole().getPermissions().stream()
                 .map(permissionsMapper::toDto).toList();
     }
 
@@ -48,7 +52,7 @@ public class PermissionsServiceImpl implements PermissionsService {
     @Override
     public boolean hasPermission(String permission) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByEmail(email).getPermissions().stream()
+        return userRepository.findByEmail(email).getRestaurantRole().getPermissions().stream()
                 .anyMatch(p -> permission.equalsIgnoreCase(p.getTitle()));
     }
 
@@ -60,26 +64,51 @@ public class PermissionsServiceImpl implements PermissionsService {
                 permissionsRepository.findAllByPermissionCodeIn(permissionCodes)
         );
         validateRoleInPermissionsAndUser(user, permissions);
-        user.setPermissions(permissions);
+        user.getRestaurantRole().setPermissions(permissions);
         userRepository.save(user);
     }
 
     @Override
     @Transactional
-    public List<PermissionsDTO> addPermissionsToRole(String role, List<PermissionsDTO> permissionsDTOList) {
-        Set<Permissions> newPermissions = new HashSet<>(
-                permissionsDTOList.stream()
-                        .map(dto -> {
-                            Permissions entity = permissionsMapper.toEntity(dto);
-                            entity.setRole(Role.valueOf(role.toUpperCase()));
-                            return entity;
-                        })
-                        .toList()
-        );
-        Set<Permissions> savedPermissions = new HashSet<>(permissionsRepository.saveAll(newPermissions));
-        return savedPermissions.stream()
+    public void addPermissionsToRole(String roleName, Set<String> permissionCodes) {
+        // Extract restaurant code from security context
+        String restaurantCode = getRestaurantCodeFromContext();
+        
+        RestaurantRole role = restaurantRoleRepository.findByNameAndRestaurantCode(roleName, restaurantCode)
+                .orElseThrow(() -> new RuntimeException("Restaurant role not found"));
+        
+        Set<Permissions> permissions = permissionsRepository.findAllByPermissionCodeIn(permissionCodes);
+        
+        // Add permissions to the role's permission set
+        if (role.getPermissions() == null) {
+            role.setPermissions(new HashSet<>());
+        }
+        role.getPermissions().addAll(permissions);
+        
+        restaurantRoleRepository.save(role);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PermissionsDTO> getPermissionsByRoleName(String roleName) {
+        // Extract restaurant code from security context
+        String restaurantCode = getRestaurantCodeFromContext();
+        
+        RestaurantRole role = restaurantRoleRepository.findByNameAndRestaurantCode(roleName, restaurantCode)
+                .orElseThrow(() -> new RuntimeException("Restaurant role not found"));
+        
+        List<Permissions> permissions = permissionsRepository.findAllByRestaurantRoleId(role.getId());
+        return permissions.stream()
                 .map(permissionsMapper::toDto)
                 .toList();
+    }
+
+    private String getRestaurantCodeFromContext() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication instanceof com.justintime.jit.security.CustomAuthToken) {
+            return ((com.justintime.jit.security.CustomAuthToken) authentication).getRestaurantCode();
+        }
+        throw new RuntimeException("Restaurant code not found in security context");
     }
 
     @Override
@@ -90,21 +119,30 @@ public class PermissionsServiceImpl implements PermissionsService {
                 .collect(Collectors.toSet());
 
         if (isRole) {
-            Role roleEnum;
-            try {
-                roleEnum = Role.valueOf(roleOrEmail.toUpperCase());
-            } catch (IllegalArgumentException ex) {
-                throw new IllegalArgumentException("Invalid role: " + roleOrEmail);
-            }
-            List<Permissions> oldPermissions = permissionsRepository.findAllByRole(roleEnum);
-            permissionsRepository.deleteAll(oldPermissions);
-            newPermissions.forEach(p -> p.setRole(roleEnum));
-            permissionsRepository.saveAll(newPermissions);
+            // Extract restaurant code from security context
+            String restaurantCode = getRestaurantCodeFromContext();
+            
+            // Find the role by name and restaurant code
+            RestaurantRole restaurantRole = restaurantRoleRepository.findByNameAndRestaurantCode(roleOrEmail, restaurantCode)
+                    .orElseThrow(() -> new RuntimeException("Restaurant role not found"));
+            
+            // Clear existing permissions and set new ones
+            restaurantRole.getPermissions().clear();
+            
+            // Get permission codes from DTOs
+            Set<String> permissionCodes = newPermissionsDTOList.stream()
+                    .map(PermissionsDTO::getPermissionCode)
+                    .collect(Collectors.toSet());
+            
+            Set<Permissions> persistedPermissions = permissionsRepository.findAllByPermissionCodeIn(permissionCodes);
+            restaurantRole.getPermissions().addAll(persistedPermissions);
+            
+            restaurantRoleRepository.save(restaurantRole);
         } else {
             User user = userRepository.findByEmail(roleOrEmail);
             validateRoleInPermissionsAndUser(user, newPermissions);
             Set<Permissions> persistedPermissions = new HashSet<>(permissionsRepository.saveAll(newPermissions));
-            user.setPermissions(persistedPermissions);
+            user.getRestaurantRole().setPermissions(persistedPermissions);
             userRepository.save(user);
         }
     }
@@ -115,11 +153,20 @@ public class PermissionsServiceImpl implements PermissionsService {
     }
 
     private void validateRoleInPermissionsAndUser(User user, Set<Permissions> permissions) throws AccessDeniedException {
+        RestaurantRole userRole = user.getRestaurantRole();
+        if (userRole == null) {
+            throw new AccessDeniedException("User does not have a role assigned");
+        }
+        
         for (Permissions permission : permissions) {
-            if (permission.getRole().getValue() > user.getRole().getValue()) {
+            // Check if the permission is associated with the user's role
+            boolean hasPermission = permission.getRestaurantRoles().stream()
+                    .anyMatch(role -> role.getId().equals(userRole.getId()));
+            
+            if (!hasPermission) {
                 throw new AccessDeniedException(String.format(
                         "User is not allowed to assign or access permission '%s'",
-                        permission.getRole().name()
+                        permission.getPermissionCode()
                 ));
             }
         }

@@ -19,4 +19,7 @@ public interface PermissionsRepository extends JpaRepository<Permissions, Long> 
     Optional<Permissions> findByPermissionCode(String code);
     Optional<Permissions> findByTitle(String title);
     Set<Permissions> findAllByPermissionCodeIn(Set<String> permissionCodes);
+    
+    @Query("SELECT p FROM Permissions p JOIN p.restaurantRoles r WHERE r.id = :restaurantRoleId")
+    List<Permissions> findAllByRestaurantRoleId(@Param("restaurantRoleId") Long restaurantRoleId);
 }

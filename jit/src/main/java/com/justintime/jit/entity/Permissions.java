@@ -10,6 +10,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.envers.Audited;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Audited
@@ -27,5 +29,9 @@ public class Permissions extends BaseEntity {
 
     @Column(name = "description")
     private String description;
+
+    @ManyToMany(mappedBy = "permissions")
+    @JsonIgnore
+    private Set<RestaurantRole> restaurantRoles = new HashSet<>();
 
 }

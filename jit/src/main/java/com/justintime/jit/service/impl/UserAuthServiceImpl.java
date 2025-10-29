@@ -12,6 +12,7 @@ import com.justintime.jit.entity.UserInvitationToken;
 import com.justintime.jit.exception.ResourceNotFoundException;
 import com.justintime.jit.exception.TokenExpiredException;
 import com.justintime.jit.repository.RestaurantRepository;
+import com.justintime.jit.repository.RestaurantRoleRepository;
 import com.justintime.jit.repository.UserInvitationRepository;
 import com.justintime.jit.repository.UserRepository;
 import com.justintime.jit.service.JwtService;
@@ -214,7 +215,7 @@ public class UserAuthServiceImpl extends BaseServiceImpl<User, Long> implements 
                 user.setRestaurantRole(role);
             }
         }
-        if(!CollectionUtils.isEmpty(permissionCodes)) user.setPermissions(permissionsService.getAllPermissionsByPermissionCodes(permissionCodes));
+        if(!CollectionUtils.isEmpty(permissionCodes)) user.getRestaurantRole().setPermissions(permissionsService.getAllPermissionsByPermissionCodes(permissionCodes));
         if(Objects.nonNull(userDTO.getRestaurantCodes())) {
             Set<Restaurant> restaurants = new HashSet<>(restaurantRepository.findByRestaurantCodeIn(userDTO.getRestaurantCodes())
                     .orElseThrow(() -> new ResourceNotFoundException("Restaurant(s) not found, please contact admin")));
