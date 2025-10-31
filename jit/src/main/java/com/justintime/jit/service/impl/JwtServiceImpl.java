@@ -1,5 +1,6 @@
 package com.justintime.jit.service.impl;
 
+import com.justintime.jit.entity.User;
 import com.justintime.jit.repository.UserRepository;
 import com.justintime.jit.service.JwtService;
 import io.jsonwebtoken.Claims;

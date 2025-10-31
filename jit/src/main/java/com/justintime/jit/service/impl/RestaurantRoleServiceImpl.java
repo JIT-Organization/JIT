@@ -2,17 +2,23 @@ package com.justintime.jit.service.impl;
 
 import com.justintime.jit.dto.RestaurantRoleDTO;
 import com.justintime.jit.entity.Enums.Role;
+import com.justintime.jit.entity.Permissions;
 import com.justintime.jit.entity.RestaurantRole;
 import com.justintime.jit.exception.ResourceNotFoundException;
 import com.justintime.jit.repository.RestaurantRoleRepository;
+import com.justintime.jit.service.PermissionsService;
 import com.justintime.jit.service.RestaurantRoleService;
 import com.justintime.jit.util.mapper.GenericMapper;
 import com.justintime.jit.util.mapper.MapperFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,6 +26,9 @@ public class RestaurantRoleServiceImpl extends BaseServiceImpl<RestaurantRole, L
 
     @Autowired
     private RestaurantRoleRepository restaurantRoleRepository;
+
+    @Autowired
+    private PermissionsService permissionsService;
 
     private final GenericMapper<RestaurantRole, RestaurantRoleDTO> mapper = 
             MapperFactory.getMapper(RestaurantRole.class, RestaurantRoleDTO.class);
@@ -50,7 +59,19 @@ public class RestaurantRoleServiceImpl extends BaseServiceImpl<RestaurantRole, L
             existingRole.setRoleType(Role.valueOf(roleDTO.getRoleType()));
         }
         existingRole.setName(roleDTO.getName());
-        existingRole.setPermissionCodes(roleDTO.getPermissionCodes());
+        
+        // Handle permission codes - parse string to Set and fetch Permissions entities
+        if (StringUtils.hasText(roleDTO.getPermissionCodes())) {
+            Set<String> permissionCodes = Arrays.stream(roleDTO.getPermissionCodes().split(","))
+                    .map(String::trim)
+                    .filter(code -> !code.isEmpty())
+                    .collect(Collectors.toSet());
+            
+            if (!permissionCodes.isEmpty()) {
+                Set<Permissions> permissions = permissionsService.getAllPermissionsByPermissionCodes(permissionCodes);
+                existingRole.setPermissions(permissions);
+            }
+        }
         
         RestaurantRole updatedRole = restaurantRoleRepository.save(existingRole);
         return mapper.toDto(updatedRole);

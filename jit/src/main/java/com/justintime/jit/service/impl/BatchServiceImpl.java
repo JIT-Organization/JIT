@@ -220,12 +220,8 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
         Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode)
             .orElseThrow(() -> new RuntimeException("Restaurant not found with code: " + restaurantCode));
         
-        // Get the COOK role for this restaurant by roleType
-        RestaurantRole cookRole = restaurantRoleRepository.findFirstByRoleTypeAndRestaurantCode(com.justintime.jit.entity.Enums.Role.COOK, restaurantCode)
-                .orElseThrow(() -> new ResourceNotFoundException("COOK role not found for restaurant: " + restaurantCode));
-            
         // Get cook for this restaurant
-        User cook = userRepository.findByRestaurantIdAndRoleAndUserName(restaurant.getId(), cookRole.getId(), cookName)
+        User cook = userRepository.findByRestaurantIdAndRoleTypeAndUserName(restaurant.getId(), com.justintime.jit.entity.Enums.Role.COOK, cookName)
 ;
         if (null==cook){
             throw new ResourceNotFoundException("Cook not found for restaurant " + restaurantCode);
@@ -354,11 +350,7 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
     public List<BatchDTO> getBatchesByRestaurantCodeAndCookName(String restaurantCode, String cookName) {
         Optional<Restaurant> restaurant = restaurantRepository.findByRestaurantCode(restaurantCode);
         
-        // Get the COOK role for this restaurant by roleType
-        RestaurantRole cookRole = restaurantRoleRepository.findFirstByRoleTypeAndRestaurantCode(com.justintime.jit.entity.Enums.Role.COOK, restaurantCode)
-                .orElseThrow(() -> new ResourceNotFoundException("COOK role not found for restaurant: " + restaurantCode));
-        
-        User cook = userRepository.findByRestaurantIdAndRoleAndUserName(restaurant.orElseThrow().getId(), cookRole.getId(), cookName);
+        User cook = userRepository.findByRestaurantIdAndRoleTypeAndUserName(restaurant.orElseThrow().getId(), com.justintime.jit.entity.Enums.Role.COOK, cookName);
         if (null==cook){
             throw new ResourceNotFoundException("Cook not found for restaurant " + restaurantCode);
         }

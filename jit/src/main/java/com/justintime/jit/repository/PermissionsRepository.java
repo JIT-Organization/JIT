@@ -15,7 +15,9 @@ import java.util.Set;
 
 @Repository
 public interface PermissionsRepository extends JpaRepository<Permissions, Long> {
-    List<Permissions> findAllByRole(Role role);
+    @Query(value = "SELECT p.* FROM permissions p INNER JOIN restaurant_role_permissions rp ON p.id = rp.permission_id INNER JOIN restaurant_roles r ON rp.restaurant_role_id = r.id WHERE r.role_type = :role", nativeQuery = true)
+    List<Permissions> findAllByRole(@Param("role") Role role);
+    
     Optional<Permissions> findByPermissionCode(String code);
     Optional<Permissions> findByTitle(String title);
     Set<Permissions> findAllByPermissionCodeIn(Set<String> permissionCodes);

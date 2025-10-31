@@ -26,10 +26,11 @@ public interface UserRepository extends BaseRepository<User, Long> {
     @Query(value = "SELECT u.* FROM users u " +
             "JOIN user_restaurant ur ON u.id = ur.user_id " +
             "JOIN restaurant r ON ur.restaurant_id = r.id " +
-            "WHERE r.id = :restaurantId AND u.restaurant_role_id = :roleId AND u.user_name = :userName", nativeQuery = true)
-    User findByRestaurantIdAndRoleAndUserName(
+            "JOIN restaurant_role rr ON u.restaurant_role_id = rr.id " +
+            "WHERE r.id = :restaurantId AND rr.role_type = :roleType AND u.user_name = :userName", nativeQuery = true)
+        User findByRestaurantIdAndRoleTypeAndUserName(
             @Param("restaurantId") Long restaurantId,
-            @Param("roleId") Long roleId,
+            @Param("roleType") Role roleType,
             @Param("userName") String userName);
 
     @Query(value = "SELECT u.* FROM users u " +
@@ -49,7 +50,7 @@ public interface UserRepository extends BaseRepository<User, Long> {
     List<Long> findRestaurantIdsByEmail(@Param("email") String email);
 
     @Query("SELECT u FROM User u JOIN u.restaurants r " +
-            "WHERE r.id = :restaurantId AND u.restaurantRole.role_type = :roleType AND u.username IN :cookNames")
+            "WHERE r.id = :restaurantId AND u.restaurantRole.roleType = :roleType AND u.username IN :cookNames")
     Set<User> findCooksByRestaurantIdAndRoleAndUserNames(@Param("restaurantId") Long restaurantId,
                                                           @Param("roleType") Role roleType,
                                                           @Param("cookNames") Set<String> cookNames);
@@ -57,7 +58,8 @@ public interface UserRepository extends BaseRepository<User, Long> {
             "FROM users u " +
             "JOIN user_restaurant ur ON u.id = ur.user_id " +
             "JOIN restaurants r ON ur.restaurant_id = r.id " +
-            "WHERE r.restaurant_code = :restaurantCode AND u.restaurantRole.role_type = :roleType", nativeQuery = true)
+            "JOIN restaurant_roles rr ON u.restaurant_role_id = rr.id " +
+            "WHERE r.restaurant_code = :restaurantCode AND rr.role_type = :roleType", nativeQuery = true)
     List<String> findUserNamesByRestaurantCodeAndRole(@Param("restaurantCode") String restaurantCode,
                                                       @Param("roleType") Role roleType);
 

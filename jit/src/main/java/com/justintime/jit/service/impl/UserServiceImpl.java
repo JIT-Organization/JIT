@@ -111,7 +111,9 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
     public List<UserDTO> getUsersByRestaurantCode(String restaurantCode) {
         List<User> users = userRepository.findAllByRestaurantCode(restaurantCode);
         return users.stream().map(user -> {
-            Set<String> permissionsCodes = user.getPermissions().stream().map(Permissions::getPermissionCode).collect(Collectors.toSet());
+            Set<String> permissionsCodes = user.getRestaurantRole() != null && user.getRestaurantRole().getPermissions() != null
+                    ? user.getRestaurantRole().getPermissions().stream().map(Permissions::getPermissionCode).collect(Collectors.toSet())
+                    : new HashSet<>();
             UserDTO userDTO = userMapper.toDto(user);
             userDTO.setPermissionCodes(permissionsCodes);
             return userDTO;
@@ -130,16 +132,24 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
         // TODO write a validation where the username should be unique if they are updating it
         if(propertiesToBeUpdated.contains("permissionCodes")) {
             Set<Permissions> permissions = permissionsService.getAllPermissionsByPermissionCodes(dto.getPermissionCodes());
-            permissions.addAll(existingUser.getPermissions());
-            patchedUser.setPermissions(permissions);
+            // Get existing permissions from restaurant role
+            if(existingUser.getRestaurantRole() != null && existingUser.getRestaurantRole().getPermissions() != null) {
+                permissions.addAll(existingUser.getRestaurantRole().getPermissions());
+            }
+            // Set permissions on the restaurant role
+            if(patchedUser.getRestaurantRole() != null) {
+                patchedUser.getRestaurantRole().setPermissions(permissions);
+            }
             propertiesToBeUpdated.remove("permissionCodes");
-            propertiesToBeUpdated.add("permissions");
+            propertiesToBeUpdated.add("restaurantRole.permissions");
         }
         HashSet<String> propertiesToBeUpdatedClone = new HashSet<>(propertiesToBeUpdated);
         commonServiceImplUtil.copySelectedProperties(patchedUser, existingUser, propertiesToBeUpdatedClone);
         existingUser.setUpdatedDttm(LocalDateTime.now());
         userRepository.save(existingUser);
-        Set<String> permissionCodes = existingUser.getPermissions().stream().map(Permissions::getPermissionCode).collect(Collectors.toSet());
+        Set<String> permissionCodes = existingUser.getRestaurantRole() != null && existingUser.getRestaurantRole().getPermissions() != null
+                ? existingUser.getRestaurantRole().getPermissions().stream().map(Permissions::getPermissionCode).collect(Collectors.toSet())
+                : new HashSet<>();
         UserDTO savedUserDTO = userMapper.toDto(existingUser);
         savedUserDTO.setPermissionCodes(permissionCodes);
         return savedUserDTO;
@@ -235,6 +245,8 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
 
     private void addPermissionsToUser(User user, Set<String> permissionCodes) {
         Set<Permissions> permissions = permissionsService.getAllPermissionsByPermissionCodes(permissionCodes);
-        user.setPermissions(permissions);
+        if(user.getRestaurantRole() != null) {
+            user.getRestaurantRole().setPermissions(permissions);
+        }
     }
 }

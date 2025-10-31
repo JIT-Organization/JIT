@@ -37,10 +37,10 @@ public class RestaurantRole extends BaseEntity {
     @JsonIgnore
     private Set<Permissions> permissions = new HashSet<>();
 
-    @OneToMany(mappedBy = "restaurant_roles", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "restaurantRole", cascade = CascadeType.ALL)
     @JsonIgnore
     private Set<User> users = new HashSet<>();
 
-    @Column(name = "restaurant_code", nullable = false)
-    private String restaurantCode;
+//    @Column(name = "restaurant_code", nullable = false)
+//    private String restaurantCode;
 }

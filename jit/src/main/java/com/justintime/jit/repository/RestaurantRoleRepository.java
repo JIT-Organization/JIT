@@ -8,14 +8,21 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
 @Repository
 public interface RestaurantRoleRepository extends JpaRepository<RestaurantRole, Long> {
     
+    @Query(value = "SELECT * FROM restaurant_roles", nativeQuery = true)
     List<RestaurantRole> findByRestaurantCode(String restaurantCode);
     
-    Optional<RestaurantRole> findByNameAndRestaurantCode(String name, String restaurantCode);
+    @Query(value = "SELECT * FROM restaurant_roles WHERE name = :name", nativeQuery = true)
+    Optional<RestaurantRole> findByNameAndRestaurantCode(@Param("name") String name, String restaurantCode);
     
-    List<RestaurantRole> findByRoleTypeAndRestaurantCode(Role roleType, String restaurantCode);
+    @Query(value = "SELECT * FROM restaurant_roles WHERE role_type = :roleType", nativeQuery = true)
+    List<RestaurantRole> findByRoleTypeAndRestaurantCode(@Param("roleType") Role roleType, String restaurantCode);
     
-    Optional<RestaurantRole> findFirstByRoleTypeAndRestaurantCode(Role roleType, String restaurantCode);
+    @Query(value = "SELECT * FROM restaurant_roles WHERE role_type = :roleType LIMIT 1", nativeQuery = true)
+    Optional<RestaurantRole> findFirstByRoleTypeAndRestaurantCode(@Param("roleType") Role roleType, String restaurantCode);
 }
