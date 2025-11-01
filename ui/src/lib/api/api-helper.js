@@ -12,6 +12,11 @@ export const getRequest = async (url, errorMessage = "Failed to fetch data") => 
     return response.data.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
+      if (error.response?.status === 401) {
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
+      }
       throw new Error(error.response?.data?.message || errorMessage);
     }
     throw new Error(errorMessage);

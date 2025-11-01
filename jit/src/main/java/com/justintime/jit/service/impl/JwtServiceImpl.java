@@ -1,5 +1,6 @@
 package com.justintime.jit.service.impl;
 
+import com.justintime.jit.entity.User;
 import com.justintime.jit.repository.UserRepository;
 import com.justintime.jit.service.JwtService;
 import io.jsonwebtoken.Claims;
@@ -36,7 +37,8 @@ public class JwtServiceImpl implements JwtService {
     private String generateToken(String email, long expiration) {
         Map<String, Object> claims = new HashMap<>();
         List<String> restaurantCodes = getRestaurantCodes(email);
-        claims.put("role", userRepository.findByEmail(email).getRole().toString());
+        User user = userRepository.findByEmail(email);
+        claims.put("role", user.getRestaurantRole() != null ? user.getRestaurantRole().getName() : "");
         if(!restaurantCodes.isEmpty()) {
             if(restaurantCodes.size() == 1) {
                 claims.put("restaurantCode", restaurantCodes.get(0));

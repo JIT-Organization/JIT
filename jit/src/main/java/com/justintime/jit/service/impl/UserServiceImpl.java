@@ -9,6 +9,7 @@ import com.justintime.jit.entity.User;
 import com.justintime.jit.entity.UserPrincipal;
 import com.justintime.jit.exception.ResourceNotFoundException;
 import com.justintime.jit.repository.RestaurantRepository;
+import com.justintime.jit.repository.RestaurantRoleRepository;
 import com.justintime.jit.event.UserInvitationEvent;
 import com.justintime.jit.repository.UserInvitationRepository;
 import com.justintime.jit.repository.UserRepository;
@@ -48,6 +49,8 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
     private final PermissionsService permissionsService;
 
     private final UserInvitationRepository userInvitationRepository;
+    
+    private final RestaurantRoleRepository restaurantRoleRepository;
 
     private final GenericMapper<User, UserDTO> userMapper = MapperFactory.getMapper(User.class, UserDTO.class);
 
@@ -60,12 +63,13 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
     private String registrationUrl;
 
     @SuppressFBWarnings(value = "EI2", justification = "User Service Impl is a Spring-managed bean and is not exposed.")
-    public UserServiceImpl(UserRepository userRepository, CommonServiceImplUtil commonServiceImplUtil, PermissionsService permissionsService, UserInvitationRepository userInvitationRepository, RestaurantRepository restaurantRepository, RestaurantRepository restaurantRepository1) {
+    public UserServiceImpl(UserRepository userRepository, CommonServiceImplUtil commonServiceImplUtil, PermissionsService permissionsService, UserInvitationRepository userInvitationRepository, RestaurantRepository restaurantRepository, RestaurantRepository restaurantRepository1, RestaurantRoleRepository restaurantRoleRepository) {
         this.userRepository = userRepository;
         this.commonServiceImplUtil = commonServiceImplUtil;
         this.permissionsService = permissionsService;
         this.userInvitationRepository = userInvitationRepository;
         this.restaurantRepository = restaurantRepository1;
+        this.restaurantRoleRepository = restaurantRoleRepository;
     }
 
     @Override
@@ -97,7 +101,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
             existingUser.setEmail(updatedUser.getEmail());
             existingUser.setPhoneNumber(updatedUser.getPhoneNumber());
             existingUser.setPasswordHash(updatedUser.getPasswordHash());
-            existingUser.setRole(updatedUser.getRole());
+            existingUser.setRestaurantRole(updatedUser.getRestaurantRole());
             existingUser.setUpdatedDttm(LocalDateTime.now()); // Set updated timestamp
             return userRepository.save(existingUser);
         }).orElseThrow(() -> new RuntimeException("User not found with id " + id));
@@ -107,7 +111,9 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
     public List<UserDTO> getUsersByRestaurantCode(String restaurantCode) {
         List<User> users = userRepository.findAllByRestaurantCode(restaurantCode);
         return users.stream().map(user -> {
-            Set<String> permissionsCodes = user.getPermissions().stream().map(Permissions::getPermissionCode).collect(Collectors.toSet());
+            Set<String> permissionsCodes = user.getRestaurantRole() != null && user.getRestaurantRole().getPermissions() != null
+                    ? user.getRestaurantRole().getPermissions().stream().map(Permissions::getPermissionCode).collect(Collectors.toSet())
+                    : new HashSet<>();
             UserDTO userDTO = userMapper.toDto(user);
             userDTO.setPermissionCodes(permissionsCodes);
             return userDTO;
@@ -126,16 +132,24 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
         // TODO write a validation where the username should be unique if they are updating it
         if(propertiesToBeUpdated.contains("permissionCodes")) {
             Set<Permissions> permissions = permissionsService.getAllPermissionsByPermissionCodes(dto.getPermissionCodes());
-            permissions.addAll(existingUser.getPermissions());
-            patchedUser.setPermissions(permissions);
+            // Get existing permissions from restaurant role
+            if(existingUser.getRestaurantRole() != null && existingUser.getRestaurantRole().getPermissions() != null) {
+                permissions.addAll(existingUser.getRestaurantRole().getPermissions());
+            }
+            // Set permissions on the restaurant role
+            if(patchedUser.getRestaurantRole() != null) {
+                patchedUser.getRestaurantRole().setPermissions(permissions);
+            }
             propertiesToBeUpdated.remove("permissionCodes");
-            propertiesToBeUpdated.add("permissions");
+            propertiesToBeUpdated.add("restaurantRole.permissions");
         }
         HashSet<String> propertiesToBeUpdatedClone = new HashSet<>(propertiesToBeUpdated);
         commonServiceImplUtil.copySelectedProperties(patchedUser, existingUser, propertiesToBeUpdatedClone);
         existingUser.setUpdatedDttm(LocalDateTime.now());
         userRepository.save(existingUser);
-        Set<String> permissionCodes = existingUser.getPermissions().stream().map(Permissions::getPermissionCode).collect(Collectors.toSet());
+        Set<String> permissionCodes = existingUser.getRestaurantRole() != null && existingUser.getRestaurantRole().getPermissions() != null
+                ? existingUser.getRestaurantRole().getPermissions().stream().map(Permissions::getPermissionCode).collect(Collectors.toSet())
+                : new HashSet<>();
         UserDTO savedUserDTO = userMapper.toDto(existingUser);
         savedUserDTO.setPermissionCodes(permissionCodes);
         return savedUserDTO;
@@ -210,8 +224,8 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
     }
 
     @Override
-    public List<User> findByRole(Role role) {
-        return userRepository.findByRole(role);
+    public List<User> findByRestaurantRole(RestaurantRole restaurantRole) {
+        return userRepository.findByRestaurantRole(restaurantRole);
     }
 
     @Override
@@ -231,6 +245,8 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
 
     private void addPermissionsToUser(User user, Set<String> permissionCodes) {
         Set<Permissions> permissions = permissionsService.getAllPermissionsByPermissionCodes(permissionCodes);
-        user.setPermissions(permissions);
+        if(user.getRestaurantRole() != null) {
+            user.getRestaurantRole().setPermissions(permissions);
+        }
     }
 }

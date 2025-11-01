@@ -11,5 +11,4 @@ public class PermissionsDTO {
     private String title;
     private String description;
     private String permissionCode;
-    private String role;
 }

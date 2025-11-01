@@ -381,6 +381,13 @@ export const getPermisisonsForRole = (role) => ({
   ...cacheConfig,
 });
 
+export const getDashboardDataOptions = (restaurantCode = "TGSR") => ({
+  queryKey: ["dashboardData", restaurantCode],
+  queryFn: () => getRequest(`${URLS.dashboard}/${restaurantCode}`, "Failed to fetch Dashboard Data"),
+  enabled: !!restaurantCode,
+  ...cacheConfig,
+});
+
 // export const getMenuItemListOptions = (id) => ({
 //   queryKey: ["menuItemList"],
 //   queryFn: async () => {

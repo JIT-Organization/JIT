@@ -2,7 +2,6 @@ package com.justintime.jit.entity;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.justintime.jit.entity.Enums.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,6 +10,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.envers.Audited;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Audited
@@ -20,12 +21,6 @@ import java.time.LocalDateTime;
 @Table(name = "permissions")
 public class Permissions extends BaseEntity {
 
-    @Access(AccessType.FIELD)
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false)
-    @JsonIgnore
-    private Role role;
-
     @Column(name = "permission_code", unique = true, nullable = false)
     private String permissionCode;
 
@@ -34,5 +29,9 @@ public class Permissions extends BaseEntity {
 
     @Column(name = "description")
     private String description;
+
+    @ManyToMany(mappedBy = "permissions")
+    @JsonIgnore
+    private Set<RestaurantRole> restaurantRoles = new HashSet<>();
 
 }

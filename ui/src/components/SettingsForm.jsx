@@ -10,7 +10,6 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
-import { BiSolidChevronLeft } from "react-icons/bi";
 import Image from "next/image";
 import MapPopup from "./MapPopup";
 import { Input } from "./ui/input";
@@ -56,18 +55,6 @@ export default function BusinessProfilePage() {
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="flex items-center p-0.5">
-          <Button
-            type="button"
-            className="mr-4 text-yellow-500 font-extrabold text-5xl"
-            onClick={() => window.history.back()}
-          >
-            <BiSolidChevronLeft />
-          </Button>
-          <h1 className="text-4xl font-extrabold">Business Profile</h1>
-        </div>
-
-
         <div className="rounded-full border-2 border-solid relative">
           <Image
             src="/resources/images/background.jpeg"

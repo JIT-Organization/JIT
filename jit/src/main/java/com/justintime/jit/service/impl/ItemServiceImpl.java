@@ -6,8 +6,7 @@ import com.justintime.jit.dto.ItemDTO;
 import com.justintime.jit.entity.*;
 import com.justintime.jit.entity.ComboEntities.Combo;
 import com.justintime.jit.entity.ComboEntities.ComboItem;
-import com.justintime.jit.entity.Enums.FoodType;
-import com.justintime.jit.entity.Enums.Role;
+import com.justintime.jit.entity.Enums.*;
 import com.justintime.jit.exception.ResourceNotFoundException;
 import com.justintime.jit.repository.*;
 import com.justintime.jit.repository.ComboRepo.ComboItemRepository;
@@ -48,6 +47,9 @@ public class ItemServiceImpl implements ItemService {
 
     @Autowired
     private TimeIntervalRepository timeIntervalRepository;
+    
+    @Autowired
+    private RestaurantRoleRepository restaurantRoleRepository;
 
     @Autowired
     private CommonServiceImplUtil commonServiceImplUtil;

@@ -7,7 +7,6 @@ import com.justintime.jit.entity.*;
 import com.justintime.jit.entity.Enums.BatchStatus;
 import com.justintime.jit.entity.Enums.FoodType;
 import com.justintime.jit.entity.Enums.OrderType;
-import com.justintime.jit.entity.Enums.Role;
 import com.justintime.jit.entity.OrderEntities.OrderItem;
 import com.justintime.jit.exception.IllegalBatchStateException;
 import com.justintime.jit.exception.ResourceNotFoundException;
@@ -61,6 +60,9 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
 
     @Autowired
     private BatchOrderItemRepository batchOrderItemRepository;
+    
+    @Autowired
+    private RestaurantRoleRepository restaurantRoleRepository;
 
     private static final int BUFFER_TIME_MINUTES = 5;
 
@@ -217,9 +219,9 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
         // First get the restaurant to validate and get its ID
         Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode)
             .orElseThrow(() -> new RuntimeException("Restaurant not found with code: " + restaurantCode));
-            
+        
         // Get cook for this restaurant
-        User cook = userRepository.findByRestaurantIdAndRoleAndUserName(restaurant.getId(), Role.COOK, cookName)
+        User cook = userRepository.findByRestaurantIdAndRoleTypeAndUserName(restaurant.getId(), com.justintime.jit.entity.Enums.Role.COOK, cookName)
 ;
         if (null==cook){
             throw new ResourceNotFoundException("Cook not found for restaurant " + restaurantCode);
@@ -347,7 +349,8 @@ public class BatchServiceImpl extends BaseServiceImpl<Batch, Long> implements Ba
 
     public List<BatchDTO> getBatchesByRestaurantCodeAndCookName(String restaurantCode, String cookName) {
         Optional<Restaurant> restaurant = restaurantRepository.findByRestaurantCode(restaurantCode);
-        User cook = userRepository.findByRestaurantIdAndRoleAndUserName(restaurant.orElseThrow().getId(), Role.COOK, cookName);
+        
+        User cook = userRepository.findByRestaurantIdAndRoleTypeAndUserName(restaurant.orElseThrow().getId(), com.justintime.jit.entity.Enums.Role.COOK, cookName);
         if (null==cook){
             throw new ResourceNotFoundException("Cook not found for restaurant " + restaurantCode);
         }

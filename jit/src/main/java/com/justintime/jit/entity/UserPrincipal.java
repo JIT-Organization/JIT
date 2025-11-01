@@ -1,7 +1,7 @@
 package com.justintime.jit.entity;
 
-import com.justintime.jit.entity.Enums.Role;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serial;
@@ -14,17 +14,20 @@ public class UserPrincipal implements UserDetails {
 
     private final String email;
     private final String passwordHash;
-    private final Role role;
+    private final RestaurantRole restaurantRole;
 
     public UserPrincipal(User user) {
         this.email = user.getEmail();
         this.passwordHash = user.getPasswordHash();
-        this.role = user.getRole();
+        this.restaurantRole = user.getRestaurantRole();
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singleton(role);
+        if (restaurantRole != null) {
+            return Collections.singleton(new SimpleGrantedAuthority("ROLE_" + restaurantRole.getName()));
+        }
+        return Collections.emptyList();
     }
 
     @Override
