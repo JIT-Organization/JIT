@@ -3,10 +3,12 @@ name: Build and Push Docker Images
 on:
   push:
     branches:
-      - sprint/2025.3
+      - version/**
+  #     - sprint/**
   pull_request:
     branches:
-      - sprint/2025.3
+      - version/**
+      - sprint/**
 
 env:
   REGISTRY: jitimagereg.azurecr.io
@@ -38,7 +40,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.JIT_IMAGE_NAME }}
           tags: |
-            type=raw,value=${{ github.ref_name }}-${{ github.sha }},sanitize=true
+            type=raw,value=${{ (github.event_name == 'pull_request' && github.head_ref || github.ref_name).replace('/', '-') }}-${{ github.sha::0:8 }}
 
       - name: Build and push JIT Docker image
         uses: docker/build-push-action@v6
@@ -75,7 +77,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.UI_IMAGE_NAME }}
           tags: |
-            type=raw,value=${{ github.ref_name }}-${{ github.sha }},sanitize=true
+            type=raw,value=${{ (github.event_name == 'pull_request' && github.head_ref || github.ref_name).replace('/', '-') }}-${{ github.sha::0:8 }}
 
       - name: Build and push UI Docker image
         uses: docker/build-push-action@v6
