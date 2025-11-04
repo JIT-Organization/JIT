@@ -38,7 +38,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.JIT_IMAGE_NAME }}
           tags: |
-            type=sha,prefix={{branch}},prefix_sep=-,sanitize=true
+            type=raw,value=${{ github.ref_name }}-${{ github.sha }},sanitize=true
 
       - name: Build and push JIT Docker image
         uses: docker/build-push-action@v6
@@ -75,7 +75,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.UI_IMAGE_NAME }}
           tags: |
-            type=sha,prefix={{branch}},prefix_sep=-,sanitize=true
+            type=raw,value=${{ github.ref_name }}-${{ github.sha }},sanitize=true
 
       - name: Build and push UI Docker image
         uses: docker/build-push-action@v6
