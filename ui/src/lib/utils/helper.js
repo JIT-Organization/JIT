@@ -1,5 +1,6 @@
 import axios from "axios";
 import Cookies from "js-cookie";
+import { getBaseUrl } from "../api/urls";
 
 export const getDistinctCategories = (data) => {
   const categorySet = new Set();
@@ -35,7 +36,7 @@ export const getAxiosInstance = (cookies = "") => {
     }
   })
   const refreshInstance = axios.create({
-    baseURL: "http://localhost:8080",
+    baseURL: getBaseUrl(),
     withCredentials: true,
     headers: {
       "Content-Type": "application/json",

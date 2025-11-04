@@ -1,4 +1,4 @@
-const createUrl = (endpoint) => `http://localhost:8080/jit-api${endpoint}`;
+const createUrl = (endpoint) => `${getBaseUrl()}/jit-api${endpoint}`;
 
 export const URLS = {
   menuItemList: createUrl("/items"),
@@ -7,7 +7,13 @@ export const URLS = {
   tablesList: createUrl("/tables"),
   usersList: createUrl("/users"),
   addOns: createUrl("/addons"),
-  register: "http://localhost:8080/register",
+  register: getBaseUrl() + "/register",
+  login: getBaseUrl() + "/login",
+  refresh: getBaseUrl() + "/refresh",
   sendInvite: createUrl("/users/send-invite"),
   permissions: createUrl("/permissions")
 };
+
+export function getBaseUrl() {
+  return process.env.API_BASE_URL || 'http://localhost:8080'
+}

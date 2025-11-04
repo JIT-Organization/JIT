@@ -11,12 +11,12 @@ const resCodes = Cookies.get("resCodes")
 console.log(resCodes)
 
 export const login = (data) => {
-  postRequest("http://localhost:8080/login", data, {withCredential: true})
+  postRequest(URLS.login, data, {withCredential: true})
 }
 
 export const refresh = () => {
   try{
-    postRequest("http://localhost:8080/refresh", {}, {withCredential: true})
+    postRequest(URLS.refresh, {}, {withCredential: true})
   } catch (e) {
     console.log(e)
   }
