@@ -3,12 +3,12 @@ name: Build and Push Docker Images
 on:
   push:
     branches:
-      - version/**
+      - 'version/*'
   #     - sprint/**
   pull_request:
     branches:
-      - version/**
-      - sprint/**
+      - 'version/*'
+      - 'sprint/*'
 
 env:
   REGISTRY: jitimagereg.azurecr.io
