@@ -16,6 +16,8 @@ import { Input } from "./ui/input";
 import { registerUser } from "@/lib/api/api";
 import { useMutation } from "@tanstack/react-query";
 import { Card, CardDescription, CardHeader } from "./ui/card";
+import { URLS } from "@/lib/api/urls";
+import { useToast } from "@/hooks/use-toast";
 
 const LoginAndRegisterForm = () => {
   const router = useRouter();
@@ -45,7 +47,7 @@ const LoginAndRegisterForm = () => {
     if (!isRegister) {
       // Login flow
       await axios.post(
-        "http://localhost:8080/login",
+        URLS.login,
         { email, password },
         { withCredentials: true }
       );

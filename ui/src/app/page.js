@@ -1,12 +1,13 @@
 "use client";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { URLS } from "../lib/api/urls";
 
 export default function Home() {
   const router = useRouter();
   async () => {
     try {
-      const res = await axios.post("http://localhost:8080/refresh", null, {
+      const res = await axios.post(URLS.refresh, null, {
         withCredentials: true,
       });
 
