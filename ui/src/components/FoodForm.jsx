@@ -167,7 +167,7 @@ const FoodForm = forwardRef(
       getCategoriesListOptions()
     );
     const { data: usersListData, isLoading: isUserListLoading } = useQuery(
-      getUsersListOptions("TGSR")
+      getUsersListOptions()
     );
 
     const categoryOptions =

@@ -34,7 +34,7 @@ public class UserController extends BaseController {
 
     @GetMapping
     @PreAuthorize("hasPermission(null, 'VIEW_USERS')")
-    public ResponseEntity<ApiResponse<List<UserDTO>>> getUsersByRestaurantCode(@PathVariable String restaurantCode) {
+    public ResponseEntity<ApiResponse<List<UserDTO>>> getUsersByRestaurantCode() {
         List<UserDTO> users = userService.getUsersByRestaurantCode();
         return success(users);
     }

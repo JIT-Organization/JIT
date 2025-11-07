@@ -6,7 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const Users = () => {
   const queryClient = useQueryClient();
-  const { data: usersListData, isLoading, error } = useQuery(getUsersListOptions("TGSR"));
+  const { data: usersListData, isLoading, error } = useQuery(getUsersListOptions());
   const patchMutation = useMutation(patchUpdateUserItemList(queryClient));
   const deleteMutation = useMutation(deleteUserItem(queryClient));
   const postMutation = useMutation(sendInviteToUser());

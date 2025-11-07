@@ -175,9 +175,9 @@ export const deleteCategoryItem = (queryClient) => ({
   },
 });
 
-export const getUsersListOptions = (resCode) => ({
+export const getUsersListOptions = () => ({
   queryKey: ["usersList"],
-  queryFn: () => getRequest(`${URLS.usersList}/${resCode}`, "Failed to fetch Users List"),
+  queryFn: () => getRequest(URLS.usersList, "Failed to fetch Users List"),
   ...cacheConfig
 });
 
