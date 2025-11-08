@@ -162,7 +162,7 @@ const availabilityOptions = [
 // };
 
 const FoodForm = forwardRef(
-  ({ onFormChange, onSubmit, defaultValues, isLoading, onError, isEdit}, ref) => {
+  ({ onFormChange, onSubmit, defaultValues, isLoading, onError, isEdit }, ref) => {
     const { data: categoriesList, isLoading: isCategoryListLoading } = useQuery(
       getCategoriesListOptions()
     );
@@ -187,7 +187,7 @@ const FoodForm = forwardRef(
     });
     const offerPrice = form.watch("offerPrice");
     const foodType = form.watch("foodType");
-    
+
     const formFields = [
       {
         name: "menuItemName",
@@ -301,24 +301,24 @@ const FoodForm = forwardRef(
             if (!value || !Array.isArray(value)) {
               return "Timings are required";
             }
-            
+
             for (const interval of value) {
               if (!interval.startTime || interval.startTime.trim() === "") {
                 return "Available from time is required";
               }
-              
+
               if (!interval.endTime || interval.endTime.trim() === "") {
                 return "Available to time is required";
               }
-              
+
               const startTime = new Date(`2000-01-01T${interval.startTime}`);
               const endTime = new Date(`2000-01-01T${interval.endTime}`);
-              
+
               if (startTime >= endTime) {
                 return "Available from time must be earlier than available to time";
               }
             }
-            
+
             return true;
           }
         }
@@ -546,7 +546,7 @@ const FoodForm = forwardRef(
 
     return (
       <div className="grid grid-cols-12">
-        <CommonForm form={form} formFields={formFields} />
+        <CommonForm form={form} formFields={formFields} formRef={ref} />
       </div>
     );
   }

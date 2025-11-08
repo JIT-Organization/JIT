@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -34,7 +34,7 @@ const customerFormSchema = z.object({
   }
 });
 
-const OrderPageWrapper = ({ 
+const OrderPageWrapper = ({
   mode = "create", // "create" or "edit"
   queryOptions,
   orderNumber = null, // Only used in edit mode
@@ -44,7 +44,7 @@ const OrderPageWrapper = ({
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const isMobile = useIsMobile();
-  
+
   const [globalFilter, setGlobalFilter] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const [isCustomerDialogOpen, setIsCustomerDialogOpen] = useState(false);
@@ -83,10 +83,10 @@ const OrderPageWrapper = ({
   );
 
   // Fetch order details in edit mode
-  const { 
-    data: orderDetails = null, 
+  const {
+    data: orderDetails = null,
     isLoading: isOrderLoading,
-    error: orderError 
+    error: orderError
   } = useQuery(getOrderDetails(isEditOrder ? currentOrderNumber : null));
 
 
@@ -191,9 +191,9 @@ const OrderPageWrapper = ({
   }, [menuItems, globalFilter, activeCategory]);
 
   const categories = getDistinctCategories(menuItems);
-  const tableOptions = (tablesList || []).map((t) => ({ 
-    label: t.tableNumber, 
-    value: t.tableNumber 
+  const tableOptions = (tablesList || []).map((t) => ({
+    label: t.tableNumber,
+    value: t.tableNumber
   }));
   // Form fields configuration
   const orderFormFields = [
@@ -313,6 +313,7 @@ const OrderPageWrapper = ({
   const isLoading = queryLoading || (isEditOrder && isOrderLoading);
   const error = queryError || orderError;
   const isMutationPending = createOrderMutation.isPending || updateOrderMutation.isPending;
+  const formRef = useRef(null);
 
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Error loading data: {error.message}</p>;
@@ -327,7 +328,7 @@ const OrderPageWrapper = ({
           categories={categories}
           activeCategory={activeCategory}
           setActiveCategory={setActiveCategory}
-          setColumnFilters={() => {}}
+          setColumnFilters={() => { }}
           headerButtonName={isNewOrder ? "Place Order" : "Update Order"}
           headerButtonClick={handlePlaceOrder}
           disabled={isMutationPending}
@@ -385,7 +386,7 @@ const OrderPageWrapper = ({
           <DialogTitle className="col-span-12 block w-full text-center">
             Customer Details
           </DialogTitle>
-          <CommonForm form={form} formFields={orderFormFields} />
+          <CommonForm form={form} formFields={orderFormFields} formRef={formRef} />
         </DialogContent>
       </Dialog>
     </Card>

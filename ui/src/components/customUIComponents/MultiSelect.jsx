@@ -4,12 +4,12 @@ import { Command, CommandInput, CommandList, CommandItem } from "../ui/command";
 import { Check } from "lucide-react";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
-import { useRef } from "react";
 
 export default function MultiSelect({
   options,
   value,
   onChange,
+  containerRef,
   placeholder = "Select options",
   className = '',
   showAllOption = false,
@@ -73,7 +73,7 @@ export default function MultiSelect({
           </Button>
         </PopoverTrigger>
         {!disabled && (
-          <PopoverContent container={false} className="w-full p-0 bg-white relative z-[9999]">
+          <PopoverContent container={containerRef.current} className="w-full p-0 bg-white relative z-[9999]">
             <Command>
               <CommandInput placeholder="Search options..." />
               <CommandList>

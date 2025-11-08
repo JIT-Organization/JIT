@@ -19,7 +19,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={inter.className}>
-        <WebSocketProvider url={`ws://${addr}/ws`}>
+        <WebSocketProvider url={`wss://${addr}/ws`}>
           <ColorProvider>
             <TSQueryClientProvider>
               {children}
