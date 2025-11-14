@@ -84,7 +84,8 @@ public class SecurityConfig {
 
     private CorsConfigurationSource corsSource() {
         CorsConfiguration cfg = new CorsConfiguration();
-        cfg.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:3001", "http://localhost:8080", "https://ui.graystone-894984be.centralindia.azurecontainerapps.io/"));
+        cfg.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:3001", "http://localhost:8080",
+                "https://ui.graystone-894984be.centralindia.azurecontainerapps.io/", "https://app.jit-apps.com"));
         cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         cfg.setAllowedHeaders(List.of("*"));
         cfg.setAllowCredentials(true);  // Crucial for cookie-based auth
