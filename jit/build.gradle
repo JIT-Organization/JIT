@@ -84,6 +84,9 @@ dependencies {
 	// Annotation Processor
 	compileOnly "com.google.auto.service:auto-service:1.1.1"
 	annotationProcessor "com.google.auto.service:auto-service:1.1.1"
+
+	// Spring Actuator
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 }
 
 dependencyManagement {

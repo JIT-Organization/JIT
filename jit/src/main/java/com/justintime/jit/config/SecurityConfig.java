@@ -58,7 +58,9 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/register", "/login", "/refresh",
                                 "/swagger-ui/**", "/v3/api-docs/**",
-                                "/swagger-resources/**", "/webjars/**"
+                                "/swagger-resources/**", "/webjars/**",
+                                "/actuator/health",
+                                "/actuator/health/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers( "/ws/**", "/user/**", "/topic/**").authenticated() // Web Socket matchers
