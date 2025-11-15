@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/jit-api/orders")
+@RequestMapping("/orders")
 public class OrderController extends BaseController {
 
     @Autowired

@@ -13,7 +13,7 @@ import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/jit-api/users")
+@RequestMapping("/users")
 public class UserController extends BaseController {
 
     @Autowired

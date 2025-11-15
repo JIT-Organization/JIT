@@ -7,9 +7,9 @@ export const URLS = {
   tablesList: createUrl("/tables"),
   usersList: createUrl("/users"),
   addOns: createUrl("/addons"),
-  register: getBaseUrl() + "/register",
-  login: getBaseUrl() + "/login",
-  refresh: getBaseUrl() + "/refresh",
+  register: createUrl("/register"),
+  login: createUrl("/login"),
+  refresh: createUrl("/refresh"),
   sendInvite: createUrl("/users/send-invite"),
   permissions: createUrl("/permissions")
 };

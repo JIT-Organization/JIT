@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/jit-api/categories")
+@RequestMapping("/categories")
 public class CategoryController extends BaseController {
 
     @Autowired
