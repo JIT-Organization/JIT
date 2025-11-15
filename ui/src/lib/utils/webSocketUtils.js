@@ -38,6 +38,9 @@ const useWebSocket = (url) => {
       onStompError: (frame) => {
         console.error("STOMP error", frame.headers.message, frame.body);
       },
+      onWebSocketError: (event) => {
+        console.error("WebSocket connection error:", event);
+      }
     });
     
     stompRef.current = client; 
