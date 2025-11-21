@@ -2,16 +2,22 @@
 FROM node:18-alpine AS builder
 WORKDIR /app
 
-# Define and use build-time argument
-ARG NEXT_PUBLIC_API_BASE_URL
-ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
-RUN echo "Building with NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL"
+# Declare build args
+ARG NEXT_PUBLIC_BASE_URL
+ARG BASE_URL
+
+# Export them as env vars for Next.js build
+ENV NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
+ENV BASE_URL=${BASE_URL}
+
+RUN echo "NEXT_PUBLIC_BASE_URL=$NEXT_PUBLIC_BASE_URL"
+RUN echo "BASE_URL=$BASE_URL"
 
 COPY package*.json ./
 RUN npm install --frozen-lockfile
 COPY . .
 
-# Next.js build uses the env var above
+# Build Next.js (uses env vars)
 RUN npm run build
 
 # Runtime stage
