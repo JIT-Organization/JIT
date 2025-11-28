@@ -115,5 +115,11 @@ public interface OrderItemRepository extends BaseRepository<OrderItem,Long> {
             "ORDER BY oi.createdDttm ASC")
     List<OrderItem> findAssignedAndStartedItemsByRestaurantCodeAndCook(@Param("restaurantCode") String restaurantCode, @Param("cookId") Long cookId);
 
+    @Query("SELECT oi FROM OrderItem oi " +
+            "WHERE (oi.orderItemStatus = 'ASSIGNED' OR oi.orderItemStatus = 'STARTED') " +
+            "  AND oi.order.restaurant.restaurantCode = :restaurantCode " +
+            "ORDER BY oi.createdDttm ASC")
+    List<OrderItem> findAssignedAndStartedItemsByRestaurantCode(@Param("restaurantCode") String restaurantCode);
+
     List<OrderItem> findByOrder_Restaurant_RestaurantCodeAndOrderItemStatusIn(String restaurantCode, List<OrderItemStatus> orderItemStatuses);
 }
