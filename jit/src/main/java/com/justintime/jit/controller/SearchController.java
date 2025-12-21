@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/jit-api/search")
+@RequestMapping("/search")
 public class SearchController extends BaseController {
 
     @Autowired

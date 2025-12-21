@@ -2,6 +2,7 @@ package com.justintime.jit.controller;
 
 import com.justintime.jit.dto.ApiResponse;
 import com.justintime.jit.dto.OrderDTO;
+import com.justintime.jit.dto.OrderItemDTO;
 import com.justintime.jit.dto.PatchRequest;
 import com.justintime.jit.entity.Enums.OrderStatus;
 import com.justintime.jit.service.OrderService;
@@ -16,22 +17,22 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/jit-api/orders")
+@RequestMapping("/orders")
 public class OrderController extends BaseController {
 
     @Autowired
     private OrderService orderService;
 
-    @PostMapping("/{restaurantCode}")
+    @PostMapping
     @PreAuthorize("hasPermission(null, 'ADD_ORDERS')")
-    public ResponseEntity<String> createOrder(@PathVariable String restaurantCode, @RequestBody OrderDTO orderDTO) {
-        return orderService.createOrder(restaurantCode, orderDTO);
+    public ResponseEntity<String> createOrder(@RequestBody OrderDTO orderDTO) {
+        return orderService.createOrder(orderDTO);
     }
 
-    @GetMapping("/{restaurantCode}")
+    @GetMapping
     @PreAuthorize("hasPermission(null, 'VIEW_ORDERS')")
-    public ResponseEntity<ApiResponse<List<OrderDTO>>> getAllOrders(@PathVariable String restaurantCode) {
-        List<OrderDTO> orderDTOs = orderService.getOrdersByRestaurantId(restaurantCode);
+    public ResponseEntity<ApiResponse<List<OrderDTO>>> getAllOrders() {
+        List<OrderDTO> orderDTOs = orderService.getOrdersByRestaurantId();
         return success(orderDTOs, "Orders fetched successfully");
     }
 
@@ -84,5 +85,20 @@ public class OrderController extends BaseController {
     @PreAuthorize("hasPermission(null, 'ADD_ORDERS')")
     public ResponseEntity<BigDecimal> calculateTotalRevenue(@PathVariable String restaurantCode) {
         BigDecimal totalRevenue = orderService.calculateTotalRevenue(restaurantCode);
-        return ResponseEntity.ok(totalRevenue); }
+        return ResponseEntity.ok(totalRevenue);
+    }
+
+    @GetMapping("/orderItems")
+    @PreAuthorize("hasPermission(null, 'VIEW_ORDERS')")
+    public ResponseEntity<ApiResponse<List<OrderItemDTO>>> getAllInProgressOrderItemsForRestaurant() {
+        List<OrderItemDTO> orderItemDTOS = orderService.getAllInProgressOrderItemsForRestaurant();
+        return success(orderItemDTOS, "Orders fetched successfully");
+    }
+
+    @PatchMapping("/orderItem/updateStatus")
+    @PreAuthorize("hasPermission(null, 'ADD_ORDERS')")
+    public ResponseEntity<ApiResponse<OrderItemDTO>> updateOrderItemStatus(@RequestBody OrderItemDTO orderItemDTO) {
+        OrderItemDTO returnOrderItemDTO = orderService.updateOrderItemStatus(orderItemDTO);
+        return success(returnOrderItemDTO, "Order Item updated successfully");
+    }
 }

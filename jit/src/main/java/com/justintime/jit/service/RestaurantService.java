@@ -10,12 +10,12 @@ public interface RestaurantService {
     Restaurant addRestaurant(Restaurant restaurant);
     List<Restaurant> getAllRestaurants();
     Restaurant getRestaurantById(Long id);
-    void updateRestaurant(String code, Restaurant restaurant);
-    void deleteRestaurant(String restaurantCode);
-    Restaurant getRestaurantByRestaurantCode(String restaurantCode);
-    RestaurantDTO getRestaurantDTOByRestaurantCode(String restaurantCode);
-    String getUpiIdByRestaurantCode(String restaurantCode);
-    void patchUpdateRestaurant(String restaurantCode, RestaurantDTO dto, HashSet<String> propertiesToBeUpdated);
+    void updateRestaurant(Restaurant restaurant);
+    void deleteRestaurant();
+    Restaurant getRestaurantByRestaurantCode();
+    RestaurantDTO getRestaurantDTOByRestaurantCode();
+    String getUpiIdByRestaurantCode();
+    void patchUpdateRestaurant(RestaurantDTO dto, HashSet<String> propertiesToBeUpdated);
 
 //    List<String> findSimilarNames(String name);
 //

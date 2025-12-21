@@ -91,4 +91,8 @@ public class OrderItem extends BaseEntity {
                 }
             }
         }
+
+        public long getPreparationTime() {
+            return menuItem.getPreparationTime();
+        }
 }

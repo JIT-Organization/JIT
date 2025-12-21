@@ -43,6 +43,13 @@ export const handleMutate = async (queryClient, queryKey, id, fields, checkColum
 
   const previousData = queryClient.getQueryData(queryKey);
 
+  const isCompositeKey = typeof id === 'object' && id !== null && !Array.isArray(id);
+
+  const rowMatchesCompositeKey = (row) => {
+    if (!isCompositeKey) return false;
+    return Object.keys(id).every((key) => row[key] === id[key]);
+  };
+
   queryClient.setQueryData(queryKey, (oldData) => {
     if (!oldData) return oldData;
 
@@ -50,7 +57,15 @@ export const handleMutate = async (queryClient, queryKey, id, fields, checkColum
       case "create":
         return [fields, ...oldData];
       case "update":
-        return oldData.map((row) => row[checkColumn] === id ? { ...row, ...fields } : row)
+        if (isCompositeKey) {
+          return oldData.map((row) =>
+            rowMatchesCompositeKey(row) ? { ...row, ...fields } : row
+          );
+        } else {
+          return oldData.map((row) =>
+            row[checkColumn] === id ? { ...row, ...fields } : row
+          );
+        }
       case "delete":
         return oldData.filter((row) => row[checkColumn] !== id);
       default:

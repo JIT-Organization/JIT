@@ -15,15 +15,15 @@ public interface UserService extends BaseService<User, Long>, UserDetailsService
     List<User> findByRole(Role role);
     User findByEmail(String email);
     List<User> findByUserName(String username);
-    List<String> getCookNamesByRestaurantCode(String restaurantCode);
+    List<String> getCookNamesByRestaurantCode();
     void delete(Long id);
     void update(Long id, User user);
 
-    List<UserDTO> getUsersByRestaurantCode(String restaurantCode);
+    List<UserDTO> getUsersByRestaurantCode();
 
-    User getUserByRestaurantCodeAndUsername(String restaurantCode, String username);
+    User getUserByRestaurantCodeAndUsername(String username);
 
-    UserDTO patchUpdateUser(String restaurantCode, String username, UserDTO dto, HashSet<String> propertiesToBeUpdated);
+    UserDTO patchUpdateUser(String username, UserDTO dto, HashSet<String> propertiesToBeUpdated);
 
     UserDTO addOrUpdatePermissions(String email, List<PermissionsDTO> permissionsDTOS, boolean isEdit) throws AccessDeniedException;
 

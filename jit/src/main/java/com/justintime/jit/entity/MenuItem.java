@@ -1,5 +1,6 @@
 package com.justintime.jit.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.justintime.jit.entity.ComboEntities.Combo;
 import com.justintime.jit.entity.ComboEntities.ComboItem;
 import com.justintime.jit.entity.Enums.FoodType;
@@ -30,6 +31,7 @@ public class MenuItem extends BaseEntity implements FilterableItem {
 
     @ManyToOne
     @JoinColumn(name = "restaurant_id")
+    @JsonManagedReference
     private Restaurant restaurant;
 
     @ManyToMany(cascade = CascadeType.ALL)

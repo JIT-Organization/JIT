@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/jit-api/combos")
+@RequestMapping("/combos")
 public class ComboController {
 
     @Autowired

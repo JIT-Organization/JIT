@@ -12,6 +12,14 @@ const nextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: '/jit-api/:path*',
+        destination: `${process.env.BASE_URL}/jit-api/:path*`,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

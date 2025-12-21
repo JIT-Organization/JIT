@@ -1,5 +1,6 @@
 package com.justintime.jit.controller;
 
+import com.justintime.jit.dto.ApiResponse;
 import com.justintime.jit.dto.MenuItemDTO;
 import com.justintime.jit.dto.OrderItemDTO;
 import com.justintime.jit.dto.PatchRequest;
@@ -7,12 +8,13 @@ import com.justintime.jit.entity.OrderEntities.OrderItem;
 import com.justintime.jit.service.OrderItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/jit-api/OrderItems")
+@RequestMapping("/orderItems")
 public class OrderItemController {
 
     @Autowired
@@ -28,9 +30,9 @@ public class OrderItemController {
         return orderItemService.getOrderItemsByRestaurantCodeAndOrderNumber(restaurantCode,orderNumber);
     }
 
-    @PutMapping("/{restaurantCode}")
-    public OrderItemDTO updateOrderItem(@PathVariable String restaurantCode, @RequestBody OrderItemDTO orderItemDTO) {
-        return orderItemService.updateOrderItem(restaurantCode, orderItemDTO);
+    @PutMapping
+    public OrderItemDTO updateOrderItem(@RequestBody OrderItemDTO orderItemDTO) {
+        return orderItemService.updateOrderItem(orderItemDTO);
     }
 
     @PatchMapping("/{restaurantCode}")

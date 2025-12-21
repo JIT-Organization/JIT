@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.justintime.jit.dto.ApiResponse;
 import com.justintime.jit.dto.LoginRequestDto;
 import com.justintime.jit.dto.UserDTO;
-import com.justintime.jit.service.RefreshTokenService;
 import com.justintime.jit.service.UserAuthService;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,9 +20,6 @@ public class AuthController extends BaseController {
 
     @Autowired
     private UserAuthService userAuthService;
-
-    @Autowired
-    private RefreshTokenService refreshTokenService;
 
     @PostMapping("register")
     public void register(@Nullable @RequestParam String token, @RequestBody UserDTO user) {

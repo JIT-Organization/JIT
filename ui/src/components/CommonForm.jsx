@@ -8,7 +8,7 @@ import ImageUploader from "./ImageUploader";
 import TimeIntervalSetInput from "@/components/TimeIntervalSetInput";
 import { DateTimePicker } from "@/components/customUIComponents/CustomeDateTimePicker";
 
-const renderField = (fieldConfig, formField, form) => {
+const renderField = (fieldConfig, formField, formRef) => {
   switch (fieldConfig.type) {
     case "input":
       return (
@@ -37,6 +37,7 @@ const renderField = (fieldConfig, formField, form) => {
           placeholder={fieldConfig.placeholder}
           showAllOption={fieldConfig.showAllOption}
           disabled={fieldConfig.disabled}
+          containerRef={formRef}
         />
       );
     case "toggleGroup":
@@ -80,7 +81,7 @@ const renderField = (fieldConfig, formField, form) => {
           onChange={formField.onChange}
         />
       );
-                  case "select":
+    case "select":
       return (
         <select
           className={fieldConfig.inputClassName || "input flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"}
@@ -98,27 +99,29 @@ const renderField = (fieldConfig, formField, form) => {
   }
 };
 
-const CommonForm = ({ form, formFields }) => (
+const CommonForm = ({ form, formFields, formRef }) => (
   <Form {...form}>
-    {formFields.map((fieldConfig) => (
-      !fieldConfig.hidden && (
-        <FormField
-          key={fieldConfig.name}
-          control={form.control}
-          name={fieldConfig.name}
-          rules={fieldConfig.rules}
-          render={({ field }) => (
-            <FormItem className={`mb-4 mr-4 ${fieldConfig.fieldCol ?? "col-span-12"}`}>
+    <form ref={formRef}>
+      {formFields.map((fieldConfig) => (
+        !fieldConfig.hidden && (
+          <FormField
+            key={fieldConfig.name}
+            control={form.control}
+            name={fieldConfig.name}
+            rules={fieldConfig.rules}
+            render={({ field }) => (
+              <FormItem className={`mb-4 mr-4 ${fieldConfig.fieldCol ?? "col-span-12"}`}>
                 <FormLabel className={`${fieldConfig.labelCol ?? "col-span-3"}`}>{fieldConfig.label}</FormLabel>
                 <FormControl className={`${fieldConfig.controlCol ?? "col-span-9"} w-full`}>
-                  {renderField(fieldConfig, field, form)}
+                  {renderField(fieldConfig, field, formRef)}
                 </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      )
-    ))}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )
+      ))}
+    </form>
   </Form>
 );
 

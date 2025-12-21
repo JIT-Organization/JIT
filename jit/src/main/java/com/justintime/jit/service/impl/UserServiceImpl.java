@@ -18,6 +18,7 @@ import com.justintime.jit.util.CommonServiceImplUtil;
 import com.justintime.jit.util.mapper.GenericMapper;
 import com.justintime.jit.util.mapper.MapperFactory;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
@@ -74,7 +75,8 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
     }
 
     @Override
-    public List<String> getCookNamesByRestaurantCode(String restaurantCode) {
+    public List<String> getCookNamesByRestaurantCode() {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         return userRepository.findUserNamesByRestaurantCodeAndRole(restaurantCode, Role.COOK);
     }
 
@@ -104,23 +106,27 @@ public class UserServiceImpl extends BaseServiceImpl<User, Long> implements User
     }
 
     @Override
-    public List<UserDTO> getUsersByRestaurantCode(String restaurantCode) {
+    public List<UserDTO> getUsersByRestaurantCode() {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         List<User> users = userRepository.findAllByRestaurantCode(restaurantCode);
         return users.stream().map(user -> {
             Set<String> permissionsCodes = user.getPermissions().stream().map(Permissions::getPermissionCode).collect(Collectors.toSet());
             UserDTO userDTO = userMapper.toDto(user);
             userDTO.setPermissionCodes(permissionsCodes);
+            userDTO.setIsRegistrationCompleted(StringUtils.isNotEmpty(user.getPasswordHash()));
             return userDTO;
         }).toList();
     }
 
     @Override
-    public User getUserByRestaurantCodeAndUsername(String restaurantCode, String username) {
+    public User getUserByRestaurantCodeAndUsername(String username) {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         return userRepository.findByRestaurantCodeAndUserName(restaurantCode, username);
     }
 
     @Override
-    public UserDTO patchUpdateUser(String restaurantCode, String username, UserDTO dto, HashSet<String> propertiesToBeUpdated) {
+    public UserDTO patchUpdateUser(String username, UserDTO dto, HashSet<String> propertiesToBeUpdated) {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
         User existingUser = userRepository.findByRestaurantCodeAndUserName(restaurantCode, username);
         User patchedUser = userMapper.toEntity(dto);
         // TODO write a validation where the username should be unique if they are updating it

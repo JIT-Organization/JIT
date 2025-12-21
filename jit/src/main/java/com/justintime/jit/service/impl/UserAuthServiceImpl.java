@@ -28,6 +28,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -63,10 +64,20 @@ public class UserAuthServiceImpl extends BaseServiceImpl<User, Long> implements 
 
     private final UserInvitationRepository userInvitationRepository;
 
+    private final boolean isSecure;
+
+    private final String sameSite;
+
     @SuppressFBWarnings(value = "EI2", justification = "User Auth Service Impl is a Spring-managed bean and is not exposed.")
     public UserAuthServiceImpl(PasswordEncoder passwordEncoder, JwtService jwtService,
                                RefreshTokenService refreshTokenService,
-                               AuthenticationManager authenticationManager, UserRepository userRepository, PermissionsService permissionsService, RestaurantRepository restaurantRepository, UserInvitationRepository userInvitationRepository) {
+                               AuthenticationManager authenticationManager,
+                               UserRepository userRepository,
+                               PermissionsService permissionsService,
+                               RestaurantRepository restaurantRepository,
+                               UserInvitationRepository userInvitationRepository,
+                               @Value("${cookies.secure:true}") boolean isSecure,
+                               @Value("${cookies.same-site:None}") String sameSite) {
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
@@ -75,6 +86,8 @@ public class UserAuthServiceImpl extends BaseServiceImpl<User, Long> implements 
         this.permissionsService = permissionsService;
         this.restaurantRepository = restaurantRepository;
         this.userInvitationRepository = userInvitationRepository;
+        this.isSecure = isSecure;
+        this.sameSite = sameSite;
     }
 
     @Override
@@ -118,27 +131,27 @@ public class UserAuthServiceImpl extends BaseServiceImpl<User, Long> implements 
                 String permissions = Base64.getEncoder().encodeToString(objectMapper.writeValueAsString(permissionsDTOList.stream().map(PermissionsDTO::getPermissionCode).collect(Collectors.toSet())).getBytes(StandardCharsets.UTF_8));
                 ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
                         .httpOnly(true)
-//                        .secure(true)
+                        .secure(isSecure)
                         .path("/")
                         .maxAge(12 * 60 * 60)
-                        .sameSite("Strict")
+                        .sameSite(sameSite)
                         .build();
                 ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
                         .httpOnly(true)
-//                        .secure(true)
+                        .secure(isSecure)
                         .path("/")
                         .maxAge(15 * 60)
-                        .sameSite("Strict")
+                        .sameSite(sameSite)
                         .build();
                 ResponseCookie resCodesCookie = ResponseCookie.from("resCodes", restaurantCodes)
                         .path("/")
-//                        .secure(true)
-                        .sameSite("Strict")
+                        .secure(isSecure)
+                        .sameSite(sameSite)
                         .build();
                 ResponseCookie permissionsCookie = ResponseCookie.from("permissions", permissions)
                         .path("/")
-//                        .secure(true)
-                        .sameSite("Strict")
+                        .secure(isSecure)
+                        .sameSite(sameSite)
                         .build();
                 response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
                 response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());

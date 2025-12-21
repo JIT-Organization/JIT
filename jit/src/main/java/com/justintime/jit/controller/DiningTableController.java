@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/jit-api/tables")
+@RequestMapping("/tables")
 public class DiningTableController extends BaseController {
     @Autowired
     private DiningTableService diningTableService;

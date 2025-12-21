@@ -1,0 +1,36 @@
+package com.justintime.jit.exception;
+
+import com.justintime.jit.validators.ValidationError;
+import lombok.Getter;
+
+import java.util.List;
+
+import java.util.Collections;
+
+@Getter
+public class ValidationException extends RuntimeException {
+
+    private final List<ValidationError> errors;
+
+    public ValidationException(List<ValidationError> errors) {
+        super(buildMessage(errors));
+        this.errors = errors != null ? List.copyOf(errors) : Collections.emptyList();
+    }
+
+    private static String buildMessage(List<ValidationError> errors) {
+        if (errors == null || errors.isEmpty()) {
+            return "Validation failed with no error details.";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for (ValidationError error : errors) {
+            sb.append(error.message());
+            if(errors.size() > 1) {
+                sb.append(",");
+            }
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+}

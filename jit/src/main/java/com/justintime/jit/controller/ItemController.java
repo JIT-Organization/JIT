@@ -12,73 +12,66 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/jit-api/items")
+@RequestMapping("/items")
 public class ItemController extends BaseController{
 
     @Autowired
     private ItemService itemService;
 
-    @GetMapping("/{restaurantCode}")
+    @GetMapping
     public ResponseEntity<ApiResponse<List<ItemDTO>>> getItemsByRestaurantAndFoodType(
-            @PathVariable String restaurantCode,
             @RequestParam(required = false) FoodType foodType) {
         if (foodType != null) {
-            return success(itemService.getAllItemsForRestaurantAndFoodType(restaurantCode, foodType));
+            return success(itemService.getAllItemsForRestaurantAndFoodType(foodType));
         } else {
-            return success(itemService.getAllItemsForRestaurant(restaurantCode));
+            return success(itemService.getAllItemsForRestaurant());
         }
     }
 
-    @GetMapping("/getItemNames/{restaurantCode}")
+    @GetMapping("/getItemNames")
     public ResponseEntity<ApiResponse<List<String>>> getItemNamesByRestaurantAndFoodType(
-            @PathVariable String restaurantCode,
             @RequestParam(required = false) FoodType foodType) {
         if (foodType != null) {
-            return success(itemService.getAllItemNamesForRestaurantAndFoodType(restaurantCode, foodType));
+            return success(itemService.getAllItemNamesForRestaurantAndFoodType(foodType));
         } else {
-            return success(itemService.getAllItemNamesForRestaurant(restaurantCode));
+            return success(itemService.getAllItemNamesForRestaurant());
         }
     }
 
-    @GetMapping("/{restaurantCode}/{itemName}")
+    @GetMapping("/{itemName}")
     public ResponseEntity<ApiResponse<ItemDTO>> getItemByRestaurantAndName(
-            @PathVariable String restaurantCode,
             @PathVariable String itemName,
             @RequestParam FoodType foodType) {
-        return success(itemService.getItemByRestaurantAndNameAndFoodType(restaurantCode, itemName, foodType));
+        return success(itemService.getItemByRestaurantAndNameAndFoodType(itemName, foodType));
     }
-    @PostMapping("/{restaurantCode}")
+    @PostMapping("")
     public ResponseEntity<ApiResponse<ItemDTO>> createItem(
-            @PathVariable String restaurantCode,
             @RequestParam FoodType foodType,
             @RequestBody ItemDTO itemDTO) {
-        return success(itemService.createItem(restaurantCode, foodType, itemDTO));
+        return success(itemService.createItem(foodType, itemDTO));
     }
 
-    @PutMapping("/{restaurantCode}/{itemName}")
+    @PutMapping("/{itemName}")
     public ResponseEntity<ApiResponse<ItemDTO>> updateItem(
-            @PathVariable String restaurantCode,
             @PathVariable String itemName,
             @RequestParam FoodType foodType,
             @RequestBody ItemDTO itemDTO) {
-        return success(itemService.updateItem(restaurantCode, itemName, foodType, itemDTO));
+        return success(itemService.updateItem(itemName, foodType, itemDTO));
     }
 
-    @PatchMapping("/{restaurantCode}/{itemName}")
+    @PatchMapping("/{itemName}")
     public ResponseEntity<ApiResponse<ItemDTO>> patchItem(
-            @PathVariable String restaurantCode,
             @PathVariable String itemName,
             @RequestParam FoodType foodType,
             @RequestBody PatchRequest<ItemDTO> payload) {
-        return success(itemService.patchItem(restaurantCode, itemName, foodType, payload.getDto(), payload.getPropertiesToBeUpdated()));
+        return success(itemService.patchItem(itemName, foodType, payload.getDto(), payload.getPropertiesToBeUpdated()));
     }
 
-    @DeleteMapping("/{restaurantCode}/{itemName}")
+    @DeleteMapping("/{itemName}")
     public void deleteItem(
-            @PathVariable String restaurantCode,
             @PathVariable String itemName,
             @RequestParam FoodType foodType) {
-        itemService.deleteItem(restaurantCode, itemName, foodType);
+        itemService.deleteItem(itemName, foodType);
     }
 
 

@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/jit-api/addons")
+@RequestMapping("/addons")
 public class AddOnController extends BaseController{
 
     @Autowired
@@ -21,48 +21,47 @@ public class AddOnController extends BaseController{
     @Autowired
     private JwtService jwtService;
 
-    @GetMapping("/{restaurantCode}")
-    public ResponseEntity<ApiResponse<List<AddOnDTO>>> getAddOnsForRestaurant(@PathVariable String restaurantCode) {
-        return success(addOnService.getAllAddOnsForRestaurant(restaurantCode));
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<AddOnDTO>>> getAddOnsForRestaurant() {
+        return success(addOnService.getAllAddOnsForRestaurant());
     }
 
-    @GetMapping("/{restaurantCode}/{menuItemName}")
-    public ResponseEntity<ApiResponse<List<AddOnDTO>>> getAddOnsForMenuItem(@PathVariable String restaurantCode, @PathVariable String menuItemName) {
-        return success(addOnService.getAllAddOnsForMenuItem(restaurantCode, menuItemName));
+    @GetMapping("/{menuItemName}")
+    public ResponseEntity<ApiResponse<List<AddOnDTO>>> getAddOnsForMenuItem(@PathVariable String menuItemName) {
+        return success(addOnService.getAllAddOnsForMenuItem(menuItemName));
     }
 
-    @GetMapping("/{restaurantCode}/combo/{comboName}")
-    public ResponseEntity<ApiResponse<List<AddOnDTO>>> getAddOnsForCombo(@PathVariable String restaurantCode, @PathVariable String comboName) {
-        return success(addOnService.getAllAddOnsForCombo(restaurantCode, comboName));
+    @GetMapping("/combo/{comboName}")
+    public ResponseEntity<ApiResponse<List<AddOnDTO>>> getAddOnsForCombo(@PathVariable String comboName) {
+        return success(addOnService.getAllAddOnsForCombo(comboName));
     }
 
-    @GetMapping("/{restaurantCode}/order/{orderNumber}/item/{orderItemName}")
+    @GetMapping("/order/{orderNumber}/item/{orderItemName}")
     public ResponseEntity<ApiResponse<List<AddOnDTO>>> getAddOnsForOrderItem(
-            @PathVariable String restaurantCode,
             @PathVariable String orderNumber,
             @PathVariable String orderItemName) {
-        return success(addOnService.getAllAddOnsForOrderItem(restaurantCode, orderNumber, orderItemName));
+        return success(addOnService.getAllAddOnsForOrderItem(orderNumber, orderItemName));
     }
 
-    @PostMapping("/{restaurantCode}")
-    public ResponseEntity<ApiResponse<Void>> createAddOn(@PathVariable String restaurantCode, @RequestBody AddOnDTO addOnDTO) {
-        addOnService.createAddOn(restaurantCode, addOnDTO);
+    @PostMapping
+    public ResponseEntity<ApiResponse<Void>> createAddOn(@RequestBody AddOnDTO addOnDTO) {
+        addOnService.createAddOn(addOnDTO);
         return success(null, "Add-On created successfully");
     }
 
-    @PutMapping("/{restaurantCode}")
-    public ResponseEntity<ApiResponse<AddOnDTO>> updateAddOn(@PathVariable String restaurantCode, @RequestBody AddOnDTO addOnDTO) {
-        return success(addOnService.updateAddOn(restaurantCode, addOnDTO), "Add-On updated successfully");
+    @PutMapping
+    public ResponseEntity<ApiResponse<AddOnDTO>> updateAddOn(@RequestBody AddOnDTO addOnDTO) {
+        return success(addOnService.updateAddOn(addOnDTO), "Add-On updated successfully");
     }
 
-    @PatchMapping("/{restaurantCode}")
-    public ResponseEntity<ApiResponse<AddOnDTO>> patchUpdateAddOn(@PathVariable String restaurantCode, @RequestBody PatchRequest<AddOnDTO> payload) {
-        return success(addOnService.patchAddOn(restaurantCode, payload.getDto(), payload.getPropertiesToBeUpdated()));
+    @PatchMapping
+    public ResponseEntity<ApiResponse<AddOnDTO>> patchUpdateAddOn(@RequestBody PatchRequest<AddOnDTO> payload) {
+        return success(addOnService.patchAddOn(payload.getDto(), payload.getPropertiesToBeUpdated()));
     }
 
-    @DeleteMapping("/{restaurantCode}/{label}")
-    public ResponseEntity<ApiResponse<Void>> deleteAddOn(@PathVariable String restaurantCode, @PathVariable String label) {
-        addOnService.deleteAddOn(restaurantCode, label);
+    @DeleteMapping("/{label}")
+    public ResponseEntity<ApiResponse<Void>> deleteAddOn(@PathVariable String label) {
+        addOnService.deleteAddOn(label);
         return success(null, "Add-On deleted successfully");
     }
 

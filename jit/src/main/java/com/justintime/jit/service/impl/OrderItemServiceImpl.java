@@ -26,6 +26,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -96,26 +98,29 @@ public class OrderItemServiceImpl extends BaseServiceImpl<OrderItem,Long> implem
             commonServiceImplUtil.copySelectedProperties(patchedItem, existingItem, payload.getPropertiesToBeUpdated());
             existingItem.setUpdatedDttm(LocalDateTime.now());
             OrderItem orderItem = orderItemRepository.save(existingItem);
-            if(payload.getPropertiesToBeUpdated().contains("status")) notificationService.notifyOrderItemStatusUpdate(orderItem);
+//            if(payload.getPropertiesToBeUpdated().contains("orderItemStatus")) notificationService.notifyOrderItemStatusUpdate(orderItem);
             return mapToDTO(orderItem, orderItemMapper);
     }
 
-     public OrderItemDTO updateOrderItem(String restaurantCode, OrderItemDTO orderItemDTO){
+     @Transactional(propagation = Propagation.REQUIRES_NEW)
+     public OrderItemDTO updateOrderItem(OrderItemDTO orderItemDTO) {
+         String restaurantCode = getRestaurantCodeFromJWTBean();
          OrderItem existingItem = orderItemRepository.findByRestaurantCodeAndItemNameAndOrderNumber(restaurantCode,orderItemDTO.getItemName(), orderItemDTO.getOrderNumber());
          GenericMapper<OrderItem, OrderItemDTO> orderItemMapper = MapperFactory.getMapper(OrderItem.class, OrderItemDTO.class);
          OrderItem patchedOrderItem = orderItemMapper.toEntity(orderItemDTO);
          MenuItem menuItem= menuItemRepository.findByRestaurantCodeAndMenuItemName(restaurantCode,orderItemDTO.getItemName());
          patchedOrderItem.setMenuItem(menuItem);
-         if(orderItemDTO.getOrderNumber().isEmpty()) {
-             Order order=orderRepository.findByOrderNumber(orderItemDTO.getOrderNumber())
+         if(StringUtils.isNotEmpty(orderItemDTO.getOrderNumber())) {
+             Order order = orderRepository.findByOrderNumber(orderItemDTO.getOrderNumber())
                      .orElseThrow(() -> new ResourceNotFoundException("Order not found with number: " + orderItemDTO.getOrderNumber()));
              patchedOrderItem.setOrder(order);
          }
          //resolveRelationships(patchedItem, menuItemDTO, new HashSet<>(), false);
          BeanUtils.copyProperties(patchedOrderItem, existingItem, "id", "createdDttm");
          existingItem.setUpdatedDttm(LocalDateTime.now());
-        orderItemRepository.save(existingItem);
-        return  orderItemDTO;
+         orderItemRepository.save(existingItem);
+//         if(!previousStatus.equals(currentStatus)) notificationService.notifyOrderItemStatusUpdate(existingItem);
+         return orderItemDTO;
      }
 
     public void saveOrderItem(String restaurantCode,OrderItemDTO orderItemDTO) {
@@ -143,6 +148,18 @@ public class OrderItemServiceImpl extends BaseServiceImpl<OrderItem,Long> implem
              orderItemDTOs.add(mapToDTO(orderItem, orderItemMapper));
          }
          return orderItemDTOs;
+    }
+
+    @Override
+    public List<OrderItemDTO> getOrderItemsForRestaurant() {
+        String restaurantCode = getRestaurantCodeFromJWTBean();
+        List<OrderItemStatus> orderItemStatuses = List.of(OrderItemStatus.UNASSIGNED, OrderItemStatus.ASSIGNED, OrderItemStatus.STARTED, OrderItemStatus.READY_TO_SERVE);
+        List<OrderItem> orderItems = orderItemRepository.findByOrder_Restaurant_RestaurantCodeAndOrderItemStatusIn(restaurantCode, orderItemStatuses);
+        List<OrderItemDTO> orderItemDTOs = new ArrayList<>();
+        for(OrderItem orderItem : orderItems) {
+            orderItemDTOs.add(mapToDTO(orderItem, orderItemMapper));
+        }
+        return orderItemDTOs;
     }
 
     private OrderItemDTO mapToDTO(OrderItem orderItem, GenericMapper<OrderItem, OrderItemDTO> mapper) {
@@ -185,6 +202,11 @@ public class OrderItemServiceImpl extends BaseServiceImpl<OrderItem,Long> implem
             }
             dto.setOrderItemStatus(OrderItemStatus.UNASSIGNED); // Set the initial status as unassigned
         }
+        Map<User, List<OrderItem>> pendingOrderItems =
+                orderItemRepository.findAssignedAndStartedItemsByRestaurantCode(restaurantCode)
+                        .stream()
+                        .collect(Collectors.groupingBy(OrderItem::getCook));
+        Map<User, Long> cookWaitTime = calculateCookAvailabilityTime(pendingOrderItems);
 
         Map<String, Combo> comboMap = comboRepository
                 .findByComboNamesAndRestaurantCode(comboItemNames, restaurantCode)
@@ -196,12 +218,12 @@ public class OrderItemServiceImpl extends BaseServiceImpl<OrderItem,Long> implem
                 .stream()
                 .collect(Collectors.toMap(MenuItem::getMenuItemName, Function.identity()));
 
-        List<OrderItem> orderItems = buildOrderItemEntities(orderItemDTOList, comboMap, menuItemMap, savedOrder, restaurantCode);
+        List<OrderItem> orderItems = buildOrderItemEntities(orderItemDTOList, comboMap, menuItemMap, savedOrder, cookWaitTime);
         orderItemRepository.saveAll(orderItems);
         return orderItems;
     }
 
-    private List<OrderItem> buildOrderItemEntities(List<OrderItemDTO> orderItemDTOList, Map<String, Combo> comboMap, Map<String, MenuItem> menuItemMap, Order savedOrder, String restaurantCode) {
+    private List<OrderItem> buildOrderItemEntities(List<OrderItemDTO> orderItemDTOList, Map<String, Combo> comboMap, Map<String, MenuItem> menuItemMap, Order savedOrder, Map<User, Long> cookWaitTime) {
         List<OrderItem> allOrderItems = new ArrayList<>();
         boolean isCookAssignmentManual = StringUtils.equals(businessConfigurationService.getConfigValue(savedOrder.getRestaurant().getRestaurantCode(), ConfigurationName.MANUAL_COOK_ASSIGNMENT), "Y");
         for (OrderItemDTO dto : orderItemDTOList) {
@@ -213,14 +235,14 @@ public class OrderItemServiceImpl extends BaseServiceImpl<OrderItem,Long> implem
                 item.setCombo(combo);
                 List<OrderItem> subItems = getOrderItemForEachMenuItemInCombo(item);
                 subItems.forEach(subItem -> {
-                    if(!isCookAssignmentManual) setMaxTimeLimitAndAssignCook(subItem, restaurantCode);
+                    if(!isCookAssignmentManual) setMaxTimeLimitAndAssignCook(subItem, cookWaitTime);
                 });
                 allOrderItems.addAll(subItems);
             } else {
                 MenuItem menuItem = menuItemMap.get(dto.getItemName());
 //                if (menuItem == null) throw new IllegalArgumentException("Invalid menu item: " + dto.getItemName());
                 item.setMenuItem(menuItem);
-                if(!isCookAssignmentManual) setMaxTimeLimitAndAssignCook(item, restaurantCode);
+                if(!isCookAssignmentManual) setMaxTimeLimitAndAssignCook(item, cookWaitTime);
             }
             if (dto.getAddOns() != null) {
                 Set<AddOn> addOns = dto.getAddOns().stream()
@@ -237,7 +259,7 @@ public class OrderItemServiceImpl extends BaseServiceImpl<OrderItem,Long> implem
      * Calculate and set MaxTimeLimitToStart for a menu item based on cook's availability
      * Also assigns the order item to the most quickly available cook
      */
-    private void setMaxTimeLimitAndAssignCook(OrderItem orderItem, String restaurantCode) {
+    private void setMaxTimeLimitAndAssignCook(OrderItem orderItem, Map<User, Long> cookWaitTime) {
         MenuItem menuItem = orderItem.getMenuItem();
 
         if (menuItem == null || menuItem.getCookSet() == null || menuItem.getCookSet().isEmpty()) {
@@ -249,22 +271,23 @@ public class OrderItemServiceImpl extends BaseServiceImpl<OrderItem,Long> implem
         User mostAvailableCook = null;
         long shortestWaitTime = Long.MAX_VALUE;
 
-        for (User cook : menuItem.getCookSet()) {
-            long waitTime = calculateCookAvailabilityTime(cook, restaurantCode);
-            if (waitTime < shortestWaitTime) {
-                shortestWaitTime = waitTime;
+        for(User cook: menuItem.getCookSet()) {
+            long currentWait = cookWaitTime.getOrDefault(cook, 0L);
+            if (currentWait < shortestWaitTime) {
+                shortestWaitTime = currentWait;
                 mostAvailableCook = cook;
             }
         }
 
-        assignCook(orderItem, mostAvailableCook, shortestWaitTime);
+        assignCook(orderItem, mostAvailableCook, shortestWaitTime, cookWaitTime);
     }
 
-    private void assignCook(OrderItem orderItem, User mostAvailableCook, long shortestWaitTime) {
+    private void assignCook(OrderItem orderItem, User mostAvailableCook, long shortestWaitTime, Map<User, Long> cookWaitTime) {
         if (mostAvailableCook != null) {
             orderItem.setCook(mostAvailableCook);
             orderItem.setMaxTimeLimitToStart(LocalDateTime.now().plusMinutes(shortestWaitTime));
             orderItem.setOrderItemStatus(OrderItemStatus.ASSIGNED);
+            cookWaitTime.put(mostAvailableCook, cookWaitTime.get(mostAvailableCook) + orderItem.getPreparationTime());
         }
     }
 
@@ -287,29 +310,31 @@ public class OrderItemServiceImpl extends BaseServiceImpl<OrderItem,Long> implem
     /**
      * Calculate when a cook will be available based on their current workload
      */
-    private long calculateCookAvailabilityTime(User cook, String restaurantCode) {
-        List<OrderItem> pendingOrderItems = orderItemRepository.findAssignedAndStartedItemsByRestaurantCodeAndCook(restaurantCode, cook.getId());
-        return pendingOrderItems.stream()
-                .mapToInt(orderItem -> {
-                    int itemPrepTime = 0;
-                    int comboPrepTime = 0;
+    private Map<User, Long> calculateCookAvailabilityTime(Map<User, List<OrderItem>> pendingOrderItems) {
 
-                    MenuItem menuItem = orderItem.getMenuItem();
-                    if (menuItem != null && menuItem.getPreparationTime() != null) {
-                        itemPrepTime = menuItem.getPreparationTime();
-                    }
+        Map<User, Long> cookWaitTime = new HashMap<>();
 
-                    Combo combo = orderItem.getCombo();
-                    if (combo != null && combo.getComboItemSet() != null) {
-                        comboPrepTime = combo.getComboItemSet().stream()
+        pendingOrderItems.forEach((cook, items) -> {
+            long total = items.stream()
+                    .mapToInt(item -> {
+                        int menuTime = item.getMenuItem() != null && item.getMenuItem().getPreparationTime() != null
+                                ? item.getMenuItem().getPreparationTime()
+                                : 0;
+
+                        int comboTime = item.getCombo() != null
+                                ? item.getCombo().getComboItemSet().stream()
                                 .map(ComboItem::getMenuItem)
                                 .filter(Objects::nonNull)
                                 .mapToInt(mi -> mi.getPreparationTime() != null ? mi.getPreparationTime() : 0)
-                                .sum();
-                    }
+                                .sum()
+                                : 0;
 
-                    return itemPrepTime + comboPrepTime;
-                })
-                .sum();
+                        return menuTime + comboTime;
+                    })
+                    .sum();
+            cookWaitTime.put(cook, total);
+        });
+
+        return cookWaitTime;
     }
 }

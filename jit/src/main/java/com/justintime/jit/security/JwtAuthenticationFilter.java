@@ -1,5 +1,6 @@
 package com.justintime.jit.security;
 
+import com.justintime.jit.bean.JwtBean;
 import com.justintime.jit.service.JwtService;
 import com.justintime.jit.service.UserService;
 import jakarta.servlet.FilterChain;
@@ -29,39 +30,41 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-//        String authHeader = request.getHeader("Authorization");
         String token = null;
         String email = null;
 
         // Get token from cookie
-        if(request.getCookies() != null) {
-            for(var cookie : request.getCookies()) {
-                if("accessToken".equals(cookie.getName())) {
+        if (request.getCookies() != null) {
+            for (var cookie : request.getCookies()) {
+                if ("accessToken".equals(cookie.getName())) {
                     token = cookie.getValue();
                     break;
                 }
             }
         }
 
-        if(token != null) email = jwtService.extractEmail(token);
+        if (token != null) email = jwtService.extractEmail(token);
 
-//        if(authHeader != null && authHeader.startsWith("Bearer")) {
-//            token = authHeader.substring(7);
-//            email = jwtService.extractEmail(token);
-//        }
-
-        if(email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = context.getBean(UserService.class).loadUserByUsername(email);
             String restaurantCode = (String) jwtService.extractRestaurantCode(token);
-            if(jwtService.validateToken(token, userDetails)) {
+            if (jwtService.validateToken(token, userDetails)) {
                 CustomAuthToken userPassToken =
-                        new CustomAuthToken(restaurantCode, userDetails,null, userDetails.getAuthorities());
+                        new CustomAuthToken(restaurantCode, userDetails, null, userDetails.getAuthorities());
                 userPassToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(userPassToken);
             }
         }
 
+        createJwtBean(token);
+
         filterChain.doFilter(request, response);
+    }
+
+    private void createJwtBean(String token) {
+        if (token != null && SecurityContextHolder.getContext().getAuthentication() != null) {
+            jwtService.createJwtBean(SecurityContextHolder.getContext().getAuthentication(), token);
+        }
     }
 }
 

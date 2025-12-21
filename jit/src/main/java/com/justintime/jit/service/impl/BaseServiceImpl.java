@@ -1,5 +1,6 @@
 package com.justintime.jit.service.impl;
 
+import com.justintime.jit.bean.JwtBean;
 import com.justintime.jit.service.BaseService;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,9 @@ public abstract class BaseServiceImpl<T, ID> implements BaseService<T, ID> {
 
     @Autowired
     private JpaRepository<T, ID> repository;
+
+    @Autowired
+    private JwtBean jwtBean;
 
     @Override
     public T findById(ID id) {
@@ -29,5 +33,13 @@ public abstract class BaseServiceImpl<T, ID> implements BaseService<T, ID> {
     @Override
     public void deleteById(ID id) {
         repository.deleteById(id);
+    }
+
+    protected String getRestaurantCodeFromJWTBean() {
+        return jwtBean.getRestaurantCode();
+    }
+
+    protected String getUsernameFromJWTBean() {
+        return jwtBean.getUsername();
     }
 }

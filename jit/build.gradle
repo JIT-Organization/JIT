@@ -60,26 +60,33 @@ dependencies {
 	implementation 'org.apache.commons:commons-text:1.10.0'
 	implementation 'org.modelmapper:modelmapper:3.1.1'
 
-    //Security
+    // Security
 	implementation("org.springframework.boot:spring-boot-starter-security")
 
-	//JWT
+	// JWT
 	implementation("io.jsonwebtoken:jjwt-api:0.11.5")
 	implementation("io.jsonwebtoken:jjwt-impl:0.11.5")
 	implementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
 
-	//Password Encoder
+	// Password Encoder
 	implementation("org.springframework.security:spring-security-crypto")
 
-	//Bean Validation
+	// Bean Validation
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 
-	//Swagger
+	// Swagger
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
 
-	//WebSocket
+	// WebSocket
 	implementation("org.springframework.boot:spring-boot-starter-websocket:3.5.3")
 	implementation 'org.springframework.security:spring-security-messaging'
+
+	// Annotation Processor
+	compileOnly "com.google.auto.service:auto-service:1.1.1"
+	annotationProcessor "com.google.auto.service:auto-service:1.1.1"
+
+	// Spring Actuator
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 }
 
 dependencyManagement {

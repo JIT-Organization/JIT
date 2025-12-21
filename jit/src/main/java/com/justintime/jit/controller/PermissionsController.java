@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/jit-api/permissions")
+@RequestMapping("/permissions")
 public class PermissionsController extends BaseController {
 
     @Autowired

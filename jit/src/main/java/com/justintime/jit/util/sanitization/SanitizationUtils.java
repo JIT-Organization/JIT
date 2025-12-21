@@ -3,24 +3,15 @@ package com.justintime.jit.util.sanitization;
 import org.apache.commons.text.StringEscapeUtils;
 
 import java.lang.reflect.Field;
-import java.util.Collection;
+import java.util.*;
 
 public class SanitizationUtils {
     public static String sanitizeText(String input) {
         if (input == null) return null;
-
-        // Trim
         String sanitized = input.trim();
-
-        // Remove control characters (non-printable ASCII)
         sanitized = sanitized.replaceAll("\\p{Cntrl}&&[^\n" + "\t]", "");
-
-        // Normalize Unicode (optional: use NFC/NFD forms)
         sanitized = java.text.Normalizer.normalize(sanitized, java.text.Normalizer.Form.NFC);
-
-        // Escape HTML to prevent XSS
         sanitized = StringEscapeUtils.escapeHtml4(sanitized);
-
         return sanitized;
     }
 
@@ -28,11 +19,36 @@ public class SanitizationUtils {
         return str == null || sanitizeText(str).isBlank();
     }
 
+    /**
+     * Public entry point for sanitizing an object.
+     * It creates a tracking set to prevent infinite loops.
+     */
     public static void sanitizeObject(Object obj) {
+        // Use IdentityHashMap to track objects by reference, not .equals()
+        sanitizeObject(obj, Collections.newSetFromMap(new IdentityHashMap<>()));
+    }
+
+    /**
+     * Private worker method that recursively sanitizes and tracks visited objects.
+     */
+    private static void sanitizeObject(Object obj, Set<Object> visited) {
         if (obj == null) return;
 
+        // ** THIS IS THE FIX **
+        // If we have already sanitized this exact object instance, stop.
+        if (visited.contains(obj)) {
+            return;
+        }
+
+        // Add the object to our "seen" list before processing
+        visited.add(obj);
+
         Class<?> clazz = obj.getClass();
-        if (clazz.getName().startsWith("java")) return;
+
+        // Base case for Java libraries and primitives
+        if (clazz.isPrimitive() || clazz.getName().startsWith("java.")) {
+            return;
+        }
 
         for (Field field : clazz.getDeclaredFields()) {
             field.setAccessible(true);
@@ -43,10 +59,12 @@ public class SanitizationUtils {
                     field.set(obj, sanitizeText((String) value));
                 } else if (value instanceof Collection<?> collection) {
                     for (Object item : collection) {
-                        sanitizeObject(item);
+                        // Pass the tracking set down in the recursive call
+                        sanitizeObject(item, visited);
                     }
-                } else if (!field.getType().isPrimitive()) {
-                    sanitizeObject(value);
+                } else {
+                    // Pass the tracking set down in the recursive call
+                    sanitizeObject(value, visited);
                 }
 
             } catch (IllegalAccessException e) {

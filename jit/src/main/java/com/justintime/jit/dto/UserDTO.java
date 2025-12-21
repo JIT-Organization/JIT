@@ -27,6 +27,7 @@ public class UserDTO {
     String shift;
     String profilePictureUrl;
     Set<String> permissionCodes;
+    Boolean isRegistrationCompleted;
 
     // Only for registration
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)

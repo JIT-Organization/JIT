@@ -7,13 +7,13 @@ export const URLS = {
   tablesList: createUrl("/tables"),
   usersList: createUrl("/users"),
   addOns: createUrl("/addons"),
-  register: getBaseUrl() + "/register",
-  login: getBaseUrl() + "/login",
-  refresh: getBaseUrl() + "/refresh",
+  register: createUrl("/register"),
+  login: createUrl("/login"),
+  refresh: createUrl("/refresh"),
   sendInvite: createUrl("/users/send-invite"),
   permissions: createUrl("/permissions")
 };
 
 export function getBaseUrl() {
-  return process.env.API_BASE_URL || 'http://localhost:8080'
+  return process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8080'
 }

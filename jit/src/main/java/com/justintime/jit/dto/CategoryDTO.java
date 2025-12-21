@@ -1,7 +1,5 @@
 package com.justintime.jit.dto;
 
-import com.justintime.jit.entity.ComboEntities.Combo;
-import com.justintime.jit.entity.MenuItem;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

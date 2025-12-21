@@ -23,7 +23,7 @@ import MultiSelect from "./customUIComponents/MultiSelect";
 import { X } from "lucide-react";
 import { Switch } from "./ui/switch";
 import { AddOnSingleInput } from "./AddOnInput";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getPermisisonsForRole } from "@/lib/api/api";
 import { useQuery } from "@tanstack/react-query";
 import { checkPermission } from "@/lib/utils/checkPerimission";
@@ -216,6 +216,7 @@ export default function DialogForm({ type, data, onSubmit, selectOptions, isLoad
                 value={props.value || []}
                 onChange={props.onChange}
                 placeholder="Select restaurants"
+                {...props}
               />
               <div className="flex flex-wrap gap-2 mt-2 bg-gray-600/20 p-6 overflow-auto h-20">
                 {(props.value || []).map((val) => {
@@ -257,6 +258,7 @@ export default function DialogForm({ type, data, onSubmit, selectOptions, isLoad
                 value={props.value || []}
                 onChange={props.onChange}
                 placeholder="Select permissions"
+                {...props}
                 disabled={!addPermissions}
               />
               <div className="flex flex-wrap gap-2 mt-2 bg-gray-600/20 p-6 overflow-auto h-20">
@@ -308,6 +310,7 @@ export default function DialogForm({ type, data, onSubmit, selectOptions, isLoad
                 value={props.value || []}
                 onChange={props.onChange}
                 placeholder="Select foods"
+                {...props}
               />
               <div className="flex flex-wrap gap-2 mt-2 bg-gray-600/20 p-6 overflow-auto h-20">
                 {(props.value || []).map((val) => {
@@ -409,6 +412,7 @@ export default function DialogForm({ type, data, onSubmit, selectOptions, isLoad
     defaultValues: data || getDefaultValues(type),
     mode: "onBlur",
   });
+  const formRef = useRef(null);
   const role = form.watch("role");
   const { data: permissionOptions = [] } = useQuery(getPermisisonsForRole(role));
 
@@ -424,6 +428,7 @@ export default function DialogForm({ type, data, onSubmit, selectOptions, isLoad
     return (
       <Form {...form}>
         <form
+          ref={formRef}
           onSubmit={form.handleSubmit(handleSubmit)}
           className="space-y-4"
         >
@@ -452,7 +457,7 @@ export default function DialogForm({ type, data, onSubmit, selectOptions, isLoad
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4" ref={formRef}>
           <div
             className={`grid gap-6 ${(fieldConfig?.[type]?.length || 0) > 6
                 ? "grid-cols-1 sm:grid-cols-2"
@@ -473,7 +478,7 @@ export default function DialogForm({ type, data, onSubmit, selectOptions, isLoad
                           {field.label}
                         </FormLabel>
                         <FormControl className="sm:col-span-2">
-                          {field.render(formField)}
+                          {field.render({...formField, containerRef: formRef})}
                         </FormControl>
                       </div>
                       <FormMessage />
@@ -492,7 +497,6 @@ export default function DialogForm({ type, data, onSubmit, selectOptions, isLoad
             <DialogClose asChild>
               <Button type="submit" disabled={isLoading}>
                 {isEdit ? "Submit" : "Add"}
-                {isLoading ? "Saving..." : "Save"}
               </Button>
             </DialogClose>
           </div>

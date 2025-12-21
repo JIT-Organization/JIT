@@ -8,13 +8,13 @@ import java.util.List;
 import java.util.Set;
 
 public interface ItemService {
-    List<ItemDTO> getAllItemsForRestaurant(String restaurantCode);
-    List<String> getAllItemNamesForRestaurant(String restaurantCode);
-    List<String> getAllItemNamesForRestaurantAndFoodType(String restaurantCode, FoodType foodType);
-    List<ItemDTO> getAllItemsForRestaurantAndFoodType(String restaurantCode, FoodType foodType);
-    ItemDTO getItemByRestaurantAndNameAndFoodType(String restaurantCode, String itemName, FoodType foodType);
-    ItemDTO createItem(String restaurantCode, FoodType foodType, ItemDTO itemDTO);
-    ItemDTO updateItem(String restaurantCode, String ItemName, FoodType foodType, ItemDTO itemDTO);
-    ItemDTO patchItem(String restaurantCode, String ItemName, FoodType foodType, ItemDTO itemDTO, HashSet<String> propertiesToBeUpdated);
-    void deleteItem(String restaurantCode, String itemName, FoodType foodType);
+    List<ItemDTO> getAllItemsForRestaurant();
+    List<String> getAllItemNamesForRestaurant();
+    List<String> getAllItemNamesForRestaurantAndFoodType(FoodType foodType);
+    List<ItemDTO> getAllItemsForRestaurantAndFoodType(FoodType foodType);
+    ItemDTO getItemByRestaurantAndNameAndFoodType(String itemName, FoodType foodType);
+    ItemDTO createItem(FoodType foodType, ItemDTO itemDTO);
+    ItemDTO updateItem(String ItemName, FoodType foodType, ItemDTO itemDTO);
+    ItemDTO patchItem(String ItemName, FoodType foodType, ItemDTO itemDTO, HashSet<String> propertiesToBeUpdated);
+    void deleteItem(String itemName, FoodType foodType);
 }

@@ -9,13 +9,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/jit-api/dashboard")
-public class DashboardController {
+@RequestMapping("/dashboard")
+public class DashboardController extends BaseController {
     @Autowired
     private DashboardService dashboardService;
 
-    @GetMapping("/{restaurantCode}")
-    public DashboardDTO getDashboardData(@PathVariable String restaurantCode) {
-        return dashboardService.getDashboardData(restaurantCode);
+    @GetMapping
+    public DashboardDTO getDashboardData() {
+        return dashboardService.getDashboardData();
     }
 }
