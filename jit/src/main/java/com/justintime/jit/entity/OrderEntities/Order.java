@@ -1,61 +1,77 @@
 package com.justintime.jit.entity.OrderEntities;
 
+import com.justintime.jit.entity.BaseEntity;
+import com.justintime.jit.entity.Enums.OrderStatus;
+import com.justintime.jit.entity.Enums.OrderType;
 import com.justintime.jit.entity.PaymentEntities.Payment;
+import com.justintime.jit.entity.Reservation;
 import com.justintime.jit.entity.Restaurant;
 import com.justintime.jit.entity.User;
+import com.justintime.jit.util.CodeNumberGenerator;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.envers.Audited;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Audited
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
 @Table(name = "orders")
-public class Order {
+public class Order extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "order_number", unique = true, updatable = false)
+    private String orderNumber;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User customer;
-
-    @ManyToOne
-    @JoinColumn(name = "restaurant_id", nullable = false)
-    private Restaurant restaurant;
-
-    @Column(name ="status", nullable = false)
-    private String status; // Example: "PENDING", "PREPARING", "READY", "COMPLETED"
-
-    @Column(name = "order_time", nullable = false)
-    private LocalDateTime orderTime;
-
-    @Column(name = "batch_time", nullable = false)
-    private LocalDateTime batchTime;
-
-    @Column(name = "created_dttm", updatable = false)
-    private LocalDateTime createdDttm = LocalDateTime.now();
-
-    @Column(name = "updated_dttm")
-    private LocalDateTime updatedDttm = LocalDateTime.now();
-
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    private List<Payment> payments;
-
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    private List<OrderItem> orderItems;
-
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    private List<OrderActivity> orderActivities;
-
-    @PreUpdate
-    private void setUpdatedAt() {
-        this.updatedDttm = LocalDateTime.now();
+    @PrePersist
+    protected void onCreate() {
+        this.orderNumber = CodeNumberGenerator.generateCode("order");
     }
 
-    // Getters and Setters
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "restaurant_id")
+    private Restaurant restaurant;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name ="status", length = 20)
+    private OrderStatus status;
+
+    @Column(name = "order_type")
+    private OrderType orderType;
+
+    @Column(name = "order_date", updatable = false)
+    private LocalDateTime orderDate = LocalDateTime.now();
+
+    @Column(name="notes", columnDefinition = "TEXT")
+    private String notes;
+
+    @Column(name = "serve_time")
+    private LocalDateTime serveTime;
+
+    @Column(name = "amount", columnDefinition = "DECIMAL(10,2)")
+    private BigDecimal amount;
+
+    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    @JoinColumn(name = "reservation_id")
+    private Reservation reservation;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.REMOVE)
+    private List<Payment> payments;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.REMOVE)
+    private List<OrderItem> orderItems;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.REMOVE)
+    private List<OrderActivity> orderActivities;
+
 }

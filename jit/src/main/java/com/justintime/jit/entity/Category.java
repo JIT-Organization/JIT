@@ -1,36 +1,55 @@
 package com.justintime.jit.entity;
 
-
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.justintime.jit.entity.ComboEntities.Combo;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Audited
-@Data
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 @Table(name="category")
-public class Category {
+public class Category extends BaseEntity{
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
-
-    @Column(name="category_name",nullable = false)
+    @Column(name="category_name", unique = true, nullable = false)
     private String categoryName;
 
-    @Column(name = "created_dttm", nullable = false, columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime createdDttm;
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "category_menu_item",
+            joinColumns = @JoinColumn(name = "category_id"),
+            inverseJoinColumns = @JoinColumn(name = "menu_item_id")
+    )
+    private Set<MenuItem> menuItemSet = new HashSet<>();
 
-    @Column(name = "updated_dttm", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime updatedDttm;
+    @ManyToMany
+    @JoinTable(
+            name = "combo_category",
+            joinColumns = @JoinColumn(name = "category_id"),
+            inverseJoinColumns = @JoinColumn(name = "combo_id")
+    )
+    private Set<Combo> comboSet = new HashSet<>();
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Food> foods;
+    @ManyToOne
+    @JoinColumn(name = "restaurant_id")
+    private Restaurant restaurant;
+
+    private Boolean isPublic;
 }

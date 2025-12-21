@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/shift-capacity")
+@RequestMapping("/jit-api/shift-capacity")
 public class ShiftCapacityController {
 
     @Autowired

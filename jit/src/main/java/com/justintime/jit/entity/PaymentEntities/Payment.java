@@ -1,8 +1,13 @@
 package com.justintime.jit.entity.PaymentEntities;
 
+import com.justintime.jit.entity.BaseEntity;
+import com.justintime.jit.entity.Enums.PaymentStatus;
 import com.justintime.jit.entity.OrderEntities.Order;
+import com.justintime.jit.util.CodeNumberGenerator;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.envers.Audited;
 
 import java.math.BigDecimal;
@@ -11,17 +16,19 @@ import java.util.List;
 
 @Entity
 @Audited
-@Table(name = "payment")
-@Data
 @Getter
 @Setter
+@Table(name = "payment")
 @NoArgsConstructor
-@AllArgsConstructor
-public class Payment {
+public class Payment extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "payment_number", unique = true, nullable = false, updatable = false)
+    private String paymentNumber;
+
+    @PrePersist
+    protected void onCreate(){
+        this.paymentNumber = CodeNumberGenerator.generateCode("payment");
+    }
 
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)
@@ -37,18 +44,14 @@ public class Payment {
     private String currency = "USD";
 
     @Column(name = "payment_status", nullable = false)
-    private String paymentStatus = "PENDING";
+    private PaymentStatus paymentStatus;
 
-    @Column(name = "payment_date", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime paymentDate;
+    @Column(name = "payment_date", nullable = false, updatable = false)
+    private LocalDateTime paymentDate = LocalDateTime.now();
 
     @Column(name = "updated_by")
     private String updatedBy;
 
-    @Column(name = "updated_dttm", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime updatedDttm;
-
     @OneToMany(mappedBy = "payment", cascade = CascadeType.ALL)
     private List<Transaction> transactions;
-
 }

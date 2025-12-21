@@ -1,7 +1,9 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '3.3.5'
+	id 'org.springframework.boot' version '3.5.4'
 	id 'io.spring.dependency-management' version '1.1.6'
+	id("org.owasp.dependencycheck") version "11.1.1"
+	id("com.github.spotbugs") version "6.0.27"
 }
 
 group = 'com.justintime'
@@ -32,6 +34,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-mail:3.5.0'
 
 	// Hibernate Envers (Ensure compatibility with Spring Boot version)
 	implementation 'org.hibernate:hibernate-envers:6.3.1.Final'
@@ -39,9 +42,14 @@ dependencies {
 	// Development Tools
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
+	// Retry & AOP
+	implementation 'org.springframework.retry:spring-retry'
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
+
 	// Lombok
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+	implementation 'com.github.spotbugs:spotbugs-annotations'
 
 	// Testing Dependencies
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -50,12 +58,38 @@ dependencies {
 
 	// Apache Commons Text (for additional utilities)
 	implementation 'org.apache.commons:commons-text:1.10.0'
+	implementation 'org.modelmapper:modelmapper:3.1.1'
+
+    //Security
+	implementation("org.springframework.boot:spring-boot-starter-security")
+
+	//JWT
+	implementation("io.jsonwebtoken:jjwt-api:0.11.5")
+	implementation("io.jsonwebtoken:jjwt-impl:0.11.5")
+	implementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
+
+	//Password Encoder
+	implementation("org.springframework.security:spring-security-crypto")
+
+	//Bean Validation
+	implementation("org.springframework.boot:spring-boot-starter-validation")
+
+	//Swagger
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
+
+	//WebSocket
+	implementation("org.springframework.boot:spring-boot-starter-websocket:3.5.3")
+	implementation 'org.springframework.security:spring-security-messaging'
 }
 
 dependencyManagement {
 	imports {
 		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
 	}
+}
+
+dependencyCheck {
+	nvd.apiKey = "f4bd36ec-fed1-473d-a2fa-291f8c625fe2"
 }
 
 tasks.named('test') {

@@ -2,20 +2,98 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  color: var(--foreground);
-  background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer base {
+  :root {
+    --primary-color: #233a48;
+    --primary-text-color: #fff;
+    --sidebar-color: #233a48;
+    --sidebar-text-color: #fff;
+    --sidebar-active-bg: #babdbf;
+    --sidebar-active-text: #fff;
+    --button-bg: #233a48;
+    --button-text: #fff;
+    --input-bg: #e3f2fd;
+    --input-text-color: #222;
+    
+    /* Ensure popover and select backgrounds are white */
+    --popover: #ffffff;
+    --popover-foreground: #000000;
+  }
+
+  .app-bar {
+    background-color: var(--primary-color) !important;
+    color: var(--primary-text-color) !important;
+  }
+
+  .sidebar-theme {
+    background-color: var(--sidebar-color) !important;
+    color: var(--sidebar-text-color) !important;
+  }
+  
+  /* Ensure mobile sidebar has correct background */
+  .sidebar-theme[data-mobile="true"] {
+    background-color: var(--sidebar-color) !important;
+  }
+  
+  .sidebar-theme .sidebar-item {
+    color: var(--sidebar-text-color) !important;
+  }
+  .sidebar-theme .sidebar-item.active {
+    background-color: var(--sidebar-active-bg) !important;
+    color: var(--sidebar-active-text) !important;
+  }
+  .sidebar-theme .sidebar-item:hover {
+    background-color: var(--sidebar-active-bg) !important;
+    color: var(--sidebar-active-text) !important;
+  }
+
+  .button {
+    background-color: var(--button-bg) !important;
+    color: var(--button-text) !important;
+    border: 1px solid #000 !important;
+    border-radius: 0.375rem !important; /* rounded-md */
+  }
+  .button-primary {
+    background-color: var(--primary-color) !important;
+    color: var(--primary-text-color) !important;
+  }
+  .button-none {
+    background-color: transparent !important;
+    color: inherit !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  .button-remove {
+    background-color: #dc2626 !important; /* red-600 */
+    color: #fff !important;
+    border: 1px solid #000 !important;
+    border-radius: 0.375rem !important;
+  }
+  .button-white {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #000 !important;
+    border-radius: 0.375rem !important;
+  }
+  .input {
+    background-color: var(--input-bg) !important;
+    color: var(--input-text-color) !important;
+  }
+
+  /* Force white backgrounds for popover components */
+  [data-radix-popper-content-wrapper],
+  [data-radix-select-content],
+  [data-radix-popover-content] {
+    background-color: #ffffff !important;
+  }
+  
+  /* Additional fallback for any transparent backgrounds */
+  .bg-popover {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
 }

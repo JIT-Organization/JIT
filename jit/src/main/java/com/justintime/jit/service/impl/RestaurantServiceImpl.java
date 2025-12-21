@@ -1,26 +1,28 @@
 package com.justintime.jit.service.impl;
 
+import com.justintime.jit.dto.RestaurantDTO;
 import com.justintime.jit.entity.Restaurant;
-import com.justintime.jit.repository.AddressRepository;
+import com.justintime.jit.exception.ResourceNotFoundException;
 import com.justintime.jit.repository.RestaurantRepository;
 import com.justintime.jit.service.RestaurantService;
-import org.apache.commons.text.similarity.LevenshteinDistance;
+import com.justintime.jit.util.CommonServiceImplUtil;
+import com.justintime.jit.util.mapper.GenericMapper;
+import com.justintime.jit.util.mapper.MapperFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class RestaurantServiceImpl extends BaseServiceImpl<Restaurant,Long> implements RestaurantService {
-
     @Autowired
     private RestaurantRepository restaurantRepository;
 
-    @Autowired
-    private AddressRepository addressRepository;
-
     private static final int SUGGESTION_THRESHOLD = 3;
+
+    @Autowired
+    private CommonServiceImplUtil commonServiceImplUtil;
 
     @Override
     public Restaurant addRestaurant(Restaurant restaurant) {
@@ -40,43 +42,56 @@ public class RestaurantServiceImpl extends BaseServiceImpl<Restaurant,Long> impl
 
 
     @Override
-    public Restaurant updateRestaurant(Long id, Restaurant restaurant) {
-        Restaurant existingRestaurant = getRestaurantById(id);
+    public void updateRestaurant(String code, Restaurant restaurant) {
+        Restaurant existingRestaurant = restaurantRepository.findByRestaurantCode(code)
+                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
 
-        // Update fields
         existingRestaurant.setRestaurantName(restaurant.getRestaurantName());
-        existingRestaurant.setAddresses(restaurant.getAddresses());
+        existingRestaurant.setContactNumber(restaurant.getContactNumber());
+        existingRestaurant.setEmail(restaurant.getEmail());
+        existingRestaurant.setMenu(restaurant.getMenu());
+        existingRestaurant.setOrders(restaurant.getOrders());
         existingRestaurant.setContactNumber(restaurant.getContactNumber());
 
-        return restaurantRepository.save(existingRestaurant);
+        restaurantRepository.save(existingRestaurant);
     }
 
     @Override
-    public void deleteRestaurant(Long id) {
-        Restaurant existingRestaurant = getRestaurantById(id);
+    public void deleteRestaurant(String restaurantCode) {
+        Restaurant existingRestaurant = restaurantRepository.findByRestaurantCode(restaurantCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
         restaurantRepository.delete(existingRestaurant);
     }
 
-//    public List<String> findSimilarNames(String name) {
-//        List<String> allNames = restaurantRepository.findAll().stream()
-//                .map(Restaurant::getName)
-//                .collect(Collectors.toList());
-//
-//        return allNames.stream()
-//                .filter(existingName -> existingName.toLowerCase().contains(name.toLowerCase()))
-//                .collect(Collectors.toList());
-//    }
-//
-//    public String suggestCorrectName(String name) {
-//        List<String> allNames = restaurantRepository.findAll().stream()
-//                .map(Restaurant::getName)
-//                .collect(Collectors.toList());
-//
-//        LevenshteinDistance distance = new LevenshteinDistance();
-//
-//        return allNames.stream()
-//                .min(Comparator.comparingInt(existingName -> distance.apply(name.toLowerCase(), existingName.toLowerCase())))
-//                .filter(existingName -> distance.apply(name.toLowerCase(), existingName.toLowerCase()) <= SUGGESTION_THRESHOLD)
-//                .orElse(null);
-//    }
+    @Override
+    public Restaurant getRestaurantByRestaurantCode(String restaurantCode) {
+        return restaurantRepository.findByRestaurantCode(restaurantCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
+    }
+
+    @Override
+    public RestaurantDTO getRestaurantDTOByRestaurantCode(String restaurantCode) {
+        Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
+        GenericMapper<Restaurant, RestaurantDTO> mapper = MapperFactory.getMapper(Restaurant.class, RestaurantDTO.class);
+        return mapper.toDto(restaurant);
+    }
+
+    @Override
+    public void patchUpdateRestaurant(String restaurantCode, RestaurantDTO dto, HashSet<String> propertiesToBeUpdated) {
+        Restaurant existingItem = restaurantRepository.findByRestaurantCode(restaurantCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
+        GenericMapper<Restaurant, RestaurantDTO> restaurantMapper = MapperFactory.getMapper(Restaurant.class, RestaurantDTO.class);
+        Restaurant patchedRestaurant = restaurantMapper.toEntity(dto);
+        commonServiceImplUtil.copySelectedProperties(patchedRestaurant, existingItem, propertiesToBeUpdated);
+        existingItem.setUpdatedDttm(LocalDateTime.now());
+        restaurantRepository.save(existingItem);
+    }
+
+    @Override
+    public String getUpiIdByRestaurantCode(String restaurantCode) {
+        Restaurant restaurant = restaurantRepository.findByRestaurantCode(restaurantCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
+        return restaurant.getUpiId();
+    }
 }
