@@ -16,7 +16,7 @@ const nextConfig = {
     return [
       {
         source: '/jit-api/:path*',
-        destination: `${process.env.BASE_URL}/jit-api/:path*`,
+        destination: `${process.env.NEXT_PUBLIC_API_BASE_URL}/jit-api/:path*`,
       },
     ];
   },

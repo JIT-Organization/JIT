@@ -14,12 +14,13 @@ export const metadata = {
 };
 
 const addr = getBaseUrl().split("//")[1];
+const url = `${addr.startsWith("localhost") ? "ws" : "wss"}://${addr}/jit-api/ws`;
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={inter.className}>
-        <WebSocketProvider url={`wss://${addr}/ws`}>
+        <WebSocketProvider url={url}>
           <ColorProvider>
             <TSQueryClientProvider>
               {children}
