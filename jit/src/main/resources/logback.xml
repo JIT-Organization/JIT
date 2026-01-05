@@ -1,0 +1,22 @@
+<configuration>
+
+    <contextListener
+            class="com.logPreProcessor.adapter.logback.LogPreProcessorBootstrap"/>
+
+    <appender name="STDOUT"
+              class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d %-5level [%thread] %logger - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="COMPRESSED"
+              class="com.logPreProcessor.adapter.logback.TemplateAppender">
+        <appender-ref ref="STDOUT"/>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="COMPRESSED"/>
+    </root>
+
+</configuration>
