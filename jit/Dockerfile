@@ -1,14 +1,13 @@
-# Use an official OpenJDK runtime as a parent image
-FROM eclipse-temurin:17-jdk
-
-# Set the working directory in the container
+# Build stage
+FROM eclipse-temurin:17-jdk AS build
 WORKDIR /app
+COPY . .
+RUN chmod +x ./gradlew
+RUN ./gradlew clean build -x test -Dorg.gradle.project.excludePlainJar=true
 
-# Copy the Gradle build output (assumes the JAR is in 'build/libs/')
-COPY build/libs/*.jar app.jar
-
-# Expose the application's port (optional, match your application's configuration)
+# Runtime stage
+FROM eclipse-temurin:17-jre
+WORKDIR /app
+COPY --from=build /app/build/libs/*.jar app.jar
 EXPOSE 8080
-
-# Run the application
-CMD ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
