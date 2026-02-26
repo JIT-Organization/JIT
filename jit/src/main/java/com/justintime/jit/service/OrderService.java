@@ -12,13 +12,25 @@ import java.util.Optional;
 
 public interface OrderService {
     ResponseEntity<String> createOrder(OrderDTO orderDTO);
+
     List<OrderDTO> getOrdersByRestaurantId();
+
     OrderDTO getOrderByRestaurantAndOrderNumber(String restaurantCode, String orderNumber);
+
     OrderDTO updateOrderStatus(String restaurantCode, String orderNumber, OrderStatus status);
-    OrderDTO patchUpdateOrder(String restaurantCode, String orderNumber, OrderDTO orderDTO, HashSet<String> propertiesToBeUpdated);
+
+    OrderDTO patchUpdateOrder(String restaurantCode, String orderNumber, OrderDTO orderDTO,
+            HashSet<String> propertiesToBeUpdated);
+
     void deleteOrder(String restaurantCode, String orderNumber);
+
     List<OrderDTO> getOrdersByRestaurantAndUserId(Optional<Long> restaurantId, Optional<Long> userId);
+
     BigDecimal calculateTotalRevenue(String restaurantCode);
+
+    List<OrderItemDTO> getAllAssignedOrdersForUser();
+
     List<OrderItemDTO> getAllInProgressOrderItemsForRestaurant();
+
     OrderItemDTO updateOrderItemStatus(OrderItemDTO orderItemDTO);
 }

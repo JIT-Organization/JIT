@@ -20,4 +20,5 @@ public interface OrderItemService {
     List<OrderItemDTO> getOrderItemsForRestaurant();
     List<OrderItemDTO> getOrderItemsForCookByNameAndRestaurant(String cookName, String restaurantCode);
     List<OrderItem> createAndPersistOrderItems(OrderDTO orderDTO, String restaurantCode, Order savedOrder);
+    List<OrderItemDTO> getAllAssignedOrdersForUser();
 }

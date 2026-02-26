@@ -20,11 +20,11 @@ public class UserController extends BaseController {
     private UserService userService;
 
     // GET: Retrieve all users
-//    @GetMapping
-//    public ResponseEntity<List<User>> getAllUsers() {
-//        List<User> users = userService.findAll();
-//        return ResponseEntity.ok(users);
-//    }
+    // @GetMapping
+    // public ResponseEntity<List<User>> getAllUsers() {
+    // List<User> users = userService.findAll();
+    // return ResponseEntity.ok(users);
+    // }
 
     @GetMapping("/getCookNames")
     public ResponseEntity<ApiResponse<List<String>>> getCookNamesByRestaurantCode() {
@@ -49,8 +49,10 @@ public class UserController extends BaseController {
 
     @PatchMapping("/{username}")
     @PreAuthorize("hasPermission(null, 'EDIT_USERS')")
-    public ResponseEntity<ApiResponse<UserDTO>> patchUpdateUser(@PathVariable String username, @RequestBody PatchRequest<UserDTO> patchRequest) {
-        UserDTO updatedUser = userService.patchUpdateUser(username, patchRequest.getDto(), patchRequest.getPropertiesToBeUpdated());
+    public ResponseEntity<ApiResponse<UserDTO>> patchUpdateUser(@PathVariable String username,
+            @RequestBody PatchRequest<UserDTO> patchRequest) {
+        UserDTO updatedUser = userService.patchUpdateUser(username, patchRequest.getDto(),
+                patchRequest.getPropertiesToBeUpdated());
         return success(updatedUser);
     }
 
@@ -85,14 +87,18 @@ public class UserController extends BaseController {
 
     @PostMapping("/add-permissions")
     @PreAuthorize("hasPermission(null, 'ADD_PERMISSIONS')")
-    public ResponseEntity<ApiResponse<UserDTO>> addPermissions(@RequestBody AddPermissionRequest addPermissionRequest) throws AccessDeniedException {
-        return success(userService.addOrUpdatePermissions(addPermissionRequest.getEmail(), addPermissionRequest.getPermissionsDTOS(), false));
+    public ResponseEntity<ApiResponse<UserDTO>> addPermissions(@RequestBody AddPermissionRequest addPermissionRequest)
+            throws AccessDeniedException {
+        return success(userService.addOrUpdatePermissions(addPermissionRequest.getEmail(),
+                addPermissionRequest.getPermissionsDTOS(), false));
     }
 
     @PatchMapping("/update-permissions")
     @PreAuthorize("hasPermission(null, 'EDIT_PERMISSIONS')")
-    public ResponseEntity<ApiResponse<UserDTO>> updatePermissions(@RequestBody AddPermissionRequest addPermissionRequest) throws AccessDeniedException {
-        return success(userService.addOrUpdatePermissions(addPermissionRequest.getEmail(), addPermissionRequest.getPermissionsDTOS(), true));
+    public ResponseEntity<ApiResponse<UserDTO>> updatePermissions(
+            @RequestBody AddPermissionRequest addPermissionRequest) throws AccessDeniedException {
+        return success(userService.addOrUpdatePermissions(addPermissionRequest.getEmail(),
+                addPermissionRequest.getPermissionsDTOS(), true));
     }
 
     @GetMapping("/permissions")
