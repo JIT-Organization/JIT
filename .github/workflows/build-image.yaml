@@ -9,7 +9,6 @@ on:
       - sprint/2025.3
 
 env:
-  REGISTRY: jitimagereg.azurecr.io
   JIT_IMAGE_NAME: jit
   UI_IMAGE_NAME: ui
 
@@ -25,7 +24,7 @@ jobs:
       - name: Log in to Azure Container Registry
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ${{ secrets.REGISTRY }}
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
@@ -36,7 +35,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.JIT_IMAGE_NAME }}
+          images: ${{ secrets.REGISTRY }}/${{ env.JIT_IMAGE_NAME }}
           tags: |
             type=sha
 
@@ -48,8 +47,8 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.JIT_IMAGE_NAME }}:buildcache
-          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.JIT_IMAGE_NAME }}:buildcache,mode=max
+          cache-from: type=registry,ref=${{ secrets.REGISTRY }}/${{ env.JIT_IMAGE_NAME }}:buildcache
+          cache-to: type=registry,ref=${{ secrets.REGISTRY }}/${{ env.JIT_IMAGE_NAME }}:buildcache,mode=max
 
   build-ui:
     name: Build UI Docker Image
@@ -62,7 +61,7 @@ jobs:
       - name: Log in to Azure Container Registry
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ${{ secrets.REGISTRY }}
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
@@ -73,7 +72,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.UI_IMAGE_NAME }}
+          images: ${{ secrets.REGISTRY }}/${{ env.UI_IMAGE_NAME }}
           tags: |
             type=sha
 
@@ -85,8 +84,8 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.UI_IMAGE_NAME }}:buildcache
-          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.UI_IMAGE_NAME }}:buildcache,mode=max
+          cache-from: type=registry,ref=${{ secrets.REGISTRY }}/${{ env.UI_IMAGE_NAME }}:buildcache
+          cache-to: type=registry,ref=${{ secrets.REGISTRY }}/${{ env.UI_IMAGE_NAME }}:buildcache,mode=max
           build-args: |
             NEXT_PUBLIC_BASE_URL=https://app.jit-apps.com
             BASE_URL=https://app.jit-apps.com
