@@ -9,7 +9,7 @@ on:
       - sprint/2025.3
 
 env:
-  REGISTRY: jitimagereg.azurecr.io
+  REGISTRY: jitprodregistry.azurecr.io
   JIT_IMAGE_NAME: jit
   UI_IMAGE_NAME: ui
 
@@ -89,4 +89,5 @@ jobs:
           cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.UI_IMAGE_NAME }}:buildcache,mode=max
           build-args: |
             NEXT_PUBLIC_BASE_URL=https://app.jit-apps.com
+            NEXT_PUBLIC_API_BASE_URL=https://app.jit-apps.com
             BASE_URL=https://app.jit-apps.com
