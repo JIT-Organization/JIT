@@ -1,8 +1,10 @@
 package com.justintime.jit.service.impl;
 
+import com.justintime.jit.dto.MenuItemDTO;
 import com.justintime.jit.dto.OrderDTO;
 import com.justintime.jit.dto.OrderItemDTO;
 import com.justintime.jit.entity.*;
+import com.justintime.jit.entity.Enums.ErrorCodes;
 import com.justintime.jit.entity.Enums.OrderItemStatus;
 import com.justintime.jit.entity.Enums.OrderStatus;
 import com.justintime.jit.entity.OrderEntities.Order;
@@ -60,6 +62,8 @@ public class OrderServiceImpl extends BaseServiceImpl<Order, Long> implements Or
 
     private final DiningTableService tableService;
 
+    private final MenuItemService menuItemService;
+
     private final static Set<OrderItemStatus> activeOrderItemStatuses = Set.of(
             OrderItemStatus.STARTED,
             OrderItemStatus.READY_TO_SERVE,
@@ -88,6 +92,16 @@ public class OrderServiceImpl extends BaseServiceImpl<Order, Long> implements Or
         Order order = orderMapper.toEntity(orderDTO);
         order.setRestaurant(restaurant);
 
+        validateCart(orderDTO, restaurantCode);
+        if (!validateCart(orderDTO, restaurantCode).getStatusCode().is2xxSuccessful()) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(validateCart(orderDTO, restaurantCode).getBody());
+        }
+
+        BigDecimal totalAmount = calculateAmount(orderDTO);
+        order.setTotalAmount(totalAmount);
+
         if (StringUtils.isNotEmpty(username)) {
             User orderedBy = userService.getUserByRestaurantCodeAndUsername(username);
             if (orderedBy != null) {
@@ -115,6 +129,55 @@ public class OrderServiceImpl extends BaseServiceImpl<Order, Long> implements Or
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create order.");
         }
     }
+
+    public  ResponseEntity<String> validateCart(OrderDTO orderDTO, String restaurantCode) {
+
+        if (orderDTO.getOrderItems() == null || orderDTO.getOrderItems().isEmpty()) {
+            return ResponseEntity.status(ErrorCodes.EMPTY_CART.getCode())
+                    .body(ErrorCodes.EMPTY_CART.getMessage());
+        }
+
+        for (OrderItemDTO item : orderDTO.getOrderItems()) {
+
+            if (item.getQuantity() <= 0) {
+                return ResponseEntity.status(ErrorCodes.INVALID_QUANTITY.getCode())
+                        .body(ErrorCodes.INVALID_QUANTITY.getMessage() + ": " + item.getItemName());
+            }
+            String menuItemCode = item.getItemCode();
+
+            MenuItemDTO menuItemDTO = menuItemService.getMenuItemByMenuItemCode(restaurantCode, item.getItemName(), menuItemCode );
+
+            if (menuItemDTO == null) {
+                return ResponseEntity.status(ErrorCodes.ITEM_NOT_FOUND.getCode())
+                        .body(ErrorCodes.ITEM_NOT_FOUND.getMessage());
+            }
+
+            if (!menuItemDTO.getCategorySet().isEmpty()) {
+                return ResponseEntity.status(ErrorCodes.ITEM_UNAVAILABLE.getCode())
+                        .body(ErrorCodes.ITEM_UNAVAILABLE.getMessage() + ": " + item.getItemName());
+            }
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body("Cart is valid.");
+    }
+
+    public BigDecimal calculateAmount(OrderDTO orderDTO) {
+
+        BigDecimal total = BigDecimal.ZERO;
+
+        for (OrderItemDTO item : orderDTO.getOrderItems()) {
+            MenuItem menuItem = menuItemService.getMenuItemByMenuItemCode(orderDTO.getRestaurantCode(), item.getItemName(), item.getItemCode());
+
+            BigDecimal itemTotal =
+                    menuItem.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
+
+            total = total.add(itemTotal);
+        }
+
+        return total;
+    }
+
+
 
     @Override
     public List<OrderDTO> getOrdersByRestaurantId() {

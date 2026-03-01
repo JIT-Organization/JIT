@@ -20,14 +20,22 @@ import java.util.stream.Collectors;
 
 @Entity
 @Audited
-@Table(name = "menu_item")
 @Getter
 @Setter
 @NoArgsConstructor
+@Table(
+        name = "menu_item",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"menu_item_code"})
+        }
+)
 public class MenuItem extends BaseEntity implements FilterableItem {
 
     @Column(name="menu_item_name", length = 100)
     private String menuItemName;
+
+    @Column(name = "menu_item_code", unique = true, length = 50,updatable = false,nullable = false)
+    private String menuItemCode;
 
     @ManyToOne
     @JoinColumn(name = "restaurant_id")

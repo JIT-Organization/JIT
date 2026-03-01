@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 
 public interface RestaurantService {
-    Restaurant addRestaurant(Restaurant restaurant);
+    RestaurantDTO addRestaurant(RestaurantDTO restaurantDTO);
     List<Restaurant> getAllRestaurants();
     Restaurant getRestaurantById(Long id);
     void updateRestaurant(Restaurant restaurant);

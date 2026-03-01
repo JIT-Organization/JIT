@@ -63,7 +63,7 @@ public class MenuItemController extends BaseController {
     @ValidateInput
     @PostMapping("/{restaurantCode}")
     @PreAuthorize("hasPermission(null, 'ADD_MENU_ITEMS')")
-    public ResponseEntity<ApiResponse<MenuItem>> addMenuItem(@PathVariable String restaurantCode, @RequestBody MenuItemDTO menuItemDTO) {
+    public ResponseEntity<ApiResponse<MenuItemDTO>> addMenuItem(@PathVariable String restaurantCode, @RequestBody MenuItemDTO menuItemDTO) {
         return success(menuItemService.addMenuItem(restaurantCode,menuItemDTO), "Created Menu Item Successfully");
     }
 
@@ -72,6 +72,12 @@ public class MenuItemController extends BaseController {
     @PreAuthorize("hasPermission(null, 'ADD_MENU_ITEMS')")
     public MenuItem updateMenuItem(@PathVariable String restaurantCode,@PathVariable Long id, @RequestBody MenuItemDTO updatedItem) {
         return menuItemService.updateMenuItem(restaurantCode,id, updatedItem);
+    }
+
+    @GetMapping("/{restaurantCode}/{menuItemName}/{menuItemCode}")
+    @PreAuthorize("hasPermission(null, 'VIEW_MENU_ITEMS')")
+    public ResponseEntity<ApiResponse<MenuItemDTO>> getMenuItemByMenuItemCode(@PathVariable String restaurantCode, @PathVariable String menuItemName, @PathVariable String menuItemCode) {
+        return success(menuItemService.getMenuItemByMenuItemCode(restaurantCode, menuItemName, menuItemCode));
     }
 
     @ValidateInput

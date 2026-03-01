@@ -66,20 +66,39 @@ public class MenuItemServiceImpl extends BaseServiceImpl<MenuItem, Long> impleme
     }
   
     @Override
-    public MenuItem addMenuItem(String restaurantCode,MenuItemDTO menuItemDTO) {
+    public MenuItemDTO addMenuItem(String restaurantCode,MenuItemDTO menuItemDTO) {
         GenericMapper<MenuItem, MenuItemDTO> mapper = MapperFactory.getMapper(MenuItem.class, MenuItemDTO.class);
         MenuItem menuItem = mapper.toEntity(menuItemDTO);
         menuItem.setRestaurant(restaurantRepository.findByRestaurantCode(restaurantCode).orElseThrow(() -> new RuntimeException("Restaurant not found")));
         resolveRelationships(menuItem, menuItemDTO, new HashSet<>(), false);
         menuItem.setUpdatedDttm(LocalDateTime.now());
-        return menuItemRepository.save(menuItem);
+        menuItemRepository.save(menuItem);
+        menuItemDTO.setMenuItemCode(generateUniqueMenuItemCode());
+        return menuItemDTO;
+    }
+
+    String generateUniqueMenuItemCode() {
+        String menuItemCode;
+        do {
+            menuItemCode = "MI" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        } while (menuItemRepository.existsByMenuItemCode(menuItemCode));
+        return menuItemCode;
     }
 
     @Override
     public MenuItemDTO getMenuItemByRestaurantIdAndMenuItemName(String restaurantCode,String menuItemName){
         GenericMapper<MenuItem, MenuItemDTO> mapper = MapperFactory.getMapper(MenuItem.class, MenuItemDTO.class);
         MenuItem menuItem = menuItemRepository.findByRestaurantCodeAndMenuItemName(restaurantCode, menuItemName);
+        menuItem.setMenuItemCode(generateUniqueMenuItemCode());
         return mapToDTO(menuItem, mapper);
+    }
+
+    @Override
+    public  MenuItemDTO getMenuItemByMenuItemCode(String restaurantCode, String menuItemName,String menuItemCode){
+        MenuItem menuItem = menuItemRepository.findByMenuItemCode(menuItemCode);
+        MenuItemDTO dto = new MenuItemDTO();
+        dto.setMenuItemCode(menuItem.getMenuItemCode());
+        return dto;
     }
 
     @Override

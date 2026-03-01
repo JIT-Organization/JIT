@@ -2,6 +2,7 @@ package com.justintime.jit.repository;
 
 import com.justintime.jit.entity.MenuItem;
 
+import com.justintime.jit.entity.Restaurant;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -34,6 +35,10 @@ public interface MenuItemRepository extends BaseRepository<MenuItem, Long> {
             "JOIN restaurant r ON r.id = mi.restaurant_id " +
             "WHERE r.restaurant_code = :restaurantCode", nativeQuery = true)
     List<String> findMenuItemNamesByRestaurantCode(@Param("restaurantCode") String restaurantCode);
+
+    boolean existsByMenuItemCode(String menuItemCode);
+
+   MenuItem findByMenuItemCode(String MenuItemCode);
 
     @Query(value = "SELECT mi.* FROM menu_item mi " +
             "JOIN restaurant r ON r.id = mi.restaurant_id " +

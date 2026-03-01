@@ -11,8 +11,9 @@ public interface MenuItemService extends BaseService<MenuItem,Long>{
 
     List<MenuItemDTO> getAllMenuItems();
     List<MenuItemDTO> getMenuItemsByRestaurantId(String restaurantCode, Sort sortBy, String priceRange, String category, Boolean onlyVeg, Boolean onlyForCombos);
+    MenuItemDTO getMenuItemByMenuItemCode(String restaurantCode, String menuItemName,String menuItemCode);
     MenuItemDTO getMenuItemByRestaurantIdAndMenuItemName(String restaurantCode, String menuItemName);
-    MenuItem addMenuItem(String restaurantCode,MenuItemDTO menuItemDTO);
+    MenuItemDTO addMenuItem(String restaurantCode,MenuItemDTO menuItemDTO);
     MenuItem updateMenuItem(String restaurantCode,Long id, MenuItemDTO updatedItem);
     MenuItemDTO patchUpdateMenuItem(String restaurantCode,String menuItemName, MenuItemDTO updatedItem, HashSet<String> propertiesToBeUpdated);
     void deleteMenuItem(String restaurantCode, String menuItemName);

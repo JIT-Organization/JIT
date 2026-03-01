@@ -17,6 +17,7 @@ public class MenuItemDTO {
     private String menuItemName;
     private String description;
     private BigDecimal price;
+    private String menuItemCode;
     private BigDecimal offerPrice;
     private LocalDateTime offerFrom;
     private LocalDateTime offerTo;

@@ -17,6 +17,8 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
     // Get all restaurants
     List<Restaurant> findAll();
 
+    Boolean existsByRestaurantCode(String restaurantCode);
+
     List<Restaurant> findByRestaurantNameContaining(String restaurantName);
 
     Optional<Restaurant> findByRestaurantCode(String restaurantCode);

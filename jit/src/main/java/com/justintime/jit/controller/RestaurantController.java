@@ -22,8 +22,8 @@ public class RestaurantController extends BaseController {
 
     // Add a new restaurant
     @PostMapping
-    public ResponseEntity<Restaurant> addRestaurant(@RequestBody Restaurant restaurant) {
-        Restaurant createdRestaurant = restaurantService.addRestaurant(restaurant);
+    public ResponseEntity<RestaurantDTO> addRestaurant(@RequestBody RestaurantDTO restaurantDTO) {
+        RestaurantDTO createdRestaurant = restaurantService.addRestaurant(restaurantDTO);
         return ResponseEntity.ok(createdRestaurant);
     }
 

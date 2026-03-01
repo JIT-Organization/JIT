@@ -25,8 +25,22 @@ public class RestaurantServiceImpl extends BaseServiceImpl<Restaurant,Long> impl
     private CommonServiceImplUtil commonServiceImplUtil;
 
     @Override
-    public Restaurant addRestaurant(Restaurant restaurant) {
-        return restaurantRepository.save(restaurant);
+    public RestaurantDTO addRestaurant(RestaurantDTO restaurantDTO) {
+        GenericMapper<Restaurant, RestaurantDTO> mapper = MapperFactory.getMapper(Restaurant.class, RestaurantDTO.class);
+        Restaurant restaurant = mapper.toEntity(restaurantDTO);
+        String restaurantCode = generateUniqueRestaurantCode();
+        restaurant.setRestaurantCode(restaurantCode);
+        restaurantRepository.save(restaurant);
+        restaurantDTO.setRestaurantCode(restaurantCode);
+        return restaurantDTO;
+    }
+
+    String generateUniqueRestaurantCode() {
+        String restaurantCode;
+        do {
+            restaurantCode = "RES" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        } while (restaurantRepository.existsByRestaurantCode(restaurantCode));
+        return restaurantCode;
     }
 
     @Override
